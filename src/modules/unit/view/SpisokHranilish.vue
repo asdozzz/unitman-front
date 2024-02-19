@@ -1,0 +1,102 @@
+<script setup lang="ts">
+  import EditForm from "@/modules/unit/view/Hranilisha/EditForm.vue";
+  import AddForm from "@/modules/unit/view/Hranilisha/AddForm.vue";
+  import {useSpisokHranilishStore} from "@/modules/unit/store/SpisokHranilishStore";
+  import {storeToRefs} from "pinia";
+  import {onMounted} from "vue";
+  import {useEditFormStore} from "@/modules/unit/store/SpisokHranilish/EditFormStore";
+  import {useAddFormStore} from "@/modules/unit/store/SpisokHranilish/AddFormStore";
+  import Hranilishe from "@/modules/unit/store/SpisokHranilish/model/Hranilishe";
+  import { EditForm as EditFormModel } from '@/modules/unit/store/SpisokHranilish/EditFormStore';
+
+  const hranilishaStore = useSpisokHranilishStore();
+  const { spisok, loaderSpiskaHranilish, oshibkaZagruzkiSpiska } = storeToRefs(hranilishaStore);
+
+  const editFormStore = useEditFormStore();
+  const { enable: enableEditForm } = storeToRefs(editFormStore);
+
+  const addFormStore = useAddFormStore();
+  const { enable: enableAddForm } = storeToRefs(addFormStore);
+
+  onMounted(async () => {
+    await hranilishaStore.poluchitSpisokHranilish();
+  })
+
+  function confirm(repoId: string) {
+    hranilishaStore.activirovatHranilishe(repoId);
+  }
+
+  function udalit(repoId: string) {
+    hranilishaStore.udalitHranilishe(repoId);
+  }
+
+  function openEditForm(item: Hranilishe) {
+    editFormStore.otkritFormu(new EditFormModel(item.id, item.token));
+  }
+
+  function openAddForm() {
+    addFormStore.otkritFormu();
+  }
+</script>
+
+<template>
+
+  <div class="full-width flex column">
+    <q-spinner
+        v-if="loaderSpiskaHranilish"
+        color="primary"
+        size="3em"
+    />
+    <div class="row wrap items-start content-start">
+      <q-card class="q-mb-md">
+        <q-card-section>
+          <q-btn size="md" color="primary" icon="add" @click="openAddForm">
+            <q-tooltip>add</q-tooltip>
+          </q-btn>
+        </q-card-section>
+      </q-card>
+    </div>
+    <div class="row wrap items-start content-start">
+      <template v-if="oshibkaZagruzkiSpiska">
+        <div v-html="oshibkaZagruzkiSpiska"></div>
+      </template>
+      <template v-else>
+
+        <template v-for="item in spisok">
+          <q-card class="q-mr-md" style="width: 200px">
+            <q-card-section>
+              <div class="text-h6 text-left">{{ item.name }}</div>
+              <div class="text-subtitle2 text-left">{{ item.type }}</div>
+            </q-card-section>
+
+            <q-separator dark />
+
+            <q-card-actions>
+              <q-btn size="md" color="black" icon="delete" @click="udalit(item.id)">
+                <q-tooltip>delete</q-tooltip>
+              </q-btn>
+              <q-btn size="md" color="black" icon="edit" @click="openEditForm(item)">
+                <q-tooltip>edit</q-tooltip>
+              </q-btn>
+              <q-btn size="md" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
+                <q-tooltip>confirm</q-tooltip>
+              </q-btn>
+            </q-card-actions>
+          </q-card>
+        </template>
+      </template>
+
+      <q-dialog v-model="enableEditForm" persistent transition-show="scale" transition-hide="scale">
+        <EditForm @formaBilaOtpravlena="hranilishaStore.poluchitSpisokHranilish()"/>
+      </q-dialog>
+      <q-dialog v-model="enableAddForm" persistent transition-show="scale" transition-hide="scale">
+        <AddForm @formaBilaOtpravlena="hranilishaStore.poluchitSpisokHranilish()"/>
+      </q-dialog>
+    </div>
+  </div>
+
+</template>
+
+<style scoped>
+
+</style>

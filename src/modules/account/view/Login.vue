@@ -1,0 +1,57 @@
+<script setup>
+import { useAuthStore } from '@/modules/account/store/auth';
+import { storeToRefs } from 'pinia'
+import { Notify } from 'quasar'
+
+const authStore = useAuthStore();
+const { loginView, tokenData } = storeToRefs(authStore);
+async function onSubmit() {
+  const response = await authStore.login();
+  if (response.status === "fail") {
+    Notify.create(response.data.message);
+  }
+}
+
+function onLogout() {
+  authStore.logout();
+}
+</script>
+
+<template>
+  <div class="flex flex-center">
+    <q-card class="shadow-2 my_card" bordered v-if="!tokenData">
+      <q-card-section class="text-center">
+        <div class="text-grey-9 text-h5 text-weight-bold">Sign in</div>
+        <div class="text-grey-8">Sign in below to access your account</div>
+      </q-card-section>
+      <q-card-section>
+        <q-input name="login" v-model="loginView.form.login" dense outlined label="Email Address"></q-input>
+        <q-input name="pass" v-model="loginView.form.pass" dense outlined class="q-mt-md" type="password" label="Password"></q-input>
+      </q-card-section>
+      <q-card-section>
+        <q-btn style="
+  border-radius: 8px;" color="dark" rounded size="md" @click="onSubmit" label="Sign in" no-caps class="full-width"></q-btn>
+      </q-card-section>
+      <q-card-section class="text-center q-pt-none">
+        <div class="text-grey-8">Don't have an account yet?
+          <a href="#" class="text-dark text-weight-bold" style="text-decoration: none">Sign
+            up.</a></div>
+      </q-card-section>
+    </q-card>
+    <q-card class="q-pa-md shadow-2 my_card" bordered v-else>
+      <q-card-section class="text-center">
+        <div class="text-grey-9 text-h5 text-weight-bold">Already signed</div>
+        <q-btn color="black" label="Logout" @click.prevent="onLogout"/>
+      </q-card-section>
+    </q-card>
+  </div>
+
+</template>
+
+<style>
+.my_card {
+  width: 25rem;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+</style>
