@@ -1,3 +1,8 @@
+type PolzovatelProekta = {
+    userId: string;
+    role: string;
+}
+
 export default class ModelDlySpiskaProektov {
     public id: string = "";
     public repoId: string = "";
@@ -8,4 +13,6 @@ export default class ModelDlySpiskaProektov {
     public state: string = "";
     public buildInfo: string | null = null;
     public removeInfo: string | null = null;
+    public proxyHost: string = "";
+    public users: PolzovatelProekta[] = [];
 }

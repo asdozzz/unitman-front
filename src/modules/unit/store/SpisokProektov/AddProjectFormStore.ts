@@ -8,12 +8,14 @@ export class AddForm {
     projectName: string;
     projectCode: string;
     mainBranch: string;
+    proxyHost: string;
 
-    constructor(repoId: string = "", projectName: string = "", projectCode: string = "", mainBranch: string = "master") {
+    constructor(repoId: string = "", projectName: string = "", projectCode: string = "", mainBranch: string = "master", proxyHost: string = "") {
         this.repoId = repoId;
         this.projectName = projectName;
         this.projectCode = projectCode;
         this.mainBranch = mainBranch;
+        this.proxyHost = proxyHost;
     }
 }
 

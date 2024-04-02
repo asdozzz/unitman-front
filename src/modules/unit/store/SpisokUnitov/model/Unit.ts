@@ -8,6 +8,7 @@ export default class Unit {
     state: string = "";
     waitResultFromRunner: boolean = false;
     commands: string[] = [];
+    url: string | null = null;
 
     constructor(
         data: {
@@ -19,7 +20,8 @@ export default class Unit {
             branch: string,
             state: string,
             waitResultFromRunner: boolean,
-            commands: string | null,
+            commands: string[],
+            url: string | null,
         }
     ) {
         this.id = data.id;
@@ -30,12 +32,8 @@ export default class Unit {
         this.branch = data.branch;
         this.state = data.state;
         this.waitResultFromRunner = data.waitResultFromRunner;
+        this.commands = data.commands;
 
-        if (data.commands === null) {
-            this.commands = [];
-        } else {
-            const arr = JSON.parse(data.commands) as string[];
-            this.commands = arr ?? [];
-        }
+        this.url = data.url;
     }
 };

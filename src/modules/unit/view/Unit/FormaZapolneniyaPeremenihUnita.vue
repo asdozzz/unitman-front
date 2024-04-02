@@ -38,7 +38,14 @@ async function otpravitFormu() {
         <q-spinner  color="primary" size="3em"/>
       </div>
       <template v-for="peremenaya in form.values" v-else>
-        <q-input v-model="peremenaya.value" :label="peremenaya.konfig.label" />
+        <template v-if="peremenaya.konfig.type === 'collection'">
+          <q-select v-model="peremenaya.value" option-value="id" option-label="name"
+                    :options="peremenaya.konfig.options.options ?? []" :label="peremenaya.konfig.label" emit-value map-options/>
+        </template>
+        <template v-else>
+          <q-input v-model="peremenaya.value" :label="peremenaya.konfig.label" />
+        </template>
+
       </template>
 
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>

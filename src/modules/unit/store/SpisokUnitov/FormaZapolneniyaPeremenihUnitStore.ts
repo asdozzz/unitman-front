@@ -14,12 +14,19 @@ export class Peremenaya {
     }
 }
 
+type CollectionOptions = {
+    options?: {
+        id: string,
+        name: string
+    }[]
+}
+
 export type KonfigPeremenoi = {
     id: string,
     label: string,
     type: string,
     defaultValue: string,
-    options:Record<string, unknown>
+    options: CollectionOptions
 }
 
 class FormaZapolneniyaPeremenih {

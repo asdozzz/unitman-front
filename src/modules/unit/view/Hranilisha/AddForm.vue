@@ -31,7 +31,7 @@ async function otpravitFormu() {
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-select v-model="form.repoType" :options="tipiHranilisha.spisok" label="Type" emit-value/>
+      <q-select v-model="form.repoType" :options="tipiHranilisha.spisok" label="Type" emit-value map-options/>
       <q-input v-model="form.repoName" label="Name" />
       <q-input v-model="form.token" label="Token" />
       <q-input v-model="form.repoUrl" label="Url" />

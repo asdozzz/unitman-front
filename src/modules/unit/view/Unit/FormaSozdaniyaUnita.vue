@@ -33,7 +33,7 @@ async function otpravitFormu() {
 
     <q-card-section class="q-pt-none">
       <q-select v-model="form.projectId" :options="proekti.spisok" label="Project" emit-value map-options @update:model-value="addFormStore.poluchitVetki()"/>
-      <q-select :loading="vetki.loader" v-model="form.branch" :options="vetki.spisok" label="Branch" emit-value/>
+      <q-select :loading="vetki.loader" v-model="form.branch" :options="vetki.spisok" label="Branch" emit-value map-options/>
       <q-input v-model="form.unitName" label="Unit Name" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>

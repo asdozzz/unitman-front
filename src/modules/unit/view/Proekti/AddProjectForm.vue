@@ -31,10 +31,11 @@ async function otpravitFormu() {
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-select v-model="form.repoId" :options="hranilisha.spisok" label="Repo" emit-value/>
+      <q-select v-model="form.repoId" :options="hranilisha.spisok" label="Repo" emit-value map-options/>
       <q-input v-model="form.projectCode" label="Project Code" />
       <q-input v-model="form.projectName" label="Project Name" />
       <q-input v-model="form.mainBranch" label="Main Branch" />
+      <q-input v-model="form.proxyHost" label="Proxy Host" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

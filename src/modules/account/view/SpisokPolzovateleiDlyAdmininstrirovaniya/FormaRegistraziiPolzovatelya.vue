@@ -30,7 +30,7 @@ async function otpravitFormu() {
     <q-card-section class="q-pt-none">
       <q-input v-model="form.email" label="Email" />
       <q-input v-model="form.password" label="Password" />
-      <q-select v-model="form.roles" :options="roles.spisok" label="Role" emit-value/>
+      <q-select v-model="form.roles" :options="roles.spisok" label="Role" emit-value map-options/>
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

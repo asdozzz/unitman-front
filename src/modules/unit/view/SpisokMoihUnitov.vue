@@ -39,7 +39,7 @@
   }
 
   async function obnovit(id: string) {
-    await unitiStore.obnovitMoiUnit(id);
+    await unitiStore.obnovitKodMoegoUnita(id);
   }
 
   async function ustanovitResultatObnovleniya(id: string) {
@@ -87,6 +87,8 @@
 
   onMounted(async () => {
     await unitiStore.poluchitSpisokMoihUnitov();
+
+    unitiStore.zapustitObrabotkuOcherediNaObnovlenie();
   })
 </script>
 
@@ -119,14 +121,22 @@
         <template v-for="item in spisok">
           <q-card class="q-mr-md" style="width: 300px">
             <q-card-section>
-              <div class="text-h6 text-left">{{ item.name }}.{{ item.projectName }}</div>
+              <div class="text-h6 text-left" v-if="!item.url">
+                {{ item.name }}.{{ item.projectName }}
+              </div>
+              <div class="text-h6 text-left" v-else>
+                <a :href="item.url" target="_blank">{{ item.name }}.{{ item.projectName }}</a>
+              </div>
               <div class="text-subtitle2 text-left">Id: {{ item.id }}</div>
               <div class="text-subtitle2 text-left">Branch: {{ item.branch }}</div>
             </q-card-section>
 
+            <q-inner-loading :showing="item.waitResultFromRunner">
+              <q-spinner-gears size="50px" color="primary" />
+            </q-inner-loading>
+
             <q-separator dark />
             <q-card-actions>
-
               <template v-for="command in item.commands">
                 <q-btn v-if="command === 'nachatUdalenie'" size="md" color="black" icon="delete" @click="udalit(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>delete</q-tooltip>
@@ -134,41 +144,41 @@
                 <q-btn v-if="command === 'ustanovitResultatUdaleniya'" size="md" color="black" icon="sync" @click="ustanovitResultatUdaleniyaMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>
                 </q-btn>
-                <q-btn v-if="command === 'nachatSborku'" size="md" color="black" icon="build" @click="sobrat(item.id)" :loading="getUnitLoader(item.id)">
+                <q-btn v-if="command === 'nachatSborku'" size="lg" color="black" icon="build" @click="sobrat(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>build</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'ustanovitResultatSborki'" size="md" color="black" icon="sync" @click="ustanovitResultatSborkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'nachatObnovlenie'" size="md" color="black" icon="sync" @click="obnovit(item.id)" :loading="getUnitLoader(item.id)">
-                  <q-tooltip>sync</q-tooltip>
+                  <q-tooltip>fetch changes</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'ustanovitResultatObnovleniya'" size="md" color="black" icon="sync" @click="ustanovitResultatObnovleniya(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'zapolnitPeremenie'" size="md" color="black" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
-                  <q-tooltip>settings</q-tooltip>
+                  <q-tooltip>set config</q-tooltip>
                 </q-btn>
-                <q-btn v-if="command === 'nachatPodgotovku'" size="md" color="black" icon="done_all" @click="podgotovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
-                  <q-tooltip>done_all</q-tooltip>
+                <q-btn v-if="command === 'nachatPodgotovku'" size="lg" color="black" icon="done_all" @click="podgotovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
+                  <q-tooltip>preparing</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'ustanovitResultatPodgotovki'" size="md" color="black" icon="sync" @click="ustanovitResultatPodgovkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'nachatSbrosPodgotovki'" size="md" color="black" icon="remove_done" @click="sbrositPodgotovkuMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
-                  <q-tooltip>remove_done</q-tooltip>
+                  <q-tooltip>remove preparing</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'ustanovitResultatSbrosaPodgotovki'" size="md" color="black" icon="sync" @click="ustanovitResultatSbrosaPodgotovkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>
                 </q-btn>
-                <q-btn v-if="command === 'nachatZapusk'" size="md" color="black" icon="play_arrow" @click="zapustitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
-                  <q-tooltip>play_arrow</q-tooltip>
+                <q-btn v-if="command === 'nachatZapusk'" size="lg" color="black" icon="play_arrow" @click="zapustitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
+                  <q-tooltip>up</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'ustanovitResultatZapuska'" size="md" color="black" icon="sync" @click="ustanovitResultatZapuskaMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'nachatOstanovku'" size="md" color="black" icon="stop" @click="ostanovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
-                  <q-tooltip>stop</q-tooltip>
+                  <q-tooltip>down</q-tooltip>
                 </q-btn>
                 <q-btn v-if="command === 'ustanovitResultatOstanovki'" size="md" color="black" icon="sync" @click="ustanovitResultatOstanovkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
                   <q-tooltip>sync</q-tooltip>

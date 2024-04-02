@@ -4,10 +4,12 @@ import ProektiService from "@/modules/unit/services/ProektiService";
 export class EditProjectForm {
     id: string;
     newProjectName: string;
+    newProxyHost: string;
 
-    constructor(id: string = "", newProjectName: string = "") {
+    constructor(id: string = "", newProjectName: string = "", newProxyHost: string = "") {
         this.id = id;
         this.newProjectName = newProjectName;
+        this.newProxyHost = newProxyHost;
     }
 }
 

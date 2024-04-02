@@ -1,3 +1,5 @@
+import PolzovatelProekta from "@/modules/unit/store/SpisokProektov/model/PolzovatelProekta";
+
 export default class Proekt {
     id: string = "";
     repoId: string = "";
@@ -8,6 +10,8 @@ export default class Proekt {
     isActive: boolean = false;
     buildInfo: string | null = null;
     removeInfo: string | null = null;
+    proxyHost: string | null = null;
+    users: PolzovatelProekta[] = [];
 
     constructor(
         data: {
@@ -20,6 +24,8 @@ export default class Proekt {
             isActive: boolean,
             buildInfo: string|null,
             removeInfo: string|null,
+            proxyHost: string|null,
+            users: PolzovatelProekta[]
         }
     ) {
         this.id = data.id;
@@ -31,5 +37,7 @@ export default class Proekt {
         this.buildInfo = data.buildInfo;
         this.removeInfo = data.removeInfo;
         this.state = data.state;
+        this.proxyHost = data.proxyHost;
+        this.users = data.users;
     }
 };

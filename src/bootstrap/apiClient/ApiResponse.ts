@@ -9,6 +9,7 @@ export type FailApiResponse = {
 export type ErrorApiResponse = {
     status: "error";
     message: string;
+    code: string;
 }
 
 export type SuccessApiResponse<T> = {

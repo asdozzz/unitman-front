@@ -21,6 +21,7 @@ import {
 import {
     OtvetNaPolucheniePeremenihUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
+import {ZaprosNaPoluchenieUnita} from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieUnita";
 
 class UnitiService {
     list() {
@@ -29,6 +30,10 @@ class UnitiService {
 
     moi() {
         return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/moi', {});
+    }
+
+    obnovit(params: ZaprosNaPoluchenieUnita ) {
+        return apiClient.post<ModelDlySpiskaUnitov>('/unit/obnovit', params);
     }
 
     sozdat(params: ModelDlySozdaniyaUnita) {
@@ -43,8 +48,8 @@ class UnitiService {
         return apiClient.post<null>('/unit/ustanovitResultatSborki', params);
     }
 
-    obnovit(params: ModelDlyObnovleniyaUnita) {
-        return apiClient.post<null>('/unit/obnovit', params);
+    obnovitKodUnita(params: ModelDlyObnovleniyaUnita) {
+        return apiClient.post<null>('/unit/obnovitKodUnita', params);
     }
 
     ustanovitResultatObnovleniya(params: ModelDlyObnovleniyaUnita) {

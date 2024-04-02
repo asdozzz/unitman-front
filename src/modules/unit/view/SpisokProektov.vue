@@ -30,7 +30,7 @@ function openAddForm() {
 }
 
 function openEditForm(proekt: Proekt) {
-  editFormStore.otkritFormu(new EditProjectForm(proekt.id, ""))
+  editFormStore.otkritFormu(new EditProjectForm(proekt.id, proekt.name, proekt.proxyHost))
 }
 
 function pokazatSpisokPolzovatelei(id: string) {

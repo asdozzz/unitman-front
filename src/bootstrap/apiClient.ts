@@ -32,7 +32,7 @@ class ApiClient {
 
     private handleError(error: AxiosError): FailApiResponse {
         let modifyResponse: FailApiResponse = ApiResponseFactory.makeFail("Unknown error");
-        console.log("AAA", error);
+
         if (error.response && error.response.data) {
             let errorMessage = "";
             const serverError: ServerResponseError = error.response.data;
@@ -70,12 +70,15 @@ class ApiClient {
             url,
             data
         }).then((response: AxiosResponse<any>) => {
-            if ("data" in response.data) {
-                modifyResponse = ApiResponseFactory.makeSuccess(response.data.data);
+            if ("status" in response.data && response.data.status != "success") {
+                modifyResponse = this.handleError(response.data);
             } else {
-                modifyResponse = ApiResponseFactory.makeSuccess(response.data);
+                if ("data" in response.data) {
+                    modifyResponse = ApiResponseFactory.makeSuccess(response.data.data);
+                } else {
+                    modifyResponse = ApiResponseFactory.makeSuccess(response.data);
+                }
             }
-
         }).catch((error: AxiosError) => {
             modifyResponse = this.handleError(error);
         })

@@ -9,7 +9,9 @@ export type SpisokUnitovState = {
     loaderSpiskaUnitov: boolean;
     oshibkaZagruzkiSpiska: string | null;
     loaderObnovleniyaUnita: boolean;
-    unitLoaders: Record<string, boolean>
+    unitLoaders: Record<string, boolean>;
+    ocheredDlyObnovleniya: string[],
+    pollingId: any | null
 }
 
 export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
@@ -19,7 +21,9 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             loaderSpiskaUnitov:false,
             oshibkaZagruzkiSpiska: null,
             loaderObnovleniyaUnita:false,
-            unitLoaders: {}
+            unitLoaders: {},
+            ocheredDlyObnovleniya:[],
+            pollingId: null,
         }
     },
     actions: {
@@ -29,11 +33,40 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         stopUnitLoader(id: string) {
             this.unitLoaders[id] = false;
         },
+        dobavitVOcherediNaObnovlenie(id: string): void {
+            console.log('dobavitVOcherediNaObnovlenie', id);
+            this.ocheredDlyObnovleniya.push(id);
+        },
+        udalitIzOcherediNaObnovlenie(id: string): void {
+            const index = this.ocheredDlyObnovleniya.indexOf(id);
+
+            if (index > -1) {
+                this.ocheredDlyObnovleniya.splice(index, 1);
+            }
+        },
+        zapustitObrabotkuOcherediNaObnovlenie(): void {
+            if (!this.pollingId) {
+                clearInterval(this.pollingId);
+            }
+            this.pollingId = setInterval(() => {
+                console.log('polling', this.ocheredDlyObnovleniya.length);
+                if (this.ocheredDlyObnovleniya.length > 0) {
+                    this.obnovitUnit(this.ocheredDlyObnovleniya[0]);
+                }
+            }, 2000);
+        },
         async poluchitSpisokUnitov() {
             this.loaderSpiskaUnitov = true;
+            this.ocheredDlyObnovleniya = [];
             const response = await UnitiService.list();
             if (response.status === "success") {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
+
+                this.spisok.forEach((item: Unit) => {
+                    if (item.waitResultFromRunner) {
+                        this.dobavitVOcherediNaObnovlenie(item.id);
+                    }
+                });
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;
@@ -48,9 +81,15 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         async poluchitSpisokMoihUnitov() {
             this.loaderSpiskaUnitov = true;
+            this.ocheredDlyObnovleniya = [];
             const response = await UnitiService.moi();
             if (response.status === "success") {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
+                this.spisok.forEach((item: Unit) => {
+                    if (item.waitResultFromRunner) {
+                        this.dobavitVOcherediNaObnovlenie(item.id);
+                    }
+                });
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;
@@ -63,6 +102,28 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
+        async obnovitUnit(id: string) {
+            this.startUnitLoader(id);
+            this.udalitIzOcherediNaObnovlenie(id);
+            const response = await UnitiService.obnovit({ id })
+
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            } else if (response.status === "success") {
+                const unitIndex = this.spisok.findIndex((unit: Unit) => unit.id === id);
+
+                if (unitIndex !== -1) {
+                    this.spisok[unitIndex] = new Unit(response.data);
+                    if (this.spisok[unitIndex].waitResultFromRunner) {
+                        this.dobavitVOcherediNaObnovlenie(id);
+                    }
+                }
+            }
+
+            this.stopUnitLoader(id);
+
+            return response;
+        },
         async sobratMoiUnit(id: string) {
             this.startUnitLoader(id);
 
@@ -72,7 +133,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -85,20 +146,20 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
-        async obnovitMoiUnit(id: string) {
+        async obnovitKodMoegoUnita(id: string) {
             this.startUnitLoader(id);
 
-            const response = await UnitiService.obnovit({ id })
+            const response = await UnitiService.obnovitKodUnita({ id })
             this.stopUnitLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -112,7 +173,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -125,7 +186,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -138,7 +199,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -151,7 +212,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -164,7 +225,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -177,7 +238,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -190,7 +251,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -203,7 +264,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -216,7 +277,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -229,7 +290,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -242,7 +303,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -255,7 +316,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.poluchitSpisokMoihUnitov();
+            this.obnovitUnit(id);
 
             return response;
         },

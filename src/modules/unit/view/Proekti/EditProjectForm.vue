@@ -27,6 +27,7 @@ async function otpravitFormu() {
 
     <q-card-section class="q-pt-none">
       <q-input v-model="form.newProjectName" label="New Project Name" />
+      <q-input v-model="form.newProxyHost" label="New Proxy Host" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

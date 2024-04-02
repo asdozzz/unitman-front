@@ -3,4 +3,5 @@ export type ModelDlyDobavleniyaProekta = {
     projectCode: string;
     projectName: string;
     mainBranch: string;
+    proxyHost: string;
 }
