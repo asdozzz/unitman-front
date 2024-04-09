@@ -6,10 +6,10 @@ export class EditProjectForm {
     newProjectName: string;
     newProxyHost: string;
 
-    constructor(id: string = "", newProjectName: string = "", newProxyHost: string = "") {
+    constructor(id: string = "", newProjectName: string = "", newProxyHost: string | null = null) {
         this.id = id;
         this.newProjectName = newProjectName;
-        this.newProxyHost = newProxyHost;
+        this.newProxyHost = newProxyHost  ?? "";
     }
 }
 

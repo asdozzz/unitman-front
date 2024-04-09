@@ -8,6 +8,7 @@ export default class Unit {
     state: string = "";
     waitResultFromRunner: boolean = false;
     commands: string[] = [];
+    error: boolean = false;
     url: string | null = null;
 
     constructor(
@@ -21,6 +22,7 @@ export default class Unit {
             state: string,
             waitResultFromRunner: boolean,
             commands: string[],
+            error: boolean,
             url: string | null,
         }
     ) {
@@ -35,5 +37,6 @@ export default class Unit {
         this.commands = data.commands;
 
         this.url = data.url;
+        this.error = data.error;
     }
 };

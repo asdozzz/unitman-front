@@ -63,10 +63,11 @@
       <template v-else>
 
         <template v-for="item in spisok">
-          <q-card class="q-mr-md" style="width: 200px">
+          <q-card class="q-mr-md" style="width: 300px">
             <q-card-section>
               <div class="text-h6 text-left">{{ item.name }}</div>
               <div class="text-subtitle2 text-left">{{ item.type }}</div>
+              <div class="text-subtitle2 text-left" v-if="item.type === 'GITLAB'">{{ item.repoUrl }}</div>
             </q-card-section>
 
             <q-separator dark />

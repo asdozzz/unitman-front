@@ -55,6 +55,18 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 }
             }, 2000);
         },
+        ostanovitObrabotkuOcherediNaObnovlenie(): void {
+            if (!this.pollingId) {
+                clearInterval(this.pollingId);
+            }
+        },
+        udalitUnitIzSpiska(id: string): void {
+            const index = this.spisok.findIndex((item: Unit) => item.id === id);
+
+            if (index > -1) {
+                this.spisok.splice(index, 1);
+            }
+        },
         async poluchitSpisokUnitov() {
             this.loaderSpiskaUnitov = true;
             this.ocheredDlyObnovleniya = [];
@@ -290,7 +302,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.obnovitUnit(id);
+            this.udalitUnitIzSpiska(id);
 
             return response;
         },
@@ -316,7 +328,20 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.obnovitUnit(id);
+            this.udalitUnitIzSpiska(id);
+
+            return response;
+        },
+        async udalitSlomaniiUnit(id: string) {
+            this.startUnitLoader(id);
+
+            const response = await UnitiService.udalitSlomaniyUnit({ id })
+            this.stopUnitLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.udalitUnitIzSpiska(id);
 
             return response;
         },
@@ -330,6 +355,11 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 }
 
                 return store.unitLoaders[id];
+            }
+        },
+        showForceRemove() {
+            return (item: Unit): boolean => {
+                return !item.commands.some((command: string) => ['udalitVruchnuyu','nachatUdalenie'].includes(command))
             }
         }
     }

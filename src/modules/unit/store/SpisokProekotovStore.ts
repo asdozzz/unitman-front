@@ -10,6 +10,7 @@ export type SpisokProektovState = {
     loaderSpiskaProektov: boolean;
     oshibkaZagruzkiSpiska: string | null;
     loaderObnovleniyaProekta: boolean;
+    projectLoaders: Record<string, boolean>;
 }
 
 export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
@@ -19,9 +20,20 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             loaderSpiskaProektov:false,
             oshibkaZagruzkiSpiska: null,
             loaderObnovleniyaProekta:false,
+            projectLoaders: {}
         }
     },
     getters: {
+        getProjectLoader() {
+            const store = this;
+            return (id: string): boolean => {
+                if (!store.projectLoaders.hasOwnProperty(id)) {
+                    return false;
+                }
+
+                return store.projectLoaders[id];
+            }
+        },
         poluchitProektPoId: (state) => {
             return (id: string) => state.spisok.find((proekt: Proekt) => proekt.id === id);
         },
@@ -73,6 +85,12 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
         },
     },
     actions: {
+        startProjectLoader(id: string) {
+            this.projectLoaders[id] = true;
+        },
+        stopProjectLoader(id: string) {
+            this.projectLoaders[id] = false;
+        },
         async poluchitSpisokProektov() {
             this.loaderSpiskaProektov = true;
             const response = await ProektiService.list();
@@ -91,10 +109,10 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             return response;
         },
         async udalitProekt(id: string) {
-            this.loaderObnovleniyaProekta = true;
+            this.startProjectLoader(id);
 
             const response = await ProektiService.udalit({ id })
-            this.loaderObnovleniyaProekta = false;
+            this.stopProjectLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             }
@@ -104,10 +122,10 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             return response;
         },
         async udalitSlomaniiProekt(id: string) {
-            this.loaderObnovleniyaProekta = true;
+            this.startProjectLoader(id);
 
             const response = await ProektiService.udalitSlomaniiProekt({ id })
-            this.loaderObnovleniyaProekta = false;
+            this.stopProjectLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             }
@@ -117,10 +135,10 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             return response;
         },
         async aktivirovat(id: string) {
-            this.loaderObnovleniyaProekta = true;
+            this.stopProjectLoader(id);
 
             const response = await ProektiService.aktivirovat({ id })
-            this.loaderObnovleniyaProekta = false;
+            this.stopProjectLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             }
@@ -130,10 +148,10 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             return response;
         },
         async deaktivirovat(id: string) {
-            this.loaderObnovleniyaProekta = true;
+            this.stopProjectLoader(id);
 
             const response = await ProektiService.deaktivirovat({ id })
-            this.loaderObnovleniyaProekta = false;
+            this.stopProjectLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             }
@@ -143,10 +161,10 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             return response;
         },
         async sobrat(id: string) {
-            this.loaderObnovleniyaProekta = true;
+            this.stopProjectLoader(id);
 
             const response = await ProektiService.sobrat({ id })
-            this.loaderObnovleniyaProekta = false;
+            this.stopProjectLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             }

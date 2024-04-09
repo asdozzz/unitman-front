@@ -12,6 +12,7 @@
     "@quasar/vite-plugin": "^1.0.4",
     "@types/node": "^20.4.4",
     "axios": "^1.4.0",
+    "date-fns": "^3.6.0",
     "pinia": "^2.1.4",
     "quasar": "^2.0.0",
     "vee-validate": "^4.5.11",

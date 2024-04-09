@@ -8,6 +8,7 @@ export default class ModelDlySpiskaUnitov {
     public state: string = "";
     public waitResultFromRunner: boolean = false;
     public commands: string[] = [];
+    public error: boolean = false;
     public url: string | null = null;
 }
 

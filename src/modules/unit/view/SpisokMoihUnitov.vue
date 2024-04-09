@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
   import {storeToRefs} from "pinia";
-  import {onMounted} from "vue";
+  import {onBeforeUnmount, onMounted} from "vue";
   import FormaSozdaniyaUnita from "@/modules/unit/view/Unit/FormaSozdaniyaUnita.vue";
   import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
   import {
@@ -89,6 +89,10 @@
     await unitiStore.poluchitSpisokMoihUnitov();
 
     unitiStore.zapustitObrabotkuOcherediNaObnovlenie();
+  })
+
+  onBeforeUnmount(() => {
+    unitiStore.ostanovitObrabotkuOcherediNaObnovlenie();
   })
 </script>
 

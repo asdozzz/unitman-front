@@ -22,6 +22,12 @@ import {
     OtvetNaPolucheniePeremenihUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
 import {ZaprosNaPoluchenieUnita} from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieUnita";
+import {
+    ZaprosNaPoluchenieZadachRunneraUnita
+} from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieZadachRunneraUnita";
+import {
+    OtvetNaPoluchenieZadachRunneraUnita
+} from "@/modules/unit/services/UnitiService/model/OtvetNaPoluchenieZadachRunneraUnita";
 
 class UnitiService {
     list() {
@@ -110,6 +116,10 @@ class UnitiService {
 
     poluchitPeremenieUnita(params: ZaprosNaPolucheniePeremenihUnita) {
         return apiClient.post<OtvetNaPolucheniePeremenihUnita[]>('/unit/poluchitPeremenieUnita', params);
+    }
+
+    poluchitVipolnenieZadachiRunnera(params: ZaprosNaPoluchenieZadachRunneraUnita) {
+        return apiClient.post<OtvetNaPoluchenieZadachRunneraUnita[]>('/unit/poluchitVipolnenieZadachiRunnera', params);
     }
 }
 

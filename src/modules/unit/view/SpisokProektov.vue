@@ -11,7 +11,7 @@ import SpisokPolzovateleiProekta from "@/modules/unit/view/Proekti/SpisokPolzova
 import {useSpisokPolzovateleiProektaStore} from "@/modules/unit/store/SpisokProektov/SpisokPolzovateleiProektaStore";
 
 const proektiStore = useSpisokProektovStore();
-const { spisok, loaderSpiskaProektov, oshibkaZagruzkiSpiska, loaderObnovleniyaProekta, proektSloman, proektNeSobirali } = storeToRefs(proektiStore);
+const { spisok, loaderSpiskaProektov, oshibkaZagruzkiSpiska, getProjectLoader, proektSloman, proektNeSobirali } = storeToRefs(proektiStore);
 
 const addFormStore = useAddProjectFormStore();
 const { enable: enableAddForm } = storeToRefs(addFormStore);
@@ -100,22 +100,22 @@ async function sobrat(id: string) {
              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="manage_accounts" @click="pokazatSpisokPolzovatelei(item.id)">
                <q-tooltip>manage_accounts</q-tooltip>
              </q-btn>
-              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="delete" @click="udalit(item.id)" :loading="loaderObnovleniyaProekta">
+              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="delete" @click="udalit(item.id)" :loading="getProjectLoader(item.id)">
                 <q-tooltip>delete</q-tooltip>
               </q-btn>
-             <q-btn size="md" color="black" v-if="proektSloman(item.id)" icon="delete" @click="udalitSlomaniiProekt(item.id)" :loading="loaderObnovleniyaProekta">
+             <q-btn size="md" color="black" v-if="proektSloman(item.id)" icon="delete" @click="udalitSlomaniiProekt(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>delete manually</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && !item.isActive" icon="done" @click="aktivirovat(item.id)" :loading="loaderObnovleniyaProekta">
+             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && !item.isActive" icon="done" @click="aktivirovat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>activate</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && item.isActive" icon="remove_done" @click="deaktivirovat(item.id)" :loading="loaderObnovleniyaProekta">
+             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && item.isActive" icon="remove_done" @click="deaktivirovat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>deactivate</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="edit" @click="openEditForm(item)" :loading="loaderObnovleniyaProekta">
+             <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="edit" @click="openEditForm(item)" :loading="getProjectLoader(item.id)">
                <q-tooltip>edit</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="loaderObnovleniyaProekta">
+             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>build</q-tooltip>
              </q-btn>
 
