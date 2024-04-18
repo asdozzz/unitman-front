@@ -35,8 +35,8 @@ function convertDate(unixtime: number): string {
 
             <div class="flex flex-center column">
               <div class="row" style="min-height: 400px; width: 100%; padding: 24px;">
-                <div class="fit row inline wrap justify-start items-start content-start" style="overflow: hidden;">
-                  <div class="col" style="overflow: auto;">
+                <div class="full-height row inline wrap justify-start items-start content-start">
+                  <div class="col" style="overflow: hidden;">
                     <q-card class="no-border-radius bg-grey-10">
                       <q-card-section v-if="selectJob">
                         <div v-for="(step, i) in selectJob.steps">
@@ -54,8 +54,8 @@ function convertDate(unixtime: number): string {
                             </div>
 
                           </div>
-                          <div v-if="step.success" class="text-grey-1">{{step.response}}</div>
-                          <div v-if="!step.success" class="text-red-8">{{step.response}}</div>
+                          <div v-if="step.success" class="text-grey-1" v-html="step.response.split('\n').join('<br>')"></div>
+                          <div v-if="!step.success" class="text-red-8" v-html="step.response.split('\n').join('<br>')"></div>
 
                         </div>
                       </q-card-section>

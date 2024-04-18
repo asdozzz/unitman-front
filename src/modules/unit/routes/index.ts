@@ -12,7 +12,10 @@ export default [
             {
                 path: '',
                 component: SpisokUnitov,
-                alias: 'list'
+                alias: 'list',
+                meta: {
+                    requiredRoles: ['ROLE_ADMIN']
+                }
             },
             {
                 path: 'moi',

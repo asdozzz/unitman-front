@@ -10,7 +10,7 @@ export class Peremenaya {
 
     constructor(konfig: KonfigPeremenoi, value: string = "") {
         this.konfig = konfig;
-        this.value = value;
+        this.value = value.length > 0 ? value : konfig.defaultValue;
     }
 }
 
