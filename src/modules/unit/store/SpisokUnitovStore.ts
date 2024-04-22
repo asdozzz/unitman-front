@@ -91,29 +91,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async poluchitSpisokMoihUnitov() {
-            this.loaderSpiskaUnitov = true;
-            this.ocheredDlyObnovleniya = [];
-            const response = await UnitiService.moi();
-            if (response.status === "success") {
-                this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
-                this.spisok.forEach((item: Unit) => {
-                    if (item.waitResultFromRunner) {
-                        this.dobavitVOcherediNaObnovlenie(item.id);
-                    }
-                });
-            } else if (response.status === "fail") {
-                this.spisok = [];
-                this.oshibkaZagruzkiSpiska = response.data.message;
-            } else if (response.status === "error") {
-                this.spisok = [];
-                this.oshibkaZagruzkiSpiska = response.message;
-            }
-
-            this.loaderSpiskaUnitov = false;
-
-            return response;
-        },
         async obnovitUnit(id: string) {
             this.startUnitLoader(id);
             this.udalitIzOcherediNaObnovlenie(id);

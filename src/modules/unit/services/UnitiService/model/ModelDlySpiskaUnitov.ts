@@ -1,6 +1,7 @@
 export default class ModelDlySpiskaUnitov {
     public id: string = "";
     public authorId: string = "";
+    public authorName: string = "";
     public name: string = "";
     public projectId: string = "";
     public projectName: string = "";

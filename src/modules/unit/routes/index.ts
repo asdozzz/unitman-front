@@ -2,7 +2,7 @@ import UnitLayout from "../view/UnitLayout.vue";
 import SpisokUnitov from "../view/SpisokUnitov.vue";
 import SpisokHranilish from "../view/SpisokHranilish.vue";
 import SpisokProektov from "../view/SpisokProektov.vue";
-import SpisokMoihUnitov from "@/modules/unit/view/SpisokMoihUnitov.vue";
+
 
 export default [
     {
@@ -16,10 +16,6 @@ export default [
                 meta: {
                     requiredRoles: ['ROLE_ADMIN']
                 }
-            },
-            {
-                path: 'moi',
-                component: SpisokMoihUnitov,
             },
             {
                 path: 'repositories',

@@ -33,9 +33,9 @@ function onLogout() {
   border-radius: 8px;" color="dark" rounded size="md" @click="onSubmit" label="Sign in" no-caps class="full-width"></q-btn>
       </q-card-section>
       <q-card-section class="text-center q-pt-none">
-        <div class="text-grey-8">Don't have an account yet?
+<!--        <div class="text-grey-8">Don't have an account yet?
           <a href="#" class="text-dark text-weight-bold" style="text-decoration: none">Sign
-            up.</a></div>
+            up.</a></div>-->
       </q-card-section>
     </q-card>
     <q-card class="q-pa-md shadow-2 my_card" bordered v-else>

@@ -9,6 +9,7 @@ interface TokenData {
     token: string | null;
     expired: string | null;
     user: {
+        id: string;
         email: string;
         roles: string[];
     }
@@ -40,6 +41,9 @@ export const useAuthStore = defineStore('auth', {
     getters: {
         isAuth(state: State): boolean {
             return state.tokenData != null && state.tokenData.token != null;
+        },
+        userId(state: State): string | null {
+            return state.tokenData && state.tokenData.user.id || null;
         },
         email(state: State): string | null {
             return state.tokenData && state.tokenData.user.email || null;
@@ -81,10 +85,7 @@ export const useAuthStore = defineStore('auth', {
                 // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(response.data));
 
-                let defaultRoute = '/unit/moi';
-                if (this.isAdmin) {
-                    defaultRoute = '/unit/list';
-                }
+                const defaultRoute = '/unit/list';
                 // redirect to previous url or default to home page
                 router.push(this.returnUrl || defaultRoute);
             }

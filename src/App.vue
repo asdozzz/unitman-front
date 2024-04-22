@@ -13,8 +13,7 @@
           <q-route-tab to="/account/list" label="Accounts" v-if="isAdmin"/>
           <q-route-tab to="/unit/repositories" label="Repositories" v-if="isAdmin"/>
           <q-route-tab to="/unit/projects" label="Projects" v-if="isAdmin"/>
-          <q-route-tab to="/unit/list" label="Units" v-if="isAdmin"/>
-          <q-route-tab to="/unit/moi" label="Units" v-if="!isAdmin"/>
+          <q-route-tab to="/unit/list" label="Units"/>
         </q-tabs>
       </q-header>
 

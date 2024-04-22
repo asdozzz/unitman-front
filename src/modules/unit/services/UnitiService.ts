@@ -34,10 +34,6 @@ class UnitiService {
         return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/list', {});
     }
 
-    moi() {
-        return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/moi', {});
-    }
-
     obnovit(params: ZaprosNaPoluchenieUnita ) {
         return apiClient.post<ModelDlySpiskaUnitov>('/unit/obnovit', params);
     }

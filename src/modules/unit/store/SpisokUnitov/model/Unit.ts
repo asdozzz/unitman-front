@@ -1,6 +1,7 @@
 export default class Unit {
     id: string = "";
     authorId: string = "";
+    authorName: string = "";
     name: string = "";
     projectId: string = "";
     projectName: string = "";
@@ -15,6 +16,7 @@ export default class Unit {
         data: {
             id: string,
             authorId: string,
+            authorName: string,
             name: string,
             projectId: string,
             projectName: string,
@@ -28,6 +30,7 @@ export default class Unit {
     ) {
         this.id = data.id;
         this.authorId = data.authorId;
+        this.authorName = data.authorName;
         this.name = data.name;
         this.projectId = data.projectId;
         this.projectName = data.projectName;
