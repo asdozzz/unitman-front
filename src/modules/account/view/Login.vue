@@ -2,18 +2,25 @@
 import { useAuthStore } from '@/modules/account/store/auth';
 import { storeToRefs } from 'pinia'
 import { Notify } from 'quasar'
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 const authStore = useAuthStore();
-const { loginView, tokenData } = storeToRefs(authStore);
+const { loginView, tokenData, defaultRoute, returnUrl } = storeToRefs(authStore);
+
 async function onSubmit() {
   const response = await authStore.login();
   if (response.status === "fail") {
     Notify.create(response.data.message);
   }
+  if (response.status === "success") {
+    router.push(returnUrl.value || defaultRoute.value);
+  }
 }
 
 function onLogout() {
   authStore.logout();
+  router.push('/login');
 }
 </script>
 

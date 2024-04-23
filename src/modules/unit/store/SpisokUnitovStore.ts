@@ -4,7 +4,17 @@ import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import ModelDlySpiskaUnitov from "@/modules/unit/services/UnitiService/model/ModelDlySpiskaUnitov";
 import {Notify} from "quasar";
 
+type NastroikiSpiska = {
+    filter: {
+        onlyMine: boolean,
+        name: string | null
+        branch: string | null
+        projectId: string | null
+    }
+}
+
 export type SpisokUnitovState = {
+    nastroikiSpiska: NastroikiSpiska;
     spisok: Unit[];
     loaderSpiskaUnitov: boolean;
     oshibkaZagruzkiSpiska: string | null;
@@ -17,6 +27,14 @@ export type SpisokUnitovState = {
 export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
     state: (): SpisokUnitovState => {
         return {
+            nastroikiSpiska: {
+                filter: {
+                    onlyMine: false,
+                    name: null,
+                    branch: null,
+                    projectId: null
+                }
+            },
             spisok:[],
             loaderSpiskaUnitov:false,
             oshibkaZagruzkiSpiska: null,
@@ -70,7 +88,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         async poluchitSpisokUnitov() {
             this.loaderSpiskaUnitov = true;
             this.ocheredDlyObnovleniya = [];
-            const response = await UnitiService.list();
+            const response = await UnitiService.list(this.nastroikiSpiska);
             if (response.status === "success") {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
 

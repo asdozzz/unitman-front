@@ -11,10 +11,9 @@ import {
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
 import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
 import OknoVipolnenihZadachRunnera from "@/modules/unit/view/Unit/OknoVipolnenihZadachRunnera.vue";
-import {useAuthStore} from "@/modules/account/store/auth";
 
 const unitiStore = useSpisokUnitovStore();
-const { spisok, loaderSpiskaUnitov, oshibkaZagruzkiSpiska } = storeToRefs(unitiStore);
+const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska } = storeToRefs(unitiStore);
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
 const { enable: enableAddForm } = storeToRefs(addFormStore);
@@ -24,9 +23,6 @@ const { enable: enableKonfigForm } = storeToRefs(konfigFormStore);
 
 const storeVipolnenihZadach = storVipolnenihZadachRunnera();
 const { enable: pokazanoOknoVipolnenihZadachRunnera } = storeToRefs(storeVipolnenihZadach);
-
-const authStore = useAuthStore();
-const { userId } = storeToRefs(authStore);
 
 function openAddForm() {
   addFormStore.otkritFormu();
@@ -45,23 +41,34 @@ onBeforeUnmount(() => {
 <template>
 
   <div class="full-width flex column">
-    <q-spinner
-        v-if="loaderSpiskaUnitov"
-        color="primary"
-        size="3em"
-    />
-    <div class="row wrap items-start content-start">
-      <q-card class="q-mb-md">
-        <q-card-section>
-          <q-btn class="q-mr-md" size="md" color="primary" icon="add" @click="openAddForm">
-            <q-tooltip>add</q-tooltip>
-          </q-btn>
-          <q-btn size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
-            <q-tooltip>refresh</q-tooltip>
-          </q-btn>
-        </q-card-section>
-      </q-card>
+
+    <div class="row wrap items-start content-start q-pb-md">
+      <div class="col-auto">
+        <q-btn class="q-mr-md" size="md" color="primary" icon="add" @click="openAddForm">
+          <q-tooltip>add</q-tooltip>
+        </q-btn>
+        <q-btn size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
+          <q-tooltip>refresh</q-tooltip>
+        </q-btn>
+
+      </div>
+      <div class="col-auto">
+        <q-toggle
+            v-model="nastroikiSpiska.filter.onlyMine"
+            label="Only Mine"
+            @update:model-value="unitiStore.poluchitSpisokUnitov()"
+        />
+      </div>
+      <div class="col q-px-md">
+        <q-input dense outlined v-model="nastroikiSpiska.filter.name" label="Unit Name" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
+      </div>
+      <div class="col">
+        <q-input dense outlined v-model="nastroikiSpiska.filter.branch" label="Branch" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
+      </div>
+
+      <div class="col"></div>
     </div>
+
     <div class="row wrap items-start content-start">
       <template v-if="oshibkaZagruzkiSpiska">
         <div v-html="oshibkaZagruzkiSpiska"></div>
@@ -90,7 +97,7 @@ onBeforeUnmount(() => {
 
             <q-separator dark />
             <q-card-actions>
-                <UnitActions :item="item" v-if="userId === item.authorId"/>
+                <UnitActions :item="item"/>
             </q-card-actions>
           </q-card>
         </template>

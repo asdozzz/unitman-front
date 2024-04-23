@@ -28,10 +28,11 @@ import {
 import {
     OtvetNaPoluchenieZadachRunneraUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPoluchenieZadachRunneraUnita";
+import {ZaprosSpiskaUnitov} from "@/modules/unit/services/UnitiService/model/ZaprosSpiskaUnitov";
 
 class UnitiService {
-    list() {
-        return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/list', {});
+    list(params: ZaprosSpiskaUnitov) {
+        return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/list', params);
     }
 
     obnovit(params: ZaprosNaPoluchenieUnita ) {

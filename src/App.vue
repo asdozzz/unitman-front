@@ -35,26 +35,15 @@
 <script setup lang="ts">
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 const authStore = useAuthStore();
 const { isAuth, email, isAdmin } = storeToRefs(authStore);
 
 function logout() {
   authStore.logout();
+  router.push('/login');
 }
 </script>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>

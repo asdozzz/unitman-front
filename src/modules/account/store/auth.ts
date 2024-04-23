@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import AccountService from "@/modules/account/services/AccountService";
-import router from "@/bootstrap/router";
 import LoginView from "@/modules/account/store/auth/LoginView";
 
 const LOCAL_STORAGE_KEY = 'tokenData';
@@ -19,6 +18,7 @@ interface TokenData {
 interface State {
     tokenData: TokenData | null,
     returnUrl: string | null,
+    defaultRoute: string,
     loginView: LoginView
 }
 
@@ -33,6 +33,7 @@ export const useAuthStore = defineStore('auth', {
         return {
             // initialize state from local storage to enable user to stay logged in
             tokenData: json ? JSON.parse(json) : null,
+            defaultRoute : '/unit/list',
             returnUrl: null,
             loginView: new LoginView()
         };
@@ -80,14 +81,8 @@ export const useAuthStore = defineStore('auth', {
             const response = await AccountService.login(this.loginView.form.login, this.loginView.form.pass);
 
             if (response.status === "success") {
-                // update pinia state
                 this.tokenData = response.data;
-                // store user details and jwt in local storage to keep user logged in between page refreshes
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(response.data));
-
-                const defaultRoute = '/unit/list';
-                // redirect to previous url or default to home page
-                router.push(this.returnUrl || defaultRoute);
             }
 
             return response;
@@ -95,7 +90,6 @@ export const useAuthStore = defineStore('auth', {
         logout() {
             this.tokenData = null;
             localStorage.removeItem(LOCAL_STORAGE_KEY);
-            router.push('/login');
         }
     }
 });
