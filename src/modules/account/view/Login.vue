@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useAuthStore } from '@/modules/account/store/auth';
 import { storeToRefs } from 'pinia'
 import { Notify } from 'quasar'

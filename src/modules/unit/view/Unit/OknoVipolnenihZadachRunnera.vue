@@ -5,7 +5,7 @@ import {onMounted} from "vue";
 import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
 
 const store = storVipolnenihZadachRunnera();
-const { spisok, oshibkaOtBackenda, loader, enable, selectJob, selectIndex } = storeToRefs(store);
+const { spisok, enable, selectJob, selectIndex } = storeToRefs(store);
 
 onMounted(async () => {
   await store.poluchitVipolnenieZadachiRunnera();

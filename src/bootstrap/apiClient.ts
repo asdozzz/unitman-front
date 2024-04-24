@@ -25,7 +25,7 @@ class ApiClient {
         }
 
         return axios.create({
-            baseURL: "http://localhost:8082/api",
+            baseURL: import.meta.env.VITE_API_HOST,
             headers: headers,
         });
     }
@@ -34,16 +34,17 @@ class ApiClient {
         let modifyResponse: FailApiResponse = ApiResponseFactory.makeFail("Unknown error");
 
         if (error.response && error.response.data) {
-            let errorMessage = "";
+            let errorMessage: string = "";
             const serverError: ServerResponseError = error.response.data;
 
             if (typeof serverError === "string") {
                 errorMessage = serverError;
             } else if (serverError) {
                 if ("message" in serverError) {
-                    errorMessage = serverError['message'];
+                    errorMessage = serverError['message'] as string;
                 } else if ("data" in serverError) {
-                    errorMessage = serverError['data']['message'];
+                    const data = serverError['data'] as Record<"message", string>;
+                    errorMessage = data['message'];
                 }
 
                 if ("code" in serverError) {
