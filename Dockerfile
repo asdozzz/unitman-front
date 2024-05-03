@@ -8,7 +8,7 @@ COPY . .
 RUN cp .env.dist .env
 # install all deps
 RUN yarn install
-
+RUN yarn build
 # vite default port
 #CMD ["yarn", "run", "dev"]
 
