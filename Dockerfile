@@ -10,8 +10,8 @@ RUN cp .env.dist .env
 RUN yarn install
 
 # vite default port
-CMD ["yarn", "run", "dev"]
+#CMD ["yarn", "run", "dev"]
 
-#FROM nginx:latest as prod
-#COPY --from=build-stage /app/dist /usr/share/nginx/html
-#CMD ["nginx", "-g", "daemon off;"]
+FROM nginx:latest as prod
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+CMD ["nginx", "-g", "daemon off;"]

@@ -3,4 +3,4 @@ services:
     build:
       context: ./
     ports:
-      - 8033:5173
+      - 8033:80
