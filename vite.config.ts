@@ -15,6 +15,9 @@ export default defineConfig({
     }),
     quasar(),
   ],
+  define: {
+    VITE_API_HOST: process.env.VITE_API_HOST,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

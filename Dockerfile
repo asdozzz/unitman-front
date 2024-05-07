@@ -8,9 +8,11 @@ COPY . .
 RUN cp .env.dist .env
 # install all deps
 RUN yarn install
-RUN yarn build
+
 # vite default port
 #CMD ["yarn", "run", "dev"]
+
+RUN yarn build
 
 FROM nginx:latest as prod
 COPY --from=build-stage /app/dist /usr/share/nginx/html
