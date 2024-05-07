@@ -16,4 +16,5 @@ RUN yarn build
 
 FROM nginx:latest as prod
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 CMD ["nginx", "-g", "daemon off;"]
