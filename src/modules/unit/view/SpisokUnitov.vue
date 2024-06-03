@@ -85,9 +85,19 @@ onBeforeUnmount(() => {
               </div>
               <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
                 <template v-for="link in item.links">
-                  <a :href="link" target="_blank">{{ link }}</a><br>
+                  <template v-if="link.indexOf('http') > -1">
+                    <div class="text-italic">
+                      <a :href="link" target="_blank">{{ link }}</a>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="text-italic">
+                      {{ link }}
+                    </div>
+                  </template>
                 </template>
               </div>
+              <hr>
               <div class="text-subtitle2 text-left">Id: {{ item.id }}</div>
               <div class="text-subtitle2 text-left">Branch: {{ item.branch }}</div>
               <div class="text-subtitle2 text-left">Author: {{ item.authorName }}</div>
