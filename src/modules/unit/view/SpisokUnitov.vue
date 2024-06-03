@@ -78,13 +78,15 @@ onBeforeUnmount(() => {
         <template v-for="item in spisok">
           <q-card class="q-mr-md q-mb-md" style="min-width: 330px">
             <q-card-section>
-              <div class="text-h6 text-left" v-if="!item.url">
+              <div class="text-h6 text-left">
                 <span :class="{'text-red-8':item.error, 'text-green-7':!item.error}">
                   {{ item.name }}.{{ item.projectName }}
                 </span>
               </div>
-              <div class="text-h6 text-left" v-else>
-                <a :href="item.url" target="_blank">{{ item.name }}.{{ item.projectName }}</a>
+              <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
+                <template v-for="link in item.links">
+                  <a :href="link" target="_blank">{{ link }}</a><br>
+                </template>
               </div>
               <div class="text-subtitle2 text-left">Id: {{ item.id }}</div>
               <div class="text-subtitle2 text-left">Branch: {{ item.branch }}</div>

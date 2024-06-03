@@ -10,7 +10,7 @@ export default class Unit {
     waitResultFromRunner: boolean = false;
     commands: string[] = [];
     error: boolean = false;
-    url: string | null = null;
+    links: string[] = []
 
     constructor(
         data: {
@@ -25,7 +25,7 @@ export default class Unit {
             waitResultFromRunner: boolean,
             commands: string[],
             error: boolean,
-            url: string | null,
+            links: string[],
         }
     ) {
         this.id = data.id;
@@ -39,7 +39,7 @@ export default class Unit {
         this.waitResultFromRunner = data.waitResultFromRunner;
         this.commands = data.commands;
 
-        this.url = data.url;
+        this.links = data.links;
         this.error = data.error;
     }
 };

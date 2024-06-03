@@ -10,6 +10,6 @@ export default class ModelDlySpiskaUnitov {
     public waitResultFromRunner: boolean = false;
     public commands: string[] = [];
     public error: boolean = false;
-    public url: string | null = null;
+    public links: string[] = [];
 }
 
