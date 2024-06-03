@@ -354,7 +354,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         showForceRemove() {
             return (item: Unit): boolean => {
-                return !item.commands.some((command: string) => ['udalitVruchnuyu','nachatUdalenie'].includes(command))
+                return item.commands.some((command: string) => ['udalitVruchnuyu'].includes(command))
             }
         }
     }
