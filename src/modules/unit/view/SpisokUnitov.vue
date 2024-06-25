@@ -11,6 +11,8 @@ import {
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
 import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
 import OknoVipolnenihZadachRunnera from "@/modules/unit/view/Unit/OknoVipolnenihZadachRunnera.vue";
+import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
+import FormaIzmeneniyaVetkiUnita from "@/modules/unit/view/Unit/FormaIzmeneniyaVetkiUnita.vue";
 
 const unitiStore = useSpisokUnitovStore();
 const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska } = storeToRefs(unitiStore);
@@ -23,6 +25,9 @@ const { enable: enableKonfigForm } = storeToRefs(konfigFormStore);
 
 const storeVipolnenihZadach = storVipolnenihZadachRunnera();
 const { enable: pokazanoOknoVipolnenihZadachRunnera } = storeToRefs(storeVipolnenihZadach);
+
+const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
+const { enable: enableIzmenenieVetki } = storeToRefs(storFormiIzmeneniyaVetki);
 
 function openAddForm() {
   addFormStore.otkritFormu();
@@ -119,6 +124,9 @@ onBeforeUnmount(() => {
       </q-dialog>
       <q-dialog v-model="enableKonfigForm" persistent transition-show="scale" transition-hide="scale">
         <FormaZapolneniyaPeremenihUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
+      </q-dialog>
+      <q-dialog v-model="enableIzmenenieVetki" persistent transition-show="scale" transition-hide="scale">
+        <FormaIzmeneniyaVetkiUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
       </q-dialog>
       <OknoVipolnenihZadachRunnera v-if="pokazanoOknoVipolnenihZadachRunnera"/>
     </div>

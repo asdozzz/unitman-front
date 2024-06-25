@@ -7,6 +7,7 @@ import {
   useFormaZapolneniyaPeremenihUnitaStore
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import {useAuthStore} from "@/modules/account/store/auth";
+import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
 
 defineProps<{
   item: Unit,
@@ -18,6 +19,8 @@ const { getUnitLoader, showForceRemove } = storeToRefs(unitiStore);
 const storeVipolnenihZadach = storVipolnenihZadachRunnera();
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
+
+const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
 
 async function sobrat(id: string) {
   await unitiStore.sobratMoiUnit(id);
@@ -90,6 +93,10 @@ function otkritOknoSZadachamiRunnera(id: string) {
   storeVipolnenihZadach.otkritOkno(id)
 }
 
+function otkritFormuIzmeneniyaVetkiUnita(unit: Unit) {
+  storFormiIzmeneniyaVetki.otkritFormu(unit)
+}
+
 const authStore = useAuthStore();
 const { userId } = storeToRefs(authStore);
 
@@ -148,6 +155,9 @@ const { userId } = storeToRefs(authStore);
       </q-btn>
       <q-btn v-if="command === 'ustanovitResultatOstanovki'" size="sm" color="black" icon="sync" @click="ustanovitResultatOstanovkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>sync</q-tooltip>
+      </q-btn>
+      <q-btn v-if="command === 'nachatIzmenenieVetki'" size="sm" color="black" icon="account_tree" @click="otkritFormuIzmeneniyaVetkiUnita(item)" :loading="getUnitLoader(item.id)">
+        <q-tooltip>change branch</q-tooltip>
       </q-btn>
 
     </template>
