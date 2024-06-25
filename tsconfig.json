@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": true,
     "target": "ES2020",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -10,7 +11,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "emitDeclarationOnly": false,
     "jsx": "preserve",
     "jsxImportSource": "vue",
 
@@ -27,5 +28,6 @@
   "exclude": [
     "node_modules"
   ],
+  "files": [],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
