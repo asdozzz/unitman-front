@@ -1,0 +1,6 @@
+services:
+  unitman-front:
+    build:
+      context: .
+    ports:
+      - 8033:80

@@ -27,7 +27,7 @@
     "typescript": "^5.0.2",
     "vite": "^4.3.9",
     "vue-cli-plugin-quasar": "~5.0.2",
-    "vue-tsc": "^1.4.2"
+    "vue-tsc": "^2.0.22"
   },
   "type": "module"
 }
