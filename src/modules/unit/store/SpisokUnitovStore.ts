@@ -297,7 +297,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.udalitUnitIzSpiska(id);
+            this.obnovitUnit(id);
 
             return response;
         },
