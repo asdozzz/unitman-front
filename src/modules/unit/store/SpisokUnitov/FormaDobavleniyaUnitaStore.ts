@@ -46,6 +46,7 @@ type FormaDobavleniyaUnitaState = {
         loader: boolean;
     },
     vetki: {
+        query: string | null;
         spisok: Vetka[];
         loader: boolean;
     }
@@ -64,6 +65,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 loader: false
             },
             vetki: {
+                query: null,
                 spisok: [],
                 loader: false
             }
@@ -100,7 +102,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             if (!this.form.projectId) {
                 throw new Error('proekt ne vibran');
             }
-            const response = await ProektiService.poluchitVetkiProekta({ id: this.form.projectId });
+            const response = await ProektiService.poluchitVetkiProekta({ id: this.form.projectId, query: this.vetki.query });
 
             this.vetki.loader = false;
             if (response.status === "success") {

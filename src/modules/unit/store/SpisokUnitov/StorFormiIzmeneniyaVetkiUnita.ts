@@ -31,6 +31,7 @@ type FormaIzmeneniyaVetkiUnitaState = {
     loader: boolean;
     oshibkaOtBackenda: string | null;
     vetki: {
+        query: string | null;
         spisok: Vetka[];
         loader: boolean;
     }
@@ -45,6 +46,7 @@ export const storFormiIzmeneniyaVetkiUnita = defineStore('StorFormiIzmeneniyaVet
             loader: false,
             oshibkaOtBackenda: null,
             vetki: {
+                query: null,
                 spisok: [],
                 loader: false
             }
@@ -71,7 +73,7 @@ export const storFormiIzmeneniyaVetkiUnita = defineStore('StorFormiIzmeneniyaVet
             if (!this.unit) {
                 throw new Error('unit ne vibran');
             }
-            const response = await ProektiService.poluchitVetkiProekta({ id: this.unit.projectId });
+            const response = await ProektiService.poluchitVetkiProekta({ id: this.unit.projectId, query: this.vetki.query });
 
             this.vetki.loader = false;
             if (response.status === "success") {

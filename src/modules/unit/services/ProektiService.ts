@@ -63,7 +63,7 @@ class ProektiService {
         return apiClient.post<null>('/project/removeUser', params);
     }
 
-    poluchitVetkiProekta(params: {id: string}) {
+    poluchitVetkiProekta(params: {id: string, query: string | null}) {
         return apiClient.post<ModelDlySpiskaVetok[]>('/project/branchesList', params);
     }
 }

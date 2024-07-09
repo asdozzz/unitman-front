@@ -23,6 +23,11 @@ async function otpravitFormu() {
   }
 
 }
+
+function filterSpiskaVetok(val: string | null, update: any) {
+  vetki.value.query = val;
+  update(() => addFormStore.poluchitVetki());
+}
 </script>
 
 <template>
@@ -33,7 +38,26 @@ async function otpravitFormu() {
 
     <q-card-section class="q-pt-none">
       <q-select v-model="form.projectId" :options="proekti.spisok" label="Project" emit-value map-options @update:model-value="addFormStore.poluchitVetki()"/>
-      <q-select :loading="vetki.loader" v-model="form.branch" :options="vetki.spisok" label="Branch" emit-value map-options/>
+      <q-select
+          :loading="vetki.loader"
+          v-model="form.branch"
+          :options="vetki.spisok"
+          @filter="filterSpiskaVetok"
+          label="Branch"
+          fill-input
+          clearable
+          use-input
+          hide-selected
+          emit-value
+      >
+        <template v-slot:no-option>
+          <q-item>
+            <q-item-section class="text-grey">
+              No results
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
       <q-input v-model="form.unitName" label="Unit Name" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
