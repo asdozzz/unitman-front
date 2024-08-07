@@ -108,7 +108,7 @@ onBeforeUnmount(() => {
               <div class="text-subtitle2 text-left">Author: {{ item.authorName }}</div>
             </q-card-section>
 
-            <q-inner-loading :showing="item.waitResultFromRunner">
+            <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska">
               <q-spinner-gears size="50px" color="primary" />
             </q-inner-loading>
 

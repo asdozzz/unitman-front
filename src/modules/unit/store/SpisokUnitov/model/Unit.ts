@@ -11,6 +11,7 @@ export default class Unit {
     commands: string[] = [];
     error: boolean = false;
     links: string[] = []
+    jdemObnovlenieKodaPosleZapuska: boolean = false;
 
     constructor(
         data: {
@@ -26,6 +27,7 @@ export default class Unit {
             commands: string[],
             error: boolean,
             links: string[],
+            jdemObnovlenieKodaPosleZapuska: boolean,
         }
     ) {
         this.id = data.id;
@@ -41,5 +43,6 @@ export default class Unit {
 
         this.links = data.links;
         this.error = data.error;
+        this.jdemObnovlenieKodaPosleZapuska = data.jdemObnovlenieKodaPosleZapuska;
     }
 };

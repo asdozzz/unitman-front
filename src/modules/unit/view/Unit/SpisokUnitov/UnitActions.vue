@@ -46,6 +46,10 @@ async function obnovitKodMoegoUnita(id: string) {
   await unitiStore.obnovitKodMoegoUnita(id);
 }
 
+async function obnovitKodPosleZapuska(id: string) {
+  await unitiStore.obnovitKodPosleZapuska(id);
+}
+
 async function ustanovitResultatObnovleniya(id: string) {
   await unitiStore.ustanovitResultatObnovleniyaMoegoUnita(id);
 }
@@ -126,6 +130,10 @@ const { userId } = storeToRefs(authStore);
       <q-btn v-if="command === 'nachatObnovlenie'" size="sm" color="black" icon="update" @click="obnovitKodMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>fetch changes</q-tooltip>
       </q-btn>
+      <q-btn v-if="command === 'nachatObnovleniePosleZapuska'" size="sm" color="black" icon="update" @click="obnovitKodPosleZapuska(item.id)" :loading="getUnitLoader(item.id)">
+        <q-tooltip>fetch changes</q-tooltip>
+      </q-btn>
+
       <q-btn v-if="command === 'ustanovitResultatObnovleniya'" size="sm" color="black" icon="sync" @click="ustanovitResultatObnovleniya(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>sync</q-tooltip>
       </q-btn>
@@ -159,7 +167,6 @@ const { userId } = storeToRefs(authStore);
       <q-btn v-if="command === 'nachatIzmenenieVetki'" size="sm" color="black" icon="account_tree" @click="otkritFormuIzmeneniyaVetkiUnita(item)" :loading="getUnitLoader(item.id)">
         <q-tooltip>change branch</q-tooltip>
       </q-btn>
-
     </template>
     <q-btn v-if="showForceRemove(item)" size="sm" color="black" icon="delete" @click="udalitSlomaniiUnit(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>delete</q-tooltip>

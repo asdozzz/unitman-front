@@ -57,6 +57,10 @@ class UnitiService {
         return apiClient.post<null>('/unit/obnovitKodUnita', params);
     }
 
+    obnovitKodPosleZapuska(params: ModelDlyObnovleniyaUnita) {
+        return apiClient.post<null>('/unit/obnovitKodUnitaPosleZapuska', params);
+    }
+
     ustanovitResultatObnovleniya(params: ModelDlyObnovleniyaUnita) {
         return apiClient.post<null>('/unit/ustanovitResultatObnovleniya', params);
     }

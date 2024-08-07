@@ -11,5 +11,6 @@ export default class ModelDlySpiskaUnitov {
     public commands: string[] = [];
     public error: boolean = false;
     public links: string[] = [];
+    public jdemObnovlenieKodaPosleZapuska: boolean = false;
 }
 

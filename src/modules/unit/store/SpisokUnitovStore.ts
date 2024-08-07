@@ -93,7 +93,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
 
                 this.spisok.forEach((item: Unit) => {
-                    if (item.waitResultFromRunner) {
+                    if (item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska) {
                         this.dobavitVOcherediNaObnovlenie(item.id);
                     }
                 });
@@ -121,7 +121,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
                 if (unitIndex !== -1) {
                     this.spisok[unitIndex] = new Unit(response.data);
-                    if (this.spisok[unitIndex].waitResultFromRunner) {
+                    if (this.spisok[unitIndex].waitResultFromRunner || this.spisok[unitIndex].jdemObnovlenieKodaPosleZapuska) {
                         this.dobavitVOcherediNaObnovlenie(id);
                     }
                 }
@@ -161,6 +161,19 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             this.startUnitLoader(id);
 
             const response = await UnitiService.obnovitKodUnita({ id })
+            this.stopUnitLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.obnovitUnit(id);
+
+            return response;
+        },
+        async obnovitKodPosleZapuska(id: string) {
+            this.startUnitLoader(id);
+
+            const response = await UnitiService.obnovitKodPosleZapuska({ id })
             this.stopUnitLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
