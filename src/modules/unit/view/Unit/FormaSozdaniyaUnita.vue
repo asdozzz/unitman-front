@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
-import {onMounted} from "vue";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
+import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
-const { form, oshibkaOtBackenda, loader, proekti, vetki } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, vetki } = storeToRefs(addFormStore);
 
-onMounted(async () => {
-  await addFormStore.poluchitMoiProekti();
-})
+const unitiStore = useSpisokUnitovStore();
+const { proekti } = storeToRefs(unitiStore);
 
 const emit = defineEmits<{
   formaBilaOtpravlena: []

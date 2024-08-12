@@ -18,7 +18,6 @@ export type VipolnenayaZadacha = {
 
 
 type StorVipolnenihZadachRunneraState = {
-    enable: boolean;
     loader: boolean;
     spisok: VipolnenayaZadacha[],
     selectIndex: number,
@@ -29,7 +28,6 @@ type StorVipolnenihZadachRunneraState = {
 export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunnera', {
     state: (): StorVipolnenihZadachRunneraState => {
         return {
-            enable: false,
             loader: false,
             oshibkaOtBackenda: null,
             spisok: [],
@@ -52,16 +50,15 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
         otkritOkno(id: string) {
             this.spisok = [];
             this.unitId = id;
-            this.enable = true;
             this.oshibkaOtBackenda = null;
             this.loader = false;
         },
         zakritOkno() {
             this.spisok = [];
             this.unitId = null;
-            this.enable = false;
         },
-        async poluchitVipolnenieZadachiRunnera() {
+        async poluchitVipolnenieZadachiRunnera(unitId: string) {
+            this.otkritOkno(unitId);
             this.loader = true;
 
             const response = await UnitiService.poluchitVipolnenieZadachiRunnera({ id: this.unitId as string });

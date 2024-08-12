@@ -3,6 +3,8 @@ import UnitiService from "@/modules/unit/services/UnitiService";
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import ModelDlySpiskaUnitov from "@/modules/unit/services/UnitiService/model/ModelDlySpiskaUnitov";
 import {Notify} from "quasar";
+import ProektiService from "@/modules/unit/services/ProektiService";
+import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
 
 type NastroikiSpiska = {
     filter: {
@@ -13,9 +15,30 @@ type NastroikiSpiska = {
     }
 }
 
+type PolzovatelProekta  = {
+    role: string;
+    userId: string;
+}
+
+class Proekt {
+    value: string;
+    label: string;
+    users: PolzovatelProekta[];
+
+    constructor(value: string, label: string, users: PolzovatelProekta[]) {
+        this.value = value;
+        this.label = label;
+        this.users = users;
+    }
+}
+
 export type SpisokUnitovState = {
     nastroikiSpiska: NastroikiSpiska;
     spisok: Unit[];
+    proekti: {
+        spisok: Proekt[];
+        loader: boolean;
+    },
     loaderSpiskaUnitov: boolean;
     oshibkaZagruzkiSpiska: string | null;
     loaderObnovleniyaUnita: boolean;
@@ -36,6 +59,10 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 }
             },
             spisok:[],
+            proekti: {
+                spisok: [],
+                loader: false
+            },
             loaderSpiskaUnitov:false,
             oshibkaZagruzkiSpiska: null,
             loaderObnovleniyaUnita:false,
@@ -353,6 +380,20 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
+        async poluchitMoiProekti() {
+            this.proekti.loader = true;
+            this.proekti.spisok = [];
+            const response = await ProektiService.poluchitMoiProekti();
+
+            this.proekti.loader = false;
+            if (response.status === "success") {
+                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name, item.users));
+            } else if (response.status === "fail") {
+                Notify.create(response.data.message);
+            } else if (response.status === "error") {
+                Notify.create(response.message);
+            }
+        },
     },
     getters: {
         getUnitLoader() {
@@ -369,6 +410,21 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             return (item: Unit): boolean => {
                 return item.commands.some((command: string) => ['udalitVruchnuyu'].includes(command))
             }
-        }
+        },
+        getUserRoleByProjectIdAndUserId() {
+            const store = this;
+            return (projectId: string, userId: string): string | null => {
+                if (store.proekti.spisok.length === 0) return null;
+                const proekt = store.proekti.spisok.find((proekt: Proekt) => proekt.value === projectId);
+
+                if (!proekt) return null;
+
+                const user = proekt.users.find((user: PolzovatelProekta) => user.userId === userId);
+
+                if (!user) return null;
+
+                return user.role;
+            }
+        },
     }
 })

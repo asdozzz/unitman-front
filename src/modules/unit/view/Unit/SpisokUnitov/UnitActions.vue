@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
+import { useRouter } from 'vue-router'
 import {storeToRefs} from "pinia";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {
@@ -13,10 +13,10 @@ defineProps<{
   item: Unit,
 }>();
 
-const unitiStore = useSpisokUnitovStore();
-const { getUnitLoader, showForceRemove } = storeToRefs(unitiStore);
+const router = useRouter();
 
-const storeVipolnenihZadach = storVipolnenihZadachRunnera();
+const unitiStore = useSpisokUnitovStore();
+const { getUnitLoader, showForceRemove, getUserRoleByProjectIdAndUserId } = storeToRefs(unitiStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 
@@ -94,7 +94,8 @@ async function udalitSlomaniiUnit(id: string) {
 }
 
 function otkritOknoSZadachamiRunnera(id: string) {
-  storeVipolnenihZadach.otkritOkno(id)
+  //storeVipolnenihZadach.otkritOkno(id)
+  router.push({ name: 'unit_jobs', params: { id }});
 }
 
 function otkritFormuIzmeneniyaVetkiUnita(unit: Unit) {
@@ -107,7 +108,7 @@ const { userId } = storeToRefs(authStore);
 </script>
 
 <template>
-  <template v-if="userId === item.authorId">
+  <template v-if="userId === item.authorId || getUserRoleByProjectIdAndUserId(item.projectId, userId as string) === 'ADMIN'">
     <q-btn size="sm" color="black" icon="info" @click="otkritOknoSZadachamiRunnera(item.id)">
       <q-tooltip>jobs</q-tooltip>
     </q-btn>

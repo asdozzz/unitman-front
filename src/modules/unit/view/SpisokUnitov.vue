@@ -34,6 +34,7 @@ function openAddForm() {
 }
 
 onMounted(async () => {
+  await unitiStore.poluchitMoiProekti();
   await unitiStore.poluchitSpisokUnitov();
   unitiStore.zapustitObrabotkuOcherediNaObnovlenie();
 })

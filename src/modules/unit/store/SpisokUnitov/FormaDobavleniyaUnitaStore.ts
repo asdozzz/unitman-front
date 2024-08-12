@@ -1,7 +1,6 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import UnitiService from "@/modules/unit/services/UnitiService";
-import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
 import ModelDlySpiskaVetok from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaVetok";
 
 export class FormaDobavleniyaUnita {
@@ -13,16 +12,6 @@ export class FormaDobavleniyaUnita {
         this.projectId = projectId;
         this.unitName = unitName;
         this.branch = branch;
-    }
-}
-
-class Proekt {
-    value: string;
-    label: string;
-
-    constructor(value: string, label: string) {
-        this.value = value;
-        this.label = label;
     }
 }
 
@@ -41,10 +30,7 @@ type FormaDobavleniyaUnitaState = {
     form:FormaDobavleniyaUnita;
     loader: boolean;
     oshibkaOtBackenda: string | null;
-    proekti: {
-        spisok: Proekt[];
-        loader: boolean;
-    },
+
     vetki: {
         query: string | null;
         spisok: Vetka[];
@@ -60,10 +46,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             form: new FormaDobavleniyaUnita(),
             loader: false,
             oshibkaOtBackenda: null,
-            proekti: {
-                spisok: [],
-                loader: false
-            },
+
             vetki: {
                 query: null,
                 spisok: [],
@@ -82,20 +65,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.form = new FormaDobavleniyaUnita();
             this.enable = false;
         },
-        async poluchitMoiProekti() {
-            this.proekti.loader = true;
-            this.proekti.spisok = [];
-            const response = await ProektiService.poluchitMoiProekti();
 
-            this.proekti.loader = false;
-            if (response.status === "success") {
-                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name));
-            } else if (response.status === "fail") {
-                this.oshibkaOtBackenda = response.data.message;
-            } else if (response.status === "error") {
-                this.oshibkaOtBackenda = response.message;
-            }
-        },
         async poluchitVetki() {
             this.vetki.loader = true;
             this.vetki.spisok = [];
