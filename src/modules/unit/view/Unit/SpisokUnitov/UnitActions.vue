@@ -50,6 +50,10 @@ async function obnovitKodPosleZapuska(id: string) {
   await unitiStore.obnovitKodPosleZapuska(id);
 }
 
+async function udalitUnitPosleZapuska(id: string) {
+  await unitiStore.udalitUnitPosleZapuska(id);
+}
+
 async function ustanovitResultatObnovleniya(id: string) {
   await unitiStore.ustanovitResultatObnovleniyaMoegoUnita(id);
 }
@@ -94,7 +98,6 @@ async function udalitSlomaniiUnit(id: string) {
 }
 
 function otkritOknoSZadachamiRunnera(id: string) {
-  //storeVipolnenihZadach.otkritOkno(id)
   router.push({ name: 'unit_jobs', params: { id }});
 }
 
@@ -117,6 +120,9 @@ const { userId } = storeToRefs(authStore);
     </q-btn>
     <template v-for="command in item.commands">
       <q-btn v-if="command === 'nachatUdalenie'" size="sm" color="black" icon="delete" @click="udalit(item.id)" :loading="getUnitLoader(item.id)">
+        <q-tooltip>delete</q-tooltip>
+      </q-btn>
+      <q-btn v-if="command === 'nachatUdaleniePosleZapuska'" size="sm" color="black" icon="delete" @click="udalitUnitPosleZapuska(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>delete</q-tooltip>
       </q-btn>
       <q-btn v-if="command === 'ustanovitResultatUdaleniya'" size="sm" color="black" icon="sync" @click="ustanovitResultatUdaleniyaMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">

@@ -9,7 +9,8 @@ type SostoyaniyaDefoltnogoRunnera = {
     loader: boolean;
     active: boolean;
     oshibkaBackenda: string | null;
-    pollingId: any | null;
+    init: boolean;
+    pause: boolean;
 }
 
 export const storeSostoyaniyaDefoltnogoRunnera = defineStore('SostoyaniyaDefoltnogoRunnera', {
@@ -18,7 +19,8 @@ export const storeSostoyaniyaDefoltnogoRunnera = defineStore('SostoyaniyaDefoltn
             loader: false,
             active: true,
             oshibkaBackenda: "",
-            pollingId: null
+            init: false,
+            pause: false
         }
     },
     actions: {
@@ -38,18 +40,18 @@ export const storeSostoyaniyaDefoltnogoRunnera = defineStore('SostoyaniyaDefoltn
                 this.active = response.data.active;
             }
         },
-        zapustitOprosStatusaRunnera(): void {
-            if (!this.pollingId) {
-                clearInterval(this.pollingId);
+        async zapustitOprosStatusaRunnera() {
+            this.init = true;
+            if (!this.pause) {
+                await this.getDefaultRunnerActive();
+                setTimeout(this.zapustitOprosStatusaRunnera, 5000);
             }
-            this.pollingId = setInterval(() => {
-                this.getDefaultRunnerActive();
-            }, 5000);
         },
         ostanovitOprosStatusaRunnera(): void {
-            if (!this.pollingId) {
-                clearInterval(this.pollingId);
-            }
+            this.pause = true;
         },
+        vostanovitOprosStatus() {
+            this.pause = false;
+        }
     }
 });

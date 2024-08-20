@@ -210,6 +210,19 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
+        async udalitUnitPosleZapuska(id: string) {
+            this.startUnitLoader(id);
+
+            const response = await UnitiService.udalitUnitPosleZapuska({ id })
+            this.stopUnitLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.obnovitUnit(id);
+
+            return response;
+        },
         async ustanovitResultatObnovleniyaMoegoUnita(id: string) {
             this.startUnitLoader(id);
 

@@ -4,10 +4,14 @@ import {storeToRefs} from "pinia";
 import {onBeforeUnmount, onMounted} from "vue";
 
 const store = storeSostoyaniyaDefoltnogoRunnera();
-const { active, oshibkaBackenda} = storeToRefs(store);
+const { active, oshibkaBackenda, init} = storeToRefs(store);
 
 onMounted(async () => {
-  store.zapustitOprosStatusaRunnera();
+  if (!init) {
+    store.zapustitOprosStatusaRunnera();
+  } else {
+    store.vostanovitOprosStatus();
+  }
 })
 
 onBeforeUnmount(() => {
