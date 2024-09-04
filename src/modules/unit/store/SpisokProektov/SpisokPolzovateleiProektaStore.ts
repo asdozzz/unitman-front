@@ -68,7 +68,7 @@ export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovatelei
 
             this.loaderSpiskaPolzovatei = true;
 
-            const response = await ProektiService.polucitSpisokPolzovatelei({ id: this.projectId});
+            const response = await ProektiService.poluchitSpisokPolzovatelei({ id: this.projectId});
 
             if (response.status === "success") {
                 this.spisok = response.data.map((item:ModelDlySpiskaPolzovateleiProekta) => new PolzovatelProekta(item))

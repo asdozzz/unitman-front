@@ -14,6 +14,18 @@ import {
     ModelDlySpiskaPolzovateleiProekta
 } from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPolzovateleiProekta";
 import ModelDlySpiskaVetok from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaVetok";
+import {
+    ModelDlySpiskaPeremenihProekta
+} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPeremenihProekta";
+import {
+    ZaprosNaDobavleniePeremenoiProekta
+} from "@/modules/unit/services/ProektiServices/model/ZaprosNaDobavleniePeremenoiProekta";
+import {
+    ZaprosNaUdaleniePeremenoiIzProekta
+} from "@/modules/unit/services/ProektiServices/model/ZaprosNaUdaleniePeremenoiIzProekta";
+import {
+    ZaprosNaIzmenenieZnacheniyaPeremenoiProekta
+} from "@/modules/unit/services/ProektiServices/model/ZaprosNaIzmenenieZnacheniyaPeremenoiProekta";
 
 class ProektiService {
     list() {
@@ -51,7 +63,7 @@ class ProektiService {
         return apiClient.post<null>('/project/build', params);
     }
 
-    polucitSpisokPolzovatelei(params: {id: string}) {
+    poluchitSpisokPolzovatelei(params: {id: string}) {
         return apiClient.post<ModelDlySpiskaPolzovateleiProekta[]>('/project/usersList', params);
     }
 
@@ -61,6 +73,22 @@ class ProektiService {
 
     udalitPolzovatelyaIzProekta(params: ModelDlyUdaleniyaPolzovatelyIzProekta) {
         return apiClient.post<null>('/project/removeUser', params);
+    }
+
+    poluchitSpisokPeremenih(params: {id: string}) {
+        return apiClient.post<ModelDlySpiskaPeremenihProekta[]>('/project/spisokPeremenihProekta', params);
+    }
+
+    dobavitPeremenuyu(params: ZaprosNaDobavleniePeremenoiProekta) {
+        return apiClient.post<null>('/project/dobavitPeremenuyu', params);
+    }
+
+    udalitPeremenuyu(params: ZaprosNaUdaleniePeremenoiIzProekta) {
+        return apiClient.post<null>('/project/udalitPeremenuyu', params);
+    }
+
+    izmenitPeremenuyu(params: ZaprosNaIzmenenieZnacheniyaPeremenoiProekta) {
+        return apiClient.post<null>('/project/izmenitPeremenuyu', params);
     }
 
     poluchitVetkiProekta(params: {id: string, query: string | null}) {

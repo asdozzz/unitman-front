@@ -9,7 +9,7 @@ const store = storVipolnenihZadachRunnera();
 const { spisok, loader, selectJob, selectIndex } = storeToRefs(store);
 
 const route = useRoute();
-console.log('asd',route);
+
 onMounted(async () => {
   await store.poluchitVipolnenieZadachiRunnera(route.params.id as string);
 })

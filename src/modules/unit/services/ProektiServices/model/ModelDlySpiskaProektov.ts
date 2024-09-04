@@ -3,6 +3,12 @@ type PolzovatelProekta = {
     role: string;
 }
 
+type PeremenayaProekta = {
+    tip: string;
+    code: string;
+    value: string;
+}
+
 export default class ModelDlySpiskaProektov {
     public id: string = "";
     public repoId: string = "";
@@ -15,4 +21,5 @@ export default class ModelDlySpiskaProektov {
     public removeInfo: string | null = null;
     public proxyHost: string = "";
     public users: PolzovatelProekta[] = [];
+    public variables: PeremenayaProekta[] = [];
 }

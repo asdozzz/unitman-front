@@ -9,6 +9,8 @@ import EditForm from "@/modules/unit/view/Proekti/EditProjectForm.vue";
 import Proekt from "@/modules/unit/store/SpisokProektov/model/Proekt";
 import SpisokPolzovateleiProekta from "@/modules/unit/view/Proekti/SpisokPolzovateleiProekta.vue";
 import {useSpisokPolzovateleiProektaStore} from "@/modules/unit/store/SpisokProektov/SpisokPolzovateleiProektaStore";
+import {useSpisokPeremenihProektaStore} from "@/modules/unit/store/SpisokProektov/SpisokPeremenihProektaStore";
+import SpisokPeremenihProekta from "@/modules/unit/view/Proekti/SpisokPeremenihProekta.vue";
 
 const proektiStore = useSpisokProektovStore();
 const { spisok, loaderSpiskaProektov, oshibkaZagruzkiSpiska, getProjectLoader, proektSloman, proektNeSobirali } = storeToRefs(proektiStore);
@@ -21,6 +23,9 @@ const { enable: enableEditForm } = storeToRefs(editFormStore);
 
 const spisokPolzovateleiProektaStore = useSpisokPolzovateleiProektaStore();
 const { enable: enableSpisokPolzovateleiProekta } = storeToRefs(spisokPolzovateleiProektaStore);
+
+const spisokPeremenihProektaStore = useSpisokPeremenihProektaStore();
+const { enable: enableSpisokPeremenih} = storeToRefs(spisokPeremenihProektaStore);
 
 onMounted(async () => {
   await proektiStore.poluchitSpisokProektov();
@@ -35,6 +40,10 @@ function openEditForm(proekt: Proekt) {
 
 function pokazatSpisokPolzovatelei(id: string) {
   spisokPolzovateleiProektaStore.pokazatSpisok(id);
+}
+
+function pokazatSpisokPeremenihProekta(proekt: Proekt) {
+  spisokPeremenihProektaStore.pokazatSpisok(proekt.id);
 }
 
 async function udalit(id: string) {
@@ -56,6 +65,7 @@ async function deaktivirovat(id: string) {
 async function sobrat(id: string) {
   await proektiStore.sobrat(id);
 }
+
 </script>
 
 <template>
@@ -118,7 +128,9 @@ async function sobrat(id: string) {
              <q-btn size="md" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>build</q-tooltip>
              </q-btn>
-
+             <q-btn size="md" color="black" icon="list" v-if="!proektSloman(item.id)" @click="pokazatSpisokPeremenihProekta(item)">
+               <q-tooltip>variables</q-tooltip>
+             </q-btn>
             </q-card-actions>
           </q-card>
         </template>
@@ -132,6 +144,9 @@ async function sobrat(id: string) {
       </q-dialog>
       <q-dialog v-model="enableSpisokPolzovateleiProekta" persistent transition-show="scale" transition-hide="scale">
         <SpisokPolzovateleiProekta/>
+      </q-dialog>
+      <q-dialog v-model="enableSpisokPeremenih" persistent transition-show="scale" transition-hide="scale">
+        <SpisokPeremenihProekta/>
       </q-dialog>
     </div>
   </div>
