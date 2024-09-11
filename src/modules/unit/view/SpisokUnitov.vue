@@ -77,17 +77,18 @@ onBeforeUnmount(() => {
       <template v-else>
         <div v-if="spisok.length === 0">У вас пока нету юнитов</div>
         <template v-for="item in spisok">
-          <q-card class="q-mr-md q-mb-md" style="min-width: 330px">
-            <q-card-section>
-              <div class="text-h6 text-left">
-                <span :class="{'text-red-8':item.error, 'text-green-7':!item.error}">
-                  {{ item.name }}.{{ item.projectName }}
-                </span>
+          <q-card class="q-mr-md q-mb-md" style="min-width: 350px">
+            <q-card-section class="bg-primary text-white q-py-sm" :class="{'bg-red text-white':item.error, 'bg-primary text-white':!item.error}">
+              <div class="text-h6">
+                {{ item.name }}.{{ item.projectName }}
+                <div class="text-subtitle2">by {{ item.authorName }}</div>
               </div>
+            </q-card-section>
+            <q-card-section class="q-py-sm">
               <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
                 <template v-for="link in item.links">
                   <template v-if="link.indexOf('http') > -1">
-                    <div class="text-italic">
+                    <div class="text-italic" style="font-size: 12px">
                       <a :href="link" target="_blank">{{ link }}</a>
                     </div>
                   </template>
@@ -98,10 +99,8 @@ onBeforeUnmount(() => {
                   </template>
                 </template>
               </div>
-              <hr>
               <div class="text-subtitle2 text-left">Id: {{ item.id }}</div>
               <div class="text-subtitle2 text-left">Branch: {{ item.branch }}</div>
-              <div class="text-subtitle2 text-left">Author: {{ item.authorName }}</div>
             </q-card-section>
 
             <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska">

@@ -12,6 +12,8 @@ export default class Unit {
     error: boolean = false;
     links: string[] = []
     jdemObnovlenieKodaPosleZapuska: boolean = false;
+    unixtimePoslednegoObnovleniyaUnita: number|null = null;
+    unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
 
     constructor(
         data: {
@@ -28,6 +30,8 @@ export default class Unit {
             error: boolean,
             links: string[],
             jdemObnovlenieKodaPosleZapuska: boolean,
+            unixtimePoslednegoObnovleniyaUnita: number|null,
+            unixtimePoslednegoObnovleniyaVHranilishe: number|null,
         }
     ) {
         this.id = data.id;
@@ -44,5 +48,7 @@ export default class Unit {
         this.links = data.links;
         this.error = data.error;
         this.jdemObnovlenieKodaPosleZapuska = data.jdemObnovlenieKodaPosleZapuska;
+        this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
+        this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
     }
 };
