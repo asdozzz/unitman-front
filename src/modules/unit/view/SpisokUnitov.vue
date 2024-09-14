@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCentrifugo } from "@/bootstrap/centrifugeClient";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {storeToRefs} from "pinia";
 import {onMounted, onBeforeUnmount} from "vue";
@@ -32,6 +33,16 @@ onMounted(async () => {
   await unitiStore.poluchitMoiProekti();
   await unitiStore.poluchitSpisokUnitov();
   unitiStore.zapustitObrabotkuOcherediNaObnovlenie();
+
+  const centrifuge = useCentrifugo();
+  const unitSub = centrifuge.newSubscription('units');
+  console.log("unitSub", unitSub);
+  unitSub.on('publication', (ctx) => {
+    console.log("publication", ctx);
+  });
+  unitSub.subscribe();
+
+  centrifuge.connect();
 })
 
 onBeforeUnmount(() => {
