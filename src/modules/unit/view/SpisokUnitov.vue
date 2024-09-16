@@ -3,7 +3,6 @@ import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {storeToRefs} from "pinia";
 import {onMounted, onBeforeUnmount} from "vue";
 import FormaSozdaniyaUnita from "@/modules/unit/view/Unit/FormaSozdaniyaUnita.vue";
-import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {
   useFormaZapolneniyaPeremenihUnitaStore
@@ -11,6 +10,7 @@ import {
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
 import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
 import FormaIzmeneniyaVetkiUnita from "@/modules/unit/view/Unit/FormaIzmeneniyaVetkiUnita.vue";
+import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
 
 const unitiStore = useSpisokUnitovStore();
 const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska } = storeToRefs(unitiStore);
@@ -77,41 +77,7 @@ onBeforeUnmount(() => {
       <template v-else>
         <div v-if="spisok.length === 0">У вас пока нету юнитов</div>
         <template v-for="item in spisok">
-          <q-card class="q-mr-md q-mb-md" style="min-width: 350px">
-            <q-card-section class="bg-primary text-white q-py-sm" :class="{'bg-red text-white':item.error, 'bg-primary text-white':!item.error}">
-              <div class="text-h6">
-                {{ item.name }}.{{ item.projectName }}
-                <div class="text-subtitle2">by {{ item.authorName }}</div>
-              </div>
-            </q-card-section>
-            <q-card-section class="q-py-sm">
-              <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
-                <template v-for="link in item.links">
-                  <template v-if="link.indexOf('http') > -1">
-                    <div class="text-italic" style="font-size: 12px">
-                      <a :href="link" target="_blank">{{ link }}</a>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="text-italic">
-                      {{ link }}
-                    </div>
-                  </template>
-                </template>
-              </div>
-              <div class="text-subtitle2 text-left">Id: {{ item.id }}</div>
-              <div class="text-subtitle2 text-left">Branch: {{ item.branch }}</div>
-            </q-card-section>
-
-            <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska">
-              <q-spinner-gears size="50px" color="primary" />
-            </q-inner-loading>
-
-            <q-separator dark />
-            <q-card-actions>
-                <UnitActions :item="item"/>
-            </q-card-actions>
-          </q-card>
+          <UnitCard :item="item"></UnitCard>
         </template>
       </template>
       <q-dialog v-model="enableAddForm" persistent transition-show="scale" transition-hide="scale" backdrop-filter="blur(4px)">

@@ -86,7 +86,7 @@ export const useFormaZapolneniyaPeremenihUnitaStore = defineStore('FormaZapolnen
             this.form.values.forEach((item: Peremenaya) => {
                 values[item.konfig.id] = item.value;
             })
-                const sendData = {
+            const sendData = {
                 id: this.form.id,
                 values
             }

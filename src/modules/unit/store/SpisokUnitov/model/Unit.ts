@@ -1,3 +1,8 @@
+type Peremenaya = {
+    id: string;
+    value: string;
+};
+
 export default class Unit {
     id: string = "";
     authorId: string = "";
@@ -12,8 +17,10 @@ export default class Unit {
     error: boolean = false;
     links: string[] = []
     jdemObnovlenieKodaPosleZapuska: boolean = false;
+    jdemUdaleniyaPosleZapuska: boolean = false;
     unixtimePoslednegoObnovleniyaUnita: number|null = null;
     unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
+    peremenie: Peremenaya[] = [];
 
     constructor(
         data: {
@@ -30,8 +37,10 @@ export default class Unit {
             error: boolean,
             links: string[],
             jdemObnovlenieKodaPosleZapuska: boolean,
+            jdemUdaleniyaPosleZapuska: boolean,
             unixtimePoslednegoObnovleniyaUnita: number|null,
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
+            peremenie: Peremenaya[]
         }
     ) {
         this.id = data.id;
@@ -48,7 +57,9 @@ export default class Unit {
         this.links = data.links;
         this.error = data.error;
         this.jdemObnovlenieKodaPosleZapuska = data.jdemObnovlenieKodaPosleZapuska;
+        this.jdemUdaleniyaPosleZapuska = data.jdemUdaleniyaPosleZapuska;
         this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
         this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
+        this.peremenie = data.peremenie;
     }
 };
