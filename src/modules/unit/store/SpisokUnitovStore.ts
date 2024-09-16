@@ -120,7 +120,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
 
                 this.spisok.forEach((item: Unit) => {
-                    if (item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska) {
+                    if (item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska) {
                         this.dobavitVOcherediNaObnovlenie(item.id);
                     }
                 });
@@ -148,7 +148,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
                 if (unitIndex !== -1) {
                     this.spisok[unitIndex] = new Unit(response.data);
-                    if (this.spisok[unitIndex].waitResultFromRunner || this.spisok[unitIndex].jdemObnovlenieKodaPosleZapuska) {
+                    if (this.spisok[unitIndex].waitResultFromRunner || this.spisok[unitIndex].jdemObnovlenieKodaPosleZapuska || this.spisok[unitIndex].jdemUdaleniyaPosleZapuska) {
                         this.dobavitVOcherediNaObnovlenie(id);
                     }
                 }
