@@ -2,7 +2,7 @@
 import { useCentrifugo } from "@/bootstrap/centrifugeClient";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {storeToRefs} from "pinia";
-import {onMounted, onBeforeUnmount} from "vue";
+import {onMounted} from "vue";
 import FormaSozdaniyaUnita from "@/modules/unit/view/Unit/FormaSozdaniyaUnita.vue";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {
@@ -12,6 +12,7 @@ import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapoln
 import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
 import FormaIzmeneniyaVetkiUnita from "@/modules/unit/view/Unit/FormaIzmeneniyaVetkiUnita.vue";
 import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
+import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
 
 const unitiStore = useSpisokUnitovStore();
 const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska } = storeToRefs(unitiStore);
@@ -32,22 +33,35 @@ function openAddForm() {
 onMounted(async () => {
   await unitiStore.poluchitMoiProekti();
   await unitiStore.poluchitSpisokUnitov();
-  unitiStore.zapustitObrabotkuOcherediNaObnovlenie();
 
   const centrifuge = useCentrifugo();
-  const unitSub = centrifuge.newSubscription('units');
-  console.log("unitSub", unitSub);
+  const unitSub = centrifuge.newSubscription('spisok_unitov');
   unitSub.on('publication', (ctx) => {
-    console.log("publication", ctx);
+    handleWebsocketEvent(ctx.data as ModelForChannelSpisokUnitov);
+
   });
   unitSub.subscribe();
 
   centrifuge.connect();
 })
 
-onBeforeUnmount(() => {
-  unitiStore.ostanovitObrabotkuOcherediNaObnovlenie();
-})
+function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
+  console.log(event.eventType, event);
+  switch (event.eventType) {
+    case 'OBNOVLEN':
+      if (unitiStore.issetUnit(event.id)) {
+          unitiStore.obnovitUnit(event.id);
+      }
+    break;
+    case 'UDALEN':
+      unitiStore.udalitUnitIzSpiska(event.id);
+    break;
+    case 'SOZDAN':
+      unitiStore.poluchitSpisokUnitov();
+    break;
+  }
+}
+
 </script>
 
 <template>

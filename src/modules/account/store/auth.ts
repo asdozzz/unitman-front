@@ -49,6 +49,9 @@ export const useAuthStore = defineStore('auth', {
         email(state: State): string | null {
             return state.tokenData && state.tokenData.user.email || null;
         },
+        getToken(state: State): string | null {
+            return state.tokenData && state.tokenData.token || null;
+        },
         getRoles(state: State): string[] {
             if (!state.tokenData) {
                 return [];

@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
 import UnitiService from "@/modules/unit/services/UnitiService";
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import ModelDlySpiskaUnitov from "@/modules/unit/services/UnitiService/model/ModelDlySpiskaUnitov";
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
+import ModelDlySpiskaUnitov from "@/modules/unit/services/UnitiService/model/ModelDlySpiskaUnitov";
 
 type NastroikiSpiska = {
     filter: {
@@ -43,7 +43,6 @@ export type SpisokUnitovState = {
     oshibkaZagruzkiSpiska: string | null;
     loaderObnovleniyaUnita: boolean;
     unitLoaders: Record<string, boolean>;
-    ocheredDlyObnovleniya: string[],
     pollingId: any | null
 }
 
@@ -67,7 +66,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             oshibkaZagruzkiSpiska: null,
             loaderObnovleniyaUnita:false,
             unitLoaders: {},
-            ocheredDlyObnovleniya:[],
             pollingId: null,
         }
     },
@@ -78,33 +76,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         stopUnitLoader(id: string) {
             this.unitLoaders[id] = false;
         },
-        dobavitVOcherediNaObnovlenie(id: string): void {
-            console.log('dobavitVOcherediNaObnovlenie', id);
-            this.ocheredDlyObnovleniya.push(id);
-        },
-        udalitIzOcherediNaObnovlenie(id: string): void {
-            const index = this.ocheredDlyObnovleniya.indexOf(id);
-
-            if (index > -1) {
-                this.ocheredDlyObnovleniya.splice(index, 1);
-            }
-        },
-        zapustitObrabotkuOcherediNaObnovlenie(): void {
-            if (!this.pollingId) {
-                clearInterval(this.pollingId);
-            }
-            this.pollingId = setInterval(() => {
-                console.log('polling', this.ocheredDlyObnovleniya.length);
-                if (this.ocheredDlyObnovleniya.length > 0) {
-                    this.obnovitUnit(this.ocheredDlyObnovleniya[0]);
-                }
-            }, 2000);
-        },
-        ostanovitObrabotkuOcherediNaObnovlenie(): void {
-            if (!this.pollingId) {
-                clearInterval(this.pollingId);
-            }
-        },
         udalitUnitIzSpiska(id: string): void {
             const index = this.spisok.findIndex((item: Unit) => item.id === id);
 
@@ -114,16 +85,9 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         async poluchitSpisokUnitov() {
             this.loaderSpiskaUnitov = true;
-            this.ocheredDlyObnovleniya = [];
             const response = await UnitiService.list(this.nastroikiSpiska);
             if (response.status === "success") {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
-
-                this.spisok.forEach((item: Unit) => {
-                    if (item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska) {
-                        this.dobavitVOcherediNaObnovlenie(item.id);
-                    }
-                });
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;
@@ -138,8 +102,8 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         async obnovitUnit(id: string) {
             this.startUnitLoader(id);
-            this.udalitIzOcherediNaObnovlenie(id);
             const response = await UnitiService.obnovit({ id })
+
 
             if (response.status === "fail"){
                 Notify.create(response.data.message);
@@ -148,9 +112,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
                 if (unitIndex !== -1) {
                     this.spisok[unitIndex] = new Unit(response.data);
-                    if (this.spisok[unitIndex].waitResultFromRunner || this.spisok[unitIndex].jdemObnovlenieKodaPosleZapuska || this.spisok[unitIndex].jdemUdaleniyaPosleZapuska) {
-                        this.dobavitVOcherediNaObnovlenie(id);
-                    }
                 }
             }
 
@@ -350,7 +311,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.udalitUnitIzSpiska(id);
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -364,19 +325,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             }
 
             this.obnovitUnit(id);
-
-            return response;
-        },
-        async udalitMoiSlomaniiUnit(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.udalitSlomaniyUnit({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.udalitUnitIzSpiska(id);
 
             return response;
         },
@@ -409,6 +357,14 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
     },
     getters: {
+        issetUnit() {
+            const store = this;
+            return (id: string): boolean => {
+                const unit = store.spisok.find((item:Unit) => item.id === id);
+
+                return unit !== undefined;
+            }
+        },
         getUnitLoader() {
             const store = this;
             return (id: string): boolean => {
