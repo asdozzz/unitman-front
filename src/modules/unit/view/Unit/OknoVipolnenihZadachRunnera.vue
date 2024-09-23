@@ -15,7 +15,9 @@ onMounted(async () => {
 })
 
 function convertDate(unixtime: number): string {
-  return format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
+  const s = format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
+  console.log("AAA", s);
+  return s;
 }
 
 </script>
