@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { format, fromUnixTime } from "date-fns";
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+
+function convertDate(unixtime: number | null): string {
+  if (!unixtime) return '';
+  return format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
+}
 
 const expanded = ref(false);
 defineProps<{
@@ -14,14 +20,14 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
     <q-card-section class="bg-primary text-white q-py-sm" :class="{'bg-red text-white':item.error, 'bg-primary text-white':!item.error}">
       <div class="text-h6">
         {{ item.name }}.{{ item.projectName }}
-        <div class="text-subtitle2">by {{ item.authorName }}</div>
       </div>
+      <div class="text-subtitle2 fs-12">by {{ item.authorName }}, updated at {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}</div>
     </q-card-section>
     <q-card-section class="q-py-sm">
       <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
         <template v-for="link in item.links">
           <template v-if="link.indexOf('http') > -1">
-            <div class="text-italic" style="font-size: 12px">
+            <div class="text-italic fs-12">
               <a :href="link" target="_blank">{{ link }}</a>
             </div>
           </template>
@@ -32,8 +38,8 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
           </template>
         </template>
       </div>
-      <div class="text-subtitle2 text-left">Id: {{ item.id }}</div>
-      <div class="text-subtitle2 text-left">Branch: {{ item.branch }}</div>
+      <div class="text-subtitle2 text-left fs-12">Id: {{ item.id }}</div>
+      <div class="text-subtitle2 text-left fs-12">Branch: {{ item.branch }}</div>
     </q-card-section>
 
     <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska">
@@ -69,5 +75,7 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 </template>
 
 <style scoped>
-
+.fs-12 {
+  font-size: 12px;
+}
 </style>

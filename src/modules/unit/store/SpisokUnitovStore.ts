@@ -311,7 +311,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.obnovitUnit(id);
+            //this.obnovitUnit(id);
 
             return response;
         },
@@ -324,7 +324,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            this.obnovitUnit(id);
+            //this.obnovitUnit(id);
 
             return response;
         },
