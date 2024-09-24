@@ -13,14 +13,17 @@ export type VipolnenayaZadacha = {
     unitId: string;
     jobType: string;
     success: boolean;
-    steps: ShagZadachi[]
+    //steps: ShagZadachi[]
 }
 
 
 type StorVipolnenihZadachRunneraState = {
     loader: boolean;
     spisok: VipolnenayaZadacha[],
-    selectIndex: number,
+    selectJob: {
+        id: string;
+        steps: ShagZadachi[]
+    },
     oshibkaOtBackenda: string | null;
     unitId: string | null;
 }
@@ -32,20 +35,24 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
             oshibkaOtBackenda: null,
             spisok: [],
             unitId: null,
-            selectIndex: 0
+            selectJob: {
+                id: "",
+                steps:[]
+            }
         };
     },
-    getters: {
-        selectJob(): VipolnenayaZadacha | null  {
-            if (this.spisok.length === 0) {
-                return null;
-            }
-            return this.spisok[this.selectIndex] ?? null;
-        },
-    },
     actions: {
-        select(index: number) {
-            this.selectIndex = index;
+        async select(jobId: string) {
+            const response = await UnitiService.poluchitShagiZadachiRunnera({ id: jobId as string });
+
+            this.loader = false;
+            if (response.status === "success") {
+                this.selectJob.steps = response.data.steps;
+            } else if (response.status === "fail") {
+                this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                this.oshibkaOtBackenda = response.message;
+            }
         },
         otkritOkno(id: string) {
             this.spisok = [];
@@ -66,7 +73,7 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
             this.loader = false;
             if (response.status === "success") {
                 this.spisok = response.data;
-                this.selectIndex = 0;
+                this.select(this.spisok[0].id);
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {

@@ -1,4 +1,4 @@
-FROM node:20.3 as build-stage
+FROM node:20.3 AS build-stage
 WORKDIR /app
 
 # install vite globally
@@ -14,7 +14,7 @@ RUN yarn install
 
 RUN yarn build
 
-FROM nginx:latest as prod
+FROM nginx:latest AS prod
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 CMD ["nginx", "-g", "daemon off;"]

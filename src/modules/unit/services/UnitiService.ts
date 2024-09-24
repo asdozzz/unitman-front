@@ -31,6 +31,9 @@ import {
 import {ZaprosSpiskaUnitov} from "@/modules/unit/services/UnitiService/model/ZaprosSpiskaUnitov";
 import {ZaprosNaIzmenenieVetki} from "@/modules/unit/services/UnitiService/model/ZaprosNaIzmenenieVetki";
 import {ZaprosIdUnita} from "@/modules/unit/services/UnitiService/model/ZaprosIdUnita";
+import {
+    OtvetNaPoluchenieShagovZadachiRunnera
+} from "@/modules/unit/services/UnitiService/model/OtvetNaPoluchenieShagovZadachiRunnera";
 
 class UnitiService {
     list(params: ZaprosSpiskaUnitov) {
@@ -135,6 +138,10 @@ class UnitiService {
 
     poluchitVipolnenieZadachiRunnera(params: ZaprosNaPoluchenieZadachRunneraUnita) {
         return apiClient.post<OtvetNaPoluchenieZadachRunneraUnita[]>('/unit/poluchitVipolnenieZadachiRunnera', params);
+    }
+
+    poluchitShagiZadachiRunnera(params: { id: string }) {
+        return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/unit/poluchitShagiZadachiRunnera', params);
     }
 }
 

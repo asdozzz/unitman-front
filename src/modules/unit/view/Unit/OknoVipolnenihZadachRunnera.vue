@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router'
 import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
 
 const store = storVipolnenihZadachRunnera();
-const { spisok, loader, selectJob, selectIndex } = storeToRefs(store);
+const { spisok, loader, selectJob } = storeToRefs(store);
 
 const route = useRoute();
 
@@ -61,7 +61,7 @@ function convertDate(unixtime: number): string {
             <q-card class="no-border-radius">
               <q-card-section class="q-pt-none">
                 <q-list bordered separator :padding="false" class="rounded-borders">
-                  <q-item clickable v-ripple v-for="(zadacha, i) in spisok" :key="zadacha.id" :active="i === selectIndex" @click="store.select(i)">
+                  <q-item clickable v-ripple v-for="(zadacha) in spisok" :key="zadacha.id" :active="zadacha.id === selectJob.id" @click="store.select(zadacha.id)">
                     {{ zadacha.jobType }}
                   </q-item>
                 </q-list>
