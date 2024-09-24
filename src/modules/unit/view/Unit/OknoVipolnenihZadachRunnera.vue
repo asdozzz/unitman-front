@@ -36,7 +36,7 @@ function convertDate(unixtime: number): string {
             <q-card class="no-border-radius bg-grey-10">
               <q-card-section v-if="selectJob">
                 <div v-for="(step, i) in selectJob.steps">
-                  <div class="text-light-green-14">
+                  <div class="text-light-green-14 fs-12">
                     <div class="row">
                       <div class="col"># {{step.command}}</div>
                       <div class="col-auto">
@@ -50,8 +50,8 @@ function convertDate(unixtime: number): string {
                     </div>
 
                   </div>
-                  <div v-if="step.success" class="text-grey-1" v-html="step.response.split('\n').join('<br>')"></div>
-                  <div v-if="!step.success" class="text-red-8" v-html="step.response.split('\n').join('<br>')"></div>
+                  <div v-if="step.success" class="text-grey-1 fs-12" v-html="step.response.split('\n').join('<br>')"></div>
+                  <div v-if="!step.success" class="text-red-8 fs-12" v-html="step.response.split('\n').join('<br>')"></div>
 
                 </div>
               </q-card-section>
@@ -61,7 +61,7 @@ function convertDate(unixtime: number): string {
             <q-card class="no-border-radius">
               <q-card-section class="q-pt-none">
                 <q-list bordered separator :padding="false" class="rounded-borders">
-                  <q-item clickable v-ripple v-for="(zadacha) in spisok" :key="zadacha.id" :active="zadacha.id === selectJob.id" @click="store.select(zadacha.id)">
+                  <q-item clickable v-ripple v-for="(zadacha) in spisok" :key="zadacha.id" active-class="bg-primary text-white" :active="zadacha.id === selectJob.id" @click="store.select(zadacha.id)">
                     {{ zadacha.jobType }}
                   </q-item>
                 </q-list>
@@ -74,3 +74,9 @@ function convertDate(unixtime: number): string {
     </div>
   </div>
 </template>
+
+<style>
+.fs-12 {
+  font-size: 12px;
+}
+</style>

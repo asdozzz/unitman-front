@@ -47,7 +47,7 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
 
             this.loader = false;
             if (response.status === "success") {
-                this.selectJob.steps = response.data.steps;
+                this.selectJob = response.data;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
