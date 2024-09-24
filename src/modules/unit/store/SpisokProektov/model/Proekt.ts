@@ -1,5 +1,6 @@
 import PolzovatelProekta from "@/modules/unit/store/SpisokProektov/model/PolzovatelProekta";
 import PeremenayaProekta from "@/modules/unit/store/SpisokProektov/model/PeremenayaProekta";
+import NastroikiHukaProekta from "@/modules/unit/store/SpisokProektov/model/NastroikiHukaProekta";
 
 export default class Proekt {
     id: string = "";
@@ -14,6 +15,7 @@ export default class Proekt {
     proxyHost: string | null = null;
     users: PolzovatelProekta[] = [];
     variables: PeremenayaProekta[] = [];
+    nastroikiHukaProekta: NastroikiHukaProekta;
 
     constructor(
         data: {
@@ -28,7 +30,8 @@ export default class Proekt {
             removeInfo: string|null,
             proxyHost: string|null,
             users: PolzovatelProekta[],
-            variables: PeremenayaProekta[]
+            variables: PeremenayaProekta[],
+            nastroikiHukaProekta: NastroikiHukaProekta
         }
     ) {
         this.id = data.id;
@@ -43,5 +46,6 @@ export default class Proekt {
         this.proxyHost = data.proxyHost;
         this.users = data.users;
         this.variables = data.variables;
+        this.nastroikiHukaProekta = data.nastroikiHukaProekta;
     }
 };

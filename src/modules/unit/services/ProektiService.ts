@@ -26,6 +26,9 @@ import {
 import {
     ZaprosNaIzmenenieZnacheniyaPeremenoiProekta
 } from "@/modules/unit/services/ProektiServices/model/ZaprosNaIzmenenieZnacheniyaPeremenoiProekta";
+import {
+    ZaprosNaObnovlenieNastroekHuka
+} from "@/modules/unit/services/ProektiServices/model/ZaprosNaObnovlenieNastroekHuka";
 
 class ProektiService {
     list() {
@@ -93,6 +96,10 @@ class ProektiService {
 
     poluchitVetkiProekta(params: {id: string, query: string | null}) {
         return apiClient.post<ModelDlySpiskaVetok[]>('/project/branchesList', params);
+    }
+
+    obnovitNastroikiHuka(params: ZaprosNaObnovlenieNastroekHuka) {
+        return apiClient.post<null>('/project/obnovitNastroikiHuka', params);
     }
 }
 

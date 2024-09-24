@@ -11,6 +11,11 @@ import SpisokPolzovateleiProekta from "@/modules/unit/view/Proekti/SpisokPolzova
 import {useSpisokPolzovateleiProektaStore} from "@/modules/unit/store/SpisokProektov/SpisokPolzovateleiProektaStore";
 import {useSpisokPeremenihProektaStore} from "@/modules/unit/store/SpisokProektov/SpisokPeremenihProektaStore";
 import SpisokPeremenihProekta from "@/modules/unit/view/Proekti/SpisokPeremenihProekta.vue";
+import FormaObnovleniyaNastroekHuka from "@/modules/unit/view/Proekti/FormaObnovleniyaNastroekHuka.vue";
+import {
+  HookSettingsForm,
+  storeObnovleniyaNastroekHuka
+} from "@/modules/unit/store/SpisokProektov/StoreObnovleniyaNastroekHuka";
 
 const proektiStore = useSpisokProektovStore();
 const { spisok, loaderSpiskaProektov, oshibkaZagruzkiSpiska, getProjectLoader, proektSloman, proektNeSobirali } = storeToRefs(proektiStore);
@@ -20,6 +25,9 @@ const { enable: enableAddForm } = storeToRefs(addFormStore);
 
 const editFormStore = useEditProjectFormStore();
 const { enable: enableEditForm } = storeToRefs(editFormStore);
+
+const hookSettingsStore = storeObnovleniyaNastroekHuka();
+const { enable: enableHookSettingsForm } = storeToRefs(hookSettingsStore);
 
 const spisokPolzovateleiProektaStore = useSpisokPolzovateleiProektaStore();
 const { enable: enableSpisokPolzovateleiProekta } = storeToRefs(spisokPolzovateleiProektaStore);
@@ -36,6 +44,10 @@ function openAddForm() {
 
 function openEditForm(proekt: Proekt) {
   editFormStore.otkritFormu(new EditProjectForm(proekt.id, proekt.name, proekt.proxyHost))
+}
+
+function openHookSettingsForm(proekt: Proekt) {
+  hookSettingsStore.otkritFormu(new HookSettingsForm(proekt.id, proekt.nastroikiHukaProekta.avtosozdanie, proekt.nastroikiHukaProekta.avtoobnovlenie, proekt.nastroikiHukaProekta.avtoudalenie))
 }
 
 function pokazatSpisokPolzovatelei(id: string) {
@@ -125,6 +137,9 @@ async function sobrat(id: string) {
              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="edit" @click="openEditForm(item)" :loading="getProjectLoader(item.id)">
                <q-tooltip>edit</q-tooltip>
              </q-btn>
+             <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="settings" @click="openHookSettingsForm(item)" :loading="getProjectLoader(item.id)">
+               <q-tooltip>hook settings</q-tooltip>
+             </q-btn>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>build</q-tooltip>
              </q-btn>
@@ -141,6 +156,9 @@ async function sobrat(id: string) {
       </q-dialog>
       <q-dialog v-model="enableEditForm" persistent transition-show="scale" transition-hide="scale">
         <EditForm @formaBilaOtpravlena="proektiStore.poluchitSpisokProektov"/>
+      </q-dialog>
+      <q-dialog v-model="enableHookSettingsForm" persistent transition-show="scale" transition-hide="scale">
+        <FormaObnovleniyaNastroekHuka @formaBilaOtpravlena="proektiStore.poluchitSpisokProektov"/>
       </q-dialog>
       <q-dialog v-model="enableSpisokPolzovateleiProekta" persistent transition-show="scale" transition-hide="scale">
         <SpisokPolzovateleiProekta/>

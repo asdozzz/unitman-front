@@ -9,6 +9,12 @@ type PeremenayaProekta = {
     value: string;
 }
 
+type NastroikiHukaProekta = {
+    avtosozdanie: boolean;
+    avtoobnovlenie: boolean;
+    avtoudalenie: boolean;
+}
+
 export default class ModelDlySpiskaProektov {
     public id: string = "";
     public repoId: string = "";
@@ -22,4 +28,9 @@ export default class ModelDlySpiskaProektov {
     public proxyHost: string = "";
     public users: PolzovatelProekta[] = [];
     public variables: PeremenayaProekta[] = [];
+    public nastroikiHukaProekta: NastroikiHukaProekta = {
+        avtosozdanie:false,
+        avtoobnovlenie: true,
+        avtoudalenie: true,
+    };
 }
