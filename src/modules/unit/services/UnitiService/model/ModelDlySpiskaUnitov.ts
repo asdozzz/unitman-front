@@ -17,6 +17,7 @@ export default class ModelDlySpiskaUnitov {
     public error: boolean = false;
     public links: string[] = [];
     public jdemObnovlenieKodaPosleZapuska: boolean = false;
+    public jdemAvtosborki: boolean = false;
     public jdemUdaleniyaPosleZapuska: boolean = false;
     public unixtimePoslednegoObnovleniyaUnita: number|null = null;
     public unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;

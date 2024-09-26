@@ -17,6 +17,7 @@ export default class Unit {
     error: boolean = false;
     links: string[] = []
     jdemObnovlenieKodaPosleZapuska: boolean = false;
+    jdemAvtosborki: boolean = false;
     jdemUdaleniyaPosleZapuska: boolean = false;
     unixtimePoslednegoObnovleniyaUnita: number|null = null;
     unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
@@ -37,6 +38,7 @@ export default class Unit {
             error: boolean,
             links: string[],
             jdemObnovlenieKodaPosleZapuska: boolean,
+            jdemAvtosborki: boolean,
             jdemUdaleniyaPosleZapuska: boolean,
             unixtimePoslednegoObnovleniyaUnita: number|null,
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
@@ -58,6 +60,7 @@ export default class Unit {
         this.error = data.error;
         this.jdemObnovlenieKodaPosleZapuska = data.jdemObnovlenieKodaPosleZapuska;
         this.jdemUdaleniyaPosleZapuska = data.jdemUdaleniyaPosleZapuska;
+        this.jdemAvtosborki = data.jdemAvtosborki;
         this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
         this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
         this.peremenie = data.peremenie;

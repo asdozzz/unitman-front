@@ -42,7 +42,7 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
       <div class="text-subtitle2 text-left fs-12">Branch: {{ item.branch }}</div>
     </q-card-section>
 
-    <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska">
+    <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki">
       <q-spinner-gears size="50px" color="primary" />
     </q-inner-loading>
 
