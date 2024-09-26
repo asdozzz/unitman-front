@@ -31,8 +31,8 @@ function openAddForm() {
 }
 
 onMounted(async () => {
-  await unitiStore.poluchitMoiProekti();
-  await unitiStore.poluchitSpisokUnitov();
+  unitiStore.poluchitMoiProekti();
+  unitiStore.poluchitSpisokUnitov();
 
   const centrifuge = useCentrifugo();
   const unitSub = centrifuge.newSubscription('spisok_unitov');

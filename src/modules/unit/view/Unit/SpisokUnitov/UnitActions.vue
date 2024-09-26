@@ -16,7 +16,7 @@ defineProps<{
 const router = useRouter();
 
 const unitiStore = useSpisokUnitovStore();
-const { getUnitLoader, showForceRemove, getUserRoleByProjectIdAndUserId } = storeToRefs(unitiStore);
+const { getUnitLoader, showForceRemove, esliZapushen,getUserRoleByProjectIdAndUserId } = storeToRefs(unitiStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 
@@ -177,6 +177,9 @@ const { userId } = storeToRefs(authStore);
     </template>
     <q-btn v-if="showForceRemove(item)" size="sm" color="black" icon="delete" @click="udalitSlomaniiUnit(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>delete</q-tooltip>
+    </q-btn>
+    <q-btn v-if="esliZapushen(item)" size="sm" color="black" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
+      <q-tooltip>set config</q-tooltip>
     </q-btn>
   </template>
 

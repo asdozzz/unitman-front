@@ -380,6 +380,11 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 return item.commands.some((command: string) => ['udalitVruchnuyu'].includes(command))
             }
         },
+        esliZapushen() {
+            return (item: Unit): boolean => {
+                return item.state === 'USPESHNO_ZAPUSHEN';
+            }
+        },
         getUserRoleByProjectIdAndUserId() {
             const store = this;
             return (projectId: string, userId: string): string | null => {

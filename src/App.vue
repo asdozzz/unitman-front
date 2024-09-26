@@ -4,7 +4,7 @@
       <q-header class="bg-primary text-white">
         <q-toolbar>
           <q-toolbar-title>
-            Unitman
+            <a href="/" class="text-white">Unitman</a>
           </q-toolbar-title>
           <div>{{ email }}</div>
           <q-btn v-if="isAuth" flat dense icon="logout" @click="logout"/>
