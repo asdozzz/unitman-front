@@ -60,7 +60,7 @@ onMounted(() => {
 })
 
 async function changeLocal(newLocale: "en" | "ru") {
-  authStore.updateLocale(newLocale);
+  authStore.izmeniyYazik(newLocale);
 }
 
 function logout() {
