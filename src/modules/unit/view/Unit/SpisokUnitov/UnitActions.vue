@@ -111,7 +111,7 @@ const { userId } = storeToRefs(authStore);
 </script>
 
 <template>
-  <template v-if="userId === item.authorId || getUserRoleByProjectIdAndUserId(item.projectId, userId as string) === 'ADMIN'">
+  <template v-if="item.unitSozdanSystemoi || userId === item.authorId || getUserRoleByProjectIdAndUserId(item.projectId, userId as string) === 'ADMIN'">
     <q-btn size="sm" color="black" icon="info" @click="otkritOknoSZadachamiRunnera(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.jobs')}}</q-tooltip>
     </q-btn>

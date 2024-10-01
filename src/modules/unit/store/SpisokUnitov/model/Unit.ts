@@ -22,6 +22,7 @@ export default class Unit {
     unixtimePoslednegoObnovleniyaUnita: number|null = null;
     unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
     peremenie: Peremenaya[] = [];
+    unitSozdanSystemoi: boolean = false;
 
     constructor(
         data: {
@@ -42,7 +43,8 @@ export default class Unit {
             jdemUdaleniyaPosleZapuska: boolean,
             unixtimePoslednegoObnovleniyaUnita: number|null,
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
-            peremenie: Peremenaya[]
+            peremenie: Peremenaya[],
+            unitSozdanSystemoi: boolean
         }
     ) {
         this.id = data.id;
@@ -64,5 +66,6 @@ export default class Unit {
         this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
         this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
         this.peremenie = data.peremenie;
+        this.unitSozdanSystemoi = data.unitSozdanSystemoi;
     }
 };
