@@ -24,19 +24,19 @@ async function otpravitFormu() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Add User</div>
+      <div class="text-h6">{{$t('account.form_add.caption')}}</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-input v-model="form.email" label="Email" />
-      <q-input v-model="form.password" label="Password" />
-      <q-select v-model="form.roles" :options="roles.spisok" label="Role" emit-value map-options/>
+      <q-input v-model="form.email" :label="$t('account.form_add.fields.labels.email')" />
+      <q-input v-model="form.password" :label="$t('account.form_add.fields.labels.password')" />
+      <q-select v-model="form.roles" :options="roles.spisok" :label="$t('account.form_add.fields.labels.role')" emit-value map-options/>
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('account.form_add.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
+      <q-btn :label="$t('account.form_add.buttons.close')" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

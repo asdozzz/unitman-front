@@ -11,6 +11,7 @@ import {
 } from "@/modules/account/services/model/ApiModelDlyRazblockirovkiPolzovatelya";
 import {ApiModelDlyIzmeneniyaParolya} from "@/modules/account/services/model/ApiModelDlyIzmeneniyaParolya";
 import {ApiModelDlyIzmeneniyaEmail} from "@/modules/account/services/model/ApiModelDlyIzmeneniyaEmail";
+import {ZaprosNaIzmenenieYazika} from "@/modules/account/services/model/ZaprosNaIzmenenieYazika";
 
 class AccountService {
     login(login: string|null, password: string|null) {
@@ -43,6 +44,10 @@ class AccountService {
 
     izmenitEmail(form: ApiModelDlyIzmeneniyaEmail) {
         return apiClient.post<null>('/account/changeEmailByAdmin', form);
+    }
+
+    izmenitYazik(form: ZaprosNaIzmenenieYazika) {
+        return apiClient.post<null>('/account/changeMyLocale', form);
     }
 }
 

@@ -24,17 +24,17 @@ async function otpravitFormu() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Change Password</div>
+      <div class="text-h6">{{$t('account.form_change_password.caption')}}</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-input v-model="form.newPassword" label="New Password" />
+      <q-input v-model="form.newPassword" :label="$t('account.form_change_password.fields.labels.new_password')" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="formaIzmeneniyaParolya.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('account.form_change_password.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
+      <q-btn :label="$t('account.form_change_password.buttons.close')" color="black" @click="formaIzmeneniyaParolya.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

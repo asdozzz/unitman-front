@@ -22,17 +22,17 @@ async function otpravitFormu() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Edit Repository</div>
+      <div class="text-h6">{{$t('unit.form_edit_rep.caption')}}</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-input v-model="form.token" label="Token" />
+      <q-input v-model="form.token" :label="$t('unit.form_edit_rep.fields.labels.token')" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="editFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('unit.form_edit_rep.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
+      <q-btn :label="$t('unit.form_edit_rep.buttons.close')" color="black" @click="editFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

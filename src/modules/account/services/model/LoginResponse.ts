@@ -1,7 +1,8 @@
 type UserData = {
     id: string;
     email: string;
-    roles: string[]
+    roles: string[];
+    locale: string;
 }
 
 export type LoginResponse = {

@@ -1,0 +1,175 @@
+{
+  "world": "world",
+  "app": {
+    "tabs": {
+      "units": "Units",
+      "projects": "Projects",
+      "repos": "Repositories",
+      "accounts": "Accounts"
+    }
+  },
+  "account": {
+    "login_form": {
+      "caption": "Sign in",
+      "email_label": "Email Address",
+      "password_label": "Password",
+      "button_login": "Sign in",
+      "already_signin": {
+        "text": "Already signed",
+        "button_text": "Logout"
+      }
+    },
+    "spisok": {
+      "buttons": {
+        "add": "add",
+        "block": "block",
+        "unblock": "unblock",
+        "change_password": "change password",
+        "change_email": "change email"
+      },
+      "card": {
+        "labels": {
+          "email": "Email",
+          "id":"Id",
+          "role": "Role",
+          "blocked":"Blocked"
+        }
+      }
+    },
+    "form_change_email": {
+      "caption": "Change Email",
+      "fields": {
+        "labels": {
+          "new_email": "New Email"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "form_change_password": {
+      "caption": "Change password",
+      "fields": {
+        "labels": {
+          "new_password": "New password"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "form_add": {
+      "caption": "Add User",
+      "fields": {
+        "labels": {
+          "email": "Email",
+          "password": "Password",
+          "role": "Role"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    }
+  },
+  "unit": {
+    "spisok_rep": {
+      "buttons": {
+        "add": "add",
+        "delete": "delete",
+        "edit": "edit",
+        "confirm": "confirm"
+      }
+    },
+    "form_add_rep": {
+      "caption": "Add Repository",
+      "fields": {
+        "labels": {
+          "type": "Type",
+          "name": "Name",
+          "token": "Token",
+          "url": "Url"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "form_edit_rep": {
+      "caption": "Edit Repository",
+      "fields": {
+        "labels": {
+          "token": "Token"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "spisok_proektov": {
+      "buttons": {
+        "add": "add project",
+        "manage_accounts": "manage_accounts",
+        "delete": "delete",
+        "delete_manually": "delete_manually",
+        "activate": "activate",
+        "deactivate": "deactivate",
+        "edit": "edit",
+        "hook_settings": "hook_settings",
+        "build": "build",
+        "variables": "variables"
+      },
+      "card_fields": {
+        "project_name": "Project name",
+        "project_id": "Project id",
+        "repo_id": "Repo id",
+        "project_code": "Project code",
+        "main_branch": "Main branch",
+        "state": "State"
+      }
+    },
+    "spisok_unitov": {
+      "buttons": {
+        "add": "add unit",
+        "refresh": "refresh"
+      },
+      "filter": {
+        "only_mine": "Only mine",
+        "unit_name": "Unit name",
+        "branch": "Branch"
+      },
+      "list": {
+        "empty_result": "Empty list"
+      },
+      "card": {
+        "header": {
+          "by": "by",
+          "updated_at": "updated at"
+        },
+        "fields": {
+          "id": "Id",
+          "branch": "Branch"
+        },
+        "buttons": {
+          "jobs": "jobs",
+          "update": "update",
+          "delete": "delete",
+          "sync": "sync",
+          "build": "build",
+          "fetch_changes" : "fetch changes",
+          "preparing": "preparing",
+          "remove_preparing": "remove_preparing",
+          "up": "up",
+          "down": "down",
+          "change_branch": "change_branch",
+          "set_config" : "set config"
+        }
+      }
+    }
+  }
+}

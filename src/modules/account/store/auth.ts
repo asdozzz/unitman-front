@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import AccountService from "@/modules/account/services/AccountService";
 import LoginView from "@/modules/account/store/auth/LoginView";
+import {Notify} from "quasar";
+import i18n from "@/bootstrap/translator";
 
 const LOCAL_STORAGE_KEY = 'tokenData';
 
@@ -11,6 +13,7 @@ interface TokenData {
         id: string;
         email: string;
         roles: string[];
+        locale: string;
     }
 }
 
@@ -19,7 +22,8 @@ interface State {
     tokenData: TokenData | null,
     returnUrl: string | null,
     defaultRoute: string,
-    loginView: LoginView
+    loginView: LoginView,
+    loaderIzmemeniyaYazika: boolean
 }
 
 enum Roles {
@@ -35,7 +39,8 @@ export const useAuthStore = defineStore('auth', {
             tokenData: json ? JSON.parse(json) : null,
             defaultRoute : '/unit/list',
             returnUrl: null,
-            loginView: new LoginView()
+            loginView: new LoginView(),
+            loaderIzmemeniyaYazika: false
         };
 
     },
@@ -59,6 +64,13 @@ export const useAuthStore = defineStore('auth', {
 
             return state.tokenData.user.roles;
         },
+        getLocale(state: State): string {
+            if (!state.tokenData) {
+                return import.meta.env.VITE_DEFAULT_LOCALE;
+            }
+
+            return state.tokenData.user.locale
+        },
         checkRole() {
             const _this = this;
             return (role: string): boolean => _this.getRoles.includes(role);
@@ -80,12 +92,21 @@ export const useAuthStore = defineStore('auth', {
         },
     },
     actions: {
+        updateLocale(locale: "en" | "ru") {
+            if (this.tokenData) {
+                this.tokenData.user.locale = locale;
+            }
+            console.log("www", locale);
+            i18n.global.locale.value = locale;
+        },
         async login() {
             const response = await AccountService.login(this.loginView.form.login, this.loginView.form.pass);
 
             if (response.status === "success") {
                 this.tokenData = response.data;
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(response.data));
+                const locale = response.data.user.locale as ("en" | "ru") || "ru";
+                this.updateLocale(locale);
             }
 
             return response;
@@ -93,6 +114,24 @@ export const useAuthStore = defineStore('auth', {
         logout() {
             this.tokenData = null;
             localStorage.removeItem(LOCAL_STORAGE_KEY);
+        },
+        async izmeniyYazik(locale: string) {
+            this.loaderIzmemeniyaYazika = true;
+
+            const response = await AccountService.izmenitYazik({locale});
+
+            if (response.status === "fail") {
+                Notify.create(response.data.message);
+            } else if (response.status === "error") {
+                Notify.create(response.message);
+            } else {
+                if (this.tokenData) {
+                    this.updateLocale(locale as "en" | "ru");
+                }
+
+            }
+
+            this.loaderIzmemeniyaYazika = false;
         }
     }
 });

@@ -71,25 +71,25 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
     <div class="row wrap items-start content-start q-pb-md">
       <div class="col-auto">
         <q-btn class="q-mr-md" size="md" color="primary" icon="add" @click="openAddForm">
-          <q-tooltip>add</q-tooltip>
+          <q-tooltip>{{$t('unit.spisok_unitov.buttons.add')}}</q-tooltip>
         </q-btn>
         <q-btn size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
-          <q-tooltip>refresh</q-tooltip>
+          <q-tooltip>{{$t('unit.spisok_unitov.buttons.refresh')}}</q-tooltip>
         </q-btn>
 
       </div>
       <div class="col-auto">
         <q-toggle
             v-model="nastroikiSpiska.filter.onlyMine"
-            label="Only Mine"
+            :label="$t('unit.spisok_unitov.filter.only_mine')"
             @update:model-value="unitiStore.poluchitSpisokUnitov()"
         />
       </div>
       <div class="col q-px-md">
-        <q-input dense outlined v-model="nastroikiSpiska.filter.name" label="Unit Name" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
+        <q-input dense outlined v-model="nastroikiSpiska.filter.name"  :label="$t('unit.spisok_unitov.filter.unit_name')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
       <div class="col">
-        <q-input dense outlined v-model="nastroikiSpiska.filter.branch" label="Branch" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
+        <q-input dense outlined v-model="nastroikiSpiska.filter.branch" :label="$t('unit.spisok_unitov.filter.branch')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
 
       <div class="col"></div>
@@ -100,7 +100,7 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
         <div v-html="oshibkaZagruzkiSpiska"></div>
       </template>
       <template v-else>
-        <div v-if="spisok.length === 0">У вас пока нету юнитов</div>
+        <div v-if="spisok.length === 0">{{$t('unit.spisok_unitov.list.empty_result')}}</div>
         <template v-for="item in spisok">
           <UnitCard :item="item"></UnitCard>
         </template>

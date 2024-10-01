@@ -92,7 +92,7 @@ async function sobrat(id: string) {
       <q-card class="q-mb-md">
         <q-card-section>
           <q-btn size="md" color="primary" icon="add" @click="openAddForm">
-            <q-tooltip>add project</q-tooltip>
+            <q-tooltip>{{ $t('unit.spisok_proektov.buttons.add') }}</q-tooltip>
           </q-btn>
         </q-card-section>
       </q-card>
@@ -105,13 +105,13 @@ async function sobrat(id: string) {
         <template v-for="item in spisok">
           <q-card class="q-mr-md">
             <q-card-section>
-              <div class="text-h6 text-left">Project name: {{ item.name }}</div>
+              <div class="text-h6 text-left">{{ $t('unit.spisok_proektov.card_fields.project_name') }}: {{ item.name }}</div>
 
-              <div class="text-subtitle2 text-left">Project id: {{ item.id }}</div>
-              <div class="text-subtitle2 text-left">Repo id: {{ item.repoId }}</div>
-              <div class="text-subtitle2 text-left">Project code: {{ item.code }}</div>
-              <div class="text-subtitle2 text-left">Main branch: {{ item.mainBranch }}</div>
-              <div class="text-subtitle2 text-left">State: {{ item.state }}</div>
+              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.project_id') }}: {{ item.id }}</div>
+              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.repo_id') }}: {{ item.repoId }}</div>
+              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.project_code') }}: {{ item.code }}</div>
+              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.main_branch') }}: {{ item.mainBranch }}</div>
+              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.state') }}: {{ item.state }}</div>
 <!--              <div class="text-subtitle2 text-left">Build Info: {{ item.buildInfo }}</div>
               <div class="text-subtitle2 text-left">Remove Info: {{ item.removeInfo }}</div>-->
             </q-card-section>
@@ -120,31 +120,31 @@ async function sobrat(id: string) {
 
            <q-card-actions>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="manage_accounts" @click="pokazatSpisokPolzovatelei(item.id)">
-               <q-tooltip>manage_accounts</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.manage_accounts') }}</q-tooltip>
              </q-btn>
               <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="delete" @click="udalit(item.id)" :loading="getProjectLoader(item.id)">
-                <q-tooltip>delete</q-tooltip>
+                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.delete') }}</q-tooltip>
               </q-btn>
              <q-btn size="md" color="black" v-if="proektSloman(item.id)" icon="delete" @click="udalitSlomaniiProekt(item.id)" :loading="getProjectLoader(item.id)">
-               <q-tooltip>delete manually</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.delete_manually') }}</q-tooltip>
              </q-btn>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id) && !item.isActive" icon="done" @click="aktivirovat(item.id)" :loading="getProjectLoader(item.id)">
-               <q-tooltip>activate</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.activate') }}</q-tooltip>
              </q-btn>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id) && item.isActive" icon="remove_done" @click="deaktivirovat(item.id)" :loading="getProjectLoader(item.id)">
-               <q-tooltip>deactivate</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.deactivate') }}</q-tooltip>
              </q-btn>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="edit" @click="openEditForm(item)" :loading="getProjectLoader(item.id)">
-               <q-tooltip>edit</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.edit') }}</q-tooltip>
              </q-btn>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="settings" @click="openHookSettingsForm(item)" :loading="getProjectLoader(item.id)">
-               <q-tooltip>hook settings</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.hook_settings') }}</q-tooltip>
              </q-btn>
              <q-btn size="md" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="getProjectLoader(item.id)">
-               <q-tooltip>build</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.build') }}</q-tooltip>
              </q-btn>
              <q-btn size="md" color="black" icon="list" v-if="!proektSloman(item.id)" @click="pokazatSpisokPeremenihProekta(item)">
-               <q-tooltip>variables</q-tooltip>
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.variables') }}</q-tooltip>
              </q-btn>
             </q-card-actions>
           </q-card>

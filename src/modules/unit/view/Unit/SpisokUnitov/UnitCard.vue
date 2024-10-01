@@ -21,7 +21,7 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
       <div class="text-h6">
         {{ item.name }}.{{ item.projectName }}
       </div>
-      <div class="text-subtitle2 fs-12">by {{ item.authorName }}, updated at {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}</div>
+      <div class="text-subtitle2 fs-12">{{$t('unit.spisok_unitov.card.header.by')}} {{ item.authorName }}, {{$t('unit.spisok_unitov.card.header.updated_at')}} {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}</div>
     </q-card-section>
     <q-card-section class="q-py-sm">
       <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
@@ -38,8 +38,8 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
           </template>
         </template>
       </div>
-      <div class="text-subtitle2 text-left fs-12">Id: {{ item.id }}</div>
-      <div class="text-subtitle2 text-left fs-12">Branch: {{ item.branch }}</div>
+      <div class="text-subtitle2 text-left fs-12">{{$t('unit.spisok_unitov.card.fields.id')}}: {{ item.id }}</div>
+      <div class="text-subtitle2 text-left fs-12">{{$t('unit.spisok_unitov.card.fields.branch')}}: {{ item.branch }}</div>
     </q-card-section>
 
     <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki">

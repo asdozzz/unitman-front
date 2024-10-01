@@ -27,20 +27,20 @@ async function otpravitFormu() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Add Repository</div>
+      <div class="text-h6">{{$t('unit.form_add_rep.caption')}}</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-select v-model="form.repoType" :options="tipiHranilisha.spisok" label="Type" emit-value map-options/>
-      <q-input v-model="form.repoName" label="Name" />
-      <q-input v-model="form.token" label="Token" />
-      <q-input v-model="form.repoUrl" label="Url" />
+      <q-select v-model="form.repoType" :options="tipiHranilisha.spisok" :label="$t('unit.form_add_rep.fields.labels.type')" emit-value map-options/>
+      <q-input v-model="form.repoName" :label="$t('unit.form_add_rep.fields.labels.name')" />
+      <q-input v-model="form.token" :label="$t('unit.form_add_rep.fields.labels.token')" />
+      <q-input v-model="form.repoUrl" :label="$t('unit.form_add_rep.fields.labels.url')" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('unit.form_add_rep.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
+      <q-btn :label="$t('unit.form_add_rep.buttons.close')" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

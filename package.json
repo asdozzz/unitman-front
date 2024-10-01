@@ -19,11 +19,13 @@
     "sass": "^1.75.0",
     "vee-validate": "^4.5.11",
     "vue": "^3.2.47",
+    "vue-i18n": "10",
     "vue-router": "4",
     "vuelidate": "^0.7.7",
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@intlify/vite-plugin-vue-i18n": "^7.0.0",
     "@vitejs/plugin-vue": "^4.1.0",
     "typescript": "^5.0.2",
     "vite": "^4.3.9",

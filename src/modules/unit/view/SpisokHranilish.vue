@@ -51,7 +51,7 @@
       <q-card class="q-mb-md">
         <q-card-section>
           <q-btn size="md" color="primary" icon="add" @click="openAddForm">
-            <q-tooltip>add</q-tooltip>
+            <q-tooltip>{{ $t('unit.spisok_rep.buttons.add') }}</q-tooltip>
           </q-btn>
         </q-card-section>
       </q-card>
@@ -74,13 +74,13 @@
 
             <q-card-actions>
               <q-btn size="md" color="black" icon="delete" @click="udalit(item.id)">
-                <q-tooltip>delete</q-tooltip>
+                <q-tooltip>{{ $t('unit.spisok_rep.buttons.delete')}}</q-tooltip>
               </q-btn>
               <q-btn size="md" color="black" icon="edit" @click="openEditForm(item)">
-                <q-tooltip>edit</q-tooltip>
+                <q-tooltip>{{ $t('unit.spisok_rep.buttons.edit')}}</q-tooltip>
               </q-btn>
               <q-btn size="md" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
-                <q-tooltip>confirm</q-tooltip>
+                <q-tooltip>{{ $t('unit.spisok_rep.buttons.confirm')}}</q-tooltip>
               </q-btn>
             </q-card-actions>
           </q-card>

@@ -6,14 +6,25 @@
           <q-toolbar-title>
             <a href="/" class="text-white">Unitman</a>
           </q-toolbar-title>
+          <div class="q-gutter-sm text-white" v-if="!loaderIzmemeniyaYazika">
+            <q-radio color="warning" dark left-label v-model="currentLocale" @update:model-value="changeLocal" val="ru" label="ru" />
+            <q-radio color="warning" dark left-label v-model="currentLocale" @update:model-value="changeLocal" val="en" label="en" />
+          </div>
+          <div class="q-mr-sm" v-else>
+            <q-spinner
+                color="warning"
+                size="2em"
+            />
+          </div>
+
           <div>{{ email }}</div>
           <q-btn v-if="isAuth" flat dense icon="logout" @click="logout"/>
         </q-toolbar>
         <q-tabs align="left" inline-label class="bg-primary text-white" v-if="isAuth">
-          <q-route-tab to="/account/list" label="Accounts" v-if="isAdmin"/>
-          <q-route-tab to="/unit/repositories" label="Repositories" v-if="isAdmin"/>
-          <q-route-tab to="/unit/projects" label="Projects" v-if="isAdmin"/>
-          <q-route-tab to="/unit/list" label="Units"/>
+          <q-route-tab to="/account/list" :label="$t('app.tabs.accounts')" v-if="isAdmin"/>
+          <q-route-tab to="/unit/repositories" :label="$t('app.tabs.repos')" v-if="isAdmin"/>
+          <q-route-tab to="/unit/projects" :label="$t('app.tabs.projects')" v-if="isAdmin"/>
+          <q-route-tab to="/unit/list" :label="$t('app.tabs.units')"/>
         </q-tabs>
       </q-header>
 
@@ -36,10 +47,21 @@
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";
 import { useRouter } from "vue-router";
+import {onMounted, ref} from "vue";
 const router = useRouter();
 
 const authStore = useAuthStore();
-const { isAuth, email, isAdmin } = storeToRefs(authStore);
+const { isAuth, email, isAdmin, loaderIzmemeniyaYazika, getLocale } = storeToRefs(authStore);
+
+let currentLocale = ref("");
+
+onMounted(() => {
+  currentLocale.value = getLocale.value;
+})
+
+async function changeLocal(newLocale: "en" | "ru") {
+  authStore.updateLocale(newLocale);
+}
 
 function logout() {
   authStore.logout();

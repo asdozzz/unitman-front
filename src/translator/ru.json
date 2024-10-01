@@ -1,0 +1,175 @@
+{
+  "world": "Мир",
+  "app": {
+    "tabs": {
+      "units": "Юниты",
+      "projects": "Проекты",
+      "repos": "Репозитории",
+      "accounts": "Учетные записи"
+    }
+  },
+  "account": {
+    "login_form": {
+      "caption": "Вход",
+      "email_label": "Email",
+      "password_label": "Пароль",
+      "button_login": "Вход",
+      "already_signin": {
+        "text": "Уже авторизован",
+        "button_text": "Выйти"
+      }
+    },
+    "spisok": {
+      "buttons": {
+        "add": "Добавить",
+        "block": "Заблокировать",
+        "unblock": "Разблокировать",
+        "change_password": "Изменить пароль",
+        "change_email": "Изменить email"
+      },
+      "card": {
+        "labels": {
+          "email": "Email",
+          "id":"Ид",
+          "role": "Роли",
+          "blocked":"Заблокирован"
+        }
+      }
+    },
+    "form_change_email": {
+      "caption": "Изменить Email",
+      "fields": {
+        "labels": {
+          "new_email": "Новый Email"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "form_change_password": {
+      "caption": "Изменить пароль",
+      "fields": {
+        "labels": {
+          "new_password": "Новый пароль"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "form_add": {
+      "caption": "Добавить учетную запись",
+      "fields": {
+        "labels": {
+          "email": "Email",
+          "password": "Пароль",
+          "role": "Роль"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    }
+  },
+  "unit": {
+    "spisok_rep": {
+      "buttons": {
+        "add": "Добавить",
+        "delete": "Удалить",
+        "edit": "Редактировать",
+        "confirm": "Верифицировать"
+      }
+    },
+    "form_add_rep": {
+      "caption": "Добавить репозиторий",
+      "fields": {
+        "labels": {
+          "type": "Тип репозитория",
+          "name": "Название",
+          "token": "Токен",
+          "url": "Url"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "form_edit_rep": {
+      "caption": "Редактировать репозиторий",
+      "fields": {
+        "labels": {
+          "token": "Токен"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "spisok_proektov": {
+      "buttons": {
+        "add": "Добавить проект",
+        "manage_accounts": "Пользователи проекта",
+        "delete": "удалить",
+        "delete_manually": "удалить вручную",
+        "activate": "активировать",
+        "deactivate": "деактивировать",
+        "edit": "редактировать",
+        "hook_settings": "Найстроки хука репозитория",
+        "build": "собрать",
+        "variables": "переменные"
+      },
+      "card_fields": {
+        "project_name": "Название проекта",
+        "project_id": "Ид проекта",
+        "repo_id": "Ид репозитория",
+        "project_code": "Код проекта",
+        "main_branch": "Master ветка",
+        "state": "Статус"
+      }
+    },
+    "spisok_unitov": {
+      "buttons": {
+        "add": "Добавить юнит",
+        "refresh": "Обновить список"
+      },
+      "filter": {
+        "only_mine": "Только мои",
+        "unit_name": "Название юнита",
+        "branch": "Ветка"
+      },
+      "list": {
+        "empty_result": "У вас пока нету юнитов"
+      },
+      "card": {
+        "header": {
+          "by": "автор ",
+          "updated_at": "обновлен"
+        },
+        "fields": {
+          "id": "Ид",
+          "branch": "Ветка"
+        },
+        "buttons": {
+          "jobs": "Логи",
+          "update": "обновить",
+          "delete": "удалить",
+          "sync": "запросить результат задачи вручную",
+          "build": "собрать",
+          "fetch_changes" : "обновить код юнита",
+          "preparing": "подготовка юнита",
+          "remove_preparing": "сбросить подготовку юнита",
+          "up": "запустить юнит",
+          "down": "остановить юнит",
+          "change_branch": "изменить ветку юнита",
+          "set_config" : "установить конфиг"
+        }
+      }
+    }
+  }
+}
