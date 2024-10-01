@@ -22,5 +22,6 @@ export default class ModelDlySpiskaUnitov {
     public unixtimePoslednegoObnovleniyaUnita: number|null = null;
     public unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
     public peremenie: Peremenaya[] = [];
+    public unitSozdanSystemoi: boolean = false;
 }
 
