@@ -3,6 +3,7 @@ import { useAuthStore } from '@/modules/account/store/auth';
 import { storeToRefs } from 'pinia'
 import { Notify } from 'quasar'
 import { useRouter } from 'vue-router';
+import {nextTick} from "vue";
 const router = useRouter();
 
 const authStore = useAuthStore();
@@ -14,6 +15,7 @@ async function onSubmit() {
     Notify.create(response.data.message);
   }
   if (response.status === "success") {
+    nextTick();
     router.push(returnUrl.value || defaultRoute.value);
   }
 }

@@ -7,8 +7,8 @@
             <a href="/" class="text-white">Unitman</a>
           </q-toolbar-title>
           <div class="q-gutter-sm text-white" v-if="!loaderIzmemeniyaYazika">
-            <q-radio color="warning" dark left-label v-model="currentLocale" @update:model-value="changeLocal" val="ru" label="ru" />
-            <q-radio color="warning" dark left-label v-model="currentLocale" @update:model-value="changeLocal" val="en" label="en" />
+            <q-radio color="warning" dark left-label :model-value="getLocale" @update:model-value="changeLocal" val="ru" label="ru" />
+            <q-radio color="warning" dark left-label :model-value="getLocale" @update:model-value="changeLocal" val="en" label="en" />
           </div>
           <div class="q-mr-sm" v-else>
             <q-spinner

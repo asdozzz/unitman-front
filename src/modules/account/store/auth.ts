@@ -118,16 +118,16 @@ export const useAuthStore = defineStore('auth', {
         async izmeniyYazik(locale: string) {
             this.loaderIzmemeniyaYazika = true;
 
-            if (this.tokenData) {
-                this.updateLocale(locale as "en" | "ru");
-            }
-
             const response = await AccountService.izmenitYazik({locale});
 
             if (response.status === "fail") {
                 Notify.create(response.data.message);
             } else if (response.status === "error") {
                 Notify.create(response.message);
+            } else {
+                if (this.tokenData) {
+                    this.updateLocale(locale as "en" | "ru");
+                }
             }
 
             this.loaderIzmemeniyaYazika = false;
