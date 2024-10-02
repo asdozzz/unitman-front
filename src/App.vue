@@ -57,6 +57,7 @@ let currentLocale = ref("");
 
 onMounted(() => {
   currentLocale.value = getLocale.value;
+  authStore.updateLocale(getLocale.value);
 })
 
 async function changeLocal(newLocale: "en" | "ru") {

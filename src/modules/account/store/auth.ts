@@ -13,7 +13,7 @@ interface TokenData {
         id: string;
         email: string;
         roles: string[];
-        locale: string;
+        locale: "en" | "ru";
     }
 }
 
@@ -64,7 +64,7 @@ export const useAuthStore = defineStore('auth', {
 
             return state.tokenData.user.roles;
         },
-        getLocale(state: State): string {
+        getLocale(state: State): "en" | "ru" {
             if (!state.tokenData) {
                 return import.meta.env.VITE_DEFAULT_LOCALE;
             }

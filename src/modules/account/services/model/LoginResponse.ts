@@ -2,7 +2,7 @@ type UserData = {
     id: string;
     email: string;
     roles: string[];
-    locale: string;
+    locale: "en" | "ru";
 }
 
 export type LoginResponse = {
