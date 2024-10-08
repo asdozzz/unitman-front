@@ -16,6 +16,7 @@ import {
   HookSettingsForm,
   storeObnovleniyaNastroekHuka
 } from "@/modules/unit/store/SpisokProektov/StoreObnovleniyaNastroekHuka";
+import {useRouter} from "vue-router";
 
 const proektiStore = useSpisokProektovStore();
 const { spisok, loaderSpiskaProektov, oshibkaZagruzkiSpiska, getProjectLoader, proektSloman, proektNeSobirali } = storeToRefs(proektiStore);
@@ -34,6 +35,8 @@ const { enable: enableSpisokPolzovateleiProekta } = storeToRefs(spisokPolzovatel
 
 const spisokPeremenihProektaStore = useSpisokPeremenihProektaStore();
 const { enable: enableSpisokPeremenih} = storeToRefs(spisokPeremenihProektaStore);
+
+const router = useRouter();
 
 onMounted(async () => {
   await proektiStore.poluchitSpisokProektov();
@@ -78,6 +81,14 @@ async function sobrat(id: string) {
   await proektiStore.sobrat(id);
 }
 
+function otkritOknoSZadachamiRunnera(id: string) {
+  router.push({ name: 'project_jobs', params: { id }});
+}
+
+async function ochistit(id: string) {
+  await proektiStore.ochistit(id);
+}
+
 </script>
 
 <template>
@@ -91,7 +102,7 @@ async function sobrat(id: string) {
     <div class="row wrap items-start content-start">
       <q-card class="q-mb-md">
         <q-card-section>
-          <q-btn size="md" color="primary" icon="add" @click="openAddForm">
+          <q-btn size="sm" color="primary" icon="add" @click="openAddForm">
             <q-tooltip>{{ $t('unit.spisok_proektov.buttons.add') }}</q-tooltip>
           </q-btn>
         </q-card-section>
@@ -104,6 +115,7 @@ async function sobrat(id: string) {
       <template v-else>
         <template v-for="item in spisok">
           <q-card class="q-mr-md">
+
             <q-card-section>
               <div class="text-h6 text-left">{{ $t('unit.spisok_proektov.card_fields.project_name') }}: {{ item.name }}</div>
 
@@ -116,34 +128,46 @@ async function sobrat(id: string) {
               <div class="text-subtitle2 text-left">Remove Info: {{ item.removeInfo }}</div>-->
             </q-card-section>
 
+            <q-inner-loading :showing="item.waitResultRunner">
+              <q-spinner-gears size="50px" color="primary" />
+            </q-inner-loading>
+
             <q-separator dark />
 
            <q-card-actions>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="manage_accounts" @click="pokazatSpisokPolzovatelei(item.id)">
+
+             <q-btn size="sm" color="black" icon="info" @click="otkritOknoSZadachamiRunnera(item.id)">
+               <q-tooltip>{{$t('unit.spisok_proektov.buttons.jobs')}}</q-tooltip>
+             </q-btn>
+
+             <q-btn size="sm" color="black" v-if="!proektSloman(item.id)" icon="manage_accounts" @click="pokazatSpisokPolzovatelei(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.manage_accounts') }}</q-tooltip>
              </q-btn>
-              <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="delete" @click="udalit(item.id)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" icon="layers_clear" @click="ochistit(item.id)">
+               <q-tooltip>{{$t('unit.spisok_proektov.buttons.layers_clear')}}</q-tooltip>
+             </q-btn>
+              <q-btn size="sm" color="black" v-if="!proektSloman(item.id)" icon="delete" @click="udalit(item.id)" :loading="getProjectLoader(item.id)">
                 <q-tooltip>{{ $t('unit.spisok_proektov.buttons.delete') }}</q-tooltip>
               </q-btn>
-             <q-btn size="md" color="black" v-if="proektSloman(item.id)" icon="delete" @click="udalitSlomaniiProekt(item.id)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" v-if="proektSloman(item.id)" icon="delete" @click="udalitSlomaniiProekt(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.delete_manually') }}</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && !item.isActive" icon="done" @click="aktivirovat(item.id)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" v-if="!proektSloman(item.id) && !item.isActive" icon="done" @click="aktivirovat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.activate') }}</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && item.isActive" icon="remove_done" @click="deaktivirovat(item.id)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" v-if="!proektSloman(item.id) && item.isActive" icon="remove_done" @click="deaktivirovat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.deactivate') }}</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="edit" @click="openEditForm(item)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" v-if="!proektSloman(item.id)" icon="edit" @click="openEditForm(item)" :loading="getProjectLoader(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.edit') }}</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id)" icon="settings" @click="openHookSettingsForm(item)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" v-if="!proektSloman(item.id)" icon="settings" @click="openHookSettingsForm(item)" :loading="getProjectLoader(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.hook_settings') }}</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="getProjectLoader(item.id)">
+             <q-btn size="sm" color="black" v-if="!proektSloman(item.id) && proektNeSobirali(item.id)" icon="build" @click="sobrat(item.id)" :loading="getProjectLoader(item.id)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.build') }}</q-tooltip>
              </q-btn>
-             <q-btn size="md" color="black" icon="list" v-if="!proektSloman(item.id)" @click="pokazatSpisokPeremenihProekta(item)">
+             <q-btn size="sm" color="black" icon="list" v-if="!proektSloman(item.id)" @click="pokazatSpisokPeremenihProekta(item)">
                <q-tooltip>{{ $t('unit.spisok_proektov.buttons.variables') }}</q-tooltip>
              </q-btn>
             </q-card-actions>

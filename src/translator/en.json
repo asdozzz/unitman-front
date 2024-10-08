@@ -113,6 +113,8 @@
     },
     "spisok_proektov": {
       "buttons": {
+        "jobs": "jobs",
+        "layers_clear": "layers_clear",
         "add": "add project",
         "manage_accounts": "manage_accounts",
         "delete": "delete",

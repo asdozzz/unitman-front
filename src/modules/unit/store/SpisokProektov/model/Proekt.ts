@@ -16,6 +16,7 @@ export default class Proekt {
     users: PolzovatelProekta[] = [];
     variables: PeremenayaProekta[] = [];
     nastroikiHukaProekta: NastroikiHukaProekta;
+    waitResultRunner: boolean = false;
 
     constructor(
         data: {
@@ -31,7 +32,8 @@ export default class Proekt {
             proxyHost: string|null,
             users: PolzovatelProekta[],
             variables: PeremenayaProekta[],
-            nastroikiHukaProekta: NastroikiHukaProekta
+            nastroikiHukaProekta: NastroikiHukaProekta,
+            waitResultRunner: boolean
         }
     ) {
         this.id = data.id;
@@ -47,5 +49,6 @@ export default class Proekt {
         this.users = data.users;
         this.variables = data.variables;
         this.nastroikiHukaProekta = data.nastroikiHukaProekta;
+        this.waitResultRunner = data.waitResultRunner
     }
 };

@@ -29,6 +29,15 @@ import {
 import {
     ZaprosNaObnovlenieNastroekHuka
 } from "@/modules/unit/services/ProektiServices/model/ZaprosNaObnovlenieNastroekHuka";
+import {
+    ZaprosNaPoluchenieZadachRunneraUnita
+} from "@/modules/unit/services/ProektiServices/model/ZaprosNaPoluchenieZadachRunneraUnita";
+import {
+    OtvetNaPoluchenieZadachRunneraUnita
+} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieZadachRunneraUnita";
+import {
+    OtvetNaPoluchenieShagovZadachiRunnera
+} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieShagovZadachiRunnera";
 
 class ProektiService {
     list() {
@@ -100,6 +109,18 @@ class ProektiService {
 
     obnovitNastroikiHuka(params: ZaprosNaObnovlenieNastroekHuka) {
         return apiClient.post<null>('/project/obnovitNastroikiHuka', params);
+    }
+
+    poluchitVipolnenieZadachiRunnera(params: ZaprosNaPoluchenieZadachRunneraUnita) {
+        return apiClient.post<OtvetNaPoluchenieZadachRunneraUnita[]>('/project/poluchitVipolnenieZadachiRunnera', params);
+    }
+
+    poluchitShagiZadachiRunnera(params: { id: string }) {
+        return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/project/poluchitShagiZadachiRunnera', params);
+    }
+
+    ochistit(params: { id: string }) {
+        return apiClient.post<null>('/project/ochistit', params);
     }
 }
 

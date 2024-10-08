@@ -173,5 +173,18 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
 
             return response;
         },
+        async ochistit(id: string) {
+            this.stopProjectLoader(id);
+
+            const response = await ProektiService.ochistit({ id })
+            this.stopProjectLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.poluchitSpisokProektov();
+
+            return response;
+        },
     }
 })

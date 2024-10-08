@@ -1,7 +1,7 @@
 import UnitLayout from "../view/UnitLayout.vue";
 import unit from './unit';
+import project from './project';
 import SpisokHranilish from "../view/SpisokHranilish.vue";
-import SpisokProektov from "../view/SpisokProektov.vue";
 
 
 export default [
@@ -10,6 +10,7 @@ export default [
         component: UnitLayout,
         children:[
             ...unit,
+            ...project,
             {
                 path: 'repositories',
                 component: SpisokHranilish,
@@ -17,13 +18,6 @@ export default [
                     requiredRoles: ['ROLE_ADMIN']
                 }
             },
-            {
-                path: 'projects',
-                component: SpisokProektov,
-                meta: {
-                    requiredRoles: ['ROLE_ADMIN']
-                }
-            }
         ]
     }
 ];

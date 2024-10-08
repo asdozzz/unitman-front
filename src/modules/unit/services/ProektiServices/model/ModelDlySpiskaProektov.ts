@@ -33,4 +33,5 @@ export default class ModelDlySpiskaProektov {
         avtoobnovlenie: true,
         avtoudalenie: true,
     };
+    public waitResultRunner: boolean = false;
 }

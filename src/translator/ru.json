@@ -113,6 +113,8 @@
     },
     "spisok_proektov": {
       "buttons": {
+        "jobs": "Выполненные задачи",
+        "layers_clear": "Очистка образов",
         "add": "Добавить проект",
         "manage_accounts": "Пользователи проекта",
         "delete": "удалить",
