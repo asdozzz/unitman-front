@@ -7,7 +7,7 @@ const store = storeSostoyaniyaDefoltnogoRunnera();
 const { active, oshibkaBackenda, init} = storeToRefs(store);
 
 onMounted(async () => {
-  if (!init) {
+  if (!init.value) {
     store.zapustitOprosStatusaRunnera();
   } else {
     store.vostanovitOprosStatus();

@@ -44,7 +44,7 @@ export const storeSostoyaniyaDefoltnogoRunnera = defineStore('SostoyaniyaDefoltn
             this.init = true;
             if (!this.pause) {
                 await this.getDefaultRunnerActive();
-                setTimeout(this.zapustitOprosStatusaRunnera, 5000);
+                setTimeout(this.zapustitOprosStatusaRunnera, 15000);
             }
         },
         ostanovitOprosStatusaRunnera(): void {
