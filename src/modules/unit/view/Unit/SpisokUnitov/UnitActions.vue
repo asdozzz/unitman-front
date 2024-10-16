@@ -148,7 +148,7 @@ const { userId } = storeToRefs(authStore);
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.set_config')}}</q-tooltip>
       </q-btn>
       <q-btn v-if="command === 'nachatPodgotovku'" size="md" color="black" icon="done_all" @click="podgotovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
-        <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.preparing')}}preparing</q-tooltip>
+        <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.preparing')}}</q-tooltip>
       </q-btn>
       <q-btn v-if="command === 'ustanovitResultatPodgotovki'" size="sm" color="black" icon="sync" @click="ustanovitResultatPodgovkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.sync')}}</q-tooltip>
