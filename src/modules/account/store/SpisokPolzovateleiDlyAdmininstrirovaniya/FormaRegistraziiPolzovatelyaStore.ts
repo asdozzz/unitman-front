@@ -5,15 +5,27 @@ export class FormaDobavleniyaPolzovatelya {
     email: string;
     password: string;
     roles: string;
+    locale: string;
 
-    constructor(email: string = "", password: string = "", roles: string = "") {
+    constructor(locale: string = "", email: string = "", password: string = "", roles: string = "") {
         this.email = email;
         this.password = password;
         this.roles = roles;
+        this.locale = locale;
     }
 }
 
 class Role {
+    value: string;
+    label: string;
+
+    constructor(value: string, label: string) {
+        this.value = value;
+        this.label = label;
+    }
+}
+
+class Locale {
     value: string;
     label: string;
 
@@ -31,6 +43,9 @@ type FormaRegistraziiPolzovatelyaState = {
     roles: {
         spisok: Role[],
         loader: boolean
+    },
+    locales: {
+        spisok: Locale[],
     }
 }
 export const useFormaRegistraziiPolzovatelya = defineStore('FormaRegistraziiPolzovatelya', {
@@ -46,15 +61,21 @@ export const useFormaRegistraziiPolzovatelya = defineStore('FormaRegistraziiPolz
                     new Role("ROLE_USER", 'User'),
                 ],
                 loader: false
+            },
+            locales: {
+                spisok: [
+                    new Locale('ru', 'ru'),
+                    new Locale('en', 'en'),
+                ]
             }
         };
     },
     actions: {
-        otkritFormu() {
+        otkritFormu(defaultLocale: "en" | "ru") {
             this.enable = true;
             this.oshibkaOtBackenda = null;
             this.loader = false;
-            this.form = new FormaDobavleniyaPolzovatelya()
+            this.form = new FormaDobavleniyaPolzovatelya(defaultLocale)
         },
         zakritFormu() {
             this.enable = false;

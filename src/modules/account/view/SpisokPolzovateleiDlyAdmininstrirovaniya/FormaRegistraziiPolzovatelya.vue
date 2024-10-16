@@ -5,7 +5,7 @@ import {
 } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaRegistraziiPolzovatelyaStore";
 
 const addFormStore = useFormaRegistraziiPolzovatelya();
-const { form, oshibkaOtBackenda, loader, roles } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, roles, locales } = storeToRefs(addFormStore);
 
 const emit = defineEmits<{
   formaBilaOtpravlena: []
@@ -31,6 +31,7 @@ async function otpravitFormu() {
       <q-input v-model="form.email" :label="$t('account.form_add.fields.labels.email')" />
       <q-input v-model="form.password" :label="$t('account.form_add.fields.labels.password')" />
       <q-select v-model="form.roles" :options="roles.spisok" :label="$t('account.form_add.fields.labels.role')" emit-value map-options/>
+      <q-select v-model="form.locale" :options="locales.spisok" :label="$t('account.form_add.fields.labels.locale')" emit-value map-options/>
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

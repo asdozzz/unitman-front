@@ -21,6 +21,10 @@ import {
 } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaEmailStore";
 import PolzovatelDlyAdmininstrirovaniya
   from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelDlyAdmininstrirovaniya";
+import {useAuthStore} from "@/modules/account/store/auth";
+
+const authStore = useAuthStore();
+const { getLocale } = storeToRefs(authStore);
 
 const spisokPolzovateleStore = useSpisokPolzovateleiDlyAdmininstrirovaniyaStore();
 const { spisok, loaderSpiska, oshibkaPolucheniyaSpiska, loaderObnovleniya } = storeToRefs(spisokPolzovateleStore);
@@ -47,7 +51,7 @@ function razblokirovka(id: string) {
 }
 
 function openAddForm() {
-  formaRegistrazii.otkritFormu();
+  formaRegistrazii.otkritFormu(getLocale.value);
 }
 
 function openNewPasswordForm(item: PolzovatelDlyAdmininstrirovaniya) {
