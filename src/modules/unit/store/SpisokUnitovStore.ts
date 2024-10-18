@@ -12,7 +12,9 @@ type NastroikiSpiska = {
         name: string | null
         branch: string | null
         projectId: string | null
-    }
+    },
+    limit: number,
+    offset: number
 }
 
 type PolzovatelProekta  = {
@@ -55,7 +57,9 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                     name: null,
                     branch: null,
                     projectId: null
-                }
+                },
+                limit: 100,
+                offset: 0
             },
             spisok:[],
             proekti: {
