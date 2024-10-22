@@ -3,6 +3,13 @@ type Peremenaya = {
     value: string;
 };
 
+type Statistika = {
+    cpuPercent: string;
+    memoryPercent: string;
+    memoryUsage: string;
+    netIO: string;
+};
+
 export default class Unit {
     id: string = "";
     authorId: string = "";
@@ -23,6 +30,7 @@ export default class Unit {
     unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
     peremenie: Peremenaya[] = [];
     unitSozdanSystemoi: boolean = false;
+    statistikaKonteinera: Statistika | null;
 
     constructor(
         data: {
@@ -44,7 +52,8 @@ export default class Unit {
             unixtimePoslednegoObnovleniyaUnita: number|null,
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
             peremenie: Peremenaya[],
-            unitSozdanSystemoi: boolean
+            unitSozdanSystemoi: boolean,
+            statistikaKonteinera: Statistika | null
         }
     ) {
         this.id = data.id;
@@ -67,5 +76,6 @@ export default class Unit {
         this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
         this.peremenie = data.peremenie;
         this.unitSozdanSystemoi = data.unitSozdanSystemoi;
+        this.statistikaKonteinera = data.statistikaKonteinera;
     }
 };

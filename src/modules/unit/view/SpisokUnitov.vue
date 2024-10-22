@@ -49,6 +49,7 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
   console.log(event.eventType, event);
   switch (event.eventType) {
     case 'OBNOVLEN':
+    case 'OBNOVLENA_STATA':
       if (unitiStore.issetUnit(event.id)) {
           unitiStore.obnovitUnit(event.id);
       }

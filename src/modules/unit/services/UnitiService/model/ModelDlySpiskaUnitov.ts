@@ -3,6 +3,13 @@ type Peremenaya = {
     value: string;
 };
 
+type Statistika = {
+    cpuPercent: string;
+    memoryPercent: string;
+    memoryUsage: string;
+    netIO: string;
+};
+
 export default class ModelDlySpiskaUnitov {
     public id: string = "";
     public authorId: string = "";
@@ -23,5 +30,6 @@ export default class ModelDlySpiskaUnitov {
     public unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
     public peremenie: Peremenaya[] = [];
     public unitSozdanSystemoi: boolean = false;
+    public statistikaKonteinera: Statistika | null = null;
 }
 

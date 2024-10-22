@@ -3,6 +3,7 @@
     <q-layout view="hHh lpR fFf">
       <q-header class="bg-primary text-white">
         <q-toolbar>
+          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" v-if="showedMenu.length > 0"/>
           <q-toolbar-title>
             <a href="/" class="text-white">Unitman</a>
           </q-toolbar-title>
@@ -21,24 +22,49 @@
           <q-btn v-if="isAuth" flat dense icon="logout" @click="logout"/>
         </q-toolbar>
         <q-tabs align="left" inline-label class="bg-primary text-white" v-if="isAuth">
-          <q-route-tab to="/account/list" :label="$t('app.tabs.accounts')" v-if="isAdmin"/>
-          <q-route-tab to="/unit/repositories" :label="$t('app.tabs.repos')" v-if="isAdmin"/>
-          <q-route-tab to="/unit/projects" :label="$t('app.tabs.projects')" v-if="isAdmin"/>
-          <q-route-tab to="/unit/list" :label="$t('app.tabs.units')"/>
+
         </q-tabs>
       </q-header>
+
+      <q-drawer
+          v-if="showedMenu.length > 0"
+          :mini="miniState"
+          @mouseenter="miniState = false"
+          @mouseleave="miniState = true"
+          show-if-above
+          v-model="leftDrawerOpen"
+          side="left"
+          :width="200"
+          :breakpoint="500"
+          bordered>
+        <q-scroll-area class="fit">
+          <q-list padding class="menu-list">
+            <template v-for="menuItem in showedMenu">
+              <q-item clickable v-ripple>
+                <q-item-section avatar>
+                  <q-icon :name="menuItem.icon" />
+                </q-item-section>
+
+                <q-item-section>
+                  <RouterLink :to="menuItem.href">{{ $t(menuItem.label) }}</RouterLink>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-list>
+        </q-scroll-area>
+      </q-drawer>
 
       <q-page-container>
         <router-view />
       </q-page-container>
 
-      <q-footer elevated class="bg-grey-8 text-white">
+<!--      <q-footer elevated class="bg-grey-8 text-white">
         <q-toolbar>
           <q-toolbar-title>
             <div>@unitman</div>
           </q-toolbar-title>
         </q-toolbar>
-      </q-footer>
+      </q-footer>-->
     </q-layout>
   </div>
 </template>
@@ -47,18 +73,41 @@
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";
 import { useRouter } from "vue-router";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, reactive, ref} from "vue";
 const router = useRouter();
 
 const authStore = useAuthStore();
 const { isAuth, email, isAdmin, loaderIzmemeniyaYazika, getLocale } = storeToRefs(authStore);
 
 let currentLocale = ref("");
+const leftDrawerOpen = ref(false);
+const miniState = ref(false);
 
 onMounted(() => {
   currentLocale.value = getLocale.value;
   authStore.updateLocale(getLocale.value);
 })
+
+/*
+          <q-route-tab to="/unit/repositories" :label="$t('app.tabs.repos')" v-if="isAdmin"/>
+          <q-route-tab to="/unit/projects" :label="$t('app.tabs.projects')" v-if="isAdmin"/>
+          <q-route-tab to="/unit/list" :label="$t('app.tabs.units')"/>
+* */
+
+const menu = reactive([
+  {icon: 'groups', href:"/account/list", label: 'app.tabs.accounts', show: isAdmin },
+  {icon: 'inbox', href:"/unit/repositories", label: 'app.tabs.repos', show: isAdmin },
+  {icon: 'list', href:"/unit/projects", label: 'app.tabs.projects', show: isAdmin },
+  {icon: 'star', href:"/unit/list", label: 'app.tabs.units', show: isAuth },
+]);
+
+const showedMenu = computed(() => {
+  return menu.filter((item) => item.show);
+})
+
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value
+}
 
 async function changeLocal(newLocale: "en" | "ru") {
   authStore.izmeniyYazik(newLocale);
