@@ -26,20 +26,20 @@ onMounted(() => {
       <template v-else>
         <template v-for="item in statistikaPoProektam">
           <q-card class="q-ma-md" style="min-width: 350px">
-            <q-card-section>
-              <div class="text-h4">{{ item.projectName }}</div>
+            <q-card-section class="bg-primary text-white q-py-sm">
+              <div class="text-h5">{{ item.projectName }}</div>
             </q-card-section>
 
             <q-card-section class="q-pt-none">
-              <div class="text-h6">
+              <div class="text-subtitle2">
                 Total
                 <q-badge align="middle">{{ item.total }}</q-badge>
               </div>
-              <div class="text-h6">
+              <div class="text-subtitle2">
                 Active
                 <q-badge align="middle">{{ item.active }}</q-badge>
               </div>
-              <div class="text-h6">
+              <div class="text-subtitle2">
                 Deleted
                 <q-badge align="middle">{{ item.deleted }}</q-badge>
               </div>

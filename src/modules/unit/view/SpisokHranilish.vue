@@ -47,14 +47,12 @@
         color="primary"
         size="3em"
     />
-    <div class="row wrap items-start content-start">
-      <q-card class="q-mb-md">
-        <q-card-section>
-          <q-btn size="md" color="primary" icon="add" @click="openAddForm">
-            <q-tooltip>{{ $t('unit.spisok_rep.buttons.add') }}</q-tooltip>
-          </q-btn>
-        </q-card-section>
-      </q-card>
+    <div class="row">
+      <div class="col q-pb-sm">
+        <q-btn size="sm" color="primary" icon="add" @click="openAddForm">
+          <q-tooltip>{{ $t('unit.spisok_rep.buttons.add') }}</q-tooltip>
+        </q-btn>
+      </div>
     </div>
     <div class="row wrap items-start content-start">
       <template v-if="oshibkaZagruzkiSpiska">
@@ -63,23 +61,25 @@
       <template v-else>
 
         <template v-for="item in spisok">
-          <q-card class="q-mr-md" style="width: 300px">
-            <q-card-section>
-              <div class="text-h6 text-left">{{ item.name }}</div>
-              <div class="text-subtitle2 text-left">{{ item.type }}</div>
-              <div class="text-subtitle2 text-left" v-if="item.type === 'GITLAB'">{{ item.repoUrl }}</div>
+          <q-card class="q-mr-md q-mb-md" style="width: 350px">
+            <q-card-section class="bg-primary text-white q-py-sm">
+              <div class="text-subtitle2 text-left"> {{ item.name }}</div>
+            </q-card-section>
+            <q-card-section class="q-py-sm">
+              <div class="fs-12 text-left">{{ item.type }}</div>
+              <div class="fs-12 text-left" v-if="item.type === 'GITLAB'">{{ item.repoUrl }}</div>
             </q-card-section>
 
             <q-separator dark />
 
             <q-card-actions>
-              <q-btn size="md" color="black" icon="delete" @click="udalit(item.id)">
+              <q-btn size="sm" color="black" icon="delete" @click="udalit(item.id)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.delete')}}</q-tooltip>
               </q-btn>
-              <q-btn size="md" color="black" icon="edit" @click="openEditForm(item)">
+              <q-btn size="sm" color="black" icon="edit" @click="openEditForm(item)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.edit')}}</q-tooltip>
               </q-btn>
-              <q-btn size="md" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
+              <q-btn size="sm" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.confirm')}}</q-tooltip>
               </q-btn>
             </q-card-actions>

@@ -2,6 +2,7 @@
   "world": "world",
   "app": {
     "tabs": {
+      "home": "Home",
       "units": "Units",
       "projects": "Projects",
       "repos": "Repositories",

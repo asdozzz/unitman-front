@@ -99,14 +99,12 @@ async function ochistit(id: string) {
         color="primary"
         size="3em"
     />
-    <div class="row wrap items-start content-start">
-      <q-card class="q-mb-md">
-        <q-card-section>
-          <q-btn size="sm" color="primary" icon="add" @click="openAddForm">
-            <q-tooltip>{{ $t('unit.spisok_proektov.buttons.add') }}</q-tooltip>
-          </q-btn>
-        </q-card-section>
-      </q-card>
+    <div class="row">
+      <div class="col q-pb-sm">
+        <q-btn size="sm" color="primary" icon="add" @click="openAddForm">
+          <q-tooltip>{{ $t('unit.spisok_proektov.buttons.add') }}</q-tooltip>
+        </q-btn>
+      </div>
     </div>
     <div class="row wrap items-start content-start">
       <template v-if="oshibkaZagruzkiSpiska">
@@ -114,16 +112,16 @@ async function ochistit(id: string) {
       </template>
       <template v-else>
         <template v-for="item in spisok">
-          <q-card class="q-mr-md">
-
-            <q-card-section>
-              <div class="text-h6 text-left">{{ $t('unit.spisok_proektov.card_fields.project_name') }}: {{ item.name }}</div>
-
-              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.project_id') }}: {{ item.id }}</div>
-              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.repo_id') }}: {{ item.repoId }}</div>
-              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.project_code') }}: {{ item.code }}</div>
-              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.main_branch') }}: {{ item.mainBranch }}</div>
-              <div class="text-subtitle2 text-left">{{ $t('unit.spisok_proektov.card_fields.state') }}: {{ item.state }}</div>
+          <q-card class="q-mr-md q-mb-md" style="width: 350px">
+            <q-card-section class="bg-primary text-white q-py-sm">
+              <div class="text-subtitle2 text-left"> {{ $t('unit.spisok_proektov.card_fields.project_name') }}: {{ item.name }}</div>
+            </q-card-section>
+            <q-card-section class="q-py-sm">
+              <div class="fs-12 text-left">{{ $t('unit.spisok_proektov.card_fields.project_id') }}: {{ item.id }}</div>
+              <div class="fs-12 text-left">{{ $t('unit.spisok_proektov.card_fields.repo_id') }}: {{ item.repoId }}</div>
+              <div class="fs-12 text-left">{{ $t('unit.spisok_proektov.card_fields.project_code') }}: {{ item.code }}</div>
+              <div class="fs-12 text-left">{{ $t('unit.spisok_proektov.card_fields.main_branch') }}: {{ item.mainBranch }}</div>
+              <div class="fs-12 text-left">{{ $t('unit.spisok_proektov.card_fields.state') }}: {{ item.state }}</div>
 <!--              <div class="text-subtitle2 text-left">Build Info: {{ item.buildInfo }}</div>
               <div class="text-subtitle2 text-left">Remove Info: {{ item.removeInfo }}</div>-->
             </q-card-section>
