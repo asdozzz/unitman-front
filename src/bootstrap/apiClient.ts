@@ -1,5 +1,6 @@
 import axios, {AxiosError, AxiosInstance, AxiosResponse} from "axios";
 import {ApiResponse, ApiResponseFactory, FailApiResponse} from "@/bootstrap/apiClient/ApiResponse";
+import {useAuthStore} from "@/modules/account/store/auth";
 
 type ServerResponseError =
     | {
@@ -49,8 +50,9 @@ class ApiClient {
 
                 if ("code" in serverError) {
                     if (serverError['code'] === 401) {
-                        localStorage.removeItem('tokenData')
-                        errorMessage = "Go to <a href='/login'>Login</a>";
+                        const authStore = useAuthStore();
+                        authStore.logout();
+                        //errorMessage = "Go to <a href='/login'>Login</a>";
                     }
                 }
             }

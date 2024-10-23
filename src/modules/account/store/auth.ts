@@ -98,6 +98,7 @@ export const useAuthStore = defineStore('auth', {
             }
             console.log("www", locale);
             i18n.global.locale.value = locale;
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
         },
         async login() {
             const response = await AccountService.login(this.loginView.form.login, this.loginView.form.pass);

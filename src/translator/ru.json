@@ -7,6 +7,12 @@
       "projects": "Проекты",
       "repos": "Репозитории",
       "accounts": "Учетные записи"
+    },
+    "header": {
+      "profile": "Профиль",
+      "help": "Помошь",
+      "settings": "Настройки",
+      "sign_out": "Выход"
     }
   },
   "account": {

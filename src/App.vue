@@ -18,12 +18,34 @@
             />
           </div>
 
-          <div>{{ email }}</div>
-          <q-btn v-if="isAuth" flat dense icon="logout" @click="logout"/>
+          <q-btn dense flat no-wrap v-if="isAuth">
+            <q-avatar color="black" text-color="white">U</q-avatar>
+            <q-icon name="arrow_drop_down" size="16px" />
+            <q-menu auto-close>
+              <q-list dense>
+                <q-item>
+                  <q-item-section>
+                    <div><strong>{{ email }}</strong></div>
+                  </q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable>
+                  <q-item-section>{{$t('app.header.profile')}}</q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable>
+                  <q-item-section>{{$t('app.header.help')}}</q-item-section>
+                </q-item>
+                <q-item clickable>
+                  <q-item-section>{{$t('app.header.settings')}}</q-item-section>
+                </q-item>
+                <q-item clickable @click="logout">
+                  <q-item-section>{{$t('app.header.sign_out')}}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </q-toolbar>
-        <q-tabs align="left" inline-label class="bg-primary text-white" v-if="isAuth">
-
-        </q-tabs>
       </q-header>
 
       <q-drawer
@@ -47,7 +69,7 @@
                 </q-item-section>
 
                 <q-item-section>
-                  <q-item-label>{{ $t(menuItem.label) }}</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ $t(menuItem.label) }}</q-item-label>
                 </q-item-section>
               </q-item>
             </template>

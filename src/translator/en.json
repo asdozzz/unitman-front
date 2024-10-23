@@ -7,6 +7,12 @@
       "projects": "Projects",
       "repos": "Repositories",
       "accounts": "Accounts"
+    },
+    "header": {
+      "profile": "Profile",
+      "help": "Help",
+      "settings": "Settings",
+      "sign_out": "Sign out"
     }
   },
   "account": {

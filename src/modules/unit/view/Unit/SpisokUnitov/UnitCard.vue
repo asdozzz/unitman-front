@@ -40,12 +40,12 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
           </template>
         </template>
       </div>
-      <div class="text-left fs-12">{{$t('unit.spisok_unitov.card.fields.id')}}: {{ item.id }}</div>
-      <div class="text-left fs-12">{{$t('unit.spisok_unitov.card.fields.branch')}}: {{ item.branch }}</div>
+      <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
+      <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}</div>
       <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
         <div class="row">
-          <div class="col-3">cpu: {{item.statistikaKonteinera.cpuPercent}}</div>
-          <div class="col">mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</div>
+          <div class="col-3"><strong>cpu: {{item.statistikaKonteinera.cpuPercent}}</strong></div>
+          <div class="col"><strong>mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</strong></div>
         </div>
       </div>
     </q-card-section>

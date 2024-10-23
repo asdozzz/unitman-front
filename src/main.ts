@@ -6,10 +6,9 @@ import router from "./bootstrap/router";
 import i18n from "./bootstrap/translator";
 import {createPinia} from "pinia";
 import { Quasar, Notify } from 'quasar'
+import '@quasar/extras/roboto-font-latin-ext/roboto-font-latin-ext.css'
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
-
-
 
 const pinia = createPinia();
 const app = createApp(App);
