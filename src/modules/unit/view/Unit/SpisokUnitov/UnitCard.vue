@@ -26,16 +26,16 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
       </div>
     </q-card-section>
     <q-card-section class="q-pa-sm">
-      <div class="text-left" v-if="item.state === 'USPESHNO_ZAPUSHEN' && item.links.length > 0">
+      <div class="text-left" v-if="item.links.length > 0">
         <template v-for="link in item.links">
-          <template v-if="link.indexOf('http') > -1">
+          <template v-if="link.protocal === 'http' && item.state === 'USPESHNO_ZAPUSHEN'">
             <div class="text-italic fs-12">
-              <a :href="link" target="_blank">{{ link }}</a>
+              <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}</a>
             </div>
           </template>
           <template v-else>
             <div class="text-italic">
-              {{ link }}
+              {{ link.protocol }}://{{link.service}}:{{link.port}}
             </div>
           </template>
         </template>

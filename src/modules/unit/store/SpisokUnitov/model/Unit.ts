@@ -10,6 +10,13 @@ type Statistika = {
     netIO: string;
 };
 
+type Link = {
+    service: string;
+    path: string;
+    port: number;
+    protocol: string;
+}
+
 export default class Unit {
     id: string = "";
     authorId: string = "";
@@ -22,7 +29,7 @@ export default class Unit {
     waitResultFromRunner: boolean = false;
     commands: string[] = [];
     error: boolean = false;
-    links: string[] = []
+    links: Link[] = []
     jdemObnovlenieKodaPosleZapuska: boolean = false;
     jdemAvtosborki: boolean = false;
     jdemUdaleniyaPosleZapuska: boolean = false;
@@ -45,7 +52,7 @@ export default class Unit {
             waitResultFromRunner: boolean,
             commands: string[],
             error: boolean,
-            links: string[],
+            links: Link[],
             jdemObnovlenieKodaPosleZapuska: boolean,
             jdemAvtosborki: boolean,
             jdemUdaleniyaPosleZapuska: boolean,

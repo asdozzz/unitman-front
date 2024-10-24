@@ -10,6 +10,13 @@ type Statistika = {
     netIO: string;
 };
 
+type Link = {
+    service: string;
+    path: string;
+    port: number;
+    protocol: string;
+}
+
 export default class ModelDlySpiskaUnitov {
     public id: string = "";
     public authorId: string = "";
@@ -22,7 +29,7 @@ export default class ModelDlySpiskaUnitov {
     public waitResultFromRunner: boolean = false;
     public commands: string[] = [];
     public error: boolean = false;
-    public links: string[] = [];
+    public links: Link[] = [];
     public jdemObnovlenieKodaPosleZapuska: boolean = false;
     public jdemAvtosborki: boolean = false;
     public jdemUdaleniyaPosleZapuska: boolean = false;
