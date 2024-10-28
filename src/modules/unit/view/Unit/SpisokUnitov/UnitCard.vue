@@ -6,21 +6,48 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
+const expanded = ref(false);
+const props = defineProps<{
+  item: Unit,
+}>();
+
 function convertDate(unixtime: number | null): string {
   if (!unixtime) return '';
   return dayjs(fromUnixTime(unixtime)).fromNow();
 }
 
-const expanded = ref(false);
-defineProps<{
-  item: Unit,
-}>();
+let headerColor = 'bg-blue-8';
+const timestamp = Math.floor(Date.now() / 1000);
+const week = 60*60*24*7;
+const week2 = 60*60*24*7*2;
+const month = 60*60*24*7*4;
+if (props.item.unixtimePoslednegoObnovleniyaUnita) {
+  if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week) {
+    headerColor = 'bg-indigo-8';
+  }
+  if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week2) {
+    headerColor = 'bg-blue-grey-8';
+  }
+  if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > month) {
+    headerColor = 'bg-grey-8';
+  }
+}
+
+let classHeader = '';
+
+if (props.item.error) {
+  classHeader = 'bg-red text-white';
+} else {
+  classHeader = `text-white ${headerColor}`;
+}
+
+
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 </script>
 
 <template>
   <q-card class="q-mr-md q-mb-md" style="width: 335px">
-    <q-card-section class="bg-primary text-white q-py-xs q-px-sm" :class="{'bg-red text-white':item.error, 'bg-primary text-white':!item.error}">
+    <q-card-section class="q-py-xs q-px-sm" :class="classHeader">
       <div class="text-h6">
         {{ item.name }}.{{ item.projectName }}
       </div>
