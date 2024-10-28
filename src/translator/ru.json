@@ -151,7 +151,8 @@
       "filter": {
         "only_mine": "Только мои",
         "unit_name": "Название юнита",
-        "branch": "Ветка"
+        "branch": "Ветка",
+        "project": "Проект"
       },
       "list": {
         "empty_result": "У вас пока нету юнитов"

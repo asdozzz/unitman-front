@@ -15,7 +15,7 @@ import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
 import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
 
 const unitiStore = useSpisokUnitovStore();
-const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska } = storeToRefs(unitiStore);
+const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska, proekti } = storeToRefs(unitiStore);
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
 const { enable: enableAddForm } = storeToRefs(addFormStore);
@@ -86,14 +86,17 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
             @update:model-value="unitiStore.poluchitSpisokUnitov()"
         />
       </div>
-      <div class="col q-px-md">
+      <div class="col q-pl-md">
         <q-input dense outlined v-model="nastroikiSpiska.filter.name"  :label="$t('unit.spisok_unitov.filter.unit_name')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
-      <div class="col">
+      <div class="col q-pl-md">
         <q-input dense outlined v-model="nastroikiSpiska.filter.branch" :label="$t('unit.spisok_unitov.filter.branch')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
 
-      <div class="col"></div>
+      <div class="col q-pl-md">
+        <q-select dense outlined v-model="nastroikiSpiska.filter.projectId" @update:model-value="unitiStore.poluchitSpisokUnitov()"
+                  :options="proekti.spisok" :label="$t('unit.spisok_unitov.filter.project')" emit-value map-options clearable/>
+      </div>
     </div>
 
     <div class="row wrap items-start content-start">

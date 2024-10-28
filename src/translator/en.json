@@ -151,7 +151,8 @@
       "filter": {
         "only_mine": "Only mine",
         "unit_name": "Unit name",
-        "branch": "Branch"
+        "branch": "Branch",
+        "project": "Project"
       },
       "list": {
         "empty_result": "Empty list"
