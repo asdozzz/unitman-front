@@ -37,7 +37,7 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
             </div>
           </template>
           <template v-else>
-            <div class="text-italic">
+            <div class="text-italic fs-12">
               {{ link.protocol }}://{{link.service}}:{{link.port}}
             </div>
           </template>
