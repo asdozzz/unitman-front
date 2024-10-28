@@ -1138,6 +1138,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dayjs@npm:^1.11.13":
+  version: 1.11.13
+  resolution: "dayjs@npm:1.11.13"
+  checksum: f388db88a6aa93956c1f6121644e783391c7b738b73dbc54485578736565c8931bdfba4bb94e9b1535c6e509c97d5deb918bbe1ae6b34358d994de735055cca9
+  languageName: node
+  linkType: hard
+
 "de-indent@npm:^1.0.2":
   version: 1.0.2
   resolution: "de-indent@npm:1.0.2"
@@ -2542,6 +2549,7 @@ __metadata:
     axios: ^1.6.8
     centrifuge: ^5.2.2
     date-fns: ^3.6.0
+    dayjs: ^1.11.13
     pinia: ^2.1.4
     quasar: ^2.17.0
     sass: ^1.75.0

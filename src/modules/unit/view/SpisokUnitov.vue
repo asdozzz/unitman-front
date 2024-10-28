@@ -70,32 +70,40 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
   <div class="full-width flex column">
 
     <div class="row wrap items-start content-start q-pb-md">
-      <div class="col-auto">
-        <q-btn class="q-mr-md" size="md" color="primary" icon="add" @click="openAddForm">
-          <q-tooltip>{{$t('unit.spisok_unitov.buttons.add')}}</q-tooltip>
-        </q-btn>
-        <q-btn size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
-          <q-tooltip>{{$t('unit.spisok_unitov.buttons.refresh')}}</q-tooltip>
-        </q-btn>
 
+     <div class="col-auto">
+        <q-input style="width: 335px"
+            dense outlined v-model="nastroikiSpiska.filter.name"  :label="$t('unit.spisok_unitov.filter.unit_name')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
-      <div class="col-auto">
-        <q-toggle
-            v-model="nastroikiSpiska.filter.onlyMine"
-            :label="$t('unit.spisok_unitov.filter.only_mine')"
-            @update:model-value="unitiStore.poluchitSpisokUnitov()"
-        />
-      </div>
-      <div class="col q-pl-md">
-        <q-input dense outlined v-model="nastroikiSpiska.filter.name"  :label="$t('unit.spisok_unitov.filter.unit_name')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
-      </div>
-      <div class="col q-pl-md">
-        <q-input dense outlined v-model="nastroikiSpiska.filter.branch" :label="$t('unit.spisok_unitov.filter.branch')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
+      <div class="col-auto q-pl-md">
+        <q-input style="width: 335px"
+            dense outlined v-model="nastroikiSpiska.filter.branch" :label="$t('unit.spisok_unitov.filter.branch')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
 
-      <div class="col q-pl-md">
-        <q-select dense outlined v-model="nastroikiSpiska.filter.projectId" @update:model-value="unitiStore.poluchitSpisokUnitov()"
+      <div class="col-auto q-pl-md">
+        <q-select style="width: 335px"
+            dense outlined v-model="nastroikiSpiska.filter.projectId" @update:model-value="unitiStore.poluchitSpisokUnitov()"
                   :options="proekti.spisok" :label="$t('unit.spisok_unitov.filter.project')" emit-value map-options clearable/>
+      </div>
+
+      <div class="col-auto q-pl-md">
+        <div style="width: 335px">
+          <q-toggle
+              stye="float:right"
+              v-model="nastroikiSpiska.filter.onlyMine"
+              :label="$t('unit.spisok_unitov.filter.only_mine')"
+              @update:model-value="unitiStore.poluchitSpisokUnitov()"
+          />
+
+          <q-btn class="q-ml-md" size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
+            <q-tooltip>{{$t('unit.spisok_unitov.buttons.refresh')}}</q-tooltip>
+          </q-btn>
+
+          <q-btn class="q-ml-md" size="md" color="primary" icon="add" @click="openAddForm">
+            <q-tooltip>{{$t('unit.spisok_unitov.buttons.add')}}</q-tooltip>
+          </q-btn>
+
+        </div>
       </div>
     </div>
 

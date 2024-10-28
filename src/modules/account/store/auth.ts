@@ -3,6 +3,7 @@ import AccountService from "@/modules/account/services/AccountService";
 import LoginView from "@/modules/account/store/auth/LoginView";
 import {Notify} from "quasar";
 import i18n from "@/bootstrap/translator";
+import dayjs from "dayjs";
 
 const LOCAL_STORAGE_KEY = 'tokenData';
 
@@ -99,6 +100,7 @@ export const useAuthStore = defineStore('auth', {
             console.log("www", locale);
             i18n.global.locale.value = locale;
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
+            dayjs.locale(locale)
         },
         async login() {
             const response = await AccountService.login(this.loginView.form.login, this.loginView.form.pass);

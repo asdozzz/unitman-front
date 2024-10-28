@@ -103,6 +103,12 @@ import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";
 import { useRouter, useRoute } from "vue-router";
 import {computed, onMounted, reactive, ref} from "vue";
+import 'dayjs/locale/ru'
+import 'dayjs/locale/en'
+import dayjs from "dayjs";
+
+
+
 const router = useRouter();
 const route=useRoute();
 const path = computed(() =>route.path)
@@ -117,6 +123,7 @@ const miniState = ref(false);
 onMounted(() => {
   currentLocale.value = getLocale.value;
   authStore.updateLocale(getLocale.value);
+  dayjs.locale(getLocale.value)
 })
 
 /*

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { format, fromUnixTime } from "date-fns";
+import { fromUnixTime } from "date-fns";
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 function convertDate(unixtime: number | null): string {
   if (!unixtime) return '';
-  return format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
+  return dayjs(fromUnixTime(unixtime)).fromNow();
 }
 
 const expanded = ref(false);
@@ -16,7 +19,7 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 </script>
 
 <template>
-  <q-card class="q-mr-md q-mb-md" style="min-width: 350px">
+  <q-card class="q-mr-md q-mb-md" style="width: 335px">
     <q-card-section class="bg-primary text-white q-py-xs q-px-sm" :class="{'bg-red text-white':item.error, 'bg-primary text-white':!item.error}">
       <div class="text-h6">
         {{ item.name }}.{{ item.projectName }}
