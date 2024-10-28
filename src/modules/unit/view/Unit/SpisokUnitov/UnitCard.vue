@@ -28,7 +28,7 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
     <q-card-section class="q-pa-sm">
       <div class="text-left" v-if="item.links.length > 0">
         <template v-for="link in item.links">
-          <template v-if="link.protocal === 'http' && item.state === 'USPESHNO_ZAPUSHEN'">
+          <template v-if="link.protocol === 'http' && item.state === 'USPESHNO_ZAPUSHEN'">
             <div class="text-italic fs-12">
               <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}</a>
             </div>
