@@ -60,12 +60,12 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
         <template v-for="link in item.links">
           <template v-if="link.protocol === 'http' && item.state === 'USPESHNO_ZAPUSHEN'">
             <div class="text-italic fs-12">
-              <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}</a>
+              <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}{{link.startUri}}</a>
             </div>
           </template>
           <template v-else>
             <div class="text-italic fs-12">
-              {{ link.protocol }}://{{link.service}}:{{link.port}}
+              {{ link.protocol }}://{{link.service}}:{{link.port}}{{link.startUri}}
             </div>
           </template>
         </template>
