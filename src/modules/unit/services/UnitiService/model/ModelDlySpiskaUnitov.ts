@@ -15,6 +15,7 @@ type Link = {
     path: string;
     port: number;
     protocol: string;
+    startUri: string | null;
 }
 
 export default class ModelDlySpiskaUnitov {
