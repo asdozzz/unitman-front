@@ -22,6 +22,11 @@ import {
 import PolzovatelDlyAdmininstrirovaniya
   from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelDlyAdmininstrirovaniya";
 import {useAuthStore} from "@/modules/account/store/auth";
+import {
+  useFormaIzmeneniyaNickname
+} from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaNikaStore";
+import FormaIzmeneniyaNika
+  from "@/modules/account/view/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaNika.vue";
 
 const authStore = useAuthStore();
 const { getLocale } = storeToRefs(authStore);
@@ -37,6 +42,9 @@ const { enable: enableNewPasswordForm } = storeToRefs(formaIzmeneniyaParolya);
 
 const formaIzmeneniyaEmail = useFormaIzmeneniyaEmail();
 const { enable: enableNewEmailForm } = storeToRefs(formaIzmeneniyaEmail);
+
+const formaIzmeneniyaNickname = useFormaIzmeneniyaNickname();
+const { enable: enableNewNicknameForm } = storeToRefs(formaIzmeneniyaNickname);
 
 onMounted(async () => {
   await spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya();
@@ -60,6 +68,10 @@ function openNewPasswordForm(item: PolzovatelDlyAdmininstrirovaniya) {
 
 function openNewEmailForm(item: PolzovatelDlyAdmininstrirovaniya) {
   formaIzmeneniyaEmail.otkritFormu(item.id, item.email);
+}
+
+function openNewNicknameForm(item: PolzovatelDlyAdmininstrirovaniya) {
+  formaIzmeneniyaNickname.otkritFormu(item.id, item.nickname);
 }
 </script>
 
@@ -93,6 +105,7 @@ function openNewEmailForm(item: PolzovatelDlyAdmininstrirovaniya) {
               <div class="text-left fs-12">{{$t('account.spisok.card.labels.id')}} : {{ item.id }}</div>
               <div class="text-left fs-12">{{$t('account.spisok.card.labels.role')}} : {{ item.roles }}</div>
               <div class="text-left fs-12">{{$t('account.spisok.card.labels.blocked')}} : {{ item.isBlocked }}</div>
+              <div class="text-left fs-12">{{$t('account.spisok.card.labels.nickname')}} : {{ item.nickname }}</div>
             </q-card-section>
 
             <q-separator dark />
@@ -109,6 +122,9 @@ function openNewEmailForm(item: PolzovatelDlyAdmininstrirovaniya) {
               </q-btn>
               <q-btn size="sm" color="black" icon="alternate_email" @click="openNewEmailForm(item)">
                 <q-tooltip>{{$t('account.spisok.buttons.change_email')}}</q-tooltip>
+              </q-btn>
+              <q-btn size="sm" color="black" icon="face" @click="openNewNicknameForm(item)">
+                <q-tooltip>{{$t('account.spisok.buttons.change_nickname')}}</q-tooltip>
               </q-btn>
             </q-card-actions>
           </q-card>
@@ -129,6 +145,9 @@ function openNewEmailForm(item: PolzovatelDlyAdmininstrirovaniya) {
     <FormaIzmeneniyaEmail @formaBilaOtpravlena="spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya()"/>
   </q-dialog>
 
+  <q-dialog v-model="enableNewNicknameForm" persistent transition-show="scale" transition-hide="scale">
+    <FormaIzmeneniyaNika @formaBilaOtpravlena="spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya()"/>
+  </q-dialog>
 </template>
 
 <style scoped>

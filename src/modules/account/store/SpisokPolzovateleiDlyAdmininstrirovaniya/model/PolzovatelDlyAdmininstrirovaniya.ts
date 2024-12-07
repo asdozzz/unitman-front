@@ -4,6 +4,7 @@ export default class PolzovatelDlyAdmininstrirovaniya {
     isBlocked: boolean;
     roles: string;
     password: string;
+    nickname: string | null;
 
     constructor(
         data: {
@@ -12,6 +13,7 @@ export default class PolzovatelDlyAdmininstrirovaniya {
             isBlocked: boolean,
             roles: string;
             password: string;
+            nickname: string | null;
         }
     ) {
         this.id = data.id;
@@ -19,5 +21,6 @@ export default class PolzovatelDlyAdmininstrirovaniya {
         this.isBlocked = data.isBlocked;
         this.roles = data.roles;
         this.password = data.password;
+        this.nickname = data.nickname;
     }
 }

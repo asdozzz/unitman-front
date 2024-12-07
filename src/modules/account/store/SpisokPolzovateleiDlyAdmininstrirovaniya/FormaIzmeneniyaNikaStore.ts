@@ -1,46 +1,46 @@
 import {defineStore} from "pinia";
 import AccountService from "@/modules/account/services/AccountService";
 
-export class FormaIzmeneniyaEmailStore {
+export class FormaIzmeneniyaNicknameStore {
     accountId: string;
-    newEmail: string;
+    newNickname: string;
 
-    constructor(accountId: string = "", newEmail: string = "") {
+    constructor(accountId: string = "", newNickname: string = "") {
         this.accountId = accountId;
-        this.newEmail = newEmail;
+        this.newNickname = newNickname;
     }
 }
 
 
-type FormaIzmeneniyaEmailState = {
+type FormaIzmeneniyaNicknameState = {
     enable: boolean,
-    form: FormaIzmeneniyaEmailStore;
+    form: FormaIzmeneniyaNicknameStore;
     loader: boolean;
     oshibkaOtBackenda: string | null,
 }
-export const useFormaIzmeneniyaEmail = defineStore('FormaIzmeneniyaEmail', {
-    state: (): FormaIzmeneniyaEmailState => {
+export const useFormaIzmeneniyaNickname = defineStore('FormaIzmeneniyaNickname', {
+    state: (): FormaIzmeneniyaNicknameState => {
         return {
             enable: false,
-            form: new FormaIzmeneniyaEmailStore(),
+            form: new FormaIzmeneniyaNicknameStore(),
             loader: false,
             oshibkaOtBackenda: null,
         };
     },
     actions: {
-        otkritFormu(accountId: string, oldEmail: string) {
+        otkritFormu(accountId: string, oldNickname: string | null) {
             this.enable = true;
             this.oshibkaOtBackenda = null;
             this.loader = false;
-            this.form = new FormaIzmeneniyaEmailStore(accountId, oldEmail)
+            this.form = new FormaIzmeneniyaNicknameStore(accountId, oldNickname || "")
         },
         zakritFormu() {
             this.enable = false;
-            this.form = new FormaIzmeneniyaEmailStore()
+            this.form = new FormaIzmeneniyaNicknameStore()
         },
         async otpravitFormu() {
             this.loader = true;
-            const response = await AccountService.izmenitEmaildminom(this.form);
+            const response = await AccountService.izmenitNickAdminom(this.form);
 
             this.loader = false;
             if (response.status === "success") {

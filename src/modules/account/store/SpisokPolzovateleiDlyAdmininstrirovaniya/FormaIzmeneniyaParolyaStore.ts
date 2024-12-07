@@ -40,7 +40,7 @@ export const useFormaIzmeneniyaParolya = defineStore('FormaIzmeneniyaParolya', {
         },
         async otpravitFormu() {
             this.loader = true;
-            const response = await AccountService.izmenitParol(this.form);
+            const response = await AccountService.izmenitParolAdminom(this.form);
 
             this.loader = false;
             if (response.status === "success") {

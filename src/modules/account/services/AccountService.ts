@@ -12,6 +12,12 @@ import {
 import {ApiModelDlyIzmeneniyaParolya} from "@/modules/account/services/model/ApiModelDlyIzmeneniyaParolya";
 import {ApiModelDlyIzmeneniyaEmail} from "@/modules/account/services/model/ApiModelDlyIzmeneniyaEmail";
 import {ZaprosNaIzmenenieYazika} from "@/modules/account/services/model/ZaprosNaIzmenenieYazika";
+import {ZaprosNaIzmenenieParolya} from "@/modules/account/services/model/ZaprosNaIzmenenieParolya";
+import {ZaprosNaIzmenenieNika} from "@/modules/account/services/model/ZaprosNaIzmenenieNika";
+import {
+    OtvetNaPoluchenieNastroekPolzovatelya
+} from "@/modules/account/services/model/OtvetNaPoluchenieNastroekPolzovatelya";
+import {ZaprosNaIzmenenieNikaAdminom} from "@/modules/account/services/model/ZaprosNaIzmenenieNikaAdminom";
 
 class AccountService {
     login(login: string|null, password: string|null) {
@@ -38,16 +44,32 @@ class AccountService {
         return apiClient.post<null>('/account/unblockByAdmin', form);
     }
 
-    izmenitParol(form: ApiModelDlyIzmeneniyaParolya) {
+    izmenitParolAdminom(form: ApiModelDlyIzmeneniyaParolya) {
         return apiClient.post<null>('/account/changePasswordByAdmin', form);
     }
 
-    izmenitEmail(form: ApiModelDlyIzmeneniyaEmail) {
+    izmenitSvoiParol(form: ZaprosNaIzmenenieParolya) {
+        return apiClient.post<null>('/account/changeMyPassword', form);
+    }
+
+    izmenitNickAdminom(form: ZaprosNaIzmenenieNikaAdminom) {
+        return apiClient.post<null>('/account/changeNicknameByAdmin', form);
+    }
+
+    izmenitSvoiNick(form: ZaprosNaIzmenenieNika) {
+        return apiClient.post<null>('/account/changeMyNickname', form);
+    }
+
+    izmenitEmaildminom(form: ApiModelDlyIzmeneniyaEmail) {
         return apiClient.post<null>('/account/changeEmailByAdmin', form);
     }
 
     izmenitYazik(form: ZaprosNaIzmenenieYazika) {
         return apiClient.post<null>('/account/changeMyLocale', form);
+    }
+
+    poluchitNastroikiPolzovatelya() {
+        return apiClient.post<OtvetNaPoluchenieNastroekPolzovatelya>('/account/poluchitNastroikiPolzovatelya', {});
     }
 }
 

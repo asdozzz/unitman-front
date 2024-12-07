@@ -32,14 +32,16 @@
         "block": "block",
         "unblock": "unblock",
         "change_password": "change password",
-        "change_email": "change email"
+        "change_email": "change email",
+        "change_nickname": "change nickname"
       },
       "card": {
         "labels": {
           "email": "Email",
           "id":"Id",
           "role": "Role",
-          "blocked":"Blocked"
+          "blocked":"Blocked",
+          "nickname":"Nickname"
         }
       }
     },
@@ -74,7 +76,20 @@
           "email": "Email",
           "password": "Password",
           "role": "Role",
-          "locale": "Language"
+          "locale": "Language",
+          "nickname": "Nickname"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "form_change_nickname": {
+      "caption": "Change Nickname",
+      "fields": {
+        "labels": {
+          "new_nickname": "New Nickname"
         }
       },
       "buttons": {

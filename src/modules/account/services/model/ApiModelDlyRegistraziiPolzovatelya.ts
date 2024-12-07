@@ -3,4 +3,5 @@ export type ApiModelDlyRegistraziiPolzovatelya = {
     password: string;
     roles: string;
     locale: string;
+    nickname: string | null;
 }

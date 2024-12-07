@@ -6,12 +6,14 @@ export class FormaDobavleniyaPolzovatelya {
     password: string;
     roles: string;
     locale: string;
+    nickname: string | null;
 
-    constructor(locale: string = "", email: string = "", password: string = "", roles: string = "") {
+    constructor(locale: string = "", email: string = "", password: string = "", roles: string = "", nickname: string | null = null) {
         this.email = email;
         this.password = password;
         this.roles = roles;
         this.locale = locale;
+        this.nickname = nickname;
     }
 }
 

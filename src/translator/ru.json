@@ -32,14 +32,16 @@
         "block": "Заблокировать",
         "unblock": "Разблокировать",
         "change_password": "Изменить пароль",
-        "change_email": "Изменить email"
+        "change_email": "Изменить email",
+        "change_nickname": "Изменить никнейм"
       },
       "card": {
         "labels": {
           "email": "Email",
           "id":"Ид",
           "role": "Роли",
-          "blocked":"Заблокирован"
+          "blocked":"Заблокирован",
+          "nickname":"Никнейм"
         }
       }
     },
@@ -74,7 +76,20 @@
           "email": "Email",
           "password": "Пароль",
           "role": "Роль",
-          "locale": "Язык"
+          "locale": "Язык",
+          "nickname": "Никнейм"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "form_change_nickname": {
+      "caption": "Изменить никнейм",
+      "fields": {
+        "labels": {
+          "new_nickname": "Новый никнейм"
         }
       },
       "buttons": {

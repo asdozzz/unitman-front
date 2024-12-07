@@ -4,4 +4,5 @@ export type ApiModelPolzovatelyaDlyAdministrorovaniya = {
     isBlocked: boolean;
     roles: string;
     password: string;
+    nickname: string | null;
 }

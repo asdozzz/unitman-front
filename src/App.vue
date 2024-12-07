@@ -36,7 +36,7 @@
                 <q-item clickable>
                   <q-item-section>{{$t('app.header.help')}}</q-item-section>
                 </q-item>
-                <q-item clickable>
+                <q-item clickable @click="accountSettings">
                   <q-item-section>{{$t('app.header.settings')}}</q-item-section>
                 </q-item>
                 <q-item clickable @click="logout">
@@ -155,6 +155,10 @@ async function changeLocal(newLocale: "en" | "ru") {
 function logout() {
   authStore.logout();
   router.push('/login');
+}
+
+function accountSettings() {
+  router.push('/account/settings');
 }
 </script>
 

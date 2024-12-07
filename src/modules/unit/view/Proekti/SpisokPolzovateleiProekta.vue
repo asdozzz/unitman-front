@@ -52,7 +52,7 @@ function dobavitPolzovatelyaVProekt() {
       <q-list style="width: 300px" v-else>
         <q-item>
           <q-item-section>
-            <q-select dense v-model="form.userId" option-value="id" option-label="email" map-options
+            <q-select dense v-model="form.userId" option-value="id" :option-label="(item: Polzovatel) => item.nickname ? item.nickname : item.email" map-options
                       :options="polzovateliDlyDobavleniyaVProekt()" label="New user" emit-value/>
           </q-item-section>
           <q-item-section side>

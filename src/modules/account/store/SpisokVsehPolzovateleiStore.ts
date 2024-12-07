@@ -25,7 +25,13 @@ export const useSpisokVsehPolzovateleiStore = defineStore('SpisokVsehPolzovatele
             const _this = this;
             return (id: string, defaultValue: string = ""): string => {
                 const polzovatel = _this.poluchitPolzovatelyaPoId(id);
-                return polzovatel ? polzovatel.email : defaultValue;
+                if (!polzovatel) {
+                    return defaultValue;
+                }
+                if (polzovatel.nickname) {
+                    return polzovatel.nickname;
+                }
+                return polzovatel.email;
             }
         },
         esliPolzovatelZablokirovan() {

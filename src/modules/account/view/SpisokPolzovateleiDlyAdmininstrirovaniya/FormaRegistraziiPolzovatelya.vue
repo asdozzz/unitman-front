@@ -32,6 +32,7 @@ async function otpravitFormu() {
       <q-input v-model="form.password" :label="$t('account.form_add.fields.labels.password')" />
       <q-select v-model="form.roles" :options="roles.spisok" :label="$t('account.form_add.fields.labels.role')" emit-value map-options/>
       <q-select v-model="form.locale" :options="locales.spisok" :label="$t('account.form_add.fields.labels.locale')" emit-value map-options/>
+      <q-input v-model="form.nickname" :label="$t('account.form_add.fields.labels.nickname')" />
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
