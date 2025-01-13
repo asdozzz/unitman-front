@@ -193,7 +193,8 @@
           "up": "up",
           "down": "down",
           "change_branch": "change_branch",
-          "set_config" : "set config"
+          "set_config" : "set config",
+          "actions" : "actions"
         }
       }
     }

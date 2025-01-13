@@ -3,6 +3,7 @@ import UnitiService from "@/modules/unit/services/UnitiService";
 import {
     OtvetNaPolucheniePeremenihUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
+import {KonfigPeremenoi} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 export class Peremenaya {
     konfig: KonfigPeremenoi;
@@ -12,21 +13,6 @@ export class Peremenaya {
         this.konfig = konfig;
         this.value = value.length > 0 ? value : konfig.defaultValue;
     }
-}
-
-type CollectionOptions = {
-    options?: {
-        id: string,
-        name: string
-    }[]
-}
-
-export type KonfigPeremenoi = {
-    id: string,
-    label: string,
-    type: string,
-    defaultValue: string,
-    options: CollectionOptions
 }
 
 class FormaZapolneniyaPeremenih {

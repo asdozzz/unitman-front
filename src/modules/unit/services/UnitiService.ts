@@ -34,6 +34,7 @@ import {ZaprosIdUnita} from "@/modules/unit/services/UnitiService/model/ZaprosId
 import {
     OtvetNaPoluchenieShagovZadachiRunnera
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPoluchenieShagovZadachiRunnera";
+import {ZaprosNaVipolnenieDeistviya} from "@/modules/unit/services/UnitiService/model/ZaprosNaVipolnenieDeistviya";
 
 class UnitiService {
     list(params: ZaprosSpiskaUnitov) {
@@ -96,6 +97,10 @@ class UnitiService {
         return apiClient.post<null>('/unit/ustanovitResultatZapuska', params);
     }
 
+    ustanovitResultatDeistviya(params: ModelDlyZapuskaUnita) {
+        return apiClient.post<null>('/unit/ustanovitResultatDeistviya', params);
+    }
+
     ostanovit(params: ModelDlyOstanovkiUnita) {
         return apiClient.post<null>('/unit/ostanovit', params);
     }
@@ -126,6 +131,10 @@ class UnitiService {
 
     zapolnitPeremenie(params: ModelDlyZapolneniyaPeremenihUnita) {
         return apiClient.post<null>('/unit/zapolnitPeremenie', params);
+    }
+
+    vipolnitDeistviye(params: ZaprosNaVipolnenieDeistviya) {
+        return apiClient.post<null>('/unit/vipolnitDeistviye', params);
     }
 
     poluchitKonfigUnita(params: ZaprosNaPoluchenieKonfigaUnita) {
