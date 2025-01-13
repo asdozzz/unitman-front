@@ -13,6 +13,8 @@ import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/S
 import FormaIzmeneniyaVetkiUnita from "@/modules/unit/view/Unit/FormaIzmeneniyaVetkiUnita.vue";
 import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
 import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
+import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
+import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
 
 const unitiStore = useSpisokUnitovStore();
 const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska, proekti } = storeToRefs(unitiStore);
@@ -25,6 +27,9 @@ const { enable: enableKonfigForm } = storeToRefs(konfigFormStore);
 
 const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
 const { enable: enableIzmenenieVetki } = storeToRefs(storFormiIzmeneniyaVetki);
+
+const storFormiDeistviy = storFormiDeistviyUnita();
+const { enable: enableFormiDeistviya } = storeToRefs(storFormiDeistviy);
 
 function openAddForm() {
   addFormStore.otkritFormu();
@@ -113,8 +118,8 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
       </template>
       <template v-else>
         <div v-if="spisok.length === 0">{{$t('unit.spisok_unitov.list.empty_result')}}</div>
-        <template v-for="item in spisok">
-          <UnitCard :item="item"></UnitCard>
+        <template v-for="item in spisok" :key="'unit_card'+item.id">
+          <UnitCard :item="item" ></UnitCard>
         </template>
       </template>
       <q-dialog v-model="enableAddForm" persistent transition-show="scale" transition-hide="scale" backdrop-filter="blur(4px)">
@@ -125,6 +130,9 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
       </q-dialog>
       <q-dialog v-model="enableIzmenenieVetki" persistent transition-show="scale" transition-hide="scale">
         <FormaIzmeneniyaVetkiUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
+      </q-dialog>
+      <q-dialog v-model="enableFormiDeistviya" persistent transition-show="scale" transition-hide="scale">
+        <FormaDeistviyUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
       </q-dialog>
     </div>
   </div>

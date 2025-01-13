@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import Unit, {Deistviye} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import { useRouter } from 'vue-router'
 import {storeToRefs} from "pinia";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
@@ -8,6 +8,7 @@ import {
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
+import {storFormiDeistviy, storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
 
 defineProps<{
   item: Unit,
@@ -21,6 +22,8 @@ const { getUnitLoader, showForceRemove, esliZapushen,getUserRoleByProjectIdAndUs
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 
 const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
+
+const storFormaDeistviy = storFormiDeistviyUnita();
 
 async function sobrat(id: string) {
   await unitiStore.sobratMoiUnit(id);
@@ -82,6 +85,10 @@ async function ustanovitResultatZapuskaMoegoUnita(id: string) {
   await unitiStore.ustanovitResultatZapuskaMoegoUnita(id);
 }
 
+async function ustanovitResultatDeistviya(id: string) {
+  await unitiStore.ustanovitResultatDeistviya(id);
+}
+
 async function ostanovitMoiUnit(id: string) {
   await unitiStore.ostanovitMoiUnit(id);
 }
@@ -91,6 +98,10 @@ async function ustanovitResultatOstanovkiMoegoUnita(id: string) {
 }
 function zapolnitPeremenie(id: string) {
   konfigFormStore.otkritFormu(id);
+}
+
+function pokazatFormuDeistviya(id: string, deistviye: Deistviye) {
+  storFormaDeistviy.otkritFormu(id, deistviye);
 }
 
 async function udalitSlomaniiUnit(id: string) {
@@ -174,6 +185,23 @@ const { userId } = storeToRefs(authStore);
       <q-btn v-if="command === 'nachatIzmenenieVetki'" size="sm" color="black" icon="account_tree" @click="otkritFormuIzmeneniyaVetkiUnita(item)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.change_branch')}}</q-tooltip>
       </q-btn>
+      <q-btn v-if="command === 'ustanovitResultatDeistviya'" size="sm" color="black" icon="sync" @click="ustanovitResultatDeistviya(item.id)" :loading="getUnitLoader(item.id)">
+        <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.sync')}}</q-tooltip>
+      </q-btn>
+
+      <q-btn v-if="command === 'vipolnitDeistvie' && item.deistviya.length > 0" size="sm" color="black" icon="apps" :loading="getUnitLoader(item.id)">
+        <q-menu>
+          <q-list>
+            <template :key="actionConfig.id" v-for="actionConfig in item.deistviya">
+              <q-item clickable v-close-popup @click="pokazatFormuDeistviya(item.id, actionConfig)">
+                <q-item-section>
+                  <q-item-label>{{ actionConfig.name }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-list>
+        </q-menu>
+      </q-btn>
     </template>
     <q-btn v-if="showForceRemove(item)" size="sm" color="black" icon="delete" @click="udalitSlomaniiUnit(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
@@ -181,6 +209,7 @@ const { userId } = storeToRefs(authStore);
     <q-btn v-if="esliZapushen(item)" size="sm" color="black" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.set_config')}}</q-tooltip>
     </q-btn>
+
   </template>
 
 </template>

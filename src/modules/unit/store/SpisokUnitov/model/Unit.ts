@@ -18,6 +18,28 @@ type Link = {
     startUri: string | null;
 }
 
+type CollectionOptions = {
+    options?: {
+        id: string,
+        name: string
+    }[]
+}
+
+export type KonfigPeremenoi = {
+    id: string,
+    label: string,
+    type: string,
+    defaultValue: string,
+    options: CollectionOptions
+}
+
+export type Deistviye = {
+    id: string;
+    name: string;
+    variables: KonfigPeremenoi[],
+    commands: string[]
+}
+
 export default class Unit {
     id: string = "";
     authorId: string = "";
@@ -39,6 +61,7 @@ export default class Unit {
     peremenie: Peremenaya[] = [];
     unitSozdanSystemoi: boolean = false;
     statistikaKonteinera: Statistika | null;
+    deistviya: Deistviye[] = [];
 
     constructor(
         data: {
@@ -61,7 +84,8 @@ export default class Unit {
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
             peremenie: Peremenaya[],
             unitSozdanSystemoi: boolean,
-            statistikaKonteinera: Statistika | null
+            statistikaKonteinera: Statistika | null,
+            deistviya: Deistviye[] | null,
         }
     ) {
         this.id = data.id;
@@ -85,5 +109,6 @@ export default class Unit {
         this.peremenie = data.peremenie;
         this.unitSozdanSystemoi = data.unitSozdanSystemoi;
         this.statistikaKonteinera = data.statistikaKonteinera;
+        this.deistviya = data.deistviya || [];
     }
 };

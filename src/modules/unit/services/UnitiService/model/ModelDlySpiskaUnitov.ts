@@ -18,6 +18,19 @@ type Link = {
     startUri: string | null;
 }
 
+type Deistviye = {
+    id: string;
+    name: string;
+    variables: {
+        id: string;
+        label: string;
+        type: string,
+        defaultValue: string,
+        options: Record<string, unknown>
+    }[],
+    commands: string[]
+}
+
 export default class ModelDlySpiskaUnitov {
     public id: string = "";
     public authorId: string = "";
@@ -39,5 +52,6 @@ export default class ModelDlySpiskaUnitov {
     public peremenie: Peremenaya[] = [];
     public unitSozdanSystemoi: boolean = false;
     public statistikaKonteinera: Statistika | null = null;
+    public deistviya: Deistviye[] = [];
 }
 
