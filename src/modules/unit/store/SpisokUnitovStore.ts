@@ -293,6 +293,19 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
+        async proveritKonteinerUnita(id: string) {
+            this.startUnitLoader(id);
+
+            const response = await UnitiService.proveritKonteinerUnita({ id })
+            this.stopUnitLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.obnovitUnit(id);
+
+            return response;
+        },
         async ostanovitMoiUnit(id: string) {
             this.startUnitLoader(id);
 

@@ -152,6 +152,11 @@ class UnitiService {
     poluchitShagiZadachiRunnera(params: { id: string }) {
         return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/unit/poluchitShagiZadachiRunnera', params);
     }
+
+    proveritKonteinerUnita(params: { id: string }) {
+        return apiClient.post<null>('/unit/proveritKonteinerUnita', params);
+    }
+
 }
 
 export default new UnitiService();
