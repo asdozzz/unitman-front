@@ -89,6 +89,10 @@ async function ustanovitResultatDeistviya(id: string) {
   await unitiStore.ustanovitResultatDeistviya(id);
 }
 
+async function proveritKonteinerUnita(id: string) {
+  await unitiStore.proveritKonteinerUnita(id);
+}
+
 async function ostanovitMoiUnit(id: string) {
   await unitiStore.ostanovitMoiUnit(id);
 }
@@ -188,6 +192,11 @@ const { userId } = storeToRefs(authStore);
       <q-btn v-if="command === 'ustanovitResultatDeistviya'" size="sm" color="black" icon="sync" @click="ustanovitResultatDeistviya(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.sync')}}</q-tooltip>
       </q-btn>
+      <q-btn v-if="command === 'proveritKonteinerUnita'" size="sm" color="black" icon="sync" @click="proveritKonteinerUnita(item.id)" :loading="getUnitLoader(item.id)">
+        <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.check_container')}}</q-tooltip>
+      </q-btn>
+
+
 
       <q-btn v-if="command === 'vipolnitDeistvie' && item.deistviya.length > 0" size="sm" color="black" icon="apps" :loading="getUnitLoader(item.id)">
         <q-menu>

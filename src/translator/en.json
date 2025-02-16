@@ -194,7 +194,8 @@
           "down": "down",
           "change_branch": "change_branch",
           "set_config" : "set config",
-          "actions" : "actions"
+          "actions" : "actions",
+          "check_container": "check unit container"
         }
       }
     }
