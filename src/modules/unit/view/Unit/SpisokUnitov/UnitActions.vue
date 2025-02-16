@@ -7,7 +7,6 @@ import {
   useFormaZapolneniyaPeremenihUnitaStore
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import {useAuthStore} from "@/modules/account/store/auth";
-import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
 
 defineProps<{
@@ -20,8 +19,6 @@ const unitiStore = useSpisokUnitovStore();
 const { getUnitLoader, showForceRemove, esliZapushen,getUserRoleByProjectIdAndUserId } = storeToRefs(unitiStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
-
-const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
 
 const storFormaDeistviy = storFormiDeistviyUnita();
 
@@ -116,12 +113,15 @@ function otkritOknoSZadachamiRunnera(id: string) {
   router.push({ name: 'unit_jobs', params: { id }});
 }
 
+/*
+const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
 function otkritFormuIzmeneniyaVetkiUnita(unit: Unit) {
   storFormiIzmeneniyaVetki.otkritFormu(unit)
 }
+*/
 
 const authStore = useAuthStore();
-const { userId } = storeToRefs(authStore);
+const { userId, isAdmin } = storeToRefs(authStore);
 
 </script>
 
@@ -134,7 +134,7 @@ const { userId } = storeToRefs(authStore);
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.update')}}</q-tooltip>
     </q-btn>
     <template v-for="command in item.commands">
-      <q-btn v-if="command === 'nachatUdalenie'" size="sm" color="black" icon="delete" @click="udalit(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatUdalenie' || isAdmin" size="sm" color="black" icon="delete" @click="udalit(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
       </q-btn>
       <q-btn v-if="command === 'nachatUdaleniePosleZapuska'" size="sm" color="black" icon="delete" @click="udalitUnitPosleZapuska(item.id)" :loading="getUnitLoader(item.id)">
@@ -186,18 +186,15 @@ const { userId } = storeToRefs(authStore);
       <q-btn v-if="command === 'ustanovitResultatOstanovki'" size="sm" color="black" icon="sync" @click="ustanovitResultatOstanovkiMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.sync')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatIzmenenieVetki'" size="sm" color="black" icon="account_tree" @click="otkritFormuIzmeneniyaVetkiUnita(item)" :loading="getUnitLoader(item.id)">
+<!--      <q-btn v-if="command === 'nachatIzmenenieVetki'" size="sm" color="black" icon="account_tree" @click="otkritFormuIzmeneniyaVetkiUnita(item)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.change_branch')}}</q-tooltip>
-      </q-btn>
+      </q-btn>-->
       <q-btn v-if="command === 'ustanovitResultatDeistviya'" size="sm" color="black" icon="sync" @click="ustanovitResultatDeistviya(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.sync')}}</q-tooltip>
       </q-btn>
       <q-btn v-if="command === 'proveritKonteinerUnita'" size="sm" color="black" icon="sync" @click="proveritKonteinerUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.check_container')}}</q-tooltip>
       </q-btn>
-
-
-
       <q-btn v-if="command === 'vipolnitDeistvie' && item.deistviya.length > 0" size="sm" color="black" icon="apps" :loading="getUnitLoader(item.id)">
         <q-menu>
           <q-list>
