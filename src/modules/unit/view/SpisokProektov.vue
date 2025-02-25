@@ -50,7 +50,7 @@ function openEditForm(proekt: Proekt) {
 }
 
 function openHookSettingsForm(proekt: Proekt) {
-  hookSettingsStore.otkritFormu(new HookSettingsForm(proekt.id, proekt.nastroikiHukaProekta.avtosozdanie, proekt.nastroikiHukaProekta.avtoobnovlenie, proekt.nastroikiHukaProekta.avtoudalenie))
+  hookSettingsStore.otkritFormu(new HookSettingsForm(proekt.id, proekt.nastroikiHukaProekta.avtosozdanie, proekt.nastroikiHukaProekta.avtoobnovlenie, proekt.nastroikiHukaProekta.avtoudalenie, proekt.nastroikiHukaProekta.obnovlenieBezSbrosaPodgotovki))
 }
 
 function pokazatSpisokPolzovatelei(id: string) {
