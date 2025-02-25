@@ -3,4 +3,5 @@ export type ZaprosNaObnovlenieNastroekHuka = {
     avtosozdanie: boolean;
     avtoobnovlenie: boolean;
     avtoudalenie: boolean;
+    obnovlenieBezSbrosaPodgotovki: boolean;
 }

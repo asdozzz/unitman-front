@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import {computed, ref} from 'vue'
 import { fromUnixTime } from "date-fns";
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import dayjs from 'dayjs';
@@ -16,38 +16,41 @@ function convertDate(unixtime: number | null): string {
   return dayjs(fromUnixTime(unixtime)).fromNow();
 }
 
-let headerColor = 'bg-blue-8';
-const timestamp = Math.floor(Date.now() / 1000);
-const week = 60*60*24*7;
-const week2 = 60*60*24*7*2;
-const month = 60*60*24*7*4;
-if (props.item.unixtimePoslednegoObnovleniyaUnita) {
-  if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week) {
-    headerColor = 'bg-indigo-8';
+const itemHeaderClass = computed(() => {
+  let headerColor = 'bg-blue-8';
+  const timestamp = Math.floor(Date.now() / 1000);
+  const week = 60*60*24*7;
+  const week2 = 60*60*24*7*2;
+  const month = 60*60*24*7*4;
+  if (props.item.unixtimePoslednegoObnovleniyaUnita) {
+    if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week) {
+      headerColor = 'bg-indigo-8';
+    }
+    if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week2) {
+      headerColor = 'bg-blue-grey-8';
+    }
+    if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > month) {
+      headerColor = 'bg-grey-8';
+    }
   }
-  if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week2) {
-    headerColor = 'bg-blue-grey-8';
+
+  let classHeader = '';
+
+  if (props.item.error) {
+    classHeader = 'bg-red text-white';
+  } else {
+    classHeader = `text-white ${headerColor}`;
   }
-  if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > month) {
-    headerColor = 'bg-grey-8';
-  }
-}
 
-let classHeader = '';
-
-if (props.item.error) {
-  classHeader = 'bg-red text-white';
-} else {
-  classHeader = `text-white ${headerColor}`;
-}
-
+  return classHeader;
+});
 
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 </script>
 
 <template>
   <q-card class="q-mr-md q-mb-md" style="width: 335px">
-    <q-card-section class="q-py-xs q-px-sm" :class="classHeader">
+    <q-card-section class="q-py-xs q-px-sm" :class="itemHeaderClass">
       <div class="text-h6">
         {{ item.name }}.{{ item.projectName }}
       </div>
