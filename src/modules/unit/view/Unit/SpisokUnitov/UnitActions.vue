@@ -133,13 +133,14 @@ const { userId, isAdmin } = storeToRefs(authStore);
     <q-btn size="md" color="black" v-if="item.waitResultFromRunner" icon="refresh" @click="obnovit(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.update')}}</q-tooltip>
     </q-btn>
+    <q-btn v-if="item.commands.includes('nachatUdaleniePosleZapuska')" size="sm" color="black" icon="delete" @click="udalitUnitPosleZapuska(item.id)" :loading="getUnitLoader(item.id)">
+      <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
+    </q-btn>
+    <q-btn v-else-if="item.commands.includes('nachatUdalenie') || isAdmin" size="sm" color="black" icon="delete" @click="udalit(item.id)" :loading="getUnitLoader(item.id)">
+      <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
+    </q-btn>
     <template v-for="command in item.commands">
-      <q-btn v-if="command === 'nachatUdalenie' || isAdmin" size="sm" color="black" icon="delete" @click="udalit(item.id)" :loading="getUnitLoader(item.id)">
-        <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
-      </q-btn>
-      <q-btn v-if="command === 'nachatUdaleniePosleZapuska'" size="sm" color="black" icon="delete" @click="udalitUnitPosleZapuska(item.id)" :loading="getUnitLoader(item.id)">
-        <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
-      </q-btn>
+
       <q-btn v-if="command === 'ustanovitResultatUdaleniya'" size="sm" color="black" icon="sync" @click="ustanovitResultatUdaleniyaMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.sync')}}</q-tooltip>
       </q-btn>
