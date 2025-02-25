@@ -29,6 +29,7 @@ async function otpravitFormu() {
       <q-toggle v-model="form.avtosozdanie" label="Auto create unit" /><br>
       <q-toggle v-model="form.avtoobnovlenie" label="Auto update unit" /><br>
       <q-toggle v-model="form.avtoudalenie" label="Auto delete unit" /><br>
+      <q-toggle v-model="form.obnovlenieBezSbrosaPodgotovki" label="Updating without resetting the preparation" /><br>
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

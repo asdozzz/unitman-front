@@ -6,12 +6,14 @@ export class HookSettingsForm {
     avtosozdanie: boolean;
     avtoobnovlenie: boolean;
     avtoudalenie: boolean;
+    obnovlenieBezSbrosaPodgotovki: boolean;
 
-    constructor(id: string = "", avtosozdanie: boolean = false, avtoobnovlenie: boolean = true, avtoudalenie: boolean = true) {
+    constructor(id: string = "", avtosozdanie: boolean = false, avtoobnovlenie: boolean = true, avtoudalenie: boolean = true, obnovlenieBezSbrosaPodgotovki: boolean = false) {
         this.id = id;
         this.avtosozdanie = avtosozdanie;
         this.avtoobnovlenie = avtoobnovlenie;
         this.avtoudalenie = avtoudalenie;
+        this.obnovlenieBezSbrosaPodgotovki = obnovlenieBezSbrosaPodgotovki;
     }
 }
 
