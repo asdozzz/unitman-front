@@ -13,6 +13,7 @@ type NastroikiHukaProekta = {
     avtosozdanie: boolean;
     avtoobnovlenie: boolean;
     avtoudalenie: boolean;
+    obnovlenieBezSbrosaPodgotovki: boolean;
 }
 
 export default class ModelDlySpiskaProektov {
@@ -32,6 +33,7 @@ export default class ModelDlySpiskaProektov {
         avtosozdanie:false,
         avtoobnovlenie: true,
         avtoudalenie: true,
+        obnovlenieBezSbrosaPodgotovki: false,
     };
     public waitResultRunner: boolean = false;
 }
