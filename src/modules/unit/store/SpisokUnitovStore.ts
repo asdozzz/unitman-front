@@ -5,6 +5,7 @@ import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
 import ModelDlySpiskaUnitov from "@/modules/unit/services/UnitiService/model/ModelDlySpiskaUnitov";
+import {safeJsonParse} from "@/utils/json";
 
 type NastroikiSpiska = {
     filter: {
@@ -34,6 +35,8 @@ class Proekt {
     }
 }
 
+const FILTER_UNITOV_STORAGE_KEY = 'FILTER_UNITOV_STORAGE_KEY';
+
 export type SpisokUnitovState = {
     nastroikiSpiska: NastroikiSpiska;
     spisok: Unit[];
@@ -50,17 +53,29 @@ export type SpisokUnitovState = {
 
 export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
     state: (): SpisokUnitovState => {
-        return {
-            nastroikiSpiska: {
-                filter: {
-                    onlyMine: false,
-                    name: null,
-                    branch: null,
-                    projectId: null
-                },
-                limit: 100,
-                offset: 0
+
+        const nastroikiIzLocalStorageAsJson = localStorage.getItem(FILTER_UNITOV_STORAGE_KEY);
+
+        let nastroiki: NastroikiSpiska = {
+            filter: {
+                onlyMine: false,
+                name: null,
+                branch: null,
+                projectId: null
             },
+            limit: 100,
+            offset: 0
+        };
+
+        if (nastroikiIzLocalStorageAsJson) {
+            const nastroikiIzLocalStorage: NastroikiSpiska | null = safeJsonParse<NastroikiSpiska>(nastroikiIzLocalStorageAsJson) || null;
+            if (nastroikiIzLocalStorage) {
+                nastroiki = nastroikiIzLocalStorage;
+            }
+        }
+
+        return {
+            nastroikiSpiska: nastroiki,
             spisok:[],
             proekti: {
                 spisok: [],
@@ -71,7 +86,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             loaderObnovleniyaUnita:false,
             unitLoaders: {},
             pollingId: null,
-        }
+        };
     },
     actions: {
         startUnitLoader(id: string) {
@@ -89,6 +104,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         async poluchitSpisokUnitov() {
             this.loaderSpiskaUnitov = true;
+            localStorage.setItem(FILTER_UNITOV_STORAGE_KEY, JSON.stringify(this.nastroikiSpiska))
             const response = await UnitiService.list(this.nastroikiSpiska);
             if (response.status === "success") {
                 this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
