@@ -15,6 +15,12 @@ type DashboardState = {
     oshibkaStatistikiPoProektam: string | null
 };
 
+type ObshayaStata = {
+    total: number;
+    active: number;
+    deleted: number;
+}
+
 export const storeDashborda = defineStore('storeDashborda', {
     state: (): DashboardState => {
         return {
@@ -41,5 +47,22 @@ export const storeDashborda = defineStore('storeDashborda', {
 
             this.loaderStatistikiPoProektam = false;
         },
+    },
+    getters: {
+        obshayaStata(): ObshayaStata {
+            const result = {
+                total: 0,
+                active: 0,
+                deleted: 0
+            }
+
+            this.statistikaPoProektam.forEach((projectStata: StatistikaPoProektam) => {
+                result.total += projectStata.total;
+                result.active += projectStata.active;
+                result.deleted += projectStata.deleted;
+            });
+
+            return result;
+        }
     }
 });
