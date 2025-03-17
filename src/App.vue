@@ -51,10 +51,6 @@
       <q-drawer
           elevated
           v-if="showedMenu.length > 0"
-          :mini="miniState"
-          @mouseenter="miniState = false"
-          @mouseleave="miniState = true"
-          show-if-above
           v-model="leftDrawerOpen"
           side="left"
           :width="200"
@@ -106,19 +102,30 @@ import {computed, onMounted, reactive, ref} from "vue";
 import 'dayjs/locale/ru'
 import 'dayjs/locale/en'
 import dayjs from "dayjs";
+import {safeJsonParse} from "@/utils/json";
 
+const NASTROIKI_STORAGE_KEY = 'AppSettings';
 
+type AppSettings = {
+  leftDrawerOpen: boolean;
+}
+
+const defoltnieNastroiki: AppSettings = {
+  leftDrawerOpen: false
+};
+
+const nastroiki: AppSettings = safeJsonParse<AppSettings>(localStorage.getItem(NASTROIKI_STORAGE_KEY) || "") || defoltnieNastroiki;
 
 const router = useRouter();
-const route=useRoute();
-const path = computed(() =>route.path)
+const route = useRoute();
+const path = computed(() => route.path)
 
 const authStore = useAuthStore();
 const { isAuth, email, isAdmin, loaderIzmemeniyaYazika, getLocale } = storeToRefs(authStore);
 
 let currentLocale = ref("");
-const leftDrawerOpen = ref(false);
-const miniState = ref(false);
+const leftDrawerOpen = ref(nastroiki.leftDrawerOpen);
+//const miniState = ref(false);
 
 onMounted(() => {
   currentLocale.value = getLocale.value;
@@ -146,6 +153,13 @@ const showedMenu = computed(() => {
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
+  sohranitNastroikiVStor({
+    leftDrawerOpen: leftDrawerOpen.value
+  })
+}
+
+function sohranitNastroikiVStor(newValue: AppSettings) {
+  localStorage.setItem(NASTROIKI_STORAGE_KEY, JSON.stringify(newValue));
 }
 
 async function changeLocal(newLocale: "en" | "ru") {

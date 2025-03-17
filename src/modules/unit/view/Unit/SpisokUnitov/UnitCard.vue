@@ -75,12 +75,12 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
       </div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}</div>
-<!--      <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
+      <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
         <div class="row">
           <div class="col-3"><strong>cpu: {{item.statistikaKonteinera.cpuPercent}}</strong></div>
           <div class="col"><strong>mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</strong></div>
         </div>
-      </div>-->
+      </div>
     </q-card-section>
 
     <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki">
