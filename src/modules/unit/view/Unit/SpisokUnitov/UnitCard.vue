@@ -122,7 +122,7 @@ function showRemovePrompt() {
       </div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.projectName')}}:</strong> {{ item.projectName }}</div>
-      <div class="text-left fs-12" style="white-space: pre-line;word-break: break-all"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
+      <div class="text-left fs-12" style="white-space: pre-line;word-break: break-all"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}</div>
       <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
         <div class="row">
           <div class="col-3"><strong>cpu: {{item.statistikaKonteinera.cpuPercent}}</strong></div>
