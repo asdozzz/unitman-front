@@ -49,7 +49,7 @@
     />
     <div class="row">
       <div class="col q-pb-sm">
-        <q-btn size="sm" color="primary" icon="add" @click="openAddForm">
+        <q-btn padding="5px 6px" square size="md" color="primary" icon="add" @click="openAddForm">
           <q-tooltip>{{ $t('unit.spisok_rep.buttons.add') }}</q-tooltip>
         </q-btn>
       </div>
@@ -61,7 +61,7 @@
       <template v-else>
 
         <template v-for="item in spisok">
-          <q-card class="q-mr-md q-mb-md" style="width: 350px">
+          <q-card square class="q-mr-md q-mb-md" style="width: 350px">
             <q-card-section class="bg-primary text-white q-py-sm">
               <div class="text-subtitle2 text-left"> {{ item.name }}</div>
             </q-card-section>
@@ -73,13 +73,13 @@
             <q-separator dark />
 
             <q-card-actions>
-              <q-btn size="sm" color="black" icon="delete" @click="udalit(item.id)">
+              <q-btn padding="5px 6px" square size="sm" color="black" icon="delete" @click="udalit(item.id)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.delete')}}</q-tooltip>
               </q-btn>
-              <q-btn size="sm" color="black" icon="edit" @click="openEditForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="black" icon="edit" @click="openEditForm(item)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.edit')}}</q-tooltip>
               </q-btn>
-              <q-btn size="sm" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
+              <q-btn padding="5px 6px" square size="sm" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.confirm')}}</q-tooltip>
               </q-btn>
             </q-card-actions>

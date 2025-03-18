@@ -24,9 +24,9 @@ onMounted(() => {
         <div v-html="oshibkaStatistikiPoProektam"></div>
       </template>
       <template v-else>
-        <q-card class="q-ma-md" style="min-width: 350px">
+        <q-card square class="q-ma-md" style="min-width: 350px">
           <q-card-section class="bg-primary text-white q-py-sm">
-            <div class="text-h5">All projects</div>
+            <div class="text-h6">All projects</div>
           </q-card-section>
 
           <q-card-section class="q-pt-none">
@@ -45,9 +45,9 @@ onMounted(() => {
           </q-card-section>
         </q-card>
         <template v-for="item in statistikaPoProektam">
-          <q-card class="q-ma-md" style="min-width: 350px">
+          <q-card square class="q-ma-md" style="min-width: 350px">
             <q-card-section class="bg-primary text-white q-py-sm">
-              <div class="text-h5">{{ item.projectName }}</div>
+              <div class="text-h6">{{ item.projectName }}</div>
             </q-card-section>
 
             <q-card-section class="q-pt-none">

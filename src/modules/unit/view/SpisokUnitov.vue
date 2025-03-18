@@ -77,16 +77,16 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
     <div class="row wrap items-start content-start q-pb-md">
 
      <div class="col-auto">
-        <q-input style="width: 335px"
+        <q-input square style="width: 235px"
             dense outlined v-model="nastroikiSpiska.filter.name"  :label="$t('unit.spisok_unitov.filter.unit_name')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
       <div class="col-auto q-pl-md">
-        <q-input style="width: 335px"
+        <q-input square style="width: 235px"
             dense outlined v-model="nastroikiSpiska.filter.branch" :label="$t('unit.spisok_unitov.filter.branch')" @update:model-value="unitiStore.poluchitSpisokUnitov()"/>
       </div>
 
       <div class="col-auto q-pl-md">
-        <q-select style="width: 335px"
+        <q-select square style="width: 235px"
             dense outlined v-model="nastroikiSpiska.filter.projectId" @update:model-value="unitiStore.poluchitSpisokUnitov()"
                   :options="proekti.spisok" :label="$t('unit.spisok_unitov.filter.project')" emit-value map-options clearable/>
       </div>
@@ -100,11 +100,11 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
               @update:model-value="unitiStore.poluchitSpisokUnitov()"
           />
 
-          <q-btn class="q-ml-md" size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
+          <q-btn square padding="5px 6px" class="q-ml-md" size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
             <q-tooltip>{{$t('unit.spisok_unitov.buttons.refresh')}}</q-tooltip>
           </q-btn>
 
-          <q-btn class="q-ml-md" size="md" color="primary" icon="add" @click="openAddForm">
+          <q-btn square padding="5px 6px" class="q-ml-md" size="md" color="primary" icon="add" @click="openAddForm">
             <q-tooltip>{{$t('unit.spisok_unitov.buttons.add')}}</q-tooltip>
           </q-btn>
 

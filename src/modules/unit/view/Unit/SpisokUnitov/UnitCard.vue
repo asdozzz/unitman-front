@@ -1,20 +1,23 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
-import { fromUnixTime } from "date-fns";
 import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-dayjs.extend(relativeTime);
+import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
+import {useAuthStore} from "@/modules/account/store/auth";
+import {storeToRefs} from "pinia";
+import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
+import {convertDate} from "@/utils/dates";
+
 
 const expanded = ref(false);
 const props = defineProps<{
   item: Unit,
 }>();
 
-function convertDate(unixtime: number | null): string {
-  if (!unixtime) return '';
-  return dayjs(fromUnixTime(unixtime)).fromNow();
-}
+const authStore = useAuthStore();
+const { isAdmin } = storeToRefs(authStore);
+
+const unitiStore = useSpisokUnitovStore();
+const {getUnitLoader, showForceRemove} = storeToRefs(unitiStore);
 
 const itemHeaderClass = computed(() => {
   let headerColor = 'bg-blue-8';
@@ -45,17 +48,61 @@ const itemHeaderClass = computed(() => {
   return classHeader;
 });
 
-import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
+const isShowRemoveBtn = computed(() => {
+  if (showForceRemove) {
+    return true;
+  }
+
+  return isAdmin;
+});
+
+
+async function udalit() {
+  await unitiStore.udalit(props.item);
+  prompt.value = false;
+}
+
+const prompt =  ref(false);
+
+function showRemovePrompt() {
+  prompt.value = true;
+}
+
 </script>
 
 <template>
-  <q-card class="q-mr-md q-mb-md" style="width: 335px">
+  <q-dialog v-model="prompt" persistent>
+    <q-card style="min-width: 350px">
+      <q-card-section>
+        <div class="text-h6">Вы уверены, что хотите этого?</div>
+      </q-card-section>
+
+      <q-card-actions align="right" class="text-primary">
+        <q-btn flat label="Нет" v-close-popup />
+        <q-btn flat label="Да" @click="udalit()" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+  <q-card square class="q-mr-md q-mb-md" style="width: 335px">
     <q-card-section class="q-py-xs q-px-sm" :class="itemHeaderClass">
-      <div class="text-h6">
-        {{ item.name }}.{{ item.projectName }}
+      <div class="row">
+        <div class="col" >
+          <div class="text-h6">
+            {{ item.name }}
+          </div>
+        </div>
+        <div class="col-auto">
+          <q-btn size="sm" flat round icon="close" v-if="isShowRemoveBtn" @click="showRemovePrompt" :loading="getUnitLoader(props.item.id)">
+            <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
+          </q-btn>
+        </div>
       </div>
-      <div class="text-subtitle2 fs-12">
-        {{$t('unit.spisok_unitov.card.header.by')}} {{ item.authorName }}, {{$t('unit.spisok_unitov.card.header.updated_at')}} {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}
+      <div class="row">
+        <div class="col">
+          <div class="text-subtitle2 fs-12">
+            {{$t('unit.spisok_unitov.card.header.by')}} {{ item.authorName }}, {{$t('unit.spisok_unitov.card.header.updated_at')}} {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}
+          </div>
+        </div>
       </div>
     </q-card-section>
     <q-card-section class="q-pa-sm">
@@ -74,7 +121,8 @@ import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
         </template>
       </div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
-      <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}</div>
+      <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.projectName')}}:</strong> {{ item.projectName }}</div>
+      <div class="text-left fs-12" style="white-space: pre-line;word-break: break-all"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</div>
       <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
         <div class="row">
           <div class="col-3"><strong>cpu: {{item.statistikaKonteinera.cpuPercent}}</strong></div>

@@ -179,7 +179,8 @@
         },
         "fields": {
           "id": "Ид",
-          "branch": "Ветка"
+          "branch": "Ветка",
+          "projectName": "Проект"
         },
         "buttons": {
           "jobs": "Логи",

@@ -179,7 +179,8 @@
         },
         "fields": {
           "id": "Id",
-          "branch": "Branch"
+          "branch": "Branch",
+          "projectName": "Project"
         },
         "buttons": {
           "jobs": "jobs",

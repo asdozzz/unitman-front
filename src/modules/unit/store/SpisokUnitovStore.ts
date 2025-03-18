@@ -348,6 +348,15 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
+        async udalit(unit: Unit) {
+            if (unit.commands.includes('udalitVruchnuyu')) {
+                await this.udalitSlomaniiUnit(unit.id);
+            } else if (unit.commands.includes('nachatUdaleniePosleZapuska')) {
+                await this.udalitUnitPosleZapuska(unit.id);
+            } else {
+                await this.udalitMoiUnit(unit.id);
+            }
+        },
         async udalitMoiUnit(id: string) {
             this.startUnitLoader(id);
 
@@ -357,7 +366,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.data.message);
             }
 
-            //this.obnovitUnit(id);
+            this.obnovitUnit(id);
 
             return response;
         },
@@ -423,7 +432,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         showForceRemove() {
             return (item: Unit): boolean => {
-                return item.commands.some((command: string) => ['udalitVruchnuyu'].includes(command))
+                return item.commands.some((command: string) => ['udalitVruchnuyu','nachatUdaleniePosleZapuska','nachatUdalenie'].includes(command))
             }
         },
         esliZapushen() {

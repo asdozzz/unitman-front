@@ -30,7 +30,7 @@ function convertDate(unixtime: number): string {
         size="3em"
     />
     <div v-else class="flex flex-center column">
-      <div class="row" style="min-height: 400px; width: 100%; padding: 24px;">
+      <div class="row" style="min-height: 400px; width: 100%;">
         <div class="full-height full-width row inline wrap justify-start items-start content-start">
           <div class="col-9" style="overflow: hidden;">
             <q-card class="no-border-radius bg-grey-10">
@@ -38,7 +38,7 @@ function convertDate(unixtime: number): string {
                 <div v-for="(step, i) in selectJob.steps">
                   <div class="text-light-green-14 fs-12">
                     <div class="row">
-                      <div class="col"># {{step.command}}</div>
+                      <div class="col"><pre class="bash-output">{{step.command}}</pre></div>
                       <div class="col-auto">
                         <div v-if="i===0">
                           {{convertDate(step.unixtime)}}
@@ -50,8 +50,12 @@ function convertDate(unixtime: number): string {
                     </div>
 
                   </div>
-                  <div v-if="step.success" class="text-grey-1 fs-12" v-html="step.response.split('\n').join('<br>')"></div>
-                  <div v-if="!step.success" class="text-red-8 fs-12" v-html="step.response.split('\n').join('<br>')"></div>
+                  <div v-if="step.success" class="text-grey-1 fs-12">
+                    <pre class="bash-output">{{step.response}}</pre>
+                  </div>
+                  <div v-if="!step.success" class="text-red-8 fs-12">
+                    <pre class="bash-output">{{step.response}}</pre>
+                  </div>
 
                 </div>
               </q-card-section>
@@ -78,5 +82,10 @@ function convertDate(unixtime: number): string {
 <style>
 .fs-12 {
   font-size: 12px;
+}
+
+.bash-output {
+  margin: 0;
+  white-space: pre-line;
 }
 </style>
