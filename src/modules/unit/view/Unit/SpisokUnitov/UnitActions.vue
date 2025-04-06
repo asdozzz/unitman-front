@@ -97,10 +97,6 @@ function pokazatFormuDeistviya(id: string, deistviye: Deistviye) {
   storFormaDeistviy.otkritFormu(id, deistviye);
 }
 
-async function udalitSlomaniiUnit(id: string) {
-  await unitiStore.udalitSlomaniiUnit(id);
-}
-
 function otkritOknoSZadachamiRunnera(id: string) {
   router.push({ name: 'unit_jobs', params: { id }});
 }
