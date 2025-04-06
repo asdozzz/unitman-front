@@ -440,6 +440,11 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 return item.state === 'USPESHNO_ZAPUSHEN';
             }
         },
+        esliJdemRunner() {
+            return (item: Unit): boolean => {
+                return item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki;
+            }
+        },
         getUserRoleByProjectIdAndUserId() {
             const store = this;
             return (projectId: string, userId: string): string | null => {

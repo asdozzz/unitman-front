@@ -21,7 +21,7 @@ onMounted(() => {
           size="3em"
       />
       <template v-if="oshibkaStatistikiPoProektam">
-        <div v-html="oshibkaStatistikiPoProektam"></div>
+        <div class="q-pa-md" v-html="oshibkaStatistikiPoProektam"></div>
       </template>
       <template v-else>
         <q-card square class="q-ma-md" style="min-width: 350px">

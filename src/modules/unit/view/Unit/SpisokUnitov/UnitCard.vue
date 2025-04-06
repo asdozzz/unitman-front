@@ -17,7 +17,7 @@ const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
 
 const unitiStore = useSpisokUnitovStore();
-const {getUnitLoader, showForceRemove} = storeToRefs(unitiStore);
+const {getUnitLoader, showForceRemove, esliJdemRunner} = storeToRefs(unitiStore);
 
 const itemHeaderClass = computed(() => {
   let headerColor = 'bg-blue-8';
@@ -87,19 +87,19 @@ function showRemovePrompt() {
     <q-card-section class="q-py-xs q-px-sm" :class="itemHeaderClass">
       <div class="row">
         <div class="col" >
-          <div class="text-h6">
+          <div class="unit-card-name">
             {{ item.name }}
           </div>
         </div>
         <div class="col-auto">
-          <q-btn size="sm" flat round icon="close" v-if="isShowRemoveBtn" @click="showRemovePrompt" :loading="getUnitLoader(props.item.id)">
+          <q-btn size="sm" padding="4px 5px" flat round icon="close" v-if="isShowRemoveBtn" @click="showRemovePrompt" :loading="getUnitLoader(props.item.id)">
             <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
           </q-btn>
         </div>
       </div>
       <div class="row">
         <div class="col">
-          <div class="text-subtitle2 fs-12">
+          <div class="unit-card-author">
             {{$t('unit.spisok_unitov.card.header.by')}} {{ item.authorName }}, {{$t('unit.spisok_unitov.card.header.updated_at')}} {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}
           </div>
         </div>
@@ -122,7 +122,9 @@ function showRemovePrompt() {
       </div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.projectName')}}:</strong> {{ item.projectName }}</div>
-      <div class="text-left fs-12" style="white-space: pre-line;word-break: break-all"><strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}</div>
+      <div class="text-left fs-12" style="white-space: pre-line;word-break: break-all">
+        <strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}
+      </div>
       <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
         <div class="row">
           <div class="col-3"><strong>cpu: {{item.statistikaKonteinera.cpuPercent}}</strong></div>
@@ -130,14 +132,12 @@ function showRemovePrompt() {
         </div>
       </div>
     </q-card-section>
-
-    <q-inner-loading :showing="item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki">
-      <q-spinner-gears size="50px" color="primary" />
-    </q-inner-loading>
-
     <q-separator dark />
     <q-card-actions>
-      <UnitActions :item="item"/>
+      <q-inner-loading v-if="esliJdemRunner(item)" showing style="position: relative">
+        <q-spinner-gears size="30px" color="primary" />
+      </q-inner-loading>
+      <UnitActions v-else :item="item"/>
       <q-space />
       <q-btn
           color="grey"
@@ -164,7 +164,13 @@ function showRemovePrompt() {
 </template>
 
 <style scoped>
-.fs-12 {
+.unit-card-name {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.unit-card-author {
   font-size: 12px;
+  font-weight: 500;
 }
 </style>
