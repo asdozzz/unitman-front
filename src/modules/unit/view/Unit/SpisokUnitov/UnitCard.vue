@@ -131,13 +131,13 @@ function showRemovePrompt() {
           <div class="col"><strong>mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</strong></div>
         </div>
       </div>
+      <q-inner-loading :showing="esliJdemRunner(item)">
+        <q-spinner-gears size="30px" color="primary" />
+      </q-inner-loading>
     </q-card-section>
     <q-separator dark />
     <q-card-actions>
-      <q-inner-loading v-if="esliJdemRunner(item)" showing style="position: relative">
-        <q-spinner-gears size="30px" color="primary" />
-      </q-inner-loading>
-      <UnitActions v-else :item="item"/>
+      <UnitActions :item="item"/>
       <q-space />
       <q-btn
           color="grey"
