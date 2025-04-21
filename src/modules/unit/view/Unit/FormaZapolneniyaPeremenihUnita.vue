@@ -4,6 +4,7 @@ import {onMounted} from "vue";
 import {
   useFormaZapolneniyaPeremenihUnitaStore
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
+import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
 
 const formStore = useFormaZapolneniyaPeremenihUnitaStore();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(formStore);
@@ -38,14 +39,7 @@ async function otpravitFormu() {
         <q-spinner  color="primary" size="3em"/>
       </div>
       <template v-for="peremenaya in form.values" v-else>
-        <template v-if="peremenaya.konfig.type === 'collection'">
-          <q-select v-model="peremenaya.value" option-value="id" option-label="name"
-                    :options="peremenaya.konfig.options.options ?? []" :label="peremenaya.konfig.label" emit-value map-options/>
-        </template>
-        <template v-else>
-          <q-input v-model="peremenaya.value" :label="peremenaya.konfig.label" />
-        </template>
-
+        <PeremenayaKonfiga :peremenaya="peremenaya"/>
       </template>
 
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>

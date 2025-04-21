@@ -33,6 +33,16 @@ export type KonfigPeremenoi = {
     options: CollectionOptions
 }
 
+export class PeremenayaKonfiga {
+    konfig: KonfigPeremenoi;
+    value: string;
+
+    constructor(konfig: KonfigPeremenoi, value: string = "") {
+        this.konfig = konfig;
+        this.value = value.length > 0 ? value : konfig.defaultValue;
+    }
+}
+
 export type Deistviye = {
     id: string;
     name: string;

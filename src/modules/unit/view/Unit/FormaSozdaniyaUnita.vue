@@ -2,6 +2,7 @@
 import {storeToRefs} from "pinia";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
+import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
 const { form, oshibkaOtBackenda, loader, vetki } = storeToRefs(addFormStore);
@@ -42,6 +43,7 @@ function filterSpiskaVetok(val: string | null, update: any) {
           v-model="form.branch"
           :options="vetki.spisok"
           @filter="filterSpiskaVetok"
+          @update:model-value="addFormStore.poluchitPeremenieKonfiga()"
           label="Branch"
           fill-input
           clearable
@@ -58,6 +60,11 @@ function filterSpiskaVetok(val: string | null, update: any) {
         </template>
       </q-select>
       <q-input v-model="form.unitName" label="Unit Name" />
+      <template v-if="form.peremenieKonfiga.length > 0">
+        <template v-for="peremenaya in form.peremenieKonfiga">
+          <PeremenayaKonfiga :peremenaya="peremenaya"/>
+        </template>
+      </template>
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
