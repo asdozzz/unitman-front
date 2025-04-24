@@ -86,6 +86,6 @@ function convertDate(unixtime: number): string {
 
 .bash-output {
   margin: 0;
-  white-space: pre-line;
+  white-space: pre-wrap;
 }
 </style>
