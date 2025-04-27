@@ -195,7 +195,6 @@ const { userId } = storeToRefs(authStore);
     <q-btn v-if="esliZapushen(item)" size="sm" square color="black" padding="5px 6px" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.set_config')}}</q-tooltip>
     </q-btn>
-
   </template>
 
 </template>

@@ -164,6 +164,9 @@ class UnitiService {
         return apiClient.post<null>('/unit/proveritKonteinerUnita', params);
     }
 
+    rebuildModel(params: { id: string }) {
+        return apiClient.post<null>('/unit/rebuildSpisokUnitov', params)
+    }
 }
 
 export default new UnitiService();

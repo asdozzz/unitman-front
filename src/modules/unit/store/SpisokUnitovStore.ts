@@ -410,6 +410,19 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 Notify.create(response.message);
             }
         },
+        async rebuildModel(id: string) {
+            this.startUnitLoader(id);
+
+            const response = await UnitiService.rebuildModel({ id });
+            this.stopUnitLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.obnovitUnit(id);
+
+            return response;
+        },
     },
     getters: {
         issetUnit() {

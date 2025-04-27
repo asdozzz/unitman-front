@@ -62,6 +62,10 @@ async function udalit() {
   prompt.value = false;
 }
 
+async function rebuildModel() {
+  await unitiStore.rebuildModel(props.item.id);
+}
+
 const prompt =  ref(false);
 
 function showRemovePrompt() {
@@ -79,7 +83,7 @@ function showRemovePrompt() {
 
       <q-card-actions align="right" class="text-primary">
         <q-btn flat label="Нет" v-close-popup />
-        <q-btn flat label="Да" @click="udalit()" />
+        <q-btn flat label="Да" :loading="getUnitLoader(props.item.id)" @click="udalit()" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -92,6 +96,8 @@ function showRemovePrompt() {
           </div>
         </div>
         <div class="col-auto">
+          <q-btn size="sm" padding="4px 5px" flat round icon="restore_from_trash" v-if="isAdmin" @click="rebuildModel" :loading="getUnitLoader(props.item.id)">
+          </q-btn>
           <q-btn size="sm" padding="4px 5px" flat round icon="close" v-if="isShowRemoveBtn" @click="showRemovePrompt" :loading="getUnitLoader(props.item.id)">
             <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
           </q-btn>
