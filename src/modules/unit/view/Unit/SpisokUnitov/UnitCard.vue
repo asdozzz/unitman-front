@@ -62,10 +62,10 @@ async function udalit() {
   prompt.value = false;
 }
 
-async function udalitSlomanii() {
+/*async function udalitSlomanii() {
   await unitiStore.udalitSlomaniiUnit(props.item.id);
   prompt.value = false;
-}
+}*/
 
 async function rebuildModel() {
   await unitiStore.rebuildModel(props.item.id);
