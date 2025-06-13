@@ -36,6 +36,7 @@ type FormaDobavleniyaUnitaState = {
     form:FormaDobavleniyaUnita;
     loader: boolean;
     oshibkaOtBackenda: string | null;
+    initPeremenie: boolean;
 
     vetki: {
         query: string | null;
@@ -55,6 +56,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             form: new FormaDobavleniyaUnita(),
             loader: false,
             oshibkaOtBackenda: null,
+            initPeremenie: false,
 
             vetki: {
                 query: null,
@@ -72,14 +74,17 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.enable = true;
             this.oshibkaOtBackenda = null;
             this.loader = false;
+            this.initPeremenie = false;
         },
         zakritFormu() {
             this.form = new FormaDobavleniyaUnita();
             this.enable = false;
+            this.initPeremenie = false;
         },
         async poluchitVetki() {
             this.vetki.loader = true;
             this.vetki.spisok = [];
+
             if (!this.form.projectId) {
                 throw new Error('proekt ne vibran');
             }
@@ -101,6 +106,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             }
 
             this.polucheniePeremenih.loader = true;
+            this.initPeremenie = false;
             if (!this.form.projectId) {
                 throw new Error('proekt ne vibran');
             }
@@ -110,6 +116,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.polucheniePeremenih.loader = false;
             if (response.status === "success") {
                 this.form.peremenieKonfiga = response.data.map((item:OtvetNaPolucheniePeremenihUnita) => new PeremenayaKonfiga(item.konfig, item.konfig.defaultValue));
+                this.initPeremenie = true;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {

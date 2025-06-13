@@ -5,7 +5,7 @@ import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
-const { form, oshibkaOtBackenda, loader, vetki } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, vetki, initPeremenie } = storeToRefs(addFormStore);
 
 const unitiStore = useSpisokUnitovStore();
 const { proekti } = storeToRefs(unitiStore);
@@ -64,6 +64,9 @@ function filterSpiskaVetok(val: string | null, update: any) {
         <template v-for="peremenaya in form.peremenieKonfiga">
           <PeremenayaKonfiga :peremenaya="peremenaya"/>
         </template>
+      </template>
+      <template v-if="initPeremenie && form.peremenieKonfiga.length == 0">
+        В конфиге отсутствуют переменные
       </template>
       <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
