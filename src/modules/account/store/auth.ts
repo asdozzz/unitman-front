@@ -97,7 +97,6 @@ export const useAuthStore = defineStore('auth', {
             if (this.tokenData) {
                 this.tokenData.user.locale = locale;
             }
-            console.log("www", locale);
             i18n.global.locale.value = locale;
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
             dayjs.locale(locale)

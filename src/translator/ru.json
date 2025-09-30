@@ -33,7 +33,8 @@
         "unblock": "Разблокировать",
         "change_password": "Изменить пароль",
         "change_email": "Изменить email",
-        "change_nickname": "Изменить никнейм"
+        "change_nickname": "Изменить никнейм",
+        "change_role": "Изменить роль"
       },
       "card": {
         "labels": {
@@ -90,6 +91,18 @@
       "fields": {
         "labels": {
           "new_nickname": "Новый никнейм"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "form_change_role": {
+      "caption": "Изменить роль",
+      "fields": {
+        "labels": {
+          "new_role": "Новая роль"
         }
       },
       "buttons": {
@@ -199,6 +212,26 @@
           "check_container": "проверка контейнера юнита"
         }
       }
+    },
+    "tipi_zadach": {
+      "SBORKA":  "Сборка",
+      "OBNOVLENIE":  "Обновление",
+      "PODGOTOVKA":  "Подготовка",
+      "ZAPUSK": "Запуск" ,
+      "OSTANOVKA" : "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
+      "UDALENIE": "Удаление" ,
+      "DEISTVIE": "Выполнение действия"
+    },
+    "tipi_prozesa": {
+      "SBORKA":  "Сборка",
+      "OBNOVLENIE":  "Обновление",
+      "PODGOTOVKA":  "Подготовка",
+      "ZAPUSK": "Запуск" ,
+      "OSTANOVKA" : "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
+      "UDALENIE": "Удаление" ,
+      "DEISTVIE": "Выполнение действия"
     }
   }
 }

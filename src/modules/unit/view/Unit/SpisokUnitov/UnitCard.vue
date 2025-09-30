@@ -17,7 +17,7 @@ const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
 
 const unitiStore = useSpisokUnitovStore();
-const {getUnitLoader, showForceRemove, esliJdemRunner} = storeToRefs(unitiStore);
+const {getUnitLoader, showForceRemove, esliJdemRunner, esliZapushen, nazvanieTekusheiZadachi} = storeToRefs(unitiStore);
 
 const itemHeaderClass = computed(() => {
   let headerColor = 'bg-blue-8';
@@ -120,7 +120,7 @@ function showRemovePrompt() {
     <q-card-section class="q-pa-sm">
       <div class="text-left" v-if="item.links.length > 0">
         <template v-for="link in item.links">
-          <template v-if="link.protocol === 'http' && item.state === 'USPESHNO_ZAPUSHEN'">
+          <template v-if="link.protocol === 'http' && esliZapushen(item)">
             <div class="text-italic fs-12">
               <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}{{link.startUri}}</a>
             </div>
@@ -145,6 +145,7 @@ function showRemovePrompt() {
       </div>
       <q-inner-loading :showing="esliJdemRunner(item)">
         <q-spinner-gears size="30px" color="primary" />
+        <p class="text-primary">{{$t('unit.tipi_zadach.'+nazvanieTekusheiZadachi(item))}}</p>
       </q-inner-loading>
     </q-card-section>
     <q-separator dark />

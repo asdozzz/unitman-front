@@ -18,6 +18,7 @@ import {
     OtvetNaPoluchenieNastroekPolzovatelya
 } from "@/modules/account/services/model/OtvetNaPoluchenieNastroekPolzovatelya";
 import {ZaprosNaIzmenenieNikaAdminom} from "@/modules/account/services/model/ZaprosNaIzmenenieNikaAdminom";
+import {ZaprosNaIzmenenieRoliAdminom} from "@/modules/account/services/model/ZaprosNaIzmenenieRoliAdminom";
 
 class AccountService {
     login(login: string|null, password: string|null) {
@@ -54,6 +55,10 @@ class AccountService {
 
     izmenitNickAdminom(form: ZaprosNaIzmenenieNikaAdminom) {
         return apiClient.post<null>('/account/changeNicknameByAdmin', form);
+    }
+
+    izmenitRoleAdminom(form: ZaprosNaIzmenenieRoliAdminom) {
+        return apiClient.post<null>('/account/changeRoleByAdmin', form);
     }
 
     izmenitSvoiNick(form: ZaprosNaIzmenenieNika) {

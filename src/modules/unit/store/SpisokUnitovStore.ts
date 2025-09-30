@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import UnitiService from "@/modules/unit/services/UnitiService";
-import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import Unit, {ProzesUnitaBezShagov} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
@@ -152,19 +152,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async ustanovitResultatSborkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatSborki({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async obnovitKodMoegoUnita(id: string) {
             this.startUnitLoader(id);
 
@@ -178,63 +165,10 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async obnovitKodPosleZapuska(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.obnovitKodPosleZapuska({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async udalitUnitPosleZapuska(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.udalitUnitPosleZapuska({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatObnovleniyaMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatObnovleniya({ id })
-            this.stopUnitLoader(id);
-
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async podgotovitMoiUnit(id: string) {
             this.startUnitLoader(id);
 
             const response = await UnitiService.podgotovit({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatPodgovkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatPodgotovki({ id })
             this.stopUnitLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
@@ -257,49 +191,10 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async ustanovitResultatSbrosaPodgotovkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatSbrosaPodgotovki({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async zapustitMoiUnit(id: string) {
             this.startUnitLoader(id);
 
             const response = await UnitiService.zapustit({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatZapuskaMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatZapuska({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatDeistviya(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatDeistviya({ id })
             this.stopUnitLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
@@ -335,24 +230,9 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async ustanovitResultatOstanovkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatOstanovki({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async udalit(unit: Unit) {
             if (unit.commands.includes('udalitVruchnuyu')) {
                 await this.udalitSlomaniiUnit(unit.id);
-            } else if (unit.commands.includes('nachatUdaleniePosleZapuska')) {
-                await this.udalitUnitPosleZapuska(unit.id);
             } else {
                 await this.udalitMoiUnit(unit.id);
             }
@@ -367,19 +247,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             }
 
             this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatUdaleniyaMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatUdaleniya({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            //this.obnovitUnit(id);
 
             return response;
         },
@@ -450,12 +317,51 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         esliZapushen() {
             return (item: Unit): boolean => {
-                return item.state === 'USPESHNO_ZAPUSHEN';
+                let zapushen = false;
+                item.prozesi.forEach((prozes: ProzesUnitaBezShagov) => {
+                    prozes.jobs.forEach((zadacha) => {
+                        if (zadacha.type === "ZAPUSK" && zadacha.state === "SUCCESS") {
+                            zapushen = true;
+                        }
+                        if (zadacha.type === "OSTANOVKA" && zadacha.state === "SUCCESS") {
+                            zapushen = false;
+                        }
+                    })
+                });
+                return zapushen;
             }
         },
         esliJdemRunner() {
             return (item: Unit): boolean => {
-                return item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki;
+                let result = false;
+                if (item.prozesi.length > 0) {
+                    result = item.prozesi[item.prozesi.length - 1].state !== "SUCCESS" && item.prozesi[item.prozesi.length - 1].state !== "ERROR" && item.prozesi[item.prozesi.length - 1].state !== "CANCLED"
+                }
+                return result;
+            }
+        },
+        nazvanieTekusheiZadachi() {
+            return (item: Unit): string => {
+                let result = "";
+                if (item.prozesi.length > 0) {
+
+                    for (let i = 0; i < item.prozesi.length; i++) {
+                        const prozes = item.prozesi[i];
+
+                        if (prozes.state !== "SUCCESS" && prozes.state !== "ERROR" && prozes.state !== "CANCLED") {
+
+                            for (let j = 0; j < prozes.jobs.length; j++) {
+                                const zadacha = prozes.jobs[j];
+
+                                if (zadacha.state !== "SUCCESS" && zadacha.state !== "ERROR" && zadacha.state !== "CANCLED") {
+                                    return zadacha.type;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return result;
             }
         },
         getUserRoleByProjectIdAndUserId() {

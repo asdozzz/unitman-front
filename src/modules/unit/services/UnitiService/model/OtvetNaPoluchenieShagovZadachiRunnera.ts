@@ -5,7 +5,4 @@ type ShagZadachiRunnera = {
     unixtime: number;
 }
 
-export type OtvetNaPoluchenieShagovZadachiRunnera = {
-    id: string;
-    steps: ShagZadachiRunnera[]
-}
+export type OtvetNaPoluchenieShagovZadachiRunnera = ShagZadachiRunnera[];

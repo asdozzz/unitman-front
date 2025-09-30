@@ -33,7 +33,8 @@
         "unblock": "unblock",
         "change_password": "change password",
         "change_email": "change email",
-        "change_nickname": "change nickname"
+        "change_nickname": "change nickname",
+        "change_role": "change role"
       },
       "card": {
         "labels": {
@@ -90,6 +91,18 @@
       "fields": {
         "labels": {
           "new_nickname": "New Nickname"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "form_change_role": {
+      "caption": "Change Role",
+      "fields": {
+        "labels": {
+          "new_role": "New Role"
         }
       },
       "buttons": {
@@ -199,6 +212,26 @@
           "check_container": "check unit container"
         }
       }
+    },
+    "tipi_zadach": {
+      "SBORKA":  "Сборка",
+      "OBNOVLENIE":  "Обновление",
+      "PODGOTOVKA":  "Подготовка",
+      "ZAPUSK": "Запуск" ,
+      "OSTANOVKA" : "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
+      "UDALENIE": "Удаление" ,
+      "DEISTVIE": "Выполнение действия"
+    },
+    "tipi_prozesa": {
+      "SBORKA":  "Сборка",
+      "OBNOVLENIE":  "Обновление",
+      "PODGOTOVKA":  "Подготовка",
+      "ZAPUSK": "Запуск" ,
+      "OSTANOVKA" : "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
+      "UDALENIE": "Удаление" ,
+      "DEISTVIE": "Выполнение действия"
     }
   }
 }

@@ -27,6 +27,11 @@ import {
 } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaNikaStore";
 import FormaIzmeneniyaNika
   from "@/modules/account/view/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaNika.vue";
+import {
+  useFormaIzmeneniyaRoli
+} from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaRoliStore";
+import FormaIzmeneniyaRoli
+  from "@/modules/account/view/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaRoli.vue";
 
 const authStore = useAuthStore();
 const { getLocale } = storeToRefs(authStore);
@@ -45,6 +50,9 @@ const { enable: enableNewEmailForm } = storeToRefs(formaIzmeneniyaEmail);
 
 const formaIzmeneniyaNickname = useFormaIzmeneniyaNickname();
 const { enable: enableNewNicknameForm } = storeToRefs(formaIzmeneniyaNickname);
+
+const formaIzmeneniyaRoli = useFormaIzmeneniyaRoli();
+const { enable: enableNewRoleForm } = storeToRefs(formaIzmeneniyaRoli);
 
 onMounted(async () => {
   await spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya();
@@ -72,6 +80,10 @@ function openNewEmailForm(item: PolzovatelDlyAdmininstrirovaniya) {
 
 function openNewNicknameForm(item: PolzovatelDlyAdmininstrirovaniya) {
   formaIzmeneniyaNickname.otkritFormu(item.id, item.nickname);
+}
+
+function openNewRoleForm(item: PolzovatelDlyAdmininstrirovaniya) {
+  formaIzmeneniyaRoli.otkritFormu(item.id, item.roles);
 }
 </script>
 
@@ -126,6 +138,9 @@ function openNewNicknameForm(item: PolzovatelDlyAdmininstrirovaniya) {
               <q-btn padding="5px 6px" square size="sm" color="black" icon="face" @click="openNewNicknameForm(item)">
                 <q-tooltip>{{$t('account.spisok.buttons.change_nickname')}}</q-tooltip>
               </q-btn>
+              <q-btn padding="5px 6px" square size="sm" color="black" icon="assignment_ind" @click="openNewRoleForm(item)">
+                <q-tooltip>{{$t('account.spisok.buttons.change_role')}}</q-tooltip>
+              </q-btn>
             </q-card-actions>
           </q-card>
         </template>
@@ -147,6 +162,10 @@ function openNewNicknameForm(item: PolzovatelDlyAdmininstrirovaniya) {
 
   <q-dialog v-model="enableNewNicknameForm" persistent transition-show="scale" transition-hide="scale">
     <FormaIzmeneniyaNika @formaBilaOtpravlena="spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya()"/>
+  </q-dialog>
+
+  <q-dialog v-model="enableNewRoleForm" persistent transition-show="scale" transition-hide="scale">
+    <FormaIzmeneniyaRoli @formaBilaOtpravlena="spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya()"/>
   </q-dialog>
 </template>
 
