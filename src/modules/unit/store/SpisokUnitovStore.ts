@@ -12,7 +12,8 @@ type NastroikiSpiska = {
         onlyMine: boolean,
         name: string | null
         branch: string | null
-        projectId: string | null
+        projectId: string | null,
+        unitId: string | null,
     },
     limit: number,
     offset: number
@@ -61,7 +62,8 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 onlyMine: false,
                 name: null,
                 branch: null,
-                projectId: null
+                projectId: null,
+                unitId: null,
             },
             limit: 100,
             offset: 0

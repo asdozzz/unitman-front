@@ -2,7 +2,7 @@ import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import UnitiService from "@/modules/unit/services/UnitiService";
 import ModelDlySpiskaVetok from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaVetok";
-import { PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import Unit, { PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {
     OtvetNaPolucheniePeremenihUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
@@ -45,6 +45,10 @@ type FormaDobavleniyaUnitaState = {
     },
     polucheniePeremenih: {
         loader: boolean;
+    },
+    dubli: {
+        loader: boolean;
+        spisok: Unit[];
     }
 }
 
@@ -65,6 +69,10 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             },
             polucheniePeremenih: {
                 loader: false
+            },
+            dubli: {
+                loader: false,
+                spisok: []
             }
         }
     },
@@ -98,6 +106,28 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             } else if (response.status === "error") {
                 this.oshibkaOtBackenda = response.message;
             }
+        },
+        async naitiDubliUnita() {
+            if (!this.form.projectId) {
+                throw new Error('proekt ne vibran');
+            }
+            this.dubli.loader = true;
+            this.dubli.spisok = [];
+
+            const response = await UnitiService.naitiDubliUnita({ projectId: this.form.projectId, branch: this.form.branch });
+
+            this.dubli.loader = false;
+            if (response.status === "success") {
+                this.dubli.spisok = response.data;
+            } else if (response.status === "fail") {
+                //this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                //this.oshibkaOtBackenda = response.message;
+            }
+        },
+        ochistitDubliUnita() {
+          this.dubli.spisok = [];
+          this.dubli.loader = false;
         },
         async poluchitPeremenieKonfiga() {
             if (!this.form.branch) {

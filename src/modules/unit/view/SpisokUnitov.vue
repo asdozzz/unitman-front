@@ -15,6 +15,7 @@ import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
 import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
 import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
+import {useRoute} from "vue-router";
 
 const unitiStore = useSpisokUnitovStore();
 const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska, proekti } = storeToRefs(unitiStore);
@@ -35,7 +36,13 @@ function openAddForm() {
   addFormStore.otkritFormu();
 }
 
+
 onMounted(async () => {
+  const route = useRoute();
+  if (route.query.id) {
+    nastroikiSpiska.value.filter.unitId = route.query.id as string;
+  }
+
   unitiStore.poluchitMoiProekti();
   unitiStore.poluchitSpisokUnitov();
 
@@ -66,6 +73,11 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
       unitiStore.poluchitSpisokUnitov();
     break;
   }
+}
+
+function clearUnitIdFilter() {
+  nastroikiSpiska.value.filter.unitId = null;
+  unitiStore.poluchitSpisokUnitov();
 }
 
 </script>
@@ -111,7 +123,16 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
         </div>
       </div>
     </div>
-
+    <div class="q-mb-md" v-if="nastroikiSpiska.filter.unitId">
+      <q-chip
+          removable
+          color="primary"
+          square
+          text-color="white"
+          :label="'id: '+ nastroikiSpiska.filter.unitId"
+          @remove="clearUnitIdFilter"
+      />
+    </div>
     <div class="row wrap items-start content-start">
       <template v-if="oshibkaZagruzkiSpiska">
         <div v-html="oshibkaZagruzkiSpiska"></div>

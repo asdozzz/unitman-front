@@ -37,10 +37,15 @@ import {ZaprosNaVipolnenieDeistviya} from "@/modules/unit/services/UnitiService/
 import {
     ZaprosNaPoluchenieKonfigaVetkiUnita
 } from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieKonfigaVetkiUnita";
+import {ZaprosNaPoluchenieDubleiUnita} from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieDubleiUnita";
 
 class UnitiService {
     list(params: ZaprosSpiskaUnitov) {
         return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/list', params);
+    }
+
+    naitiDubliUnita(params: ZaprosNaPoluchenieDubleiUnita) {
+        return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/naitiDubliUnita', params);
     }
 
     obnovit(params: ZaprosNaPoluchenieUnita ) {
