@@ -28,12 +28,12 @@ async function otpravitFormu() {
     <q-card-section class="q-pt-none">
       <q-input v-model="form.newProjectName" label="New Project Name" />
       <q-input v-model="form.newProxyHost" label="New Proxy Host" />
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="editFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn label="Close" color="dark" @click="editFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

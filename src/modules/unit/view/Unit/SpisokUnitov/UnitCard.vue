@@ -20,7 +20,7 @@ const unitiStore = useSpisokUnitovStore();
 const {getUnitLoader, showForceRemove, esliJdemRunner, esliZapushen, nazvanieTekusheiZadachi} = storeToRefs(unitiStore);
 
 const itemHeaderClass = computed(() => {
-  let headerColor = 'bg-blue-8';
+  let headerColor = 'bg-primary';
   const timestamp = Math.floor(Date.now() / 1000);
   const week = 60*60*24*7;
   const week2 = 60*60*24*7*2;
@@ -40,7 +40,7 @@ const itemHeaderClass = computed(() => {
   let classHeader = '';
 
   if (props.item.error) {
-    classHeader = 'bg-red text-white';
+    classHeader = 'bg-negative text-white';
   } else {
     classHeader = `text-white ${headerColor}`;
   }

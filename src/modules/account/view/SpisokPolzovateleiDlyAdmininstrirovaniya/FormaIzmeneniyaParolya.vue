@@ -29,12 +29,12 @@ async function otpravitFormu() {
 
     <q-card-section class="q-pt-none">
       <q-input v-model="form.newPassword" :label="$t('account.form_change_password.fields.labels.new_password')" />
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn :label="$t('account.form_change_password.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('account.form_change_password.buttons.close')" color="black" @click="formaIzmeneniyaParolya.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('account.form_change_password.buttons.close')" color="dark" @click="formaIzmeneniyaParolya.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

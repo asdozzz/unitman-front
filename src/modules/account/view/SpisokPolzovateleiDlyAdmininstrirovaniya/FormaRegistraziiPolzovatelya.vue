@@ -33,12 +33,12 @@ async function otpravitFormu() {
       <q-select v-model="form.roles" :options="roles.spisok" :label="$t('account.form_add.fields.labels.role')" emit-value map-options/>
       <q-select v-model="form.locale" :options="locales.spisok" :label="$t('account.form_add.fields.labels.locale')" emit-value map-options/>
       <q-input v-model="form.nickname" :label="$t('account.form_add.fields.labels.nickname')" />
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn :label="$t('account.form_add.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('account.form_add.buttons.close')" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('account.form_add.buttons.close')" color="dark" @click="addFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

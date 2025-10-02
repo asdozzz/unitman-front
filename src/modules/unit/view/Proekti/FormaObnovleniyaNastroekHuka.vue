@@ -30,12 +30,12 @@ async function otpravitFormu() {
       <q-toggle v-model="form.avtoobnovlenie" label="Auto update unit" /><br>
       <q-toggle v-model="form.avtoudalenie" label="Auto delete unit" /><br>
       <q-toggle v-model="form.obnovlenieBezSbrosaPodgotovki" label="Updating without resetting the preparation" /><br>
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="formStore.zakritFormu()" :loading="loader"/>
+      <q-btn label="Close" color="dark" @click="formStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

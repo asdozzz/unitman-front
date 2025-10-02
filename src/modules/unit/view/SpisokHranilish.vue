@@ -42,11 +42,7 @@
 <template>
 
   <div class="full-width flex column">
-    <q-spinner
-        v-if="loaderSpiskaHranilish"
-        color="primary"
-        size="3em"
-    />
+
     <div class="row">
       <div class="col q-pb-sm">
         <q-btn padding="5px 6px" square size="md" color="primary" icon="add" @click="openAddForm">
@@ -55,7 +51,12 @@
       </div>
     </div>
     <div class="row wrap items-start content-start">
-      <template v-if="oshibkaZagruzkiSpiska">
+      <q-spinner-cube
+          v-if="loaderSpiskaHranilish"
+          color="primary"
+          size="2em"
+      />
+      <template v-else-if="oshibkaZagruzkiSpiska">
         <div v-html="oshibkaZagruzkiSpiska"></div>
       </template>
       <template v-else>
@@ -73,13 +74,13 @@
             <q-separator dark />
 
             <q-card-actions>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="delete" @click="udalit(item.id)">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="delete" @click="udalit(item.id)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.delete')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="edit" @click="openEditForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="edit" @click="openEditForm(item)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.edit')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.confirm')}}</q-tooltip>
               </q-btn>
             </q-card-actions>

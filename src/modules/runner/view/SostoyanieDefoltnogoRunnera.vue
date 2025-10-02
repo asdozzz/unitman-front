@@ -25,7 +25,7 @@ onBeforeUnmount(() => {
   <span >
     <div v-if="oshibkaBackenda">{{oshibkaBackenda}}</div>
     <template v-else>
-      <span v-if="!active" class="text-red">the runner is non active, please notify the administrator </span>
+      <span v-if="!active" class="text-negative">the runner is non active, please notify the administrator </span>
     </template>
   </span>
 </div>

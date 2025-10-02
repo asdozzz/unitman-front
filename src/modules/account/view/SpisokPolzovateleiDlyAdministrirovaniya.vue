@@ -123,22 +123,22 @@ function openNewRoleForm(item: PolzovatelDlyAdmininstrirovaniya) {
             <q-separator dark />
 
             <q-card-actions>
-              <q-btn padding="5px 6px" square size="sm" color="black" v-if="!item.isBlocked" icon="visibility_off" @click="blokirovka(item.id)" :loading="loaderObnovleniya">
+              <q-btn padding="5px 6px" square size="sm" color="dark" v-if="!item.isBlocked" icon="visibility_off" @click="blokirovka(item.id)" :loading="loaderObnovleniya">
                 <q-tooltip>{{$t('account.spisok.buttons.block')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" v-if="item.isBlocked" icon="visibility" @click="razblokirovka(item.id)" :loading="loaderObnovleniya">
+              <q-btn padding="5px 6px" square size="sm" color="dark" v-if="item.isBlocked" icon="visibility" @click="razblokirovka(item.id)" :loading="loaderObnovleniya">
                 <q-tooltip>{{$t('account.spisok.buttons.unblock')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="password" @click="openNewPasswordForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="password" @click="openNewPasswordForm(item)">
                 <q-tooltip>{{$t('account.spisok.buttons.change_password')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="alternate_email" @click="openNewEmailForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="alternate_email" @click="openNewEmailForm(item)">
                 <q-tooltip>{{$t('account.spisok.buttons.change_email')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="face" @click="openNewNicknameForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="face" @click="openNewNicknameForm(item)">
                 <q-tooltip>{{$t('account.spisok.buttons.change_nickname')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="black" icon="assignment_ind" @click="openNewRoleForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="dark" icon="assignment_ind" @click="openNewRoleForm(item)">
                 <q-tooltip>{{$t('account.spisok.buttons.change_role')}}</q-tooltip>
               </q-btn>
             </q-card-actions>

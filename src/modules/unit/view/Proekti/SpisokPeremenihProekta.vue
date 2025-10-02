@@ -34,7 +34,7 @@ async function udalitPeremenuyu(code: string) {
         <div class="col-3 q-pa-sm"><q-input dense v-model="form.code" label="Code" /></div>
         <div class="col q-pa-sm"><q-input dense v-model="form.value" label="Value" /></div>
         <div class="col-auto q-pa-sm">
-          <q-btn size="md" color="black" icon="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
+          <q-btn size="md" color="dark" icon="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
             <q-tooltip>add</q-tooltip>
           </q-btn>
         </div>
@@ -54,7 +54,7 @@ async function udalitPeremenuyu(code: string) {
           </q-item-section>
 
           <q-item-section side>
-            <q-btn size="md" color="black" icon="delete" @click="udalitPeremenuyu(variable.code)" :loading="loaderUdaleniya">
+            <q-btn size="md" color="dark" icon="delete" @click="udalitPeremenuyu(variable.code)" :loading="loaderUdaleniya">
               <q-tooltip>delete</q-tooltip>
             </q-btn>
           </q-item-section>

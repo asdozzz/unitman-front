@@ -75,7 +75,7 @@ function otkritStranizuSDublem(dubl: Unit): void {
         </template>
       </q-select>
       <div v-if="dubli.spisok.length > 0">
-        <span class="text-red">Найденные юниты с такой же веткой: </span>
+        <span class="text-negative">Найденные юниты с такой же веткой: </span>
         <q-chip
             v-for="duble in dubli.spisok"
             size="12px"
@@ -88,6 +88,7 @@ function otkritStranizuSDublem(dubl: Unit): void {
         />
       </div>
       <q-input v-model="form.unitName" label="Unit Name" />
+      <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
       <template v-if="form.peremenieKonfiga.length > 0">
         <template v-for="peremenaya in form.peremenieKonfiga">
           <PeremenayaKonfiga :peremenaya="peremenaya"/>
@@ -96,12 +97,12 @@ function otkritStranizuSDublem(dubl: Unit): void {
       <template v-if="initPeremenie && form.peremenieKonfiga.length == 0">
         В конфиге отсутствуют переменные
       </template>
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader || dubli.loader"/>
-      <q-btn label="Close" color="black" @click="addFormStore.zakritFormu()" :loading="loader || dubli.loader"/>
+      <q-btn label="Close" color="dark" @click="addFormStore.zakritFormu()" :loading="loader || dubli.loader"/>
     </q-card-actions>
   </q-card>
 </template>

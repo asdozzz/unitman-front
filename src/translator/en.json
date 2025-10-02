@@ -233,5 +233,11 @@
       "UDALENIE": "Удаление" ,
       "DEISTVIE": "Выполнение действия"
     }
+  },
+  "dashboard": {
+    "all_projects": "All projects",
+    "total": "Total",
+    "active": "Active",
+    "deleted": "Deleted"
   }
 }

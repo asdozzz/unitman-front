@@ -11,13 +11,15 @@ export class FormaDobavleniyaUnita {
     projectId: string;
     unitName: string;
     branch: string;
+    memoryLimit: number;
     peremenieKonfiga: PeremenayaKonfiga[];
 
-    constructor(projectId: string = "", unitName: string = "", branch: string = "", peremenieKonfiga: PeremenayaKonfiga[] = []) {
+    constructor(projectId: string = "", unitName: string = "", branch: string = "", memoryLimit: number = 3072, peremenieKonfiga: PeremenayaKonfiga[] = []) {
         this.projectId = projectId;
         this.unitName = unitName;
         this.branch = branch;
         this.peremenieKonfiga = peremenieKonfiga;
+        this.memoryLimit = memoryLimit;
     }
 }
 
@@ -160,6 +162,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 projectId: this.form.projectId,
                 branch: this.form.branch,
                 unitName: this.form.unitName,
+                memoryLimit: this.form.memoryLimit,
                 znacheniePeremenoi: this.form.peremenieKonfiga.map((item) => {
                     return {
                         "id": item.konfig.id,

@@ -51,7 +51,7 @@ function convertDate(unixtime: number): string {
 
                   </div>
                   <div v-if="step.success" class="text-grey-1 fs-12" v-html="step.response.split('\n').join('<br>')"></div>
-                  <div v-if="!step.success" class="text-red-8 fs-12" v-html="step.response.split('\n').join('<br>')"></div>
+                  <div v-if="!step.success" class="text-negative fs-12" v-html="step.response.split('\n').join('<br>')"></div>
 
                 </div>
               </q-card-section>

@@ -8,6 +8,7 @@ export type ModelDlySozdaniyaUnita = {
     projectId: string;
     unitName: string;
     branch: string;
+    memoryLimit: number;
     znacheniePeremenoi: ZnacheniePeremenoi[]
 }
 

@@ -53,7 +53,7 @@ function convertDate(unixtime: number): string {
                   <div v-if="step.success" class="text-grey-1 fs-12">
                     <pre class="bash-output">{{step.response}}</pre>
                   </div>
-                  <div v-if="!step.success" class="text-red-8 fs-12">
+                  <div v-if="!step.success" class="text-negative fs-12">
                     <pre class="bash-output">{{step.response}}</pre>
                   </div>
 
@@ -74,8 +74,8 @@ function convertDate(unixtime: number): string {
                       <q-item-section avatar>
                         <q-icon v-if="prozess.state == 'NEW'  || prozess.state == 'ZADACHI_DOBAVLENI'" name="fiber_new"></q-icon>
                         <q-icon v-if="prozess.state == 'PENDING'" color="primary" name="access_time"></q-icon>
-                        <q-icon v-if="prozess.state == 'ERROR' || prozess.state == 'CANCLED'"  class="text-red" name="error"></q-icon>
-                        <q-icon v-if="prozess.state == 'SUCCESS'" class="text-green" name="check_circle"></q-icon>
+                        <q-icon v-if="prozess.state == 'ERROR' || prozess.state == 'CANCLED'"  class="text-negative" name="error"></q-icon>
+                        <q-icon v-if="prozess.state == 'SUCCESS'" class="text-positive" name="check_circle"></q-icon>
                       </q-item-section>
 
                       <q-item-section :class="{'text-primary':prozess.id === selectJob.prozesId}">
@@ -92,8 +92,8 @@ function convertDate(unixtime: number): string {
                         <q-item-section avatar>
                           <q-icon size="xs" v-if="zadacha.state == 'NEW'" color="primary" name="fiber_new"></q-icon>
                           <q-icon size="xs" v-if="zadacha.state == 'PENDING'" color="primary" name="access_time"></q-icon>
-                          <q-icon size="xs" v-if="zadacha.state == 'ERROR' || zadacha.state == 'CANCLED'"  class="text-red" name="error"></q-icon>
-                          <q-icon size="xs" v-if="zadacha.state == 'SUCCESS'" class="text-green" name="check_circle"></q-icon>
+                          <q-icon size="xs" v-if="zadacha.state == 'ERROR' || zadacha.state == 'CANCLED'"  class="text-negative" name="error"></q-icon>
+                          <q-icon size="xs" v-if="zadacha.state == 'SUCCESS'" class="text-positive" name="check_circle"></q-icon>
                         </q-item-section>
 
                         <q-item-section>
