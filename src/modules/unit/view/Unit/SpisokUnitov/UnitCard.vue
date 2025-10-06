@@ -148,7 +148,7 @@ function showRemovePrompt() {
         <p class="text-primary">{{$t('unit.tipi_zadach.'+nazvanieTekusheiZadachi(item))}}</p>
       </q-inner-loading>
     </q-card-section>
-    <q-separator dark />
+    <q-separator/>
     <q-card-actions>
       <UnitActions :item="item"/>
       <q-space />

@@ -48,6 +48,10 @@ class ProektiService {
         return apiClient.post<ModelDlySpiskaProektov[]>('/project/my', {});
     }
 
+    poluchitAktivnieProekti() {
+        return apiClient.post<ModelDlySpiskaProektov[]>('/project/activeList', {});
+    }
+
     add(params: ModelDlyDobavleniyaProekta) {
         return apiClient.post<null>('/project/add', params);
     }

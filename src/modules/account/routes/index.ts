@@ -3,6 +3,8 @@ import MainLayout from "@/modules/account/view/MainLayout.vue";
 import AccountSettings from "@/modules/account/view/AccountSettings.vue";
 import SpisokPolzovateleiDlyAdministrirovaniya
     from "@/modules/account/view/SpisokPolzovateleiDlyAdministrirovaniya.vue";
+import EditPage
+    from "@/modules/account/view/SpisokPolzovateleiDlyAdmininstrirovaniya/EditPage.vue";
 
 export default [
     {
@@ -17,6 +19,14 @@ export default [
                 path: 'list',
                 component: SpisokPolzovateleiDlyAdministrirovaniya,
                 name: "account_list",
+                meta: {
+                    requiredRoles: ['ROLE_ADMIN']
+                }
+            },
+            {
+                path: ':id',
+                component: EditPage,
+                name: "account_edit",
                 meta: {
                     requiredRoles: ['ROLE_ADMIN']
                 }

@@ -4,25 +4,25 @@ import {
   useFormaIzmeneniyaParolya
 } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaIzmeneniyaParolyaStore";
 
+const props = defineProps<{
+  id: string
+}>();
+
 const formaIzmeneniyaParolya = useFormaIzmeneniyaParolya();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(formaIzmeneniyaParolya);
 
-const emit = defineEmits<{
-  formaBilaOtpravlena: []
-}>()
+formaIzmeneniyaParolya.otkritFormu(props.id);
 async function otpravitFormu() {
   const response = await formaIzmeneniyaParolya.otpravitFormu();
 
   if (response.status === "success") {
-    emit('formaBilaOtpravlena');
     formaIzmeneniyaParolya.zakritFormu();
   }
-
 }
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
+  <q-card>
     <q-card-section>
       <div class="text-h6">{{$t('account.form_change_password.caption')}}</div>
     </q-card-section>

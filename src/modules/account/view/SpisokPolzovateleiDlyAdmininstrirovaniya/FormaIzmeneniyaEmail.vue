@@ -7,14 +7,15 @@ import {
 const formaIzmeneniyaEmail = useFormaIzmeneniyaEmail();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(formaIzmeneniyaEmail);
 
-const emit = defineEmits<{
-  formaBilaOtpravlena: []
-}>()
+const props = defineProps<{
+  id: string
+}>();
+
+formaIzmeneniyaEmail.otkritFormu(props.id, "");
 async function otpravitFormu() {
   const response = await formaIzmeneniyaEmail.otpravitFormu();
 
   if (response.status === "success") {
-    emit('formaBilaOtpravlena');
     formaIzmeneniyaEmail.zakritFormu();
   }
 
@@ -22,7 +23,7 @@ async function otpravitFormu() {
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
+  <q-card>
     <q-card-section>
       <div class="text-h6">{{$t('account.form_change_email.caption')}}</div>
     </q-card-section>

@@ -6,15 +6,14 @@ import {
 
 const formaIzmeneniyaNickname = useFormaIzmeneniyaNickname();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(formaIzmeneniyaNickname);
-
-const emit = defineEmits<{
-  formaBilaOtpravlena: []
-}>()
+const props = defineProps<{
+  id: string
+}>();
+formaIzmeneniyaNickname.otkritFormu(props.id, "");
 async function otpravitFormu() {
   const response = await formaIzmeneniyaNickname.otpravitFormu();
 
   if (response.status === "success") {
-    emit('formaBilaOtpravlena');
     formaIzmeneniyaNickname.zakritFormu();
   }
 
@@ -22,7 +21,7 @@ async function otpravitFormu() {
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
+  <q-card>
     <q-card-section>
       <div class="text-h6">{{$t('account.form_change_nickname.caption')}}</div>
     </q-card-section>

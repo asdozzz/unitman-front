@@ -112,11 +112,11 @@ function clearUnitIdFilter() {
               @update:model-value="unitiStore.poluchitSpisokUnitov()"
           />
 
-          <q-btn square padding="5px 6px" class="q-ml-md" size="md" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
+          <q-btn square padding="5px 6px" class="q-ml-md" size="sm" color="primary" icon="refresh" @click="unitiStore.poluchitSpisokUnitov()">
             <q-tooltip>{{$t('unit.spisok_unitov.buttons.refresh')}}</q-tooltip>
           </q-btn>
 
-          <q-btn square padding="5px 6px" class="q-ml-md" size="md" color="primary" icon="add" @click="openAddForm">
+          <q-btn square padding="5px 6px" class="q-ml-md" size="sm" color="primary" icon="add" @click="openAddForm">
             <q-tooltip>{{$t('unit.spisok_unitov.buttons.add')}}</q-tooltip>
           </q-btn>
 

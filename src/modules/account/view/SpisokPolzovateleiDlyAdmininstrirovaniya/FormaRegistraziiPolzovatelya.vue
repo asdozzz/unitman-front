@@ -3,22 +3,42 @@ import {storeToRefs} from "pinia";
 import {
   useFormaRegistraziiPolzovatelya
 } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/FormaRegistraziiPolzovatelyaStore";
+import {onMounted} from "vue";
 
 const addFormStore = useFormaRegistraziiPolzovatelya();
-const { form, oshibkaOtBackenda, loader, roles, locales } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, roles, locales, proekti, vibranieProekti } = storeToRefs(addFormStore);
 
 const emit = defineEmits<{
   formaBilaOtpravlena: []
 }>()
+
+onMounted(() => {
+  addFormStore.poluchitSpisokActivnihProektov();
+})
 async function otpravitFormu() {
   const response = await addFormStore.otpravitFormu();
 
   if (response.status === "success") {
+    await addFormStore.dobavitVProekti();
     emit('formaBilaOtpravlena');
     addFormStore.zakritFormu();
-  }
+    //router.push({ name: 'account_edit', params: { id: response.data.id } })
 
+  }
 }
+
+function esliVibran(proektId: string): boolean {
+  return vibranieProekti.value.includes(proektId);
+}
+
+function toggle(proektId: string) {
+  if (esliVibran(proektId)) {
+    vibranieProekti.value = vibranieProekti.value.filter(item => item!= proektId);
+  } else {
+    vibranieProekti.value.push(proektId);
+  }
+}
+
 </script>
 
 <template>
@@ -35,7 +55,19 @@ async function otpravitFormu() {
       <q-input v-model="form.nickname" :label="$t('account.form_add.fields.labels.nickname')" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
-
+    <q-card-section>
+      <q-chip
+          :disable="loader"
+          dark
+          :color="esliVibran(proekt.id) ? 'positive':'primary'"
+          v-for="proekt in proekti"
+          :label="proekt.name"
+          square
+          clickable
+          :selected="esliVibran(proekt.id)"
+          @click="toggle(proekt.id)"
+      ></q-chip>
+    </q-card-section>
     <q-card-actions align="right">
       <q-btn :label="$t('account.form_add.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
       <q-btn :label="$t('account.form_add.buttons.close')" color="dark" @click="addFormStore.zakritFormu()" :loading="loader"/>

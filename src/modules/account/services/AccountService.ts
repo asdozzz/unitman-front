@@ -33,8 +33,12 @@ class AccountService {
         return apiClient.post<ApiModelPolzovatelyaDlyAdministrorovaniya[]>('/account/poluchitVsehPolzovateleiDlyAdministrorovaniya', {});
     }
 
+    poluchitProektiPolzovatelya(id: string) {
+        return apiClient.post<{id: string, name: string}[]>('/project/user/'+id, {});
+    }
+
     registraziyaPolzovatelya(form: ApiModelDlyRegistraziiPolzovatelya) {
-        return apiClient.post<null>('/account/register', form);
+        return apiClient.post<{ id: string }>('/account/register', form);
     }
 
     blockirovkaPolzovatelya(form: ApiModelDlyBlockirovkiPolzovatelya) {

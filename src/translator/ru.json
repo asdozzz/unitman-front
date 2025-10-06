@@ -16,6 +16,9 @@
     }
   },
   "account": {
+    "form_projects": {
+      "projects": "Проекты"
+    },
     "login_form": {
       "caption": "Вход",
       "email_label": "Email",

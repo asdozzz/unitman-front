@@ -45,7 +45,7 @@
 
     <div class="row">
       <div class="col q-pb-sm">
-        <q-btn padding="5px 6px" square size="md" color="primary" icon="add" @click="openAddForm">
+        <q-btn padding="5px 6px" square size="sm" color="primary" icon="add" @click="openAddForm">
           <q-tooltip>{{ $t('unit.spisok_rep.buttons.add') }}</q-tooltip>
         </q-btn>
       </div>
@@ -63,24 +63,24 @@
 
         <template v-for="item in spisok">
           <q-card square class="q-mr-md q-mb-md" style="width: 350px">
-            <q-card-section class="bg-primary text-white q-py-sm">
+            <q-card-section class="bg-primary text-white q-py-sm q-pl-sm">
               <div class="text-subtitle2 text-left"> {{ item.name }}</div>
             </q-card-section>
-            <q-card-section class="q-py-sm">
+            <q-card-section class="q-py-sm q-pl-sm">
               <div class="fs-12 text-left">{{ item.type }}</div>
               <div class="fs-12 text-left" v-if="item.type === 'GITLAB'">{{ item.repoUrl }}</div>
             </q-card-section>
 
-            <q-separator dark />
+            <q-separator />
 
             <q-card-actions>
-              <q-btn padding="5px 6px" square size="sm" color="dark" icon="delete" @click="udalit(item.id)">
+              <q-btn padding="5px 6px" square size="sm" color="primary" icon="delete" @click="udalit(item.id)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.delete')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="dark" icon="edit" @click="openEditForm(item)">
+              <q-btn padding="5px 6px" square size="sm" color="primary" icon="edit" @click="openEditForm(item)">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.edit')}}</q-tooltip>
               </q-btn>
-              <q-btn padding="5px 6px" square size="sm" color="dark" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
+              <q-btn padding="5px 6px" square size="sm" color="primary" icon="done" @click="confirm(item.id)" v-if="!item.confirmed">
                 <q-tooltip>{{ $t('unit.spisok_rep.buttons.confirm')}}</q-tooltip>
               </q-btn>
             </q-card-actions>

@@ -7,14 +7,14 @@ import {
 const formaIzmeneniyaRoli = useFormaIzmeneniyaRoli();
 const { form, oshibkaOtBackenda, loader, roles } = storeToRefs(formaIzmeneniyaRoli);
 
-const emit = defineEmits<{
-  formaBilaOtpravlena: []
-}>()
+const props = defineProps<{
+  id: string
+}>();
+formaIzmeneniyaRoli.otkritFormu(props.id, "");
 async function otpravitFormu() {
   const response = await formaIzmeneniyaRoli.otpravitFormu();
 
   if (response.status === "success") {
-    emit('formaBilaOtpravlena');
     formaIzmeneniyaRoli.zakritFormu();
   }
 
@@ -22,7 +22,7 @@ async function otpravitFormu() {
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
+  <q-card>
     <q-card-section>
       <div class="text-h6">{{$t('account.form_change_role.caption')}}</div>
     </q-card-section>

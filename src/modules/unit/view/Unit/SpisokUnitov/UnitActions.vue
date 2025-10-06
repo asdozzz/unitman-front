@@ -72,41 +72,41 @@ const { userId, isAdmin } = storeToRefs(authStore);
 
 <template>
   <template v-if="item.unitSozdanSystemoi || userId === item.authorId || getUserRoleByProjectIdAndUserId(item.projectId, userId as string) === 'ADMIN'">
-    <q-btn square color="dark" padding="5px 6px" size="sm" icon="info" @click="otkritOknoSZadachamiRunnera(item.id)">
+    <q-btn square color="primary" padding="5px 6px" size="sm" icon="info" @click="otkritOknoSZadachamiRunnera(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.jobs')}}</q-tooltip>
     </q-btn>
-    <q-btn size="md" square color="dark" padding="5px 6px" v-if="esliJdemRunner(item)" icon="refresh" @click="obnovit(item.id)" :loading="getUnitLoader(item.id)">
+    <q-btn size="md" square color="primary" padding="5px 6px" v-if="esliJdemRunner(item)" icon="refresh" @click="obnovit(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.update')}}</q-tooltip>
     </q-btn>
     <template v-for="command in item.commands">
-      <q-btn v-if="command === 'nachatSborku'" size="md" square color="dark" padding="5px 6px" icon="build" @click="sobrat(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatSborku'" size="md" square color="primary" padding="5px 6px" icon="build" @click="sobrat(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.build')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatObnovlenie'" size="sm" square color="dark" padding="5px 6px" icon="update" @click="obnovitKodMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatObnovlenie'" size="sm" square color="primary" padding="5px 6px" icon="update" @click="obnovitKodMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.fetch_changes')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatObnovleniePosleZapuska'" size="sm" square color="dark" padding="5px 6px" icon="update" @click="obnovitKodMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatObnovleniePosleZapuska'" size="sm" square color="primary" padding="5px 6px" icon="update" @click="obnovitKodMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.fetch_changes')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'zapolnitPeremenie'" size="sm" square color="dark" padding="5px 6px" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'zapolnitPeremenie'" size="sm" square color="primary" padding="5px 6px" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.set_config')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatPodgotovku'" size="md" square color="dark" padding="5px 6px" icon="done_all" @click="podgotovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatPodgotovku'" size="md" square color="primary" padding="5px 6px" icon="done_all" @click="podgotovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.preparing')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatSbrosPodgotovki'" size="sm" square color="dark" padding="5px 6px" icon="remove_done" @click="sbrositPodgotovkuMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatSbrosPodgotovki'" size="sm" square color="primary" padding="5px 6px" icon="remove_done" @click="sbrositPodgotovkuMoegoUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.remove_preparing')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatZapusk'" size="md" square color="dark" padding="5px 6px" icon="play_arrow" @click="zapustitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatZapusk'" size="md" square color="primary" padding="5px 6px" icon="play_arrow" @click="zapustitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.up')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'nachatOstanovku'" size="sm" square color="dark" padding="5px 6px" icon="stop" @click="ostanovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'nachatOstanovku'" size="sm" square color="primary" padding="5px 6px" icon="stop" @click="ostanovitMoiUnit(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.down')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'proveritKonteinerUnita' && isAdmin" size="sm" square color="dark" padding="5px 6px" icon="sync" @click="proveritKonteinerUnita(item.id)" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'proveritKonteinerUnita' && isAdmin" size="sm" square color="primary" padding="5px 6px" icon="sync" @click="proveritKonteinerUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.check_container')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'vipolnitDeistvie' && item.deistviya.length > 0" size="sm" square color="dark" padding="5px 6px" icon="apps" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'vipolnitDeistvie' && item.deistviya.length > 0" size="sm" square color="primary" padding="5px 6px" icon="apps" :loading="getUnitLoader(item.id)">
         <q-menu>
           <q-list>
             <template :key="actionConfig.id" v-for="actionConfig in item.deistviya">
@@ -120,7 +120,7 @@ const { userId, isAdmin } = storeToRefs(authStore);
         </q-menu>
       </q-btn>
     </template>
-    <q-btn v-if="esliZapushen(item)" size="sm" square color="dark" padding="5px 6px" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
+    <q-btn v-if="esliZapushen(item)" size="sm" square color="primary" padding="5px 6px" icon="settings" @click="zapolnitPeremenie(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.set_config')}}</q-tooltip>
     </q-btn>
   </template>
