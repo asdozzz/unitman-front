@@ -56,6 +56,10 @@ class ProektiService {
         return apiClient.post<null>('/project/add', params);
     }
 
+    read(id: string) {
+        return apiClient.post<ModelDlySpiskaProektov>('/project/read/'+id, {});
+    }
+
     updateData(params: ModelDlyObnovleniyaProekta) {
         return apiClient.post<null>('/project/updateData', params);
     }

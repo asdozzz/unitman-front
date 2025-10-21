@@ -18,8 +18,8 @@ const route = useRoute();
   <div class="row">
     <div class="col-12 q-pa-sm">
       <q-breadcrumbs>
-        <q-breadcrumbs-el label="Главная" to="/"/>
-        <q-breadcrumbs-el label="Учетные записи" to="/account/list"/>
+        <q-breadcrumbs-el :label="$t('app.tabs.home')" to="/"/>
+        <q-breadcrumbs-el :label="$t('app.tabs.accounts')" to="/account/list"/>
         <q-breadcrumbs-el :label="route.params.id as string" />
       </q-breadcrumbs>
     </div>

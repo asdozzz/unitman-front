@@ -115,6 +115,15 @@
     }
   },
   "unit": {
+    "proekt": {
+      "tabs": {
+        "project_data": "Project Data",
+        "jobs": "Jobs",
+        "users": "Users",
+        "variables": "Variables",
+        "repo_event_handler": "Repository Events Handler"
+      }
+    },
     "spisok_rep": {
       "buttons": {
         "add": "add",
@@ -171,7 +180,8 @@
         "repo_id": "Repo id",
         "project_code": "Project code",
         "main_branch": "Main branch",
-        "state": "State"
+        "state": "State",
+        "proxy_host": "Proxy Host"
       }
     },
     "spisok_unitov": {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import UnitiService from "@/modules/unit/services/UnitiService";
-import Unit, {ProzesUnitaBezShagov} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
@@ -319,25 +319,14 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         esliZapushen() {
             return (item: Unit): boolean => {
-                let zapushen = false;
-                item.prozesi.forEach((prozes: ProzesUnitaBezShagov) => {
-                    prozes.jobs.forEach((zadacha) => {
-                        if (zadacha.type === "ZAPUSK" && zadacha.state === "SUCCESS") {
-                            zapushen = true;
-                        }
-                        if (zadacha.type === "OSTANOVKA" && zadacha.state === "SUCCESS") {
-                            zapushen = false;
-                        }
-                    })
-                });
-                return zapushen;
+                return item.zapushen;
             }
         },
         esliJdemRunner() {
             return (item: Unit): boolean => {
                 let result = false;
                 if (item.prozesi.length > 0) {
-                    result = item.prozesi[item.prozesi.length - 1].state !== "SUCCESS" && item.prozesi[item.prozesi.length - 1].state !== "ERROR" && item.prozesi[item.prozesi.length - 1].state !== "CANCLED"
+                    result = !['SUCCESS', 'ERROR', 'CANCLED'].includes(item.prozesi[item.prozesi.length - 1].state);
                 }
                 return result;
             }

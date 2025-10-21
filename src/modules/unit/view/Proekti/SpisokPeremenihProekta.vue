@@ -2,11 +2,15 @@
 import {storeToRefs} from "pinia";
 import {onMounted } from "vue";
 import {useSpisokPeremenihProektaStore} from "@/modules/unit/store/SpisokProektov/SpisokPeremenihProektaStore";
+import {useRoute} from "vue-router";
 
 const spisokPeremenihProekta = useSpisokPeremenihProektaStore();
-const {spisok, form, loaderUdaleniya, loaderDobavleniya, tipiPeremenoi} = storeToRefs(spisokPeremenihProekta);
+const {spisok, form, loaderUdaleniya, loaderDobavleniya, tipiPeremenoi, loaderSpiskaPeremenih} = storeToRefs(spisokPeremenihProekta);
+
+const route = useRoute();
 
 onMounted(async () => {
+  spisokPeremenihProekta.pokazatSpisok(route.params.id as string)
   await spisokPeremenihProekta.poluchitSpisok();
 })
 
@@ -21,45 +25,31 @@ async function udalitPeremenuyu(code: string) {
 </script>
 
 <template>
-  <q-card style="width: 700px; max-width: 80vw;">
-    <q-card-section class="row items-center q-pb-none">
-      <div class="text-h6">Variables list</div>
-      <q-space />
-      <q-btn icon="close" flat round dense @click="spisokPeremenihProekta.skritSpisok" />
-    </q-card-section>
-
+  <q-card style="width: 720px; max-width: 80vw;">
     <q-card-section>
       <div class="row">
-        <div class="col-3 q-pa-sm"><q-select dense v-model="form.tip" :options="tipiPeremenoi" label="Type" emit-value/></div>
-        <div class="col-3 q-pa-sm"><q-input dense v-model="form.code" label="Code" /></div>
-        <div class="col q-pa-sm"><q-input dense v-model="form.value" label="Value" /></div>
+        <div class="col-3 q-pa-sm"><q-select v-model="form.tip" :options="tipiPeremenoi" label="Type" emit-value/></div>
+        <div class="col-3 q-pa-sm"><q-input v-model="form.code" label="Code" /></div>
+        <div class="col q-pa-sm"><q-input v-model="form.value" label="Value" /></div>
         <div class="col-auto q-pa-sm">
-          <q-btn size="md" color="dark" icon="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
+          <q-btn size="sm" padding="5px 6px" color="primary" icon="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
             <q-tooltip>add</q-tooltip>
           </q-btn>
         </div>
       </div>
-      <q-list>
-        <q-item>
-          <q-item-section>
-
-          </q-item-section>
-        </q-item>
-        <q-item v-for="variable in spisok" :key="variable.code" class="q-mb-sm" clickable v-ripple>
-          <q-item-section v-if="variable.tip !== 'hidden'">
-            <q-item-label>{{variable.code}}: {{variable.value}}</q-item-label>
-          </q-item-section>
-          <q-item-section v-else>
-            <q-item-label>{{variable.code}}: *******</q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-btn size="md" color="dark" icon="delete" @click="udalitPeremenuyu(variable.code)" :loading="loaderUdaleniya">
-              <q-tooltip>delete</q-tooltip>
-            </q-btn>
-          </q-item-section>
-        </q-item>
-      </q-list>
+      <div v-for="variable in spisok" :key="variable.code" class="q-mb-sm">
+          <q-btn size="sm" padding="5px 6px" color="primary" icon="delete" @click="udalitPeremenuyu(variable.code)" :loading="loaderUdaleniya">
+            <q-tooltip>delete</q-tooltip>
+          </q-btn>
+          <span class="q-pl-sm">
+            <span v-if="variable.tip !== 'hidden'">
+              {{variable.code}}: {{variable.value}}
+            </span>
+            <span v-else>
+              {{variable.code}}: *******
+            </span>
+          </span>
+      </div>
     </q-card-section>
   </q-card>
 </template>

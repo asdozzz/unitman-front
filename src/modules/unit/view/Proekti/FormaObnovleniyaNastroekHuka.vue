@@ -1,31 +1,44 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
-import {storeObnovleniyaNastroekHuka} from "@/modules/unit/store/SpisokProektov/StoreObnovleniyaNastroekHuka";
+import {
+  HookSettingsForm,
+  storeObnovleniyaNastroekHuka
+} from "@/modules/unit/store/SpisokProektov/StoreObnovleniyaNastroekHuka";
+import {storePolucheniyaProekta} from "@/modules/unit/store/SpisokProektov/StorPolucheniyaProekta";
+import {useRoute} from "vue-router";
+import {onMounted} from "vue";
+
+const storeProekta = storePolucheniyaProekta();
+const {loader: loaderProekta, proekt, oshibkaOtBeka } = storeToRefs(storeProekta);
 
 const formStore = storeObnovleniyaNastroekHuka();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(formStore);
 
-const emit = defineEmits<{
-  formaBilaOtpravlena: []
-}>()
-async function otpravitFormu() {
-  const response = await formStore.otpravitFormu();
+const route = useRoute();
 
-  if (response.status === "success") {
-    emit('formaBilaOtpravlena');
-    formStore.zakritFormu();
+onMounted(async () => {
+  await storeProekta.poluchitProekt(route.params.id as string);
+  if (proekt.value) {
+    formStore.otkritFormu(new HookSettingsForm(proekt.value.id, proekt.value.nastroikiHukaProekta.avtosozdanie, proekt.value.nastroikiHukaProekta.avtoobnovlenie, proekt.value.nastroikiHukaProekta.avtoudalenie, proekt.value.nastroikiHukaProekta.obnovlenieBezSbrosaPodgotovki))
   }
+});
 
+async function otpravitFormu() {
+  await formStore.otpravitFormu();
 }
 </script>
 
 <template>
-  <q-card>
-    <q-card-section>
-      <div class="text-h6">Project hook settings</div>
-    </q-card-section>
-
-    <q-card-section class="q-pt-none">
+  <q-spinner-cube
+      v-if="loaderProekta"
+      color="primary"
+      size="2em"
+  />
+  <template v-else-if="oshibkaOtBeka">
+    <div class="text-negative" v-html="oshibkaOtBeka"></div>
+  </template>
+  <q-card v-else style="width: 720px">
+    <q-card-section class="q-pa-sm">
       <q-toggle v-model="form.avtosozdanie" label="Auto create unit" /><br>
       <q-toggle v-model="form.avtoobnovlenie" label="Auto update unit" /><br>
       <q-toggle v-model="form.avtoudalenie" label="Auto delete unit" /><br>
@@ -34,8 +47,7 @@ async function otpravitFormu() {
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="dark" @click="formStore.zakritFormu()" :loading="loader"/>
+      <q-btn label="Save" color="primary" @click="otpravitFormu" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

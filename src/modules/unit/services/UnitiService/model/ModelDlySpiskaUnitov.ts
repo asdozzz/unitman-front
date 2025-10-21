@@ -61,6 +61,7 @@ export default class ModelDlySpiskaUnitov {
     public prozesi: ApiProzesUnita[] = [];
     public commands: string[] = [];
     public error: boolean = false;
+    public zapushen: boolean = false;
     public links: Link[] = [];
     public unixtimePoslednegoObnovleniyaUnita: number|null = null;
     public unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;

@@ -22,10 +22,6 @@ async function otpravitFormu() {
 
 <template>
   <q-card>
-    <q-card-section>
-      <div class="text-h6">{{$t('account.form_change_nickname.caption')}}</div>
-    </q-card-section>
-
     <q-card-section class="q-pt-none">
       <q-input v-model="form.newNickname" :label="$t('account.form_change_nickname.fields.labels.new_nickname')" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
@@ -33,7 +29,6 @@ async function otpravitFormu() {
 
     <q-card-actions align="right">
       <q-btn :label="$t('account.form_change_nickname.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('account.form_change_nickname.buttons.close')" color="dark" @click="formaIzmeneniyaNickname.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

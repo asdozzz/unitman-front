@@ -17,11 +17,11 @@ const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
 
 const unitiStore = useSpisokUnitovStore();
-const {getUnitLoader, showForceRemove, esliJdemRunner, esliZapushen, nazvanieTekusheiZadachi} = storeToRefs(unitiStore);
+const { showForceRemove, esliJdemRunner, getUnitLoader, esliZapushen, nazvanieTekusheiZadachi } = storeToRefs(unitiStore);
 
 const itemHeaderClass = computed(() => {
   let headerColor = 'bg-primary';
-  const timestamp = Math.floor(Date.now() / 1000);
+  /*const timestamp = Math.floor(Date.now() / 1000);
   const week = 60*60*24*7;
   const week2 = 60*60*24*7*2;
   const month = 60*60*24*7*4;
@@ -35,7 +35,7 @@ const itemHeaderClass = computed(() => {
     if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > month) {
       headerColor = 'bg-grey-8';
     }
-  }
+  }*/
 
   let classHeader = '';
 
@@ -55,7 +55,6 @@ const isShowRemoveBtn = computed(() => {
 
   return isAdmin;
 });
-
 
 async function udalit() {
   await unitiStore.udalit(props.item);
@@ -143,7 +142,7 @@ function showRemovePrompt() {
           <div class="col"><strong>mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</strong></div>
         </div>
       </div>
-      <q-inner-loading :showing="esliJdemRunner(item)">
+      <q-inner-loading :showing="esliJdemRunner(props.item)">
         <q-spinner-gears size="30px" color="primary" />
         <p class="text-primary">{{$t('unit.tipi_zadach.'+nazvanieTekusheiZadachi(item))}}</p>
       </q-inner-loading>

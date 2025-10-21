@@ -79,6 +79,7 @@ export default class Unit {
     //waitResultFromRunner: boolean = false;
     commands: string[] = [];
     error: boolean = false;
+    zapushen: boolean = false;
     links: Link[] = []
     unixtimePoslednegoObnovleniyaUnita: number|null = null;
     unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
@@ -99,6 +100,7 @@ export default class Unit {
             prozesi: ProzesUnitaBezShagov[],
             commands: string[],
             error: boolean,
+            zapushen: boolean,
             links: Link[],
             unixtimePoslednegoObnovleniyaUnita: number|null,
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
@@ -120,6 +122,7 @@ export default class Unit {
 
         this.links = data.links;
         this.error = data.error;
+        this.zapushen = data.zapushen;
         this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
         this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
         this.peremenie = data.peremenie;

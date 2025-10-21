@@ -115,6 +115,15 @@
     }
   },
   "unit": {
+    "proekt": {
+      "tabs": {
+        "project_data": "Данные проекта",
+        "jobs": "Задачи",
+        "users": "Пользователи",
+        "variables": "Переменные",
+        "repo_event_handler": "Обработка событий репозитория"
+      }
+    },
     "spisok_rep": {
       "buttons": {
         "add": "Добавить",
@@ -171,7 +180,8 @@
         "repo_id": "Ид репозитория",
         "project_code": "Код проекта",
         "main_branch": "Master ветка",
-        "state": "Статус"
+        "state": "Статус",
+        "proxy_host": "Proxy Host"
       }
     },
     "spisok_unitov": {

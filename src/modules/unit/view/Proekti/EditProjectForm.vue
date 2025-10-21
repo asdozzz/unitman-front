@@ -1,33 +1,43 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
-import {useEditProjectFormStore} from "@/modules/unit/store/SpisokProektov/EditProjectFormStore";
+import {EditProjectForm, useEditProjectFormStore} from "@/modules/unit/store/SpisokProektov/EditProjectFormStore";
+import {onMounted} from "vue";
+import {useRoute} from "vue-router";
+import {storePolucheniyaProekta} from "@/modules/unit/store/SpisokProektov/StorPolucheniyaProekta";
+
+const storeProekta = storePolucheniyaProekta();
+const {loader: loaderProekta, proekt, oshibkaOtBeka } = storeToRefs(storeProekta);
 
 const editFormStore = useEditProjectFormStore();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(editFormStore);
 
-const emit = defineEmits<{
-  formaBilaOtpravlena: []
-}>()
-async function otpravitFormu() {
-  const response = await editFormStore.otpravitFormu();
+const route = useRoute();
 
-  if (response.status === "success") {
-    emit('formaBilaOtpravlena');
-    editFormStore.zakritFormu();
+onMounted(async () => {
+  await storeProekta.poluchitProekt(route.params.id as string);
+  if (proekt.value) {
+    await editFormStore.otkritFormu(new EditProjectForm(proekt.value.id, proekt.value.name, proekt.value.proxyHost));
   }
 
+})
+async function otpravitFormu() {
+  await editFormStore.otpravitFormu();
 }
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
-    <q-card-section>
-      <div class="text-h6">Edit Project</div>
-    </q-card-section>
-
+  <q-spinner-cube
+      v-if="loaderProekta"
+      color="primary"
+      size="2em"
+  />
+  <template v-else-if="oshibkaOtBeka">
+    <div class="text-negative" v-html="oshibkaOtBeka"></div>
+  </template>
+  <q-card v-else  style="width: 720px; max-width: 80vw;">
     <q-card-section class="q-pt-none">
-      <q-input v-model="form.newProjectName" label="New Project Name" />
-      <q-input v-model="form.newProxyHost" label="New Proxy Host" />
+      <q-input v-model="form.newProjectName" label="Project Name" />
+      <q-input v-model="form.newProxyHost" label="Proxy Host" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

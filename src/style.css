@@ -1,3 +1,7 @@
 .fs-12 {
     font-size: 12px;
 }
+
+.q-inner-loading {
+    background: rgb(255 255 255 / 85%)!important;
+}

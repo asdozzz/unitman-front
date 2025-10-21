@@ -23,10 +23,6 @@ async function otpravitFormu() {
 
 <template>
   <q-card>
-    <q-card-section>
-      <div class="text-h6">{{$t('account.form_change_role.caption')}}</div>
-    </q-card-section>
-
     <q-card-section class="q-pt-none">
       <q-select v-model="form.newRole" emit-value :options="roles" :label="$t('account.form_change_role.fields.labels.new_role')" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
@@ -34,7 +30,6 @@ async function otpravitFormu() {
 
     <q-card-actions align="right">
       <q-btn :label="$t('account.form_change_role.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('account.form_change_role.buttons.close')" color="dark" @click="formaIzmeneniyaRoli.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>
