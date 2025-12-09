@@ -10,13 +10,13 @@ RUN echo $API_HOST
 RUN echo $CENTRIFUGE_HOST
 
 
-#RUN npm install -g vite
-#COPY . .
-#RUN cp .env.dist .env
-#RUN yarn install
-#RUN yarn build
-#
-#FROM nginx:latest AS prod
-#COPY --from=build-stage /app/dist /usr/share/nginx/html
-#COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-#CMD ["nginx", "-g", "daemon off;"]
+RUN npm install -g vite
+COPY . .
+RUN cp .env.dist .env
+RUN yarn install
+RUN yarn build
+
+FROM nginx:latest AS prod
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+CMD ["nginx", "-g", "daemon off;"]
