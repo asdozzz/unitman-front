@@ -37,7 +37,7 @@ async function otpravitFormu() {
   <template v-else-if="oshibkaOtBeka">
     <div class="text-negative" v-html="oshibkaOtBeka"></div>
   </template>
-  <q-card v-else style="width: 720px">
+  <q-card v-else style="width: 500px">
     <q-card-section class="q-pa-sm">
       <q-toggle v-model="form.avtosozdanie" label="Auto create unit" /><br>
       <q-toggle v-model="form.avtoobnovlenie" label="Auto update unit" /><br>

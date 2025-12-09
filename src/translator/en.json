@@ -121,7 +121,8 @@
         "jobs": "Jobs",
         "users": "Users",
         "variables": "Variables",
-        "repo_event_handler": "Repository Events Handler"
+        "repo_event_handler": "Repository Events Handler",
+        "webhooks": "Webhooks"
       }
     },
     "spisok_rep": {

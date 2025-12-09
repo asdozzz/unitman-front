@@ -36,6 +36,7 @@ async function otpravitFormu() {
       <q-input v-model="form.projectName" label="Project Name" />
       <q-input v-model="form.mainBranch" label="Main Branch" />
       <q-input v-model="form.proxyHost" label="Proxy Host" />
+      <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 

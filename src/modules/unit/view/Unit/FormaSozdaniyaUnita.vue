@@ -43,6 +43,15 @@ function vetkaVibrana(): void {
 function otkritStranizuSDublem(dubl: Unit): void {
   window.open('/unit/list?id='+dubl.id, "_blank");
 }
+
+function projectChanged() {
+  addFormStore.poluchitVetki()
+
+  const proekt = proekti.value.spisok.find(item => item.value === form.value.projectId);
+  if (proekt) {
+    form.value.memoryLimit = proekt.memoryLimit;
+  }
+}
 </script>
 
 <template>
@@ -52,7 +61,12 @@ function otkritStranizuSDublem(dubl: Unit): void {
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-select v-model="form.projectId" :options="proekti.spisok" label="Project" emit-value map-options @update:model-value="addFormStore.poluchitVetki()"/>
+      <q-select v-model="form.projectId"
+                :options="proekti.spisok"
+                label="Project"
+                emit-value
+                map-options
+                @update:model-value="projectChanged"/>
       <q-select
           :loading="vetki.loader"
           v-model="form.branch"
@@ -106,7 +120,3 @@ function otkritStranizuSDublem(dubl: Unit): void {
     </q-card-actions>
   </q-card>
 </template>
-
-<style scoped>
-
-</style>

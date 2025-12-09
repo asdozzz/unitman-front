@@ -5,7 +5,7 @@ import {useSpisokPeremenihProektaStore} from "@/modules/unit/store/SpisokProekto
 import {useRoute} from "vue-router";
 
 const spisokPeremenihProekta = useSpisokPeremenihProektaStore();
-const {spisok, form, loaderUdaleniya, loaderDobavleniya, tipiPeremenoi, loaderSpiskaPeremenih} = storeToRefs(spisokPeremenihProekta);
+const {spisok, form, loaderUdaleniya, loaderDobavleniya, tipiPeremenoi} = storeToRefs(spisokPeremenihProekta);
 
 const route = useRoute();
 
@@ -25,19 +25,25 @@ async function udalitPeremenuyu(code: string) {
 </script>
 
 <template>
-  <q-card style="width: 720px; max-width: 80vw;">
+  <q-card style="width: 500px; max-width: 80vw;">
     <q-card-section>
-      <div class="row">
-        <div class="col-3 q-pa-sm"><q-select v-model="form.tip" :options="tipiPeremenoi" label="Type" emit-value/></div>
-        <div class="col-3 q-pa-sm"><q-input v-model="form.code" label="Code" /></div>
-        <div class="col q-pa-sm"><q-input v-model="form.value" label="Value" /></div>
-        <div class="col-auto q-pa-sm">
-          <q-btn size="sm" padding="5px 6px" color="primary" icon="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
+      <div class="row q-mb-sm">
+        <div class="col-3 q-pr-sm">
+          <q-select standout dense square outlined v-model="form.tip" :options="tipiPeremenoi" label="Type" emit-value/>
+        </div>
+        <div class="col-3 q-pr-sm">
+          <q-input standout dense square outlined  v-model="form.code" label="Code" /></div>
+        <div class="col-3 q-pr-sm">
+          <q-input standout dense square outlined  v-model="form.value" label="Value" />
+        </div>
+        <div class="col-auto q-pr-sm">
+          <q-btn color="primary" label="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
             <q-tooltip>add</q-tooltip>
           </q-btn>
         </div>
       </div>
-      <div v-for="variable in spisok" :key="variable.code" class="q-mb-sm">
+      <div v-for="variable in spisok" :key="variable.code" class="row q-mb-sm">
+        <div class="col-12">
           <q-btn size="sm" padding="5px 6px" color="primary" icon="delete" @click="udalitPeremenuyu(variable.code)" :loading="loaderUdaleniya">
             <q-tooltip>delete</q-tooltip>
           </q-btn>
@@ -49,6 +55,8 @@ async function udalitPeremenuyu(code: string) {
               {{variable.code}}: *******
             </span>
           </span>
+        </div>
+
       </div>
     </q-card-section>
   </q-card>

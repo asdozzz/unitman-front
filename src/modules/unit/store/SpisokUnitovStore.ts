@@ -28,11 +28,13 @@ class Proekt {
     value: string;
     label: string;
     users: PolzovatelProekta[];
+    memoryLimit: number;
 
-    constructor(value: string, label: string, users: PolzovatelProekta[]) {
+    constructor(value: string, label: string, users: PolzovatelProekta[], memoryLimit: number) {
         this.value = value;
         this.label = label;
         this.users = users;
+        this.memoryLimit = memoryLimit;
     }
 }
 
@@ -272,7 +274,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             this.proekti.loader = false;
             if (response.status === "success") {
-                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name, item.users));
+                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name, item.users, item.memoryLimit));
             } else if (response.status === "fail") {
                 Notify.create(response.data.message);
             } else if (response.status === "error") {

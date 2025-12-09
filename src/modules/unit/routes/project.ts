@@ -5,6 +5,8 @@ import LayoutStraniziRedaktirovaniya from "@/modules/unit/view/Proekti/LayoutStr
 import SpisokPolzovateleiProekta from "@/modules/unit/view/Proekti/SpisokPolzovateleiProekta.vue";
 import SpisokPeremenihProekta from "@/modules/unit/view/Proekti/SpisokPeremenihProekta.vue";
 import FormaObnovleniyaNastroekHuka from "@/modules/unit/view/Proekti/FormaObnovleniyaNastroekHuka.vue";
+import SpisokWebhookovProekta from "@/modules/unit/view/Proekti/SpisokWebhookovProekta.vue";
+import SobitiyaWebhooka from "@/modules/unit/view/Proekti/SobitiyaWebhooka.vue";
 
 export default [
     {
@@ -43,7 +45,17 @@ export default [
                 path: 'repo_event_handler',
                 component: FormaObnovleniyaNastroekHuka,
                 name: 'project_repo_event_handler',
+            },
+            {
+                path: 'webhooks',
+                component: SpisokWebhookovProekta,
+                name: 'project_webhooks',
             }
         ]
+    },
+    {
+        path: 'projects/:id/webhooks/:webhookId',
+        component: SobitiyaWebhooka,
+        name: 'webhook_events',
     }
 ];

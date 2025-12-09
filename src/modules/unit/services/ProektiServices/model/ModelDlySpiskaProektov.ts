@@ -36,4 +36,5 @@ export default class ModelDlySpiskaProektov {
         obnovlenieBezSbrosaPodgotovki: false,
     };
     public waitResultRunner: boolean = false;
+    public memoryLimit: number = 0;
 }

@@ -38,6 +38,15 @@ import {
 import {
     OtvetNaPoluchenieShagovZadachiRunnera
 } from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieShagovZadachiRunnera";
+import {ZaprosNaDobavlenieWebhooka} from "@/modules/unit/services/ProektiServices/model/ZaprosNaDobavlenieWebhooka";
+import {ZaprosNaObnovlenieWebhooka} from "@/modules/unit/services/ProektiServices/model/ZaprosNaObnovlenieWebhooka";
+import {
+    ModelDlySpiskaWebhookovProekta
+} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaWebhookovProekta";
+import {
+    ZaprosNaPolucheniyeSobitiiWebhooka
+} from "@/modules/unit/services/ProektiServices/model/ZaprosNaPolucheniyeSobitiiWebhooka";
+import {OtvetNaPoluchenieSpiskaSobitiiWebhooka} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieSpiskaSobitiiWebhooka";
 
 class ProektiService {
     list() {
@@ -130,6 +139,40 @@ class ProektiService {
     ochistit(params: { id: string }) {
         return apiClient.post<null>('/project/ochistit', params);
     }
+
+    dobavitWebhook(params: ZaprosNaDobavlenieWebhooka) {
+        return apiClient.post<null>('/project/webhook/dobavit', params);
+    }
+
+    readWebhook(id: string) {
+        return apiClient.post<ModelDlySpiskaWebhookovProekta>('/project/webhook/'+id+'/read', {});
+    }
+
+    obnovitWebhooka(params: ZaprosNaObnovlenieWebhooka) {
+        return apiClient.post<null>('/project/webhook/obnovit', params);
+    }
+
+    otkluchitWebhook(id: string) {
+        return apiClient.post<null>('/project/webhook/'+id+'/otkluchit', {});
+    }
+
+    vkluchitWebhook(id: string) {
+        return apiClient.post<null>('/project/webhook/'+id+'/vkluchit', {});
+    }
+
+    udalitWebhook(id: string) {
+        return apiClient.post<null>('/project/webhook/'+id+'/udalit', {});
+    }
+
+    spisokWebhookovDlyProekta( projectId: string) {
+        return apiClient.post<ModelDlySpiskaWebhookovProekta[]>('/project/webhook/'+projectId+'/spisok', {});
+    }
+
+    poluchitSobitiyaWebhooka( params: ZaprosNaPolucheniyeSobitiiWebhooka) {
+        return apiClient.post<OtvetNaPoluchenieSpiskaSobitiiWebhooka>('/project/webhook/poluchitSobitiyaWebhooka', params);
+    }
+
+
 }
 
 export default new ProektiService();

@@ -1,15 +1,17 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
+import {Notify} from "quasar";
 
 export class EditProjectForm {
     id: string;
     newProjectName: string;
     newProxyHost: string;
-
-    constructor(id: string = "", newProjectName: string = "", newProxyHost: string | null = null) {
+    memoryLimit: number;
+    constructor(id: string = "", newProjectName: string = "", newProxyHost: string | null = null, memoryLimit: number | null = null) {
         this.id = id;
         this.newProjectName = newProjectName;
         this.newProxyHost = newProxyHost  ?? "";
+        this.memoryLimit = memoryLimit ?? 0;
     }
 }
 
@@ -45,6 +47,7 @@ export const useEditProjectFormStore = defineStore('EditProjectFormStore', {
 
             this.loader = false;
             if (response.status === "success") {
+                Notify.create({ message: 'Успех операции', type: 'positive', timeout: 100 });
                 this.oshibkaOtBackenda = null;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;

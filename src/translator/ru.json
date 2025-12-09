@@ -121,7 +121,8 @@
         "jobs": "Задачи",
         "users": "Пользователи",
         "variables": "Переменные",
-        "repo_event_handler": "Обработка событий репозитория"
+        "repo_event_handler": "Обработка событий репозитория",
+        "webhooks": "Вебхуки"
       }
     },
     "spisok_rep": {

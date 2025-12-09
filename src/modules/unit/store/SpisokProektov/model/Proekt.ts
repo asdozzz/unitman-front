@@ -17,6 +17,7 @@ export default class Proekt {
     variables: PeremenayaProekta[] = [];
     nastroikiHukaProekta: NastroikiHukaProekta;
     waitResultRunner: boolean = false;
+    memoryLimit: number = 0;
 
     constructor(
         data: {
@@ -33,7 +34,8 @@ export default class Proekt {
             users: PolzovatelProekta[],
             variables: PeremenayaProekta[],
             nastroikiHukaProekta: NastroikiHukaProekta,
-            waitResultRunner: boolean
+            waitResultRunner: boolean,
+            memoryLimit: number,
         }
     ) {
         this.id = data.id;
@@ -49,6 +51,7 @@ export default class Proekt {
         this.users = data.users;
         this.variables = data.variables;
         this.nastroikiHukaProekta = data.nastroikiHukaProekta;
-        this.waitResultRunner = data.waitResultRunner
+        this.waitResultRunner = data.waitResultRunner;
+        this.memoryLimit = data.memoryLimit;
     }
 };
