@@ -2,5 +2,8 @@ services:
   unitman-front:
     build:
       context: .
+      args:
+        API_HOST: http://localhost:8082/api
+        CENTRIFUGE_HOST: ws://localhost:8000/connection/websocket
     ports:
       - 8033:80
