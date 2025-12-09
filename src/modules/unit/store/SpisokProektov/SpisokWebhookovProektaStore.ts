@@ -16,10 +16,11 @@ type WebhookProekta = {
     id: string;
     projectId: string;
     url: string;
-    isActive: string;
+    isActive: boolean;
 };
 
 type State = {
+    enable: boolean;
     projectId: string | null,
     spisok: WebhookProekta[],
     loaderSpiska: boolean,

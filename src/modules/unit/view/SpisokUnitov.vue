@@ -9,8 +9,6 @@ import {
   useFormaZapolneniyaPeremenihUnitaStore
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
-import {storFormiIzmeneniyaVetkiUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiIzmeneniyaVetkiUnita";
-import FormaIzmeneniyaVetkiUnita from "@/modules/unit/view/Unit/FormaIzmeneniyaVetkiUnita.vue";
 import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
 import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
 import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
@@ -25,9 +23,6 @@ const { enable: enableAddForm } = storeToRefs(addFormStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 const { enable: enableKonfigForm } = storeToRefs(konfigFormStore);
-
-const storFormiIzmeneniyaVetki = storFormiIzmeneniyaVetkiUnita();
-const { enable: enableIzmenenieVetki } = storeToRefs(storFormiIzmeneniyaVetki);
 
 const storFormiDeistviy = storFormiDeistviyUnita();
 const { enable: enableFormiDeistviya } = storeToRefs(storFormiDeistviy);
@@ -148,9 +143,6 @@ function clearUnitIdFilter() {
       </q-dialog>
       <q-dialog v-model="enableKonfigForm" persistent transition-show="scale" transition-hide="scale">
         <FormaZapolneniyaPeremenihUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
-      </q-dialog>
-      <q-dialog v-model="enableIzmenenieVetki" persistent transition-show="scale" transition-hide="scale">
-        <FormaIzmeneniyaVetkiUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
       </q-dialog>
       <q-dialog v-model="enableFormiDeistviya" persistent transition-show="scale" transition-hide="scale">
         <FormaDeistviyUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
