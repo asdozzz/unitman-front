@@ -42,12 +42,12 @@ async function otpravitFormu() {
         <PeremenayaKonfiga :peremenaya="peremenaya"/>
       </template>
 
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="formStore.zakritFormu()" :loading="loader"/>
+      <q-btn label="Close" color="dark" @click="formStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

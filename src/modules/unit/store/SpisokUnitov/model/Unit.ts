@@ -1,3 +1,5 @@
+import {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi} from "@/modules/unit/store/SpisokUnitov/model/UnitEnums";
+
 type Peremenaya = {
     id: string;
     value: string;
@@ -50,6 +52,20 @@ export type Deistviye = {
     commands: string[]
 }
 
+export type ZadachaUnitaBezShagov = {
+    jobId: string;
+    type: TipZadachi;
+    state: StatusZadachi;
+}
+
+export type ProzesUnitaBezShagov = {
+    id: string;
+    userId: string;
+    type: TipProzesa;
+    state: StatusProzesa;
+    jobs: ZadachaUnitaBezShagov[];
+};
+
 export default class Unit {
     id: string = "";
     authorId: string = "";
@@ -58,14 +74,13 @@ export default class Unit {
     projectId: string = "";
     projectName: string = "";
     branch: string = "";
-    state: string = "";
-    waitResultFromRunner: boolean = false;
+    prozesi: ProzesUnitaBezShagov[] = [];
+    //state: string = "";
+    //waitResultFromRunner: boolean = false;
     commands: string[] = [];
     error: boolean = false;
+    zapushen: boolean = false;
     links: Link[] = []
-    jdemObnovlenieKodaPosleZapuska: boolean = false;
-    jdemAvtosborki: boolean = false;
-    jdemUdaleniyaPosleZapuska: boolean = false;
     unixtimePoslednegoObnovleniyaUnita: number|null = null;
     unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
     peremenie: Peremenaya[] = [];
@@ -82,14 +97,11 @@ export default class Unit {
             projectId: string,
             projectName: string,
             branch: string,
-            state: string,
-            waitResultFromRunner: boolean,
+            prozesi: ProzesUnitaBezShagov[],
             commands: string[],
             error: boolean,
+            zapushen: boolean,
             links: Link[],
-            jdemObnovlenieKodaPosleZapuska: boolean,
-            jdemAvtosborki: boolean,
-            jdemUdaleniyaPosleZapuska: boolean,
             unixtimePoslednegoObnovleniyaUnita: number|null,
             unixtimePoslednegoObnovleniyaVHranilishe: number|null,
             peremenie: Peremenaya[],
@@ -105,15 +117,12 @@ export default class Unit {
         this.projectId = data.projectId;
         this.projectName = data.projectName;
         this.branch = data.branch;
-        this.state = data.state;
-        this.waitResultFromRunner = data.waitResultFromRunner;
+        this.prozesi = data.prozesi;
         this.commands = data.commands;
 
         this.links = data.links;
         this.error = data.error;
-        this.jdemObnovlenieKodaPosleZapuska = data.jdemObnovlenieKodaPosleZapuska;
-        this.jdemUdaleniyaPosleZapuska = data.jdemUdaleniyaPosleZapuska;
-        this.jdemAvtosborki = data.jdemAvtosborki;
+        this.zapushen = data.zapushen;
         this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
         this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
         this.peremenie = data.peremenie;

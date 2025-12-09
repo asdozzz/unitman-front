@@ -36,12 +36,13 @@ async function otpravitFormu() {
       <q-input v-model="form.projectName" label="Project Name" />
       <q-input v-model="form.mainBranch" label="Main Branch" />
       <q-input v-model="form.proxyHost" label="Proxy Host" />
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn label="Close" color="dark" @click="addFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

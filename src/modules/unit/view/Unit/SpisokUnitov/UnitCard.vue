@@ -17,11 +17,11 @@ const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
 
 const unitiStore = useSpisokUnitovStore();
-const {getUnitLoader, showForceRemove, esliJdemRunner} = storeToRefs(unitiStore);
+const { showForceRemove, esliJdemRunner, getUnitLoader, esliZapushen, nazvanieTekusheiZadachi } = storeToRefs(unitiStore);
 
 const itemHeaderClass = computed(() => {
-  let headerColor = 'bg-blue-8';
-  const timestamp = Math.floor(Date.now() / 1000);
+  let headerColor = 'bg-primary';
+  /*const timestamp = Math.floor(Date.now() / 1000);
   const week = 60*60*24*7;
   const week2 = 60*60*24*7*2;
   const month = 60*60*24*7*4;
@@ -35,12 +35,12 @@ const itemHeaderClass = computed(() => {
     if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > month) {
       headerColor = 'bg-grey-8';
     }
-  }
+  }*/
 
   let classHeader = '';
 
   if (props.item.error) {
-    classHeader = 'bg-red text-white';
+    classHeader = 'bg-negative text-white';
   } else {
     classHeader = `text-white ${headerColor}`;
   }
@@ -55,7 +55,6 @@ const isShowRemoveBtn = computed(() => {
 
   return isAdmin;
 });
-
 
 async function udalit() {
   await unitiStore.udalit(props.item);
@@ -120,7 +119,7 @@ function showRemovePrompt() {
     <q-card-section class="q-pa-sm">
       <div class="text-left" v-if="item.links.length > 0">
         <template v-for="link in item.links">
-          <template v-if="link.protocol === 'http' && item.state === 'USPESHNO_ZAPUSHEN'">
+          <template v-if="link.protocol === 'http' && esliZapushen(item)">
             <div class="text-italic fs-12">
               <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}{{link.startUri}}</a>
             </div>
@@ -143,11 +142,12 @@ function showRemovePrompt() {
           <div class="col"><strong>mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</strong></div>
         </div>
       </div>
-      <q-inner-loading :showing="esliJdemRunner(item)">
+      <q-inner-loading :showing="esliJdemRunner(props.item)">
         <q-spinner-gears size="30px" color="primary" />
+        <p class="text-primary">{{$t('unit.tipi_zadach.'+nazvanieTekusheiZadachi(item))}}</p>
       </q-inner-loading>
     </q-card-section>
-    <q-separator dark />
+    <q-separator/>
     <q-card-actions>
       <UnitActions :item="item"/>
       <q-space />

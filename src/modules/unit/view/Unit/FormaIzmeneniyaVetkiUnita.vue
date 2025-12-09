@@ -58,12 +58,12 @@ function filterSpiskaVetok(val: string | null, update: any) {
         </template>
       </q-select>
 
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="storFormiIzmeneniyaVetki.zakritFormu()" :loading="loader"/>
+      <q-btn label="Close" color="dark" @click="storFormiIzmeneniyaVetki.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

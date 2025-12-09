@@ -53,7 +53,7 @@ function convertDate(unixtime: number): string {
                   <div v-if="step.success" class="text-grey-1 fs-12">
                     <pre class="bash-output">{{step.response}}</pre>
                   </div>
-                  <div v-if="!step.success" class="text-red-8 fs-12">
+                  <div v-if="!step.success" class="text-negative fs-12">
                     <pre class="bash-output">{{step.response}}</pre>
                   </div>
 
@@ -65,9 +65,44 @@ function convertDate(unixtime: number): string {
             <q-card class="no-border-radius">
               <q-card-section class="q-pt-none">
                 <q-list bordered separator :padding="false" class="rounded-borders">
-                  <q-item clickable v-ripple v-for="(zadacha) in spisok" :key="zadacha.id" active-class="bg-primary text-white" :active="zadacha.id === selectJob.id" @click="store.select(zadacha.id)">
-                    {{ zadacha.jobType }}
-                  </q-item>
+                  <q-expansion-item
+                      expand-separator
+                      v-for="(prozess) in spisok"
+                      :model-value="prozess.id === selectJob.prozesId"
+                      :key="prozess.id" active-class="bg-primary text-white">
+                    <template v-slot:header>
+                      <q-item-section avatar>
+                        <q-icon v-if="prozess.state == 'NEW'  || prozess.state == 'ZADACHI_DOBAVLENI'" name="fiber_new"></q-icon>
+                        <q-icon v-if="prozess.state == 'PENDING'" color="primary" name="access_time"></q-icon>
+                        <q-icon v-if="prozess.state == 'ERROR' || prozess.state == 'CANCLED'"  class="text-negative" name="error"></q-icon>
+                        <q-icon v-if="prozess.state == 'SUCCESS'" class="text-positive" name="check_circle"></q-icon>
+                      </q-item-section>
+
+                      <q-item-section :class="{'text-primary':prozess.id === selectJob.prozesId}">
+                        <span class="text-weight-bolder">{{$t('unit.tipi_prozesa.'+prozess.type)}}</span>
+                      </q-item-section>
+                    </template>
+                    <q-list bordered separator class="rounded-borders q-pl-md">
+                      <q-item
+                          clickable
+                          v-for="zadacha in prozess.jobs"
+                          :key="zadacha.id"
+                          :active="zadacha.id === selectJob.zadachaId"
+                          @click="store.select(prozess.id, zadacha.id)">
+                        <q-item-section avatar>
+                          <q-icon size="xs" v-if="zadacha.state == 'NEW'" color="primary" name="fiber_new"></q-icon>
+                          <q-icon size="xs" v-if="zadacha.state == 'PENDING'" color="primary" name="access_time"></q-icon>
+                          <q-icon size="xs" v-if="zadacha.state == 'ERROR' || zadacha.state == 'CANCLED'"  class="text-negative" name="error"></q-icon>
+                          <q-icon size="xs" v-if="zadacha.state == 'SUCCESS'" class="text-positive" name="check_circle"></q-icon>
+                        </q-item-section>
+
+                        <q-item-section>
+                          {{$t('unit.tipi_zadach.'+zadacha.type)}}
+                        </q-item-section>
+
+                      </q-item>
+                    </q-list>
+                  </q-expansion-item>
                 </q-list>
 
               </q-card-section>

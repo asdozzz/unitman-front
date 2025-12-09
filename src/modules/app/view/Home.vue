@@ -26,20 +26,20 @@ onMounted(() => {
       <template v-else>
         <q-card square class="q-ma-md" style="min-width: 350px">
           <q-card-section class="bg-primary text-white q-py-sm">
-            <div class="text-h6">All projects</div>
+            <div class="text-h6">{{$t('dashboard.all_projects')}}</div>
           </q-card-section>
 
-          <q-card-section class="q-pt-none">
+          <q-card-section class="q-pt-sm">
             <div class="text-subtitle2">
-              Total
+              {{$t('dashboard.total')}}
               <q-badge align="middle">{{ obshayaStata.total }}</q-badge>
             </div>
             <div class="text-subtitle2">
-              Active
+              {{$t('dashboard.active')}}
               <q-badge align="middle">{{ obshayaStata.active }}</q-badge>
             </div>
             <div class="text-subtitle2">
-              Deleted
+              {{$t('dashboard.deleted')}}
               <q-badge align="middle">{{ obshayaStata.deleted }}</q-badge>
             </div>
           </q-card-section>
@@ -50,17 +50,17 @@ onMounted(() => {
               <div class="text-h6">{{ item.projectName }}</div>
             </q-card-section>
 
-            <q-card-section class="q-pt-none">
+            <q-card-section class="q-pt-sm">
               <div class="text-subtitle2">
-                Total
+                {{$t('dashboard.total')}}
                 <q-badge align="middle">{{ item.total }}</q-badge>
               </div>
               <div class="text-subtitle2">
-                Active
+                {{$t('dashboard.active')}}
                 <q-badge align="middle">{{ item.active }}</q-badge>
               </div>
               <div class="text-subtitle2">
-                Deleted
+                {{$t('dashboard.deleted')}}
                 <q-badge align="middle">{{ item.deleted }}</q-badge>
               </div>
             </q-card-section>

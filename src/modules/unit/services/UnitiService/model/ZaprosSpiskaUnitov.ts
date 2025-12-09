@@ -4,5 +4,6 @@ export type ZaprosSpiskaUnitov = {
         name: string | null
         branch: string | null
         projectId: string | null
+        unitId: string | null
     }
 }

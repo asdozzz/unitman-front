@@ -27,12 +27,12 @@ async function otpravitFormu() {
 
     <q-card-section class="q-pt-none">
       <q-input v-model="form.token" :label="$t('unit.form_edit_rep.fields.labels.token')" />
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn :label="$t('unit.form_edit_rep.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('unit.form_edit_rep.buttons.close')" color="black" @click="editFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('unit.form_edit_rep.buttons.close')" color="dark" @click="editFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

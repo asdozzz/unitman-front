@@ -16,6 +16,9 @@
     }
   },
   "account": {
+    "form_projects": {
+      "projects": "Projects"
+    },
     "login_form": {
       "caption": "Sign in",
       "email_label": "Email Address",
@@ -33,7 +36,8 @@
         "unblock": "unblock",
         "change_password": "change password",
         "change_email": "change email",
-        "change_nickname": "change nickname"
+        "change_nickname": "change nickname",
+        "change_role": "change role"
       },
       "card": {
         "labels": {
@@ -96,9 +100,31 @@
         "ok": "Ok",
         "close": "Close"
       }
+    },
+    "form_change_role": {
+      "caption": "Change Role",
+      "fields": {
+        "labels": {
+          "new_role": "New Role"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
     }
   },
   "unit": {
+    "proekt": {
+      "tabs": {
+        "project_data": "Project Data",
+        "jobs": "Jobs",
+        "users": "Users",
+        "variables": "Variables",
+        "repo_event_handler": "Repository Events Handler",
+        "webhooks": "Webhooks"
+      }
+    },
     "spisok_rep": {
       "buttons": {
         "add": "add",
@@ -155,7 +181,8 @@
         "repo_id": "Repo id",
         "project_code": "Project code",
         "main_branch": "Main branch",
-        "state": "State"
+        "state": "State",
+        "proxy_host": "Proxy Host"
       }
     },
     "spisok_unitov": {
@@ -199,6 +226,32 @@
           "check_container": "check unit container"
         }
       }
+    },
+    "tipi_zadach": {
+      "SBORKA":  "Сборка",
+      "OBNOVLENIE":  "Обновление",
+      "PODGOTOVKA":  "Подготовка",
+      "ZAPUSK": "Запуск" ,
+      "OSTANOVKA" : "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
+      "UDALENIE": "Удаление" ,
+      "DEISTVIE": "Выполнение действия"
+    },
+    "tipi_prozesa": {
+      "SBORKA":  "Сборка",
+      "OBNOVLENIE":  "Обновление",
+      "PODGOTOVKA":  "Подготовка",
+      "ZAPUSK": "Запуск" ,
+      "OSTANOVKA" : "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
+      "UDALENIE": "Удаление" ,
+      "DEISTVIE": "Выполнение действия"
     }
+  },
+  "dashboard": {
+    "all_projects": "All projects",
+    "total": "Total",
+    "active": "Active",
+    "deleted": "Deleted"
   }
 }

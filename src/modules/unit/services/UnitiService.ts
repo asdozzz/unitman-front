@@ -29,8 +29,7 @@ import {
     OtvetNaPoluchenieZadachRunneraUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPoluchenieZadachRunneraUnita";
 import {ZaprosSpiskaUnitov} from "@/modules/unit/services/UnitiService/model/ZaprosSpiskaUnitov";
-import {ZaprosNaIzmenenieVetki} from "@/modules/unit/services/UnitiService/model/ZaprosNaIzmenenieVetki";
-import {ZaprosIdUnita} from "@/modules/unit/services/UnitiService/model/ZaprosIdUnita";
+
 import {
     OtvetNaPoluchenieShagovZadachiRunnera
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPoluchenieShagovZadachiRunnera";
@@ -38,10 +37,15 @@ import {ZaprosNaVipolnenieDeistviya} from "@/modules/unit/services/UnitiService/
 import {
     ZaprosNaPoluchenieKonfigaVetkiUnita
 } from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieKonfigaVetkiUnita";
+import {ZaprosNaPoluchenieDubleiUnita} from "@/modules/unit/services/UnitiService/model/ZaprosNaPoluchenieDubleiUnita";
 
 class UnitiService {
     list(params: ZaprosSpiskaUnitov) {
         return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/list', params);
+    }
+
+    naitiDubliUnita(params: ZaprosNaPoluchenieDubleiUnita) {
+        return apiClient.post<ModelDlySpiskaUnitov[]>('/unit/naitiDubliUnita', params);
     }
 
     obnovit(params: ZaprosNaPoluchenieUnita ) {
@@ -56,80 +60,32 @@ class UnitiService {
         return apiClient.post<null>('/unit/sobrat', params);
     }
 
-    ustanovitResultatSborki(params: ModelDlySborkiUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatSborki', params);
-    }
-
     obnovitKodUnita(params: ModelDlyObnovleniyaUnita) {
         return apiClient.post<null>('/unit/obnovitKodUnita', params);
-    }
-
-    obnovitKodPosleZapuska(params: ModelDlyObnovleniyaUnita) {
-        return apiClient.post<null>('/unit/obnovitKodUnitaPosleZapuska', params);
-    }
-
-    udalitUnitPosleZapuska(params: ModelDlyObnovleniyaUnita) {
-        return apiClient.post<null>('/unit/udalitUnitPosleZapuska', params);
-    }
-
-    ustanovitResultatObnovleniya(params: ModelDlyObnovleniyaUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatObnovleniya', params);
     }
 
     podgotovit(params: ModelDlyPodgotovkiUnita) {
         return apiClient.post<null>('/unit/podgotovit', params);
     }
 
-    ustanovitResultatPodgotovki(params: ModelDlyPodgotovkiUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatPodgotovki', params);
-    }
-
     sbrositPodgotovku(params: ModelDlySbrosaPodgotovkiUnita) {
         return apiClient.post<null>('/unit/sbrositPodgotovku', params);
-    }
-
-    ustanovitResultatSbrosaPodgotovki(params: ModelDlySbrosaPodgotovkiUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatSbrosaPodgotovki', params);
     }
 
     zapustit(params: ModelDlyZapuskaUnita) {
         return apiClient.post<null>('/unit/zapustit', params);
     }
 
-    ustanovitResultatZapuska(params: ModelDlyZapuskaUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatZapuska', params);
-    }
-
-    ustanovitResultatDeistviya(params: ModelDlyZapuskaUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatDeistviya', params);
-    }
-
     ostanovit(params: ModelDlyOstanovkiUnita) {
         return apiClient.post<null>('/unit/ostanovit', params);
-    }
-
-    ustanovitResultatOstanovki(params: ModelDlyOstanovkiUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatOstanovki', params);
     }
 
     udalit(params: ModelDlyUdaleniyaUnita) {
         return apiClient.post<null>('/unit/udalit', params);
     }
 
-    ustanovitResultatUdaleniya(params: ModelDlyUdaleniyaUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatUdaleniya', params);
-    }
-
     udalitSlomaniyUnit(params: ModelDlyUdaleniyaUnita) {
         return apiClient.post<null>('/unit/udalitSlomaniyUnit', params);
-    }
-
-    izmenitVetkuUnita(params: ZaprosNaIzmenenieVetki) {
-        return apiClient.post<null>('/unit/izmenitVetkuUnita', params);
-    }
-
-    ustanovitResultatIzmenenniyaVetki(params: ZaprosIdUnita) {
-        return apiClient.post<null>('/unit/ustanovitResultatUdaleniya', params);
     }
 
     zapolnitPeremenie(params: ModelDlyZapolneniyaPeremenihUnita) {
@@ -156,7 +112,7 @@ class UnitiService {
         return apiClient.post<OtvetNaPolucheniePeremenihUnita[]>('/unit/poluchitKonfigIzHranilisha', params);
     }
 
-    poluchitShagiZadachiRunnera(params: { id: string }) {
+    poluchitShagiZadachiRunnera(params: { prozesId: string, zadachaId: string }) {
         return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/unit/poluchitShagiZadachiRunnera', params);
     }
 

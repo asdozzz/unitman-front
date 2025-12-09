@@ -15,7 +15,17 @@ const app = createApp(App);
 app.use(i18n);
 app.use(pinia)
 app.use(router)
-app.use(Quasar, {plugins: {Notify}})
+app.use(Quasar, {
+    plugins: {Notify},
+    config: {
+        brand: {
+            primary: "#4274a6",
+            positive: "#409c55",
+            negative: "#bd4654",
+            dark: "#4d4d4d"
+        }
+    }
+})
 app.mount('#app')
 
 

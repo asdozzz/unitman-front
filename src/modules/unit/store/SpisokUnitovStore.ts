@@ -12,7 +12,8 @@ type NastroikiSpiska = {
         onlyMine: boolean,
         name: string | null
         branch: string | null
-        projectId: string | null
+        projectId: string | null,
+        unitId: string | null,
     },
     limit: number,
     offset: number
@@ -27,11 +28,13 @@ class Proekt {
     value: string;
     label: string;
     users: PolzovatelProekta[];
+    memoryLimit: number;
 
-    constructor(value: string, label: string, users: PolzovatelProekta[]) {
+    constructor(value: string, label: string, users: PolzovatelProekta[], memoryLimit: number) {
         this.value = value;
         this.label = label;
         this.users = users;
+        this.memoryLimit = memoryLimit;
     }
 }
 
@@ -61,7 +64,8 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 onlyMine: false,
                 name: null,
                 branch: null,
-                projectId: null
+                projectId: null,
+                unitId: null,
             },
             limit: 100,
             offset: 0
@@ -152,19 +156,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async ustanovitResultatSborkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatSborki({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async obnovitKodMoegoUnita(id: string) {
             this.startUnitLoader(id);
 
@@ -178,63 +169,10 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async obnovitKodPosleZapuska(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.obnovitKodPosleZapuska({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async udalitUnitPosleZapuska(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.udalitUnitPosleZapuska({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatObnovleniyaMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatObnovleniya({ id })
-            this.stopUnitLoader(id);
-
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async podgotovitMoiUnit(id: string) {
             this.startUnitLoader(id);
 
             const response = await UnitiService.podgotovit({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatPodgovkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatPodgotovki({ id })
             this.stopUnitLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
@@ -257,49 +195,10 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async ustanovitResultatSbrosaPodgotovkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatSbrosaPodgotovki({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async zapustitMoiUnit(id: string) {
             this.startUnitLoader(id);
 
             const response = await UnitiService.zapustit({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatZapuskaMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatZapuska({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatDeistviya(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatDeistviya({ id })
             this.stopUnitLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);
@@ -335,24 +234,9 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
-        async ustanovitResultatOstanovkiMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatOstanovki({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.obnovitUnit(id);
-
-            return response;
-        },
         async udalit(unit: Unit) {
             if (unit.commands.includes('udalitVruchnuyu')) {
                 await this.udalitSlomaniiUnit(unit.id);
-            } else if (unit.commands.includes('nachatUdaleniePosleZapuska')) {
-                await this.udalitUnitPosleZapuska(unit.id);
             } else {
                 await this.udalitMoiUnit(unit.id);
             }
@@ -367,19 +251,6 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             }
 
             this.obnovitUnit(id);
-
-            return response;
-        },
-        async ustanovitResultatUdaleniyaMoegoUnita(id: string) {
-            this.startUnitLoader(id);
-
-            const response = await UnitiService.ustanovitResultatUdaleniya({ id })
-            this.stopUnitLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            //this.obnovitUnit(id);
 
             return response;
         },
@@ -403,7 +274,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             this.proekti.loader = false;
             if (response.status === "success") {
-                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name, item.users));
+                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name, item.users, item.memoryLimit));
             } else if (response.status === "fail") {
                 Notify.create(response.data.message);
             } else if (response.status === "error") {
@@ -450,12 +321,40 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         },
         esliZapushen() {
             return (item: Unit): boolean => {
-                return item.state === 'USPESHNO_ZAPUSHEN';
+                return item.zapushen;
             }
         },
         esliJdemRunner() {
             return (item: Unit): boolean => {
-                return item.waitResultFromRunner || item.jdemObnovlenieKodaPosleZapuska || item.jdemUdaleniyaPosleZapuska || item.jdemAvtosborki;
+                let result = false;
+                if (item.prozesi.length > 0) {
+                    result = !['SUCCESS', 'ERROR', 'CANCLED'].includes(item.prozesi[item.prozesi.length - 1].state);
+                }
+                return result;
+            }
+        },
+        nazvanieTekusheiZadachi() {
+            return (item: Unit): string => {
+                let result = "";
+                if (item.prozesi.length > 0) {
+
+                    for (let i = 0; i < item.prozesi.length; i++) {
+                        const prozes = item.prozesi[i];
+
+                        if (prozes.state !== "SUCCESS" && prozes.state !== "ERROR" && prozes.state !== "CANCLED") {
+
+                            for (let j = 0; j < prozes.jobs.length; j++) {
+                                const zadacha = prozes.jobs[j];
+
+                                if (zadacha.state !== "SUCCESS" && zadacha.state !== "ERROR" && zadacha.state !== "CANCLED") {
+                                    return zadacha.type;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return result;
             }
         },
         getUserRoleByProjectIdAndUserId() {

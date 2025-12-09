@@ -3,9 +3,10 @@ import {storeToRefs} from "pinia";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
+import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
-const { form, oshibkaOtBackenda, loader, vetki, initPeremenie } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, vetki, initPeremenie, dubli } = storeToRefs(addFormStore);
 
 const unitiStore = useSpisokUnitovStore();
 const { proekti } = storeToRefs(unitiStore);
@@ -24,9 +25,32 @@ async function otpravitFormu() {
 
 }
 
-function filterSpiskaVetok(val: string | null, update: any) {
+function filterSpiskaVetok(val: string | null, update: any): void {
   vetki.value.query = val;
   update(() => addFormStore.poluchitVetki());
+}
+
+function vetkaVibrana(): void {
+  addFormStore.poluchitPeremenieKonfiga()
+  console.log("RRR", form.value.branch);
+  if (form.value.branch) {
+    addFormStore.naitiDubliUnita();
+  } else {
+    addFormStore.ochistitDubliUnita();
+  }
+}
+
+function otkritStranizuSDublem(dubl: Unit): void {
+  window.open('/unit/list?id='+dubl.id, "_blank");
+}
+
+function projectChanged() {
+  addFormStore.poluchitVetki()
+
+  const proekt = proekti.value.spisok.find(item => item.value === form.value.projectId);
+  if (proekt) {
+    form.value.memoryLimit = proekt.memoryLimit;
+  }
 }
 </script>
 
@@ -37,13 +61,18 @@ function filterSpiskaVetok(val: string | null, update: any) {
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-select v-model="form.projectId" :options="proekti.spisok" label="Project" emit-value map-options @update:model-value="addFormStore.poluchitVetki()"/>
+      <q-select v-model="form.projectId"
+                :options="proekti.spisok"
+                label="Project"
+                emit-value
+                map-options
+                @update:model-value="projectChanged"/>
       <q-select
           :loading="vetki.loader"
           v-model="form.branch"
           :options="vetki.spisok"
           @filter="filterSpiskaVetok"
-          @update:model-value="addFormStore.poluchitPeremenieKonfiga()"
+          @update:model-value="vetkaVibrana"
           label="Branch"
           fill-input
           clearable
@@ -59,7 +88,21 @@ function filterSpiskaVetok(val: string | null, update: any) {
           </q-item>
         </template>
       </q-select>
+      <div v-if="dubli.spisok.length > 0">
+        <span class="text-negative">Найденные юниты с такой же веткой: </span>
+        <q-chip
+            v-for="duble in dubli.spisok"
+            size="12px"
+            clickable
+            color="primary"
+            square
+            text-color="white"
+            :label="duble.name"
+            @click="otkritStranizuSDublem(duble)"
+        />
+      </div>
       <q-input v-model="form.unitName" label="Unit Name" />
+      <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
       <template v-if="form.peremenieKonfiga.length > 0">
         <template v-for="peremenaya in form.peremenieKonfiga">
           <PeremenayaKonfiga :peremenaya="peremenaya"/>
@@ -68,16 +111,12 @@ function filterSpiskaVetok(val: string | null, update: any) {
       <template v-if="initPeremenie && form.peremenieKonfiga.length == 0">
         В конфиге отсутствуют переменные
       </template>
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader || dubli.loader"/>
+      <q-btn label="Close" color="dark" @click="addFormStore.zakritFormu()" :loading="loader || dubli.loader"/>
     </q-card-actions>
   </q-card>
 </template>
-
-<style scoped>
-
-</style>

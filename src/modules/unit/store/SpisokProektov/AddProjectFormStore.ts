@@ -9,13 +9,14 @@ export class AddForm {
     projectCode: string;
     mainBranch: string;
     proxyHost: string;
-
-    constructor(repoId: string = "", projectName: string = "", projectCode: string = "", mainBranch: string = "master", proxyHost: string = "") {
+    memoryLimit: number;
+    constructor(repoId: string = "", projectName: string = "", projectCode: string = "", mainBranch: string = "master", proxyHost: string = "", memoryLimit: number | null = null) {
         this.repoId = repoId;
         this.projectName = projectName;
         this.projectCode = projectCode;
         this.mainBranch = mainBranch;
         this.proxyHost = proxyHost;
+        this.memoryLimit = memoryLimit ?? 0;
     }
 }
 

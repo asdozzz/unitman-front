@@ -35,12 +35,12 @@ async function otpravitFormu() {
       <q-input v-model="form.repoName" :label="$t('unit.form_add_rep.fields.labels.name')" />
       <q-input v-model="form.token" :label="$t('unit.form_add_rep.fields.labels.token')" />
       <q-input v-model="form.repoUrl" :label="$t('unit.form_add_rep.fields.labels.url')" />
-      <div class="text-red" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
       <q-btn :label="$t('unit.form_add_rep.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('unit.form_add_rep.buttons.close')" color="black" @click="addFormStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('unit.form_add_rep.buttons.close')" color="dark" @click="addFormStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

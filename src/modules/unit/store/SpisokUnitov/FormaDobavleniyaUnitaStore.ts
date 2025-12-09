@@ -2,7 +2,7 @@ import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import UnitiService from "@/modules/unit/services/UnitiService";
 import ModelDlySpiskaVetok from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaVetok";
-import { PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import Unit, { PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {
     OtvetNaPolucheniePeremenihUnita
 } from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
@@ -11,13 +11,15 @@ export class FormaDobavleniyaUnita {
     projectId: string;
     unitName: string;
     branch: string;
+    memoryLimit: number;
     peremenieKonfiga: PeremenayaKonfiga[];
 
-    constructor(projectId: string = "", unitName: string = "", branch: string = "", peremenieKonfiga: PeremenayaKonfiga[] = []) {
+    constructor(projectId: string = "", unitName: string = "", branch: string = "", memoryLimit: number = 3072, peremenieKonfiga: PeremenayaKonfiga[] = []) {
         this.projectId = projectId;
         this.unitName = unitName;
         this.branch = branch;
         this.peremenieKonfiga = peremenieKonfiga;
+        this.memoryLimit = memoryLimit;
     }
 }
 
@@ -45,6 +47,10 @@ type FormaDobavleniyaUnitaState = {
     },
     polucheniePeremenih: {
         loader: boolean;
+    },
+    dubli: {
+        loader: boolean;
+        spisok: Unit[];
     }
 }
 
@@ -65,6 +71,10 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             },
             polucheniePeremenih: {
                 loader: false
+            },
+            dubli: {
+                loader: false,
+                spisok: []
             }
         }
     },
@@ -99,6 +109,28 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 this.oshibkaOtBackenda = response.message;
             }
         },
+        async naitiDubliUnita() {
+            if (!this.form.projectId) {
+                throw new Error('proekt ne vibran');
+            }
+            this.dubli.loader = true;
+            this.dubli.spisok = [];
+
+            const response = await UnitiService.naitiDubliUnita({ projectId: this.form.projectId, branch: this.form.branch });
+
+            this.dubli.loader = false;
+            if (response.status === "success") {
+                this.dubli.spisok = response.data;
+            } else if (response.status === "fail") {
+                //this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                //this.oshibkaOtBackenda = response.message;
+            }
+        },
+        ochistitDubliUnita() {
+          this.dubli.spisok = [];
+          this.dubli.loader = false;
+        },
         async poluchitPeremenieKonfiga() {
             if (!this.form.branch) {
                 this.form.peremenieKonfiga = [];
@@ -130,6 +162,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 projectId: this.form.projectId,
                 branch: this.form.branch,
                 unitName: this.form.unitName,
+                memoryLimit: this.form.memoryLimit,
                 znacheniePeremenoi: this.form.peremenieKonfiga.map((item) => {
                     return {
                         "id": item.konfig.id,

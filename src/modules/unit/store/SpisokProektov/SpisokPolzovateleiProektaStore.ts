@@ -7,20 +7,6 @@ import {
 } from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPolzovateleiProekta";
 import {Notify} from "quasar";
 
-class AddForm {
-    id: string;
-    userId: string;
-
-    constructor(id: string = "", userId: string = "") {
-        this.id = id;
-        this.userId = userId;
-    }
-
-    reset() {
-        this.userId = "";
-    }
-}
-
 type SpisokPolzovateleiProektaState = {
     enable: boolean;
     projectId: string | null,
@@ -29,7 +15,6 @@ type SpisokPolzovateleiProektaState = {
     loaderUdaleniya: boolean;
     loaderDobavleniya: boolean;
     oshibkaZagruzkiSpiska: string | null;
-    form: AddForm;
 }
 
 export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovateleiProektaStore', {
@@ -42,7 +27,6 @@ export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovatelei
             loaderUdaleniya: false,
             loaderDobavleniya: false,
             oshibkaZagruzkiSpiska: null,
-            form: new AddForm()
         }
     },
     getters: {
@@ -54,12 +38,10 @@ export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovatelei
         pokazatSpisok(projectId: string) {
             this.projectId = projectId;
             this.enable = true;
-            this.form = new AddForm(projectId);
         },
         skritSpisok() {
             this.projectId = null;
             this.enable = false;
-            this.form = new AddForm();
         },
         async poluchitSpisok() {
             if (this.projectId === null) {
@@ -97,29 +79,27 @@ export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovatelei
 
             if (response.status === "fail"){
                 Notify.create(response.data.message);
+            } else if (response.status === "success") {
+                this.spisok = this.spisok.filter((item) => item.userId !== userId)
             }
-
-            this.poluchitSpisok();
 
             return response;
         },
-        async dobavitPolzovatelya() {
-            if (this.form.id === null) {
-                throw new Error('projectId ne opredelen dly dobavleniya polzovatelya proekta');
+        async dobavitPolzovatelya(userId: string) {
+            if (this.projectId === null) {
+                throw new Error('projectId ne opredelen dly polucheniya spiska polzovatelei proekta');
             }
-
             this.loaderDobavleniya = true;
 
-            const response = await ProektiService.dobavitPolzovatelyaKProektu(this.form);
+            const response = await ProektiService.dobavitPolzovatelyaKProektu({ id: this.projectId, userId });
 
             this.loaderDobavleniya = false;
 
             if (response.status === "fail"){
                 Notify.create(response.data.message);
+            } else if (response.status === "success") {
+                this.spisok.push(new PolzovatelProekta({ userId, role: "USER"}))
             }
-
-            this.form.reset();
-            this.poluchitSpisok();
 
             return response;
         },

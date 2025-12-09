@@ -1,5 +1,6 @@
 import {defineStore} from "pinia";
 import UnitiService from "@/modules/unit/services/UnitiService";
+import {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi} from "@/modules/unit/store/SpisokUnitov/model/UnitEnums";
 
 type ShagZadachi = {
     command: string;
@@ -8,20 +9,27 @@ type ShagZadachi = {
     unixtime: number;
 }
 
-export type VipolnenayaZadacha = {
+export type ZadachaUnitaBezShagov = {
     id: string;
-    unitId: string;
-    jobType: string;
-    success: boolean;
-    //steps: ShagZadachi[]
+    type: TipZadachi;
+    state: StatusZadachi;
 }
+
+export type ProzesUnitaBezShagov = {
+    id: string;
+    userId: string;
+    type: TipProzesa;
+    state: StatusProzesa;
+    jobs: ZadachaUnitaBezShagov[];
+};
 
 
 type StorVipolnenihZadachRunneraState = {
     loader: boolean;
-    spisok: VipolnenayaZadacha[],
+    spisok: ProzesUnitaBezShagov[],
     selectJob: {
-        id: string;
+        prozesId: string;
+        zadachaId: string;
         steps: ShagZadachi[]
     },
     oshibkaOtBackenda: string | null;
@@ -36,18 +44,23 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
             spisok: [],
             unitId: null,
             selectJob: {
-                id: "",
+                prozesId: "",
+                zadachaId: "",
                 steps:[]
             }
         };
     },
     actions: {
-        async select(jobId: string) {
-            const response = await UnitiService.poluchitShagiZadachiRunnera({ id: jobId as string });
+        async select(prozesId: string, zadachaId: string) {
+            const response = await UnitiService.poluchitShagiZadachiRunnera({ prozesId, zadachaId });
 
             this.loader = false;
             if (response.status === "success") {
-                this.selectJob = response.data;
+                this.selectJob = {
+                    prozesId,
+                    zadachaId,
+                    steps: response.data,
+                };
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
@@ -73,7 +86,9 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
             this.loader = false;
             if (response.status === "success") {
                 this.spisok = response.data;
-                this.select(this.spisok[0].id);
+                if (this.spisok.length > 0) {
+                    this.select(this.spisok[0].id, this.spisok[0].jobs[0].id);
+                }
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {

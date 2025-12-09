@@ -19,7 +19,7 @@
           </div>
 
           <q-btn dense flat no-wrap v-if="isAuth">
-            <q-avatar color="black" text-color="white">U</q-avatar>
+            <q-avatar color="dark" text-color="white">U</q-avatar>
             <q-icon name="arrow_drop_down" size="16px" />
             <q-menu auto-close>
               <q-list dense>

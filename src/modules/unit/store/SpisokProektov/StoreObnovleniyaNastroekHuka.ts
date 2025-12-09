@@ -1,5 +1,6 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
+import {Notify} from "quasar";
 
 export class HookSettingsForm {
     id: string;
@@ -49,6 +50,7 @@ export const storeObnovleniyaNastroekHuka = defineStore('StoreObnovleniyaNastroe
 
             this.loader = false;
             if (response.status === "success") {
+                Notify.create({ message: 'Успех операции', type: 'positive', timeout: 100 });
                 this.oshibkaOtBackenda = null;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;

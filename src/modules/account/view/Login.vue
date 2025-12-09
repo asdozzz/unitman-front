@@ -43,7 +43,7 @@ function onLogout() {
     <q-card class="q-pa-md shadow-2 my_card" bordered v-else>
       <q-card-section class="text-center">
         <div class="text-grey-9 text-h5 text-weight-bold">{{$t('account.login_form.already_signin.text')}}</div>
-        <q-btn square color="black" :label="$t('account.login_form.already_signin.button_text')" @click.prevent="onLogout"/>
+        <q-btn square color="dark" :label="$t('account.login_form.already_signin.button_text')" @click.prevent="onLogout"/>
       </q-card-section>
     </q-card>
   </div>

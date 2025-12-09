@@ -4,4 +4,5 @@ export type ModelDlyDobavleniyaProekta = {
     projectName: string;
     mainBranch: string;
     proxyHost: string;
+    memoryLimit: number;
 }

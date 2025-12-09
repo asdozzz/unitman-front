@@ -1,5 +1,6 @@
 import {defineStore} from "pinia";
 import AccountService from "@/modules/account/services/AccountService";
+import ProektiService from "@/modules/unit/services/ProektiService";
 
 export class FormaDobavleniyaPolzovatelya {
     email: string;
@@ -37,6 +38,11 @@ class Locale {
     }
 }
 
+type Proekt = {
+    id: string;
+    name: string;
+}
+
 type FormaRegistraziiPolzovatelyaState = {
     enable: boolean,
     form: FormaDobavleniyaPolzovatelya;
@@ -48,7 +54,10 @@ type FormaRegistraziiPolzovatelyaState = {
     },
     locales: {
         spisok: Locale[],
-    }
+    },
+    proekti: Proekt[],
+    idPosleSozdaniya: string | null,
+    vibranieProekti: string[],
 }
 export const useFormaRegistraziiPolzovatelya = defineStore('FormaRegistraziiPolzovatelya', {
     state: (): FormaRegistraziiPolzovatelyaState => {
@@ -69,18 +78,41 @@ export const useFormaRegistraziiPolzovatelya = defineStore('FormaRegistraziiPolz
                     new Locale('ru', 'ru'),
                     new Locale('en', 'en'),
                 ]
-            }
+            },
+            proekti: [],
+            idPosleSozdaniya: null,
+            vibranieProekti: [],
         };
     },
     actions: {
+        async poluchitSpisokActivnihProektov() {
+            this.loader = true;
+            const response = await ProektiService.poluchitAktivnieProekti();
+
+            this.loader = false;
+            if (response.status === "success") {
+                this.oshibkaOtBackenda = null;
+                this.proekti = response.data;
+            } else if (response.status === "fail") {
+                this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                this.oshibkaOtBackenda = response.message;
+            }
+
+            return response;
+        },
         otkritFormu(defaultLocale: "en" | "ru") {
             this.enable = true;
             this.oshibkaOtBackenda = null;
+            this.idPosleSozdaniya = null;
+            this.vibranieProekti = [];
             this.loader = false;
             this.form = new FormaDobavleniyaPolzovatelya(defaultLocale)
         },
         zakritFormu() {
             this.enable = false;
+            this.idPosleSozdaniya = null;
+            this.vibranieProekti = [];
             this.form = new FormaDobavleniyaPolzovatelya()
         },
         async otpravitFormu() {
@@ -90,6 +122,7 @@ export const useFormaRegistraziiPolzovatelya = defineStore('FormaRegistraziiPolz
             this.loader = false;
             if (response.status === "success") {
                 this.oshibkaOtBackenda = null;
+                this.idPosleSozdaniya = response.data.id;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
@@ -98,5 +131,18 @@ export const useFormaRegistraziiPolzovatelya = defineStore('FormaRegistraziiPolz
 
             return response;
         },
+        async dobavitVProekti() {
+            this.loader = true;
+
+            if (this.idPosleSozdaniya === null) {
+                throw new Error('accountId not found');
+            }
+
+            this.vibranieProekti.forEach(async (id: string) => {
+                await ProektiService.dobavitPolzovatelyaKProektu({id, userId: this.idPosleSozdaniya as string})
+            })
+
+            this.loader = false;
+        }
     }
 });

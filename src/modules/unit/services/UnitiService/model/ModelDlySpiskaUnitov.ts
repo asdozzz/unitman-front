@@ -31,6 +31,25 @@ type Deistviye = {
     commands: string[]
 }
 
+export type ApiTipZadachi = "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
+export type ApiStatusZadachi = "NEW" | "PENDING" | "CANCLED" | "SUCCESS" | "ERROR";
+export type ApiTipProzesa = "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
+export type ApiStatusProzesa = "NEW" | "ZADACHI_DOBAVLENI" | "PENDING" | "CANCLED" | "SUCCESS" | "ERROR";
+
+export type ApiZadachaUnita = {
+    jobId: string;
+    type: ApiTipZadachi;
+    state: ApiStatusZadachi;
+}
+
+export type ApiProzesUnita = {
+    id: string;
+    userId: string;
+    type: ApiTipProzesa;
+    state: ApiStatusProzesa;
+    jobs: ApiZadachaUnita[];
+};
+
 export default class ModelDlySpiskaUnitov {
     public id: string = "";
     public authorId: string = "";
@@ -39,14 +58,11 @@ export default class ModelDlySpiskaUnitov {
     public projectId: string = "";
     public projectName: string = "";
     public branch: string = "";
-    public state: string = "";
-    public waitResultFromRunner: boolean = false;
+    public prozesi: ApiProzesUnita[] = [];
     public commands: string[] = [];
     public error: boolean = false;
+    public zapushen: boolean = false;
     public links: Link[] = [];
-    public jdemObnovlenieKodaPosleZapuska: boolean = false;
-    public jdemAvtosborki: boolean = false;
-    public jdemUdaleniyaPosleZapuska: boolean = false;
     public unixtimePoslednegoObnovleniyaUnita: number|null = null;
     public unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
     public peremenie: Peremenaya[] = [];
