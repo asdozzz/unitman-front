@@ -36,11 +36,11 @@ async function otpravitFormu() {
   </template>
   <q-card v-else  style="width: 500px; max-width: 80vw;">
     <q-card-section>
-      <q-input standou square dense outlined v-model="form.newProjectName" label="Project Name" />
-      <q-input square dense outlined v-model="form.newProxyHost" label="Proxy Host" class="q-mt-sm" />
-      <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
+      <q-input standou square dense outlined v-model="form.newProjectName" :label="$t('unit.form_edit_project.fields.labels.projectName')" />
+      <q-input square dense outlined v-model="form.newProxyHost" :label="$t('unit.form_edit_project.fields.labels.proxyHost')" class="q-mt-sm" />
+      <q-input type="number" v-model.number="form.memoryLimit" :label="$t('unit.form_edit_project.fields.labels.unitContainerMemory')" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
-      <q-btn label="SAVE" color="primary" @click="otpravitFormu" :loading="loader" class="q-mt-sm"/>
+      <q-btn :label="$t('unit.form_edit_project.buttons.save')" color="primary" @click="otpravitFormu" :loading="loader" class="q-mt-sm"/>
     </q-card-section>
   </q-card>
 </template>

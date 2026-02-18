@@ -1,5 +1,8 @@
 {
   "world": "Мир",
+  "runner": {
+    "non_active": "Раннер не активен, пожалуйста обратитесь к администратору"
+  },
   "app": {
     "tabs": {
       "home": "Главная",
@@ -123,6 +126,64 @@
         "variables": "Переменные",
         "repo_event_handler": "Обработка событий репозитория",
         "webhooks": "Вебхуки"
+      }
+    },
+    "form_variables": {
+      "fields": {
+        "labels": {
+          "type": "Тип",
+          "code": "Код",
+          "value": "Значение"
+        }
+      },
+      "types": {
+        "default": "видимая",
+        "hidden": "скрытая"
+      },
+      "buttons": {
+        "add": "Добавить"
+      }
+    },
+    "form_project_settings": {
+      "fields": {
+        "labels": {
+          "autoCreate": "Автосоздание юнита при создании ветки",
+          "autoUpdate": "Автообновление юнита при пуше в ветку",
+          "autoDelete": "Автоудаление юнита при удалении ветки",
+          "updateWithoutReset": "Обновление юнита без сброса подготовки"
+        }
+      },
+      "buttons": {
+        "save": "Сохранить"
+      }
+    },
+    "form_add_project": {
+      "caption": "Добавить проект",
+      "fields": {
+        "labels": {
+          "repo": "Репозиторий",
+          "projectCode": "Код проекта из репозитория",
+          "projectName": "Название проекта",
+          "mainBranch": "Master ветка",
+          "proxyHost": "Proxy Host",
+          "unitContainerMemory": "Лимит памяти на контейнер юнита, MB"
+        }
+      },
+      "buttons": {
+        "ok": "Сохранить",
+        "close": "Отмена"
+      }
+    },
+    "form_edit_project": {
+      "fields": {
+        "labels": {
+          "projectName": "Название проекта",
+          "proxyHost": "Proxy Host",
+          "unitContainerMemory": "Лимит памяти на контейнер юнита, MB"
+        }
+      },
+      "buttons": {
+        "save": "Сохранить"
       }
     },
     "spisok_rep": {

@@ -16,7 +16,9 @@ class HranilishaService {
     poluchitSpisokActivnih() {
         return apiClient.post<ModelDlySpiskaHranilish[]>('/repo/activeList', {});
     }
-
+    poluchitProektiHranilisha(params: {id: string, query: string | null}) {
+        return apiClient.post<{ value: string, name: string }[]>('/repo/projectList', params);
+    }
     typeList() {
         return apiClient.post<ModelDlySpiskaTipovHranilisha[]>('/repo/type/list', {});
     }

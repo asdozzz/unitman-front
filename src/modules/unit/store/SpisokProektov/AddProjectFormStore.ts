@@ -30,6 +30,16 @@ class Hranilishe {
     }
 }
 
+class Proekt {
+    value: string;
+    label: string;
+
+    constructor(value: string, label: string) {
+        this.value = value;
+        this.label = label;
+    }
+}
+
 type AddFormState = {
     enable: boolean;
     form:AddForm;
@@ -38,6 +48,11 @@ type AddFormState = {
     hranilisha: {
         spisok: Hranilishe[];
         loader: boolean;
+    },
+    proekti: {
+        spisok: Proekt[];
+        loader: boolean;
+        query: string | null;
     }
 }
 
@@ -52,6 +67,11 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
             hranilisha: {
                 spisok: [],
                 loader: false
+            },
+            proekti: {
+                spisok: [],
+                loader: false,
+                query: null
             }
         }
     },
@@ -74,6 +94,24 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
             this.hranilisha.loader = false;
             if (response.status === "success") {
                 this.hranilisha.spisok = response.data.map((item: ModelDlySpiskaHranilish) => new Hranilishe(item.id, item.name));
+            } else if (response.status === "fail") {
+                this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                this.oshibkaOtBackenda = response.message;
+            }
+        },
+        async poluchitProektiRepi() {
+            this.proekti.loader = true;
+            this.proekti.spisok = [];
+
+            if (!this.form.repoId) {
+                throw new Error('repo ne vibrana');
+            }
+            const response = await HranilishaService.poluchitProektiHranilisha({ id: this.form.repoId, query: this.proekti.query });
+
+            this.proekti.loader = false;
+            if (response.status === "success") {
+                this.proekti.spisok = response.data.map((item) => new Proekt(item.value, item.name));
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {

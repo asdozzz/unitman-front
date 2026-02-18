@@ -1,5 +1,8 @@
 {
   "world": "world",
+  "runner": {
+    "non_active": "the runner is non active, please notify the administrator"
+  },
   "app": {
     "tabs": {
       "home": "Home",
@@ -131,6 +134,64 @@
         "delete": "delete",
         "edit": "edit",
         "confirm": "confirm"
+      }
+    },
+    "form_variables": {
+      "fields": {
+        "labels": {
+          "type": "Type",
+          "code": "Code",
+          "value": "Value"
+        }
+      },
+      "types": {
+        "default": "default",
+        "hidden": "hidden"
+      },
+      "buttons": {
+        "add": "ADD"
+      }
+    },
+    "form_project_settings": {
+      "fields": {
+        "labels": {
+          "autoCreate": "Auto create unit",
+          "autoUpdate": "Auto update unit",
+          "autoDelete": "Auto delete unit",
+          "updateWithoutReset": "Updating without resetting the preparation"
+        }
+      },
+      "buttons": {
+        "save": "SAVE"
+      }
+    },
+    "form_add_project": {
+      "caption": "Add Project",
+      "fields": {
+        "labels": {
+          "repo": "Repo",
+          "projectCode": "Project Code",
+          "projectName": "Project Name",
+          "mainBranch": "Main Branch",
+          "proxyHost": "Proxy Host",
+          "unitContainerMemory": "Unit container memory limit, MB"
+        }
+      },
+      "buttons": {
+        "ok": "Ok",
+        "close": "Close"
+      }
+    },
+    "form_edit_project": {
+      "fields": {
+        "labels": {
+          "projectName": "Project Name",
+          "proxyHost": "Proxy Host",
+          "unitContainerMemory": "Unit container memory limit, MB"
+        }
+      },
+      "buttons": {
+        "save": "SAVE"
       }
     },
     "form_add_rep": {

@@ -29,15 +29,15 @@ async function udalitPeremenuyu(code: string) {
     <q-card-section>
       <div class="row q-mb-sm">
         <div class="col-3 q-pr-sm">
-          <q-select standout dense square outlined v-model="form.tip" :options="tipiPeremenoi" label="Type" emit-value/>
+          <q-select standout dense square outlined v-model="form.tip" :options="tipiPeremenoi" :label="$t('unit.form_variables.fields.labels.type')" emit-value/>
         </div>
         <div class="col-3 q-pr-sm">
-          <q-input standout dense square outlined  v-model="form.code" label="Code" /></div>
+          <q-input standout dense square outlined  v-model="form.code" :label="$t('unit.form_variables.fields.labels.code')" /></div>
         <div class="col-3 q-pr-sm">
-          <q-input standout dense square outlined  v-model="form.value" label="Value" />
+          <q-input standout dense square outlined  v-model="form.value" :label="$t('unit.form_variables.fields.labels.value')" />
         </div>
         <div class="col-auto q-pr-sm">
-          <q-btn color="primary" label="add" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
+          <q-btn color="primary" :label="$t('unit.form_variables.buttons.add')" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
             <q-tooltip>add</q-tooltip>
           </q-btn>
         </div>

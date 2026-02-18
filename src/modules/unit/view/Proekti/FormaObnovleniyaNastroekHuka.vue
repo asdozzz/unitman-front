@@ -7,6 +7,11 @@ import {
 import {storePolucheniyaProekta} from "@/modules/unit/store/SpisokProektov/StorPolucheniyaProekta";
 import {useRoute} from "vue-router";
 import {onMounted} from "vue";
+import {copyToClipboard} from "quasar";
+import {storeHelper} from "@/modules/app/store/HelperStore";
+
+const helperStore = storeHelper();
+const { baseUrl } = storeToRefs(helperStore);
 
 const storeProekta = storePolucheniyaProekta();
 const {loader: loaderProekta, proekt, oshibkaOtBeka } = storeToRefs(storeProekta);
@@ -38,16 +43,23 @@ async function otpravitFormu() {
     <div class="text-negative" v-html="oshibkaOtBeka"></div>
   </template>
   <q-card v-else style="width: 500px">
+    <q-card-section>
+      Для работы настроек ниже, нужно настроить вебхук в своих системах хранения репозиториев(gitlab, github).
+      <q-chip
+        class="q-ml-none" dark square  color="primary" label="repository event handler" icon="content_copy" clickable
+        @click="copyToClipboard(baseUrl+'/project/'+proekt.id+'/hook')">
+    </q-chip>
+    </q-card-section>
     <q-card-section class="q-pa-sm">
-      <q-toggle v-model="form.avtosozdanie" label="Auto create unit" /><br>
-      <q-toggle v-model="form.avtoobnovlenie" label="Auto update unit" /><br>
-      <q-toggle v-model="form.avtoudalenie" label="Auto delete unit" /><br>
-      <q-toggle v-model="form.obnovlenieBezSbrosaPodgotovki" label="Updating without resetting the preparation" /><br>
+      <q-toggle v-model="form.avtosozdanie" :label="$t('unit.form_project_settings.fields.labels.autoCreate')" /><br>
+      <q-toggle v-model="form.avtoobnovlenie" :label="$t('unit.form_project_settings.fields.labels.autoUpdate')" /><br>
+      <q-toggle v-model="form.avtoudalenie" :label="$t('unit.form_project_settings.fields.labels.autoDelete')" /><br>
+      <q-toggle v-model="form.obnovlenieBezSbrosaPodgotovki" :label="$t('unit.form_project_settings.fields.labels.updateWithoutReset')" /><br>
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="Save" color="primary" @click="otpravitFormu" :loading="loader"/>
+      <q-btn :label="$t('unit.form_project_settings.buttons.save')" color="primary" @click="otpravitFormu" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>
