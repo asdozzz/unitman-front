@@ -29,6 +29,9 @@ function openAddForm() {
 function openEditForm(id: string) {
   router.push({ name: 'project_edit', params: { id }});
 }
+function openJobs(id: string) {
+  router.push({ name: 'project_jobs', params: { id }});
+}
 async function udalit(id: string) {
   await proektiStore.udalitProekt(id);
 }
@@ -103,6 +106,9 @@ async function ochistit(id: string) {
             <q-separator />
 
            <q-card-actions>
+             <q-btn size="sm" padding="5px 6px" square color="primary" v-if="!proektSloman(item.id)" icon="info" @click="openJobs(item.id)" :loading="getProjectLoader(item.id)">
+               <q-tooltip>{{ $t('unit.spisok_proektov.buttons.jobs') }}</q-tooltip>
+             </q-btn>
              <q-btn size="sm" padding="5px 6px" square color="primary" icon="layers_clear" @click="ochistit(item.id)">
                <q-tooltip>{{$t('unit.spisok_proektov.buttons.layers_clear')}}</q-tooltip>
              </q-btn>
