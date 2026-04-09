@@ -57,7 +57,7 @@ function projectChanged() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Add Unit</div>
+      <div class="text-h6">Добавить юнит</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
