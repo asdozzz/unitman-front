@@ -46,6 +46,7 @@ async function otpravitFormu() {
     <q-card-section>
       Для работы настроек ниже, нужно настроить вебхук в своих системах хранения репозиториев(gitlab, github).
       <q-chip
+        v-if="proekt"
         class="q-ml-none" dark square  color="primary" label="repository event handler" icon="content_copy" clickable
         @click="copyToClipboard(baseUrl+'/project/'+proekt.id+'/hook')">
     </q-chip>
