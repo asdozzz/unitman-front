@@ -47,6 +47,8 @@ import {
     ZaprosNaPolucheniyeSobitiiWebhooka
 } from "@/modules/unit/services/ProektiServices/model/ZaprosNaPolucheniyeSobitiiWebhooka";
 import {OtvetNaPoluchenieSpiskaSobitiiWebhooka} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieSpiskaSobitiiWebhooka";
+import {ZaprosNaProverkuProxyHost} from "@/modules/unit/services/ProektiServices/model/ZaprosNaProverkuProxyHost";
+import {OtvetNaProverkuProxyHost} from "@/modules/unit/services/ProektiServices/model/OtvetNaProverkuProxyHost";
 
 class ProektiService {
     list() {
@@ -63,6 +65,10 @@ class ProektiService {
 
     add(params: ModelDlyDobavleniyaProekta) {
         return apiClient.post<null>('/project/add', params);
+    }
+
+    proveritProxyHost(params: ZaprosNaProverkuProxyHost) {
+        return apiClient.post<OtvetNaProverkuProxyHost>('/project/proverkaProxyHost', params);
     }
 
     read(id: string) {

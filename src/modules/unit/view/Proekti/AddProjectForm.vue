@@ -6,7 +6,7 @@ import {onMounted, ref} from "vue";
 const localProjectCode = ref<{value: string, label: string} | null>(null);
 
 const addFormStore = useAddProjectFormStore();
-const { form, oshibkaOtBackenda, loader, hranilisha, proekti } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, hranilisha, proekti, proverkaProxyHost } = storeToRefs(addFormStore);
 
 onMounted(async () => {
   await addFormStore.poluchitActivnieHranilisha();
@@ -84,6 +84,19 @@ function filterSpiskaProektov(val: string | null, update: any): void {
       <q-input v-model="form.projectName" :label="$t('unit.form_add_project.fields.labels.projectName')" />
       <q-input v-model="form.mainBranch" :label="$t('unit.form_add_project.fields.labels.mainBranch')" />
       <q-input v-model="form.proxyHost" :label="$t('unit.form_add_project.fields.labels.proxyHost')" />
+      <q-chip
+          v-if="form.proxyHost.length > 0"
+          :loading="proverkaProxyHost.loader"
+          size="12px"
+          clickable
+          color="primary"
+          square
+          text-color="white"
+          :label="$t('unit.form_add_project.buttons.check_proxy_host')"
+          @click="addFormStore.proveritProxyHost"
+      />
+      <span v-if="proverkaProxyHost.result === true" class="text-light-green">Доступен</span>
+      <span v-if="proverkaProxyHost.result === false" class="text-negative">Недоступен</span>
       <q-input type="number" v-model.number="form.memoryLimit" :label="$t('unit.form_add_project.fields.labels.unitContainerMemory')" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>

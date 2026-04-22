@@ -53,6 +53,10 @@ type AddFormState = {
         spisok: Proekt[];
         loader: boolean;
         query: string | null;
+    },
+    proverkaProxyHost: {
+        loader: boolean;
+        result: boolean | null;
     }
 }
 
@@ -72,6 +76,10 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
                 spisok: [],
                 loader: false,
                 query: null
+            },
+            proverkaProxyHost: {
+                loader: false,
+                result: null
             }
         }
     },
@@ -81,10 +89,12 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
             this.enable = true;
             this.oshibkaOtBackenda = null;
             this.loader = false;
+            this.proverkaProxyHost.result = null;
         },
         zakritFormu() {
             this.form = new AddForm();
             this.enable = false;
+            this.proverkaProxyHost.result = null;
         },
         async poluchitActivnieHranilisha() {
             this.hranilisha.loader = true;
@@ -133,5 +143,22 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
 
             return response;
         },
+        async proveritProxyHost() {
+            this.proverkaProxyHost.loader = true;
+            this.proverkaProxyHost.result = null;
+
+            const response = await ProektiService.proveritProxyHost({ proxyHost: this.form.proxyHost });
+
+            this.proverkaProxyHost.loader = false;
+            if (response.status === "success") {
+                this.proverkaProxyHost.result = response.data.result;
+            } else if (response.status === "fail") {
+                this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                this.oshibkaOtBackenda = response.message;
+            }
+
+            return response;
+        }
     }
 })

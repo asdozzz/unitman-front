@@ -171,7 +171,8 @@
       },
       "buttons": {
         "ok": "Сохранить",
-        "close": "Отмена"
+        "close": "Отмена",
+        "check_proxy_host": "Проверить"
       }
     },
     "form_edit_project": {

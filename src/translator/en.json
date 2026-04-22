@@ -179,7 +179,8 @@
       },
       "buttons": {
         "ok": "Ok",
-        "close": "Close"
+        "close": "Close",
+        "check_proxy_host": "Verify"
       }
     },
     "form_edit_project": {
