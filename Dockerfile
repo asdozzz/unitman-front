@@ -1,4 +1,4 @@
-FROM node:20.3 AS build-stage
+FROM node:20.19.1 AS build-stage
 WORKDIR /app
 ARG ARG_API_HOST=http://10.0.142.101:8082/api
 ARG ARG_CENTRIFUGE_HOST=ws://10.0.142.101:8000/connection/websocket
