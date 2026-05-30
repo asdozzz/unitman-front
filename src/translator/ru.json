@@ -16,6 +16,12 @@
       "help": "Помошь",
       "settings": "Настройки",
       "sign_out": "Выход"
+    },
+    "form_proxy_host": {
+      "caption": "Укажите дефолтный Proxy Host",
+      "buttons": {
+        "ok": "Сохранить"
+      }
     }
   },
   "account": {

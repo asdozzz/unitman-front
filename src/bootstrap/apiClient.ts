@@ -88,6 +88,56 @@ class ApiClient {
 
         return modifyResponse;
     }
+    async put<T>(url: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
+        const axiosInstance = this.makeAxiosInstance();
+
+        let modifyResponse: ApiResponse<T> = ApiResponseFactory.makeFail("Unknown error");
+
+        await axiosInstance.request({
+            method: "PUT",
+            url,
+            data
+        }).then((response: AxiosResponse<any>) => {
+            if ("status" in response.data && response.data.status != "success") {
+                modifyResponse = this.handleError(response.data);
+            } else {
+                if ("data" in response.data) {
+                    modifyResponse = ApiResponseFactory.makeSuccess(response.data.data);
+                } else {
+                    modifyResponse = ApiResponseFactory.makeSuccess(response.data);
+                }
+            }
+        }).catch((error: AxiosError) => {
+            modifyResponse = this.handleError(error);
+        })
+
+        return modifyResponse;
+    }
+    async get<T>(url: string, params: Record<string, unknown> = {}): Promise<ApiResponse<T>> {
+        const axiosInstance = this.makeAxiosInstance();
+
+        let modifyResponse: ApiResponse<T> = ApiResponseFactory.makeFail("Unknown error");
+
+        await axiosInstance.request({
+            method: "GET",
+            url,
+            params
+        }).then((response: AxiosResponse<any>) => {
+            if ("status" in response.data && response.data.status != "success") {
+                modifyResponse = this.handleError(response.data);
+            } else {
+                if ("data" in response.data) {
+                    modifyResponse = ApiResponseFactory.makeSuccess(response.data.data);
+                } else {
+                    modifyResponse = ApiResponseFactory.makeSuccess(response.data);
+                }
+            }
+        }).catch((error: AxiosError) => {
+            modifyResponse = this.handleError(error);
+        })
+
+        return modifyResponse;
+    }
 }
 
 const apiClient = new ApiClient();

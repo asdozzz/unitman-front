@@ -16,6 +16,12 @@
       "help": "Help",
       "settings": "Settings",
       "sign_out": "Sign out"
+    },
+    "form_proxy_host": {
+      "caption": "Proxy Host Form",
+      "buttons": {
+        "ok": "Ok"
+      }
     }
   },
   "account": {

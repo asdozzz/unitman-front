@@ -103,6 +103,7 @@ import 'dayjs/locale/ru'
 import 'dayjs/locale/en'
 import dayjs from "dayjs";
 import {safeJsonParse} from "@/utils/json";
+import {storeInizializii} from "@/modules/app/store/InitializationStore";
 
 const NASTROIKI_STORAGE_KEY = 'AppSettings';
 
@@ -127,7 +128,10 @@ let currentLocale = ref("");
 const leftDrawerOpen = ref(nastroiki.leftDrawerOpen);
 //const miniState = ref(false);
 
+const storeInit = storeInizializii();
+
 onMounted(() => {
+  storeInit.poluchitSpisok();
   currentLocale.value = getLocale.value;
   authStore.updateLocale(getLocale.value);
   dayjs.locale(getLocale.value)

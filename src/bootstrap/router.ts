@@ -3,6 +3,7 @@ import {useAuthStore} from "@/modules/account/store/auth";
 import account from '@/modules/account/routes';
 import unit from '@/modules/unit/routes';
 import app from  '@/modules/app/routes';
+import {storeInizializii} from "@/modules/app/store/InitializationStore";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -17,24 +18,31 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
 
     // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/login'];
+    const publicPages = ['/login', '/init'];
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
-
+    const initStore = storeInizializii();
 
     if (authRequired) {
         if (!authStore.tokenData) {
             authStore.returnUrl = to.fullPath;
+            console.log('login route');
             return next('/login');
+        } else if (authStore.isAdmin && !initStore.estNeZapolnenie && to.fullPath !== '/init') {
+            console.log('init route', to);
+            return next('/init');
         }
     }
 
     if (to.meta && to.meta.requiredRoles) {
         if (!authStore.checkRoles(to.meta.requiredRoles as string[])) {
+            console.log('unauthorized route');
             return next('/unauthorized');
         }
     }
 
+
+    console.log('next route');
     return next();
 });
 
