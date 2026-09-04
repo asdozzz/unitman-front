@@ -1,7 +1,7 @@
-FROM node:20.19.1 AS build-stage
+FROM node:22.23.2 AS build-stage
 WORKDIR /app
-ARG ARG_API_HOST=http://10.0.142.101:8082/api
-ARG ARG_CENTRIFUGE_HOST=ws://10.0.142.101:8000/connection/websocket
+ARG ARG_API_HOST=http://localhost:8082/api
+ARG ARG_CENTRIFUGE_HOST=ws://localhost:8000/connection/websocket
 
 ENV API_HOST=$ARG_API_HOST
 ENV CENTRIFUGE_HOST=$ARG_CENTRIFUGE_HOST
@@ -19,4 +19,8 @@ RUN yarn build
 FROM nginx:latest AS prod
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY entry.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

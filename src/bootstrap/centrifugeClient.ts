@@ -1,7 +1,7 @@
 import { Centrifuge } from 'centrifuge';
 
 export function useCentrifugo(): Centrifuge {
-    const centrifuge = new Centrifuge(import.meta.env.VITE_CENTRIFUGE_HOST);
+    const centrifuge = new Centrifuge(window._env_?.VITE_CENTRIFUGE_HOST || import.meta.env.VITE_CENTRIFUGE_HOST);
 
     centrifuge.on('connecting', function (ctx) {
         console.log(`Centrifuge connecting: ${ctx.code}, ${ctx.reason}`);

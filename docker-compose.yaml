@@ -1,5 +1,5 @@
 services:
-  unitman-front:
-    build: https://oauth2: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@github.com/asdozzz/unitman-front.git
+  app:
+    build: .
     ports:
       - 8033:80
