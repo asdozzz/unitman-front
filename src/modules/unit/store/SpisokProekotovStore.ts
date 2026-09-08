@@ -80,7 +80,7 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             const store = this;
             return (id: string): boolean => {
                 const state = store.poluchitStateProektaPoId(id);
-                return state === 'NEW';
+                return state === 'NEW' || state === 'BUILD_ERROR';
             }
         },
     },
