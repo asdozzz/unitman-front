@@ -36,7 +36,7 @@ function repoSelected(value: string | null): void {
 function projectCodeSelected(data: { value: string, label: string } | null): void {
   if (data) {
     form.value.projectCode = data.value;
-    form.value.projectName = data.label;
+    form.value.projectName = data.label.replace(/[^a-zA-Z0-9_-]+/g, "_");
   } else {
     form.value.projectCode = "";
     form.value.projectName = "";

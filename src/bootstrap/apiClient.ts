@@ -26,7 +26,7 @@ class ApiClient {
         }
 
         return axios.create({
-            baseURL: import.meta.env.VITE_API_HOST,
+            baseURL: window._env_?.VITE_API_HOST || import.meta.env.VITE_API_HOST,
             headers: headers,
         });
     }
