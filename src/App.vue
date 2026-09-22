@@ -59,7 +59,7 @@
         <q-scroll-area class="fit">
           <q-list padding class="menu-list">
             <template v-for="menuItem in showedMenu">
-              <q-item clickable v-ripple :href="menuItem.href" :active="menuItem.href === path">
+              <q-item clickable v-ripple :to="menuItem.href" :active="menuItem.href === path">
                 <q-item-section avatar>
                   <q-icon :name="menuItem.icon" />
                 </q-item-section>
@@ -103,7 +103,6 @@ import 'dayjs/locale/ru'
 import 'dayjs/locale/en'
 import dayjs from "dayjs";
 import {safeJsonParse} from "@/utils/json";
-import {storeInizializii} from "@/modules/app/store/InitializationStore";
 
 const NASTROIKI_STORAGE_KEY = 'AppSettings';
 
@@ -128,20 +127,11 @@ let currentLocale = ref("");
 const leftDrawerOpen = ref(nastroiki.leftDrawerOpen);
 //const miniState = ref(false);
 
-const storeInit = storeInizializii();
-
 onMounted(() => {
-  storeInit.poluchitSpisok();
   currentLocale.value = getLocale.value;
   authStore.updateLocale(getLocale.value);
   dayjs.locale(getLocale.value)
 })
-
-/*
-          <q-route-tab to="/unit/repositories" :label="$t('app.tabs.repos')" v-if="isAdmin"/>
-          <q-route-tab to="/unit/projects" :label="$t('app.tabs.projects')" v-if="isAdmin"/>
-          <q-route-tab to="/unit/list" :label="$t('app.tabs.units')"/>
-* */
 
 const menu = reactive([
   {icon: 'home', href:"/", label: 'app.tabs.home', show: isAuth },
@@ -149,6 +139,7 @@ const menu = reactive([
   {icon: 'inbox', href:"/unit/repositories", label: 'app.tabs.repos', show: isAdmin },
   {icon: 'list', href:"/unit/projects", label: 'app.tabs.projects', show: isAdmin },
   {icon: 'star', href:"/unit/list", label: 'app.tabs.units', show: isAuth },
+  {icon: 'settings', href:"/init", label: 'app.tabs.settings', show: isAuth },
 ]);
 
 const showedMenu = computed(() => {

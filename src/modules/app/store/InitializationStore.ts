@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import InitializationService from '../services/InitializationService';
 import {Notify} from "quasar";
+import ProektiService from "@/modules/unit/services/ProektiService";
 
 type PropModel = {
     id: string;
@@ -23,6 +24,11 @@ type InitState = {
         oshibkaOtBeka: string | null;
     },
     formaProxyHost: FormaProxyHost;
+    proverkaProxyHost: {
+        loader: boolean;
+        result: boolean | null;
+        oshibkaOtBeka: string | null;
+    }
 };
 
 export const storeInizializii = defineStore('init', {
@@ -38,6 +44,11 @@ export const storeInizializii = defineStore('init', {
                 loader: false,
                 oshibkaOtBeka: null
             },
+            proverkaProxyHost: {
+                loader: false,
+                result: null,
+                oshibkaOtBeka: null
+            }
         };
     },
     actions: {
@@ -78,11 +89,32 @@ export const storeInizializii = defineStore('init', {
             }
 
             this.formaProxyHost.loader = false;
+        },
+        async proveritProxyHost() {
+            this.proverkaProxyHost.loader = true;
+            this.proverkaProxyHost.result = null;
+            this.proverkaProxyHost.oshibkaOtBeka = null;
+
+            const response = await ProektiService.proveritProxyHost({ proxyHost: this.formaProxyHost.value || "" });
+
+            this.proverkaProxyHost.loader = false;
+            if (response.status === "success") {
+                this.proverkaProxyHost.result = response.data.result;
+            } else if (response.status === "fail") {
+                this.proverkaProxyHost.oshibkaOtBeka = response.data.message;
+            } else if (response.status === "error") {
+                this.proverkaProxyHost.oshibkaOtBeka = response.message;
+            }
+
+            return response;
         }
     },
     getters: {
         estNeZapolnenie(): boolean {
             return this.list.data.some(item => item.init === 0);
+        },
+        elsiProxyHostNeZapolnen(): boolean {
+            return !this.formaProxyHost.value || this.formaProxyHost.value.length === 0;
         }
     }
 });

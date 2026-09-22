@@ -9,7 +9,8 @@
       "units": "Юниты",
       "projects": "Проекты",
       "repos": "Репозитории",
-      "accounts": "Учетные записи"
+      "accounts": "Учетные записи",
+      "settings": "Настройки"
     },
     "header": {
       "profile": "Профиль",
@@ -20,7 +21,8 @@
     "form_proxy_host": {
       "caption": "Укажите дефолтный Proxy Host",
       "buttons": {
-        "ok": "Сохранить"
+        "ok": "Сохранить",
+        "check": "Проверить соединение"
       }
     }
   },

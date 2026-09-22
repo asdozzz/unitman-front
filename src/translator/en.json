@@ -9,7 +9,8 @@
       "units": "Units",
       "projects": "Projects",
       "repos": "Repositories",
-      "accounts": "Accounts"
+      "accounts": "Accounts",
+      "settings": "Settings"
     },
     "header": {
       "profile": "Profile",
@@ -20,7 +21,8 @@
     "form_proxy_host": {
       "caption": "Proxy Host Form",
       "buttons": {
-        "ok": "Ok"
+        "ok": "Ok",
+        "check": "Test connection"
       }
     }
   },

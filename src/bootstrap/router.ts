@@ -22,14 +22,15 @@ router.beforeEach(async (to, _from, next) => {
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
     const initStore = storeInizializii();
+    if (initStore.list.data.length === 0) {
+        await initStore.poluchitSpisok();
+    }
 
     if (authRequired) {
         if (!authStore.tokenData) {
             authStore.returnUrl = to.fullPath;
-            console.log('login route');
             return next('/login');
-        } else if (authStore.isAdmin && !initStore.estNeZapolnenie && to.fullPath !== '/init') {
-            console.log('init route', to);
+        } else if (authStore.isAdmin && initStore.estNeZapolnenie && to.fullPath !== '/init') {
             return next('/init');
         }
     }
