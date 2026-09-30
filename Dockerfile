@@ -19,7 +19,8 @@ RUN yarn build
 FROM nginx:latest AS prod
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-COPY entry.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+WORKDIR /usr/src/app
+COPY entry.sh /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
