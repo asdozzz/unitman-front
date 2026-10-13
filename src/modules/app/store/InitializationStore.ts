@@ -115,6 +115,17 @@ export const storeInizializii = defineStore('init', {
         },
         elsiProxyHostNeZapolnen(): boolean {
             return !this.formaProxyHost.value || this.formaProxyHost.value.length === 0;
+        },
+        getProxyHost(): string {
+            let proxyHost = "";
+
+            this.list.data.forEach(item => {
+                if (item.prop === 'proxy_host') {
+                    proxyHost = item.value;
+                }
+            });
+
+            return proxyHost;
         }
     }
 });

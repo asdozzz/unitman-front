@@ -70,6 +70,10 @@ async function rebuildModel() {
   await unitiStore.rebuildModel(props.item.id);
 }
 
+async function pometitKakSlomanii() {
+  await unitiStore.pometitKakSlomanii(props.item.id);
+}
+
 const prompt =  ref(false);
 
 function showRemovePrompt() {
@@ -100,8 +104,12 @@ function showRemovePrompt() {
           </div>
         </div>
         <div class="col-auto">
+          <q-btn size="sm" padding="4px 5px" flat round icon="delete_forever" v-if="isAdmin" @click="pometitKakSlomanii" :loading="getUnitLoader(props.item.id)">
+            <q-tooltip>mark as broken</q-tooltip>
+          </q-btn>
 <!--          <q-btn size="sm" padding="4px 5px" flat round icon="delete_forever" v-if="isAdmin" @click="udalitSlomanii" :loading="getUnitLoader(props.item.id)"/>-->
-          <q-btn size="sm" padding="4px 5px" flat round icon="restore_from_trash" v-if="isAdmin" @click="rebuildModel" :loading="getUnitLoader(props.item.id)">
+          <q-btn size="sm" padding="4px 5px" flat round icon="restore" v-if="isAdmin" @click="rebuildModel" :loading="getUnitLoader(props.item.id)">
+            <q-tooltip>rebuild</q-tooltip>
           </q-btn>
           <q-btn size="sm" padding="4px 5px" flat round icon="close" v-if="isShowRemoveBtn" @click="showRemovePrompt" :loading="getUnitLoader(props.item.id)">
             <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>

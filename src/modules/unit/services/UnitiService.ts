@@ -123,6 +123,10 @@ class UnitiService {
     rebuildModel(params: { id: string }) {
         return apiClient.post<null>('/unit/rebuildSpisokUnitov', params)
     }
+
+    pometitKakSlomanii(params: { id: string }) {
+        return apiClient.post<null>('/unit/pometitKakSlomanii', params);
+    }
 }
 
 export default new UnitiService();

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import UnitiService from "@/modules/unit/services/UnitiService";
-import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import Unit, {Deistviye} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
@@ -294,6 +294,19 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             return response;
         },
+        async pometitKakSlomanii(id: string) {
+            this.startUnitLoader(id);
+
+            const response = await UnitiService.pometitKakSlomanii({ id });
+            this.stopUnitLoader(id);
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            }
+
+            this.obnovitUnit(id);
+
+            return response;
+        },
     },
     getters: {
         issetUnit() {
@@ -372,5 +385,13 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 return user.role;
             }
         },
+        spisokDeistvii() {
+            const store = this;
+            return (item: Unit): Deistviye[] => {
+                return item.deistviya.filter((action: Deistviye) => {
+                    return store.esliZapushen(item) || action.prepare;
+                });
+            }
+        }
     }
 })

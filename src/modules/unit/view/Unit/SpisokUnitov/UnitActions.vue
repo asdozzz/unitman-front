@@ -16,7 +16,7 @@ defineProps<{
 const router = useRouter();
 
 const unitiStore = useSpisokUnitovStore();
-const { getUnitLoader, esliZapushen,getUserRoleByProjectIdAndUserId, esliJdemRunner } = storeToRefs(unitiStore);
+const { getUnitLoader, esliZapushen,getUserRoleByProjectIdAndUserId, esliJdemRunner, spisokDeistvii } = storeToRefs(unitiStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 
@@ -106,10 +106,10 @@ const { userId, isAdmin } = storeToRefs(authStore);
       <q-btn v-if="command === 'proveritKonteinerUnita' && isAdmin" size="sm" square color="primary" padding="5px 6px" icon="sync" @click="proveritKonteinerUnita(item.id)" :loading="getUnitLoader(item.id)">
         <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.check_container')}}</q-tooltip>
       </q-btn>
-      <q-btn v-if="command === 'vipolnitDeistvie' && item.deistviya.length > 0" size="sm" square color="primary" padding="5px 6px" icon="apps" :loading="getUnitLoader(item.id)">
+      <q-btn v-if="command === 'vipolnitDeistvie' && spisokDeistvii(item).length > 0" size="sm" square color="primary" padding="5px 6px" icon="apps" :loading="getUnitLoader(item.id)">
         <q-menu>
           <q-list>
-            <template :key="actionConfig.id" v-for="actionConfig in item.deistviya">
+            <template :key="actionConfig.id" v-for="actionConfig in spisokDeistvii(item)">
               <q-item clickable v-close-popup @click="pokazatFormuDeistviya(item.id, actionConfig)">
                 <q-item-section>
                   <q-item-label>{{ actionConfig.name }}</q-item-label>

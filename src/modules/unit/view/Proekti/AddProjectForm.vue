@@ -2,12 +2,15 @@
 import {storeToRefs} from "pinia";
 import {useAddProjectFormStore} from "@/modules/unit/store/SpisokProektov/AddProjectFormStore";
 import {onMounted, ref} from "vue";
+import {storeInizializii} from "@/modules/app/store/InitializationStore";
 
 const localProjectCode = ref<{value: string, label: string} | null>(null);
 
 const addFormStore = useAddProjectFormStore();
 const { form, oshibkaOtBackenda, loader, hranilisha, proekti, proverkaProxyHost } = storeToRefs(addFormStore);
 
+const initStore = storeInizializii();
+const { getProxyHost } = storeToRefs(initStore);
 onMounted(async () => {
   await addFormStore.poluchitActivnieHranilisha();
 })
@@ -41,6 +44,8 @@ function projectCodeSelected(data: { value: string, label: string } | null): voi
     form.value.projectCode = "";
     form.value.projectName = "";
   }
+  form.value.proxyHost = getProxyHost;
+  //form.value.proxyHost
 }
 
 function filterSpiskaProektov(val: string | null, update: any): void {

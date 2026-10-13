@@ -48,8 +48,9 @@ export class PeremenayaKonfiga {
 export type Deistviye = {
     id: string;
     name: string;
-    variables: KonfigPeremenoi[],
-    commands: string[]
+    variables: KonfigPeremenoi[];
+    commands: string[];
+    prepare?: boolean | null;
 }
 
 export type ZadachaUnitaBezShagov = {

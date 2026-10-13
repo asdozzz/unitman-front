@@ -28,7 +28,8 @@ type Deistviye = {
         defaultValue: string,
         options: Record<string, unknown>
     }[],
-    commands: string[]
+    commands: string[];
+    prepare?: boolean | null;
 }
 
 export type ApiTipZadachi = "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
