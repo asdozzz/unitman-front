@@ -1,5 +1,11 @@
 services:
   app:
-    build: .
+    build: 
+      context: .
+       cache_from:
+        - type=registry,ref=http://unitman_registry/exunit-front/app:latest
+      cache_to:
+        - type=registry,ref=http://unitman_registry/exunit-front/app:latest,mod=max
     ports:
       - 8033:80
+  
