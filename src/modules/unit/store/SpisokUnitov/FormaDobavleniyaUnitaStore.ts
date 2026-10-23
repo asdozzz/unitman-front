@@ -85,11 +85,15 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.oshibkaOtBackenda = null;
             this.loader = false;
             this.initPeremenie = false;
+            this.dubli.loader = false;
+            this.dubli.spisok = [];
         },
         zakritFormu() {
             this.form = new FormaDobavleniyaUnita();
             this.enable = false;
             this.initPeremenie = false;
+            this.dubli.loader = true;
+            this.dubli.spisok = [];
         },
         async poluchitVetki() {
             this.vetki.loader = true;

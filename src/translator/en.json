@@ -27,6 +27,9 @@
     }
   },
   "account": {
+    "filter": {
+      "query" : "Search"
+    },
     "form_projects": {
       "projects": "Projects"
     },

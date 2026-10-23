@@ -29,8 +29,8 @@ class AccountService {
         return apiClient.post<ApiModelPolzovatelya[]>('/account/poluchitVsehPolzovatelei', {});
     }
 
-    poluchitPolzovateleiDlyAdmininstrirovaniya() {
-        return apiClient.post<ApiModelPolzovatelyaDlyAdministrorovaniya[]>('/account/poluchitVsehPolzovateleiDlyAdministrorovaniya', {});
+    poluchitPolzovateleiDlyAdmininstrirovaniya(query: string|null) {
+        return apiClient.post<ApiModelPolzovatelyaDlyAdministrorovaniya[]>('/account/poluchitVsehPolzovateleiDlyAdministrorovaniya', {query});
     }
 
     poluchitProektiPolzovatelya(id: string) {

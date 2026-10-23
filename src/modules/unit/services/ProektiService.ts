@@ -142,10 +142,6 @@ class ProektiService {
         return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/project/poluchitShagiZadachiRunnera', params);
     }
 
-    ochistit(params: { id: string }) {
-        return apiClient.post<null>('/project/ochistit', params);
-    }
-
     dobavitWebhook(params: ZaprosNaDobavlenieWebhooka) {
         return apiClient.post<null>('/project/webhook/dobavit', params);
     }

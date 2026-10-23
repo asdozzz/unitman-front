@@ -8,6 +8,9 @@ import {
 import {Notify} from "quasar";
 
 export type SpisokPolzovateleiDlyAdmininstrirovaniyaState = {
+    filter: {
+        query: string | null
+    }
     spisok: PolzovatelDlyAdmininstrirovaniya[];
     loaderSpiska: boolean;
     oshibkaPolucheniyaSpiska: string;
@@ -17,6 +20,9 @@ export type SpisokPolzovateleiDlyAdmininstrirovaniyaState = {
 export const useSpisokPolzovateleiDlyAdmininstrirovaniyaStore = defineStore('SpisokPolzovateleiDlyAdmininstrirovaniyaStore', {
     state: (): SpisokPolzovateleiDlyAdmininstrirovaniyaState => {
         return {
+          filter: {
+            query: null
+          },
           spisok: [],
           loaderSpiska: false,
           oshibkaPolucheniyaSpiska: "",
@@ -26,7 +32,7 @@ export const useSpisokPolzovateleiDlyAdmininstrirovaniyaStore = defineStore('Spi
     actions: {
         async poluchitPolzovateleiDlyAdmininstrirovaniya() {
             this.loaderSpiska = true;
-            const response = await AccountService.poluchitPolzovateleiDlyAdmininstrirovaniya();
+            const response = await AccountService.poluchitPolzovateleiDlyAdmininstrirovaniya(this.filter.query);
             if (response.status === "success") {
                 this.spisok = response.data.map((item: ApiModelPolzovatelyaDlyAdministrorovaniya) => new PolzovatelDlyAdmininstrirovaniya(item));
             } else if (response.status === "fail") {

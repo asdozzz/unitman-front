@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
 import {onMounted} from "vue";
-
+import { useTimeout } from 'quasar'
+const { registerTimeout, isTimeoutPending } = useTimeout()
 import {
   useSpisokPolzovateleiDlyAdmininstrirovaniyaStore
 } from "@/modules/account/store/SpisokVsehPolzovateleiDlyAdmininstrirovaniyaStore";
@@ -17,14 +18,24 @@ const authStore = useAuthStore();
 const { getLocale } = storeToRefs(authStore);
 
 const spisokPolzovateleStore = useSpisokPolzovateleiDlyAdmininstrirovaniyaStore();
-const { spisok, loaderSpiska, oshibkaPolucheniyaSpiska, loaderObnovleniya } = storeToRefs(spisokPolzovateleStore);
+const { spisok, loaderSpiska, oshibkaPolucheniyaSpiska, loaderObnovleniya, filter } = storeToRefs(spisokPolzovateleStore);
 
 const formaRegistrazii = useFormaRegistraziiPolzovatelya();
 const { enable: enableAddForm } = storeToRefs(formaRegistrazii);
 
-onMounted(async () => {
+async function getList() {
   await spisokPolzovateleStore.poluchitPolzovateleiDlyAdmininstrirovaniya();
+}
+
+onMounted(async () => {
+  getList();
 })
+
+async function search() {
+  registerTimeout(() => {
+    getList();
+  }, 200)
+}
 
 function blokirovka(id: string) {
   spisokPolzovateleStore.blokirovatPolzovatelya(id);
@@ -44,11 +55,24 @@ function openAddForm() {
   <div class="full-width flex column">
 
     <div class="row">
+      <div class="col-auto q-pb-sm q-pr-sm">
+        <q-input square style="width: 235px"
+                 :loading="isTimeoutPending"
+                 dense outlined  v-model="filter.query"  :label="$t('account.spisok.filter.query')" clearable @update:model-value="search"/>
+      </div>
+      <div class="col-auto q-pr-sm">
+<!--        <q-btn padding="7px 7px" square size="md" color="primary" icon="search" @click="getList">
+          <q-tooltip>{{$t('account.spisok.buttons.search')}}</q-tooltip>
+        </q-btn>-->
+      </div>
       <div class="col q-pb-sm">
-        <q-btn padding="5px 6px" square size="sm" color="primary" icon="add" @click="openAddForm">
+        <q-btn padding="7px 7px" square size="md" color="primary" icon="add" @click="openAddForm">
           <q-tooltip>{{$t('account.spisok.buttons.add')}}</q-tooltip>
         </q-btn>
       </div>
+    </div>
+    <div class="row">
+
     </div>
     <div class="row wrap items-start content-start">
       <q-spinner-cube

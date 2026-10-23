@@ -121,7 +121,7 @@ export const storeInizializii = defineStore('init', {
 
             this.list.data.forEach(item => {
                 if (item.prop === 'proxy_host') {
-                    proxyHost = item.value;
+                    proxyHost = item.value || "";
                 }
             });
 
