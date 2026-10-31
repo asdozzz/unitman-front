@@ -19,12 +19,27 @@ export type CollectionOptions = {
     options?: { id: string; name: string }[];
 };
 
+/**
+ * Помощник подстановки ссылки на сервис другого юнита
+ * (ConfigVariableHelper / PomoschnikSsylki::toArray).
+ *
+ * Поля могут быть `null`, если помощник задан не полностью.
+ */
+export type PomoschnikSsylki = Schema<"ConfigVariableHelper">;
+
 type SOptions<T> = Omit<T, "options"> & { options: CollectionOptions | null };
 
-/** Переменная конфигурации юнита (UnitConfigVariable). */
-export type KonfigPeremenoi = SOptions<Schema<"UnitConfigVariable">>;
+/**
+ * Переменная конфигурации юнита (UnitConfigVariable).
+ *
+ * `helper` в спецификации объявлен как произвольный объект, поэтому здесь
+ * он уточняется до фактической структуры `ConfigVariableHelper`.
+ */
+export type KonfigPeremenoi = Omit<SOptions<Schema<"UnitConfigVariable">>, "helper"> & {
+    helper: PomoschnikSsylki | null;
+};
 
-/** Переменная действия юнита (UnitActionVariable). */
+/** Переменная действия юнита (UnitActionVariable); помощник ей не предусмотрен. */
 export type KonfigDeistviya = SOptions<Schema<"UnitActionVariable">>;
 
 export type Peremenaya = Schema<"UnitVariableValue">;

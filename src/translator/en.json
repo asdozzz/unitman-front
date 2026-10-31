@@ -147,6 +147,19 @@
         "confirm": "confirm"
       }
     },
+    "pomoschnik_ssylki": {
+      "title": "Select unit to insert link",
+      "podskazka": "The link to service \"{service}\" (port {port}) of the selected unit will be fetched",
+      "poisk": "Search unit by name or branch",
+      "empty_result": "No units found",
+      "buttons": {
+        "close": "Close",
+        "refresh": "Refresh unit list"
+      },
+      "hints": {
+        "insert_link": "Insert link to service of another unit"
+      }
+    },
     "form_variables": {
       "fields": {
         "labels": {

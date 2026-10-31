@@ -77,6 +77,14 @@ class UnitiService {
         return apiClient.post('/unit/poluchitVipolnenieZadachiRunnera', params);
     }
 
+    /**
+     * Ссылка на сервис другого юнита, вычисленная по помощнику переменной
+     * (`ConfigVariableHelper`). Используется для автоподстановки значения.
+     */
+    poluchitSsylkuPoPomoschniku(params: Schema<"PoluchitSsylkuPoPomoschniku">) {
+        return apiClient.post('/unit/poluchitSsylkuPoPomoschniku', params);
+    }
+
     poluchitKonfigPoNazvaniyuVetki(params: Schema<"PoluchitKonfigIzHranilisha">) {
         return apiClient.post('/unit/poluchitKonfigIzHranilisha', params);
     }
