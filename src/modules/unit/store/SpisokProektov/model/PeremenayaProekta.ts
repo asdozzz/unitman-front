@@ -1,17 +1,5 @@
-export default class PeremenayaProekta {
-    tip: string = "";
-    code: string = "";
-    value: string = "";
+import type {Schema} from "@/api/types";
 
-    constructor(
-        data: {
-            tip: string,
-            code: string,
-            value: string,
-        }
-    ) {
-        this.tip = data.tip;
-        this.code = data.code;
-        this.value = data.value;
-    }
-}
+export type PeremenayaProekta = Schema<"ProjectVariable">;
+
+export default PeremenayaProekta;

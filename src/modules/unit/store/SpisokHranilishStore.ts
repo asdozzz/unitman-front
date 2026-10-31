@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia';
 import HranilishaService from "@/modules/unit/services/HranilishaService";
 import {Notify} from "quasar";
-import Hranilishe from "@/modules/unit/store/SpisokHranilish/model/Hranilishe";
-import ModelDlySpiskaHranilish from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaHranilish";
+import type {Hranilishe} from "@/modules/unit/store/SpisokHranilish/model/Hranilishe";
 
 export type SpisokHranilishState = {
     spisok: Hranilishe[];
@@ -25,7 +24,7 @@ export const useSpisokHranilishStore = defineStore('SpisokHranilishStore', {
             this.loaderSpiskaHranilish = true;
             const response = await HranilishaService.list();
             if (response.status === "success") {
-                this.spisok = response.data.map((item: ModelDlySpiskaHranilish) => new Hranilishe(item));
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;

@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia';
-import PolzovatelDlyAdmininstrirovaniya from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelDlyAdmininstrirovaniya";
+import type PolzovatelDlyAdmininstrirovaniya from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelDlyAdmininstrirovaniya";
 import AccountService from "@/modules/account/services/AccountService";
-
-import {
-    ApiModelPolzovatelyaDlyAdministrorovaniya
-} from "@/modules/account/services/model/ApiModelPolzovatelyaDlyAdministrorovaniya";
 import {Notify} from "quasar";
 
 export type SpisokPolzovateleiDlyAdmininstrirovaniyaState = {
@@ -34,7 +30,7 @@ export const useSpisokPolzovateleiDlyAdmininstrirovaniyaStore = defineStore('Spi
             this.loaderSpiska = true;
             const response = await AccountService.poluchitPolzovateleiDlyAdmininstrirovaniya(this.filter.query);
             if (response.status === "success") {
-                this.spisok = response.data.map((item: ApiModelPolzovatelyaDlyAdministrorovaniya) => new PolzovatelDlyAdmininstrirovaniya(item));
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaPolucheniyaSpiska = response.data.message;

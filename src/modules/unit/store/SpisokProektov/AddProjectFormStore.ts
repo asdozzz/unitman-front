@@ -1,7 +1,7 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import HranilishaService from "@/modules/unit/services/HranilishaService";
-import ModelDlySpiskaHranilish from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaHranilish";
+import type {Schema} from "@/api/types";
 
 export class AddForm {
     repoId: string;
@@ -103,7 +103,7 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
 
             this.hranilisha.loader = false;
             if (response.status === "success") {
-                this.hranilisha.spisok = response.data.map((item: ModelDlySpiskaHranilish) => new Hranilishe(item.id, item.name));
+                this.hranilisha.spisok = response.data.map((item: Schema<"Repo">) => ({value: item.id, label: item.name}));
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
@@ -121,7 +121,7 @@ export const useAddProjectFormStore = defineStore('AddProjectFormState', {
 
             this.proekti.loader = false;
             if (response.status === "success") {
-                this.proekti.spisok = response.data.map((item) => new Proekt(item.value, item.name));
+                this.proekti.spisok = response.data.map((item: Schema<"RepoProject">) => new Proekt(item.value, item.name));
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {

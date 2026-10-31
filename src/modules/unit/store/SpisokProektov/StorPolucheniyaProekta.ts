@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import Proekt from "@/modules/unit/store/SpisokProektov/model/Proekt";
+import type {Proekt} from "@/modules/unit/store/SpisokProektov/model/Proekt";
 import ProektiService from "@/modules/unit/services/ProektiService";
 
 type State = {

@@ -1,11 +1,9 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import UnitiService from "@/modules/unit/services/UnitiService";
-import ModelDlySpiskaVetok from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaVetok";
-import Unit, { PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import {
-    OtvetNaPolucheniePeremenihUnita
-} from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
+import type {Schema} from "@/api/types";
+import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import {PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 export class FormaDobavleniyaUnita {
     projectId: string;
@@ -106,7 +104,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
 
             this.vetki.loader = false;
             if (response.status === "success") {
-                this.vetki.spisok = response.data.map((item: ModelDlySpiskaVetok) => new Vetka(item.name, item.name));
+                this.vetki.spisok = response.data.map((item: Schema<"ProjectBranch">) => new Vetka(item.name, item.name));
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
@@ -151,7 +149,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
 
             this.polucheniePeremenih.loader = false;
             if (response.status === "success") {
-                this.form.peremenieKonfiga = response.data.map((item:OtvetNaPolucheniePeremenihUnita) => new PeremenayaKonfiga(item.konfig, item.konfig.defaultValue));
+                this.form.peremenieKonfiga = response.data.map((item: Schema<"UnitVariable">) => new PeremenayaKonfiga(item.konfig, item.konfig.defaultValue));
                 this.initPeremenie = true;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;

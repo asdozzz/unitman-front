@@ -1,57 +1,8 @@
-import PolzovatelProekta from "@/modules/unit/store/SpisokProektov/model/PolzovatelProekta";
-import PeremenayaProekta from "@/modules/unit/store/SpisokProektov/model/PeremenayaProekta";
-import NastroikiHukaProekta from "@/modules/unit/store/SpisokProektov/model/NastroikiHukaProekta";
+import type {Schema} from "@/api/types";
 
-export default class Proekt {
-    id: string = "";
-    repoId: string = "";
-    name: string = "";
-    code: string = "";
-    mainBranch: string = "";
-    state: string = "";
-    isActive: boolean = false;
-    buildInfo: string | null = null;
-    removeInfo: string | null = null;
-    proxyHost: string | null = null;
-    users: PolzovatelProekta[] = [];
-    variables: PeremenayaProekta[] = [];
-    nastroikiHukaProekta: NastroikiHukaProekta;
-    waitResultRunner: boolean = false;
-    memoryLimit: number = 0;
+export type Proekt = Schema<"ProjectListItem">;
+export type PolzovatelProekta = Schema<"ProjectUser">;
+export type PeremenayaProekta = Schema<"ProjectVariable">;
+export type NastroikiHukaProekta = Schema<"ProjectHookSettings">;
 
-    constructor(
-        data: {
-            id: string,
-            repoId: string,
-            name: string,
-            code: string,
-            mainBranch: string,
-            state: string,
-            isActive: boolean,
-            buildInfo: string|null,
-            removeInfo: string|null,
-            proxyHost: string|null,
-            users: PolzovatelProekta[],
-            variables: PeremenayaProekta[],
-            nastroikiHukaProekta: NastroikiHukaProekta,
-            waitResultRunner: boolean,
-            memoryLimit: number,
-        }
-    ) {
-        this.id = data.id;
-        this.repoId = data.repoId;
-        this.name = data.name;
-        this.code = data.code;
-        this.mainBranch = data.mainBranch;
-        this.isActive = data.isActive;
-        this.buildInfo = data.buildInfo;
-        this.removeInfo = data.removeInfo;
-        this.state = data.state;
-        this.proxyHost = data.proxyHost;
-        this.users = data.users;
-        this.variables = data.variables;
-        this.nastroikiHukaProekta = data.nastroikiHukaProekta;
-        this.waitResultRunner = data.waitResultRunner;
-        this.memoryLimit = data.memoryLimit;
-    }
-};
+export default Proekt;

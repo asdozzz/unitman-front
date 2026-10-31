@@ -3,7 +3,7 @@ import {storeToRefs} from "pinia";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
-import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
 const { form, oshibkaOtBackenda, loader, vetki, initPeremenie, dubli } = storeToRefs(addFormStore);

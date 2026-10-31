@@ -1,29 +1,16 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
+import type {Schema} from "@/api/types";
 
-type ShagZadachi = {
-    command: string;
-    response: string;
-    success: boolean;
-    unixtime: number;
-}
+export type VipolnenayaZadacha = Schema<"ProjectRunnerJob">;
 
-export type VipolnenayaZadacha = {
-    id: string;
-    projectId: string;
-    jobType: string;
-    success: boolean;
-    //steps: ShagZadachi[]
-}
+type VipolnenayaZadachaSPShagami = Schema<"ProjectRunnerJobDetailed">;
 
 
 type StorVipolnenihZadachRunneraState = {
     loader: boolean;
     spisok: VipolnenayaZadacha[],
-    selectJob: {
-        id: string;
-        steps: ShagZadachi[]
-    },
+    selectJob: VipolnenayaZadachaSPShagami | null,
     oshibkaOtBackenda: string | null;
     projectId: string | null;
 }
@@ -35,10 +22,7 @@ export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunn
             oshibkaOtBackenda: null,
             spisok: [],
             projectId: null,
-            selectJob: {
-                id: "",
-                steps:[]
-            }
+            selectJob: null
         };
     },
     actions: {

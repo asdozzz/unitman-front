@@ -1,11 +1,8 @@
 import {defineStore} from "pinia";
-import PeremenayaProekta from "@/modules/unit/store/SpisokProektov/model/PeremenayaProekta";
+import type {PeremenayaProekta} from "@/modules/unit/store/SpisokProektov/model/PeremenayaProekta";
 import ProektiService from "@/modules/unit/services/ProektiService";
 
 import {Notify} from "quasar";
-import {
-    ModelDlySpiskaPeremenihProekta
-} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPeremenihProekta";
 
 class AddForm {
     projectId: string;
@@ -24,12 +21,12 @@ class AddForm {
 class EditForm {
     projectId: string;
     code: string;
-    value: string;
+    newValue: string;
 
-    constructor(projectId: string = "", code: string = "", value: string = "") {
+    constructor(projectId: string = "", code: string = "", newValue: string = "") {
         this.projectId = projectId;
         this.code = code;
-        this.value = value;
+        this.newValue = newValue;
     }
 }
 
@@ -90,7 +87,7 @@ export const useSpisokPeremenihProektaStore = defineStore('SpisokPeremenihProekt
             const response = await ProektiService.poluchitSpisokPeremenih({ id: this.projectId});
 
             if (response.status === "success") {
-                this.spisok = response.data.map((item:ModelDlySpiskaPeremenihProekta) => new PeremenayaProekta(item))
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;

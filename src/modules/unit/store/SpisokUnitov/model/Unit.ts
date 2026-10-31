@@ -1,40 +1,48 @@
+import type {Schema} from "@/api/types";
 import {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi} from "@/modules/unit/store/SpisokUnitov/model/UnitEnums";
 
-type Peremenaya = {
-    id: string;
-    value: string;
+/**
+ * Модели юнита — тонкие алиасы над схемами OpenAPI.
+ * Отдельные классы не нужны: apiClient возвращает уже готовые объекты.
+ */
+
+export type Unit = Schema<"UnitListItem">;
+
+export type Deistviye = Schema<"UnitAction">;
+
+/**
+ * Параметры выбора переменной-коллекции (CollectionOptions::toArray).
+ * В спецификации `options` объявлен как произвольный объект, поэтому здесь
+ * он уточняется до фактической структуры, которую отдаёт бэкенд.
+ */
+export type CollectionOptions = {
+    options?: { id: string; name: string }[];
 };
 
-type Statistika = {
-    cpuPercent: string;
-    memoryPercent: string;
-    memoryUsage: string;
-    netIO: string;
-};
+type SOptions<T> = Omit<T, "options"> & { options: CollectionOptions | null };
 
-type Link = {
-    service: string;
-    path: string;
-    port: number;
-    protocol: string;
-    startUri: string | null;
-}
+/** Переменная конфигурации юнита (UnitConfigVariable). */
+export type KonfigPeremenoi = SOptions<Schema<"UnitConfigVariable">>;
 
-type CollectionOptions = {
-    options?: {
-        id: string,
-        name: string
-    }[]
-}
+/** Переменная действия юнита (UnitActionVariable). */
+export type KonfigDeistviya = SOptions<Schema<"UnitActionVariable">>;
 
-export type KonfigPeremenoi = {
-    id: string,
-    label: string,
-    type: string,
-    defaultValue: string,
-    options: CollectionOptions
-}
+export type Peremenaya = Schema<"UnitVariableValue">;
 
+export type Statistika = Schema<"ContainerStats">;
+
+export type Link = Schema<"UnitLink">;
+
+export type ZadachaUnitaBezShagov = Schema<"UnitProcessBriefJob">;
+
+export type ProzesUnitaBezShagov = Schema<"UnitProcessBrief">;
+
+export type {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi};
+
+/**
+ * Значение переменной в форме заполнения.
+ * Чисто UI-модель: хранит выбранную конфигурацию и текущее значение.
+ */
 export class PeremenayaKonfiga {
     konfig: KonfigPeremenoi;
     value: string;
@@ -44,91 +52,3 @@ export class PeremenayaKonfiga {
         this.value = value.length > 0 ? value : konfig.defaultValue;
     }
 }
-
-export type Deistviye = {
-    id: string;
-    name: string;
-    variables: KonfigPeremenoi[];
-    commands: string[];
-    prepare?: boolean | null;
-}
-
-export type ZadachaUnitaBezShagov = {
-    jobId: string;
-    type: TipZadachi;
-    state: StatusZadachi;
-}
-
-export type ProzesUnitaBezShagov = {
-    id: string;
-    userId: string;
-    type: TipProzesa;
-    state: StatusProzesa;
-    jobs: ZadachaUnitaBezShagov[];
-};
-
-export default class Unit {
-    id: string = "";
-    authorId: string = "";
-    authorName: string = "";
-    name: string = "";
-    projectId: string = "";
-    projectName: string = "";
-    branch: string = "";
-    prozesi: ProzesUnitaBezShagov[] = [];
-    //state: string = "";
-    //waitResultFromRunner: boolean = false;
-    commands: string[] = [];
-    error: boolean = false;
-    zapushen: boolean = false;
-    links: Link[] = []
-    unixtimePoslednegoObnovleniyaUnita: number|null = null;
-    unixtimePoslednegoObnovleniyaVHranilishe: number|null = null;
-    peremenie: Peremenaya[] = [];
-    unitSozdanSystemoi: boolean = false;
-    statistikaKonteinera: Statistika | null;
-    deistviya: Deistviye[] = [];
-
-    constructor(
-        data: {
-            id: string,
-            authorId: string,
-            authorName: string,
-            name: string,
-            projectId: string,
-            projectName: string,
-            branch: string,
-            prozesi: ProzesUnitaBezShagov[],
-            commands: string[],
-            error: boolean,
-            zapushen: boolean,
-            links: Link[],
-            unixtimePoslednegoObnovleniyaUnita: number|null,
-            unixtimePoslednegoObnovleniyaVHranilishe: number|null,
-            peremenie: Peremenaya[],
-            unitSozdanSystemoi: boolean,
-            statistikaKonteinera: Statistika | null,
-            deistviya: Deistviye[] | null,
-        }
-    ) {
-        this.id = data.id;
-        this.authorId = data.authorId;
-        this.authorName = data.authorName;
-        this.name = data.name;
-        this.projectId = data.projectId;
-        this.projectName = data.projectName;
-        this.branch = data.branch;
-        this.prozesi = data.prozesi;
-        this.commands = data.commands;
-
-        this.links = data.links;
-        this.error = data.error;
-        this.zapushen = data.zapushen;
-        this.unixtimePoslednegoObnovleniyaUnita = data.unixtimePoslednegoObnovleniyaUnita;
-        this.unixtimePoslednegoObnovleniyaVHranilishe = data.unixtimePoslednegoObnovleniyaVHranilishe;
-        this.peremenie = data.peremenie;
-        this.unitSozdanSystemoi = data.unitSozdanSystemoi;
-        this.statistikaKonteinera = data.statistikaKonteinera;
-        this.deistviya = data.deistviya || [];
-    }
-};

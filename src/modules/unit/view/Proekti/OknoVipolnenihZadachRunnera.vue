@@ -61,7 +61,7 @@ function convertDate(unixtime: number): string {
             <q-card class="no-border-radius">
               <q-card-section class="q-pt-none">
                 <q-list bordered separator :padding="false" class="rounded-borders">
-                  <q-item clickable v-ripple v-for="(zadacha) in spisok" :key="zadacha.id" active-class="bg-primary text-white" :active="zadacha.id === selectJob.id" @click="store.select(zadacha.id)">
+                  <q-item clickable v-ripple v-for="(zadacha) in spisok" :key="zadacha.id" active-class="bg-primary text-white" :active="zadacha.id === selectJob?.id" @click="store.select(zadacha.id)">
                     {{ zadacha.jobType }}
                   </q-item>
                 </q-list>

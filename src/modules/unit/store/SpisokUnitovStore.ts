@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
 import UnitiService from "@/modules/unit/services/UnitiService";
-import Unit, {Deistviye} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Deistviye, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
-import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
-import ModelDlySpiskaUnitov from "@/modules/unit/services/UnitiService/model/ModelDlySpiskaUnitov";
 import {safeJsonParse} from "@/utils/json";
 
 type NastroikiSpiska = {
@@ -111,7 +109,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             localStorage.setItem(FILTER_UNITOV_STORAGE_KEY, JSON.stringify(this.nastroikiSpiska))
             const response = await UnitiService.list(this.nastroikiSpiska);
             if (response.status === "success") {
-                this.spisok = response.data.map((item: ModelDlySpiskaUnitov) => new Unit(item));
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;
@@ -135,7 +133,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 const unitIndex = this.spisok.findIndex((unit: Unit) => unit.id === id);
 
                 if (unitIndex !== -1) {
-                    this.spisok[unitIndex] = new Unit(response.data);
+                    this.spisok[unitIndex] = response.data;
                 }
             }
 
@@ -274,7 +272,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             this.proekti.loader = false;
             if (response.status === "success") {
-                this.proekti.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item.id, item.name, item.users, item.memoryLimit));
+                this.proekti.spisok = response.data.map((item) => new Proekt(item.id, item.name, item.users, item.memoryLimit));
             } else if (response.status === "fail") {
                 Notify.create(response.data.message);
             } else if (response.status === "error") {

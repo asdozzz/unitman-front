@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
-import Unit from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";

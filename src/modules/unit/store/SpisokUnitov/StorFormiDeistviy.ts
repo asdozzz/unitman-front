@@ -1,12 +1,13 @@
 import {defineStore} from "pinia";
-import {Deistviye, KonfigPeremenoi} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Deistviye, KonfigDeistviya} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import UnitiService from "@/modules/unit/services/UnitiService";
+import type {Schema} from "@/api/types";
 
 export class Peremenaya {
-    konfig: KonfigPeremenoi;
+    konfig: KonfigDeistviya;
     value: string;
 
-    constructor(konfig: KonfigPeremenoi, value: string = "") {
+    constructor(konfig: KonfigDeistviya, value: string = "") {
         this.konfig = konfig;
         this.value = value.length > 0 ? value : konfig.defaultValue;
     }
@@ -46,7 +47,7 @@ export const storFormiDeistviyUnita = defineStore('storFormiDeistviy', {
             this.unitId = unitId;
             this.enable = true;
             this.deistvie = deistviye;
-            const variables = deistviye.variables.map((konfig: KonfigPeremenoi) => new Peremenaya(konfig,""))
+            const variables = deistviye.variables.map((konfig: KonfigDeistviya) => new Peremenaya(konfig,""))
             this.form = new FormaPeremenih(unitId, variables);
         },
         zakritFormu() {
@@ -58,11 +59,12 @@ export const storFormiDeistviyUnita = defineStore('storFormiDeistviy', {
         async otpravitFormu() {
             this.loader = true;
 
-            const values: Record<string, string>  = {};
-            this.form.values.forEach((item: Peremenaya) => {
-                values[item.konfig.id] = item.value;
-            })
-            const sendData = {
+            const values: Schema<"ZnacheniePeremenoi">[] = this.form.values.map((item: Peremenaya) => ({
+                id: item.konfig.id,
+                type: item.konfig.type,
+                value: item.value,
+            }));
+            const sendData: Schema<"VipolnitDeistviye"> = {
                 id: this.form.id,
                 actionId: this.deistvie?.id as string,
                 values

@@ -1,45 +1,43 @@
 import apiClient from "@/bootstrap/apiClient";
 import type { Schema } from "@/api/types";
-import ModelDlySpiskaHranilish from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaHranilish";
-import ModelDlySpiskaTipovHranilisha from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaTipovHranilisha";
 
 /**
  * Сервис хранилищ (репозиториев).
  *
- * Тела запросов типизированы по OpenAPI-схеме. Типы ответов задаются явно:
- * в спецификации `SuccessEnvelope.data` описан как `object|null`.
+ * Тела запросов и типы ответов выводятся напрямую из сгенерированной OpenAPI-схемы
+ * (`yarn gen:api`). Ручные модели ответов удалены.
  */
 class HranilishaService {
-    list() {
-        return apiClient.post<ModelDlySpiskaHranilish[]>('/repo/list', {});
+    list(params: Schema<"GetRepoList"> = {}) {
+        return apiClient.post('/repo/list', params);
     }
 
-    poluchitSpisokActivnih() {
-        return apiClient.post<ModelDlySpiskaHranilish[]>('/repo/activeList', {});
+    poluchitSpisokActivnih(params: Schema<"GetActiveRepoList"> = {}) {
+        return apiClient.post('/repo/activeList', params);
     }
 
     poluchitProektiHranilisha(params: Schema<"PoluchitSpisokProektovRepi">) {
-        return apiClient.post<{ value: string, name: string }[]>('/repo/projectList', params);
+        return apiClient.post('/repo/projectList', params);
     }
 
-    typeList() {
-        return apiClient.post<ModelDlySpiskaTipovHranilisha[]>('/repo/type/list', {});
+    typeList(params: Schema<"GetRepoTypeList"> = {}) {
+        return apiClient.post('/repo/type/list', params);
     }
 
     add(params: Schema<"AddRepo">) {
-        return apiClient.post<null>('/repo/add', params);
+        return apiClient.post('/repo/add', params);
     }
 
     delete(params: Schema<"DeleteRepo">) {
-        return apiClient.post<null>('/repo/delete', params);
+        return apiClient.post('/repo/delete', params);
     }
 
     confirm(params: Schema<"CheckAccessToRepo">) {
-        return apiClient.post<null>('/repo/confirm', params);
+        return apiClient.post('/repo/confirm', params);
     }
 
     changeCredentials(params: Schema<"ChangeCredentialsOfRepo">) {
-        return apiClient.post<null>('/repo/changeCredentials', params);
+        return apiClient.post('/repo/changeCredentials', params);
     }
 }
 

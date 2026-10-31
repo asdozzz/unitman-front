@@ -1,8 +1,6 @@
 import {defineStore} from "pinia";
 import UnitiService from "@/modules/unit/services/UnitiService";
-import {
-    OtvetNaPolucheniePeremenihUnita
-} from "@/modules/unit/services/UnitiService/model/OtvetNaPolucheniePeremenihUnita";
+import type {Schema} from "@/api/types";
 import { PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 
@@ -50,7 +48,7 @@ export const useFormaZapolneniyaPeremenihUnitaStore = defineStore('FormaZapolnen
 
             this.loader = false;
             if (response.status === "success") {
-                this.form.values = response.data.map((item:OtvetNaPolucheniePeremenihUnita) => new PeremenayaKonfiga(item.konfig, item.value));
+                this.form.values = response.data.map((item: Schema<"UnitVariable">) => new PeremenayaKonfiga(item.konfig, item.value));
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
@@ -60,11 +58,12 @@ export const useFormaZapolneniyaPeremenihUnitaStore = defineStore('FormaZapolnen
         async otpravitFormu() {
             this.loader = true;
 
-            const values: Record<string, string>  = {};
-            this.form.values.forEach((item: PeremenayaKonfiga) => {
-                values[item.konfig.id] = item.value;
-            })
-            const sendData = {
+            const values: Schema<"ZnacheniePeremenoi">[] = this.form.values.map((item: PeremenayaKonfiga) => ({
+                id: item.konfig.id,
+                type: item.konfig.type,
+                value: item.value,
+            }));
+            const sendData: Schema<"ZapolnitPeremenieUnita"> = {
                 id: this.form.id,
                 values
             }

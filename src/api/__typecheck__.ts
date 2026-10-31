@@ -23,8 +23,9 @@ const createBody: ApiRequestBody<"/unit/sozdat", "post"> = {
 type HookParams = ApiPathParams<"/project/{id}/hook", "post">;
 const hookParams: HookParams = { id: "abc" };
 
-// 4. Ответ конверта слишком общий — ApiResponseData даёт unknown.
+// 4. ApiResponseData разворачивает конверт {status,data} до типа data.
 type ListResponse = ApiResponseData<"/unit/list", "post">;
+const listResponseItem: ListResponse[number] = {} as Schema<"UnitListItem">;
 
 // 5. Схемы доступны по имени.
 const value: Schema<"ZnacheniePeremenoi"> = { id: "1", type: "string", value: "v" };
@@ -35,6 +36,7 @@ const noQuery: NoQuery = undefined;
 
 export const typecheck = {
     postPath, badPost, listBody, badCreate, createBody, hookParams, value, noQuery,
+    listResponseItem,
 } as const;
 
 export type TypecheckResult = [ListResponse];

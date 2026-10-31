@@ -3,7 +3,7 @@ import {fromUnixTime} from "date-fns";
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
-export function convertDate(unixtime: number | null): string {
+export function convertDate(unixtime: number | null | undefined): string {
     if (!unixtime) return '';
     return dayjs(fromUnixTime(unixtime)).fromNow();
 }

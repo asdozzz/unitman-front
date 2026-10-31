@@ -1,14 +1,5 @@
-export default class PolzovatelProekta {
-    userId: string = "";
-    role: string = "";
+import type {Schema} from "@/api/types";
 
-    constructor(
-        data: {
-            userId: string,
-            role: string,
-        }
-    ) {
-        this.userId = data.userId;
-        this.role = data.role;
-    }
-};
+export type PolzovatelProekta = Schema<"ProjectUser">;
+
+export default PolzovatelProekta;

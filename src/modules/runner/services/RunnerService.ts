@@ -1,11 +1,13 @@
 import apiClient from "@/bootstrap/apiClient";
-import {
-    OtvetNaPoluchenieSostoyanieDefoltnogoRunnera
-} from "@/modules/runner/services/RunnerService/OtvetNaPoluchenieSostoyanieDefoltnogoRunnera";
 
+/**
+ * Сервис default-runner'а.
+ *
+ * Ответ `{active: boolean}` приходит без конверта, apiClient возвращает его целиком.
+ */
 class RunnerService {
     getDefaultRunnerActive() {
-        return apiClient.post<OtvetNaPoluchenieSostoyanieDefoltnogoRunnera>('/runner/getDefaultRunnerActive', {});
+        return apiClient.post('/runner/getDefaultRunnerActive');
     }
 }
 

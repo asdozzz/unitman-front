@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
 import HranilishaService from "@/modules/unit/services/HranilishaService";
-import ModelDlySpiskaTipovHranilisha from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaTipovHranilisha";
+import type {Schema} from "@/api/types";
 
 export class AddForm {
     repoType: string;
@@ -69,7 +69,7 @@ export const useAddFormStore = defineStore('AddFormState', {
 
             this.tipiHranilisha.loader = false;
             if (response.status === "success") {
-                this.tipiHranilisha.spisok = response.data.map((item: ModelDlySpiskaTipovHranilisha) => new TipHranilsiha(item.code, item.name));
+                this.tipiHranilisha.spisok = response.data.map((item: Schema<"RepoType">) => new TipHranilsiha(item.code, item.name));
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {

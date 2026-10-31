@@ -1,27 +1,12 @@
 import {defineStore} from "pinia";
 import UnitiService from "@/modules/unit/services/UnitiService";
-import {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi} from "@/modules/unit/store/SpisokUnitov/model/UnitEnums";
+import type {Schema} from "@/api/types";
 
-type ShagZadachi = {
-    command: string;
-    response: string;
-    success: boolean;
-    unixtime: number;
-}
+type ShagZadachi = Schema<"RunnerJobStep">;
 
-export type ZadachaUnitaBezShagov = {
-    id: string;
-    type: TipZadachi;
-    state: StatusZadachi;
-}
+export type ZadachaUnitaBezShagov = Schema<"UnitProcessBriefJob">;
 
-export type ProzesUnitaBezShagov = {
-    id: string;
-    userId: string;
-    type: TipProzesa;
-    state: StatusProzesa;
-    jobs: ZadachaUnitaBezShagov[];
-};
+export type ProzesUnitaBezShagov = Schema<"UnitProcessBrief">;
 
 
 type StorVipolnenihZadachRunneraState = {

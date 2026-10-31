@@ -1,3 +1,10 @@
+/**
+ * Событие websocket-канала списка юнитов.
+ *
+ * События отдаются не по REST, поэтому в OpenAPI-спецификации их нет.
+ * Структура повторяет бэкендовскую `WebsocketUnitEventReadModel`
+ * (`src/Unitman/Business/ReadModel/Unit/WebsocketUnitEventReadModel.php`).
+ */
 export type ModelForChannelSpisokUnitov = {
     id: string;
     eventType: string;

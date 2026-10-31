@@ -1,17 +1,14 @@
 import apiClient from "@/bootstrap/apiClient";
 import type { Schema } from "@/api/types";
-import {ApiInitializationModel} from "@/modules/app/services/Initialization/ApiInitializationModel";
 
 /**
  * Сервис инициализации.
  *
- * Тело PUT-запроса типизировано по OpenAPI-схеме.
- * Тело GET-ответа задаётся явно: в спецификации `SuccessEnvelope.data`
- * описан как `object|null`.
+ * Тела запросов и типы ответов выводятся из сгенерированной OpenAPI-схемы.
  */
 class InitializationService {
     getAllProps() {
-        return apiClient.get<ApiInitializationModel[]>('/initialization/list')
+        return apiClient.get('/initialization/list');
     }
 
     updateProxyHost(params: Schema<"ObnovitDefoltnyiProxyHost">) {

@@ -56,23 +56,37 @@ export type ApiResponseBody<P extends keyof paths, M extends ApiMethod> =
         : never;
 
 /**
- * Полезная нагрузка успешного ответа — содержимое поля `data` конверта.
+ * Полезная нагрузка успешного ответа.
  *
  * Бэкенд отдаёт `{status: "success", data: ...}` либо `{status: "error", ...}`.
  * apiClient разворачивает конверт, поэтому сервису нужен именно `data`.
  *
- * Спецификация описывает `data` обобщённо (`object|null`), поэтому точный тип
- * часто неизвестен. В таком случае возвращается `unknown`, и сервис задаёт тип
- * ответа явно.
+ * Часть эндпоинтов отвечает без конверта (`{token}`, `{active}`, `boolean`).
+ * Для них apiClient возвращает тело целиком, поэтому тип берётся как есть.
  */
 export type ApiResponseData<P extends keyof paths, M extends ApiMethod> =
     ApiResponseBody<P, M> extends infer R
         ? R extends { status: "success"; data: infer D }
-            ? [Exclude<D, null | Record<string, never>>] extends [never]
-                ? unknown
-                : Exclude<D, null | Record<string, never>>
-            : unknown
+            ? D
+            : R
         : never;
+
+/**
+ * Аргументы типизированного вызова.
+ *
+ * Если у операции нет `requestBody`, тело передавать не нужно и не должно:
+ * `apiClient.post(url)` вызывается без второго аргумента.
+ */
+export type ApiRequestArgs<P extends keyof paths, M extends ApiMethod> =
+    [ApiRequestBody<P, M>] extends [undefined] ? [] : [data: ApiRequestBody<P, M>];
+
+/**
+ * Аргументы query-параметров вызова.
+ *
+ * Для операций без `parameters.query` второй аргумент не объявляется.
+ */
+export type ApiQueryArgs<P extends keyof paths, M extends ApiMethod> =
+    [ApiQuery<P, M>] extends [undefined] ? [] : [params?: ApiQuery<P, M>];
 
 /** Ссылка на именованную схему из `components.schemas`. */
 export type Schema<Name extends keyof components["schemas"]> = components["schemas"][Name];

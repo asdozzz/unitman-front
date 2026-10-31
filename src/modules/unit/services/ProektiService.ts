@@ -1,163 +1,136 @@
 import apiClient from "@/bootstrap/apiClient";
+import { buildPath } from "@/api/paths";
 import type { Schema } from "@/api/types";
-import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
-import {
-    ModelDlySpiskaPolzovateleiProekta
-} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPolzovateleiProekta";
-import ModelDlySpiskaVetok from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaVetok";
-import {
-    ModelDlySpiskaPeremenihProekta
-} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPeremenihProekta";
-import {
-    OtvetNaPoluchenieZadachRunneraUnita
-} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieZadachRunneraUnita";
-import {
-    OtvetNaPoluchenieShagovZadachiRunnera
-} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieShagovZadachiRunnera";
-import {
-    ModelDlySpiskaWebhookovProekta
-} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaWebhookovProekta";
-import {OtvetNaPoluchenieSpiskaSobitiiWebhooka} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieSpiskaSobitiiWebhooka";
-import {OtvetNaProverkuProxyHost} from "@/modules/unit/services/ProektiServices/model/OtvetNaProverkuProxyHost";
 
 /**
  * Сервис проектов.
  *
- * Тела запросов типизированы по OpenAPI-схеме. Типы ответов задаются явно:
- * в спецификации `SuccessEnvelope.data` описан как `object|null`.
+ * Тела запросов и типы ответов выводятся из сгенерированной OpenAPI-схемы
+ * (`yarn gen:api`). Ручные модели ответов удалены.
  */
 class ProektiService {
-    list() {
-        return apiClient.post<ModelDlySpiskaProektov[]>('/project/list', {});
+    list(params: Schema<"GetProjectList"> = {}) {
+        return apiClient.post('/project/list', params);
     }
 
-    poluchitMoiProekti() {
-        return apiClient.post<ModelDlySpiskaProektov[]>('/project/my', {});
+    poluchitMoiProekti(params: Schema<"PoluchitMoiProekti"> = {}) {
+        return apiClient.post('/project/my', params);
     }
 
-    poluchitAktivnieProekti() {
-        return apiClient.post<ModelDlySpiskaProektov[]>('/project/activeList', {});
+    poluchitAktivnieProekti(params: Schema<"GetActiveProjectList"> = {}) {
+        return apiClient.post('/project/activeList', params);
     }
 
     add(params: Schema<"AddProject">) {
-        return apiClient.post<null>('/project/add', params);
+        return apiClient.post('/project/add', params);
     }
 
     proveritProxyHost(params: Schema<"ProveritProxyHost">) {
-        return apiClient.post<OtvetNaProverkuProxyHost>('/project/proverkaProxyHost', params);
+        return apiClient.post('/project/proverkaProxyHost', params);
     }
 
     read(id: string) {
-        return apiClient.post<ModelDlySpiskaProektov>('/project/read/'+id, {});
+        return apiClient.post(buildPath('/project/read/{id}', { id }));
     }
 
     updateData(params: Schema<"UpdateProjectData">) {
-        return apiClient.post<null>('/project/updateData', params);
+        return apiClient.post('/project/updateData', params);
     }
 
     udalit(params: Schema<"PostavitVOcheredNaUdalenie">) {
-        return apiClient.post<null>('/project/remove', params);
+        return apiClient.post('/project/remove', params);
     }
 
     udalitSlomaniiProekt(params: Schema<"ForceRemoveProject">) {
-        return apiClient.post<null>('/project/forceRemove', params);
+        return apiClient.post('/project/forceRemove', params);
     }
 
     aktivirovat(params: Schema<"EnableProject">) {
-        return apiClient.post<null>('/project/enable', params);
+        return apiClient.post('/project/enable', params);
     }
 
     deaktivirovat(params: Schema<"DisableProject">) {
-        return apiClient.post<null>('/project/disable', params);
+        return apiClient.post('/project/disable', params);
     }
 
     sobrat(params: Schema<"PostavitVOcheredNaSborku">) {
-        return apiClient.post<null>('/project/build', params);
+        return apiClient.post('/project/build', params);
     }
 
     poluchitSpisokPolzovatelei(params: Schema<"PoluchitSpisokPolzovateleiProekta">) {
-        return apiClient.post<ModelDlySpiskaPolzovateleiProekta[]>('/project/usersList', params);
+        return apiClient.post('/project/usersList', params);
     }
 
     dobavitPolzovatelyaKProektu(params: Schema<"AddUserToProject">) {
-        return apiClient.post<null>('/project/addUser', params);
+        return apiClient.post('/project/addUser', params);
     }
 
     udalitPolzovatelyaIzProekta(params: Schema<"RemoveUserFromProject">) {
-        return apiClient.post<null>('/project/removeUser', params);
+        return apiClient.post('/project/removeUser', params);
     }
 
     poluchitSpisokPeremenih(params: Schema<"PoluchitSpisokPeremenihProekta">) {
-        return apiClient.post<ModelDlySpiskaPeremenihProekta[]>('/project/spisokPeremenihProekta', params);
+        return apiClient.post('/project/spisokPeremenihProekta', params);
     }
 
     dobavitPeremenuyu(params: Schema<"DobavitPeremenuyuVProekt">) {
-        return apiClient.post<null>('/project/dobavitPeremenuyu', params);
+        return apiClient.post('/project/dobavitPeremenuyu', params);
     }
 
     udalitPeremenuyu(params: Schema<"UdalitPeremenuyuIzProekta">) {
-        return apiClient.post<null>('/project/udalitPeremenuyu', params);
+        return apiClient.post('/project/udalitPeremenuyu', params);
     }
 
-    /**
-     * ВНИМАНИЕ: расхождение с контрактом.
-     *
-     * Схема `IzmenitZnacheniePeremenoiProekta` ожидает поля
-     * `projectId`, `code`, `newValue`, а вызывающий код (класс `EditForm`
-     * в `SpisokPeremenihProektaStore`) отправляет `value`.
-     * Здесь намеренно сохранён прежний контракт фронта, чтобы не сломать
-     * работу формы; поле нужно согласовать с бэкендом.
-     */
-    izmenitPeremenuyu(params: { projectId: string; code: string; value: string }) {
-        return apiClient.post<null>('/project/izmenitPeremenuyu', params);
+    izmenitPeremenuyu(params: Schema<"IzmenitZnacheniePeremenoiProekta">) {
+        return apiClient.post('/project/izmenitPeremenuyu', params);
     }
 
     poluchitVetkiProekta(params: Schema<"PoluchitSpisokVetokProekta">) {
-        return apiClient.post<ModelDlySpiskaVetok[]>('/project/branchesList', params);
+        return apiClient.post('/project/branchesList', params);
     }
 
     obnovitNastroikiHuka(params: Schema<"ObnovitNastroikiHuka">) {
-        return apiClient.post<null>('/project/obnovitNastroikiHuka', params);
+        return apiClient.post('/project/obnovitNastroikiHuka', params);
     }
 
     poluchitVipolnenieZadachiRunnera(params: Schema<"GetProjectRunnerJobs">) {
-        return apiClient.post<OtvetNaPoluchenieZadachRunneraUnita[]>('/project/poluchitVipolnenieZadachiRunnera', params);
+        return apiClient.post('/project/poluchitVipolnenieZadachiRunnera', params);
     }
 
     poluchitShagiZadachiRunnera(params: Schema<"GetProjectRunnerJobSteps">) {
-        return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/project/poluchitShagiZadachiRunnera', params);
+        return apiClient.post('/project/poluchitShagiZadachiRunnera', params);
     }
 
     dobavitWebhook(params: Schema<"SozdatWebhookProekta">) {
-        return apiClient.post<null>('/project/webhook/dobavit', params);
+        return apiClient.post('/project/webhook/dobavit', params);
     }
 
     readWebhook(id: string) {
-        return apiClient.post<ModelDlySpiskaWebhookovProekta>('/project/webhook/'+id+'/read', {});
+        return apiClient.post(buildPath('/project/webhook/{id}/read', { id }));
     }
 
     obnovitWebhooka(params: Schema<"IzmenitUrlWebhooka">) {
-        return apiClient.post<null>('/project/webhook/obnovit', params);
+        return apiClient.post('/project/webhook/obnovit', params);
     }
 
     otkluchitWebhook(id: string) {
-        return apiClient.post<null>('/project/webhook/'+id+'/otkluchit', {});
+        return apiClient.post(buildPath('/project/webhook/{id}/otkluchit', { id }));
     }
 
     vkluchitWebhook(id: string) {
-        return apiClient.post<null>('/project/webhook/'+id+'/vkluchit', {});
+        return apiClient.post(buildPath('/project/webhook/{id}/vkluchit', { id }));
     }
 
     udalitWebhook(id: string) {
-        return apiClient.post<null>('/project/webhook/'+id+'/udalit', {});
+        return apiClient.post(buildPath('/project/webhook/{id}/udalit', { id }));
     }
 
     spisokWebhookovDlyProekta(projectId: string) {
-        return apiClient.post<ModelDlySpiskaWebhookovProekta[]>('/project/webhook/'+projectId+'/spisok', {});
+        return apiClient.post(buildPath('/project/webhook/{projectId}/spisok', { projectId }));
     }
 
     poluchitSobitiyaWebhooka(params: Schema<"PoluchitSobitiyaWebhooka">) {
-        return apiClient.post<OtvetNaPoluchenieSpiskaSobitiiWebhooka>('/project/webhook/poluchitSobitiyaWebhooka', params);
+        return apiClient.post('/project/webhook/poluchitSobitiyaWebhooka', params);
     }
 }
 

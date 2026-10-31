@@ -2,13 +2,10 @@ import { defineStore } from 'pinia';
 import InitializationService from '../services/InitializationService';
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
+import type {Schema} from "@/api/types";
 
-type PropModel = {
-    id: string;
-    prop: string;
-    value: string | null;
-    init: number | null;
-};
+/** Параметр инициализации из сгенерированной схемы (`InitializationRecord`). */
+type PropModel = Schema<"InitializationRecord">;
 
 type FormaProxyHost = {
     value: string | null;

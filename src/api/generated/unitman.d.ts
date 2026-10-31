@@ -1514,6 +1514,18 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        /** @description Настройки пользователя (AccountSettingsReadModel) */
+        AccountSettings: {
+            nickname: string | null;
+        };
+        /** @description Пользователь (UserList) */
+        AccountUser: {
+            /** Format: email */
+            email: string;
+            id: string;
+            isBlocked: boolean;
+            nickname: string | null;
+        };
         AddProject: {
             /** @default master */
             mainBranch?: string;
@@ -1589,6 +1601,23 @@ export type components = {
         CheckAccessToRepo: {
             repoId: string;
         };
+        /** @description Помощник ссылки (PomoschnikSsylki::toArray) */
+        ConfigVariableHelper: {
+            port: number | null;
+            projectId: string | null;
+            service: string | null;
+        };
+        /** @description Статистика контейнера юнита */
+        ContainerStats: {
+            /** @example 12.5 */
+            cpuPercent: string;
+            /** @example 34.1 */
+            memoryPercent: string;
+            /** @example 120MiB / 512MiB */
+            memoryUsage: string;
+            /** @example 1.2kB / 3.4kB */
+            netIO: string;
+        };
         DeleteRepo: {
             repoId: string;
         };
@@ -1618,6 +1647,10 @@ export type components = {
              * @enum {string}
              */
             status: "error";
+        };
+        /** @description Идентификатор обработанного события webhook */
+        EventIdHolder: {
+            eventId: string;
         };
         /** @description Ожидаемая ошибка (App\Utils\Model\Reponse\FailResponse) */
         FailEnvelope: {
@@ -1700,6 +1733,18 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
+        /** @description Идентификатор созданной сущности */
+        IdHolder: {
+            /** Format: uuid */
+            id: string;
+        };
+        /** @description Параметр инициализации (InitializationRecord) */
+        InitializationRecord: {
+            id: string;
+            init: number | null;
+            prop: string;
+            value: string | null;
+        };
         IzmenitUrlWebhooka: {
             /** Format: uuid */
             id: string;
@@ -1713,6 +1758,16 @@ export type components = {
             code: string;
             newValue: string;
             projectId: string;
+        };
+        /** @description Аккаунт для администрирования (AccountForManaging) */
+        ManagedAccount: {
+            /** Format: email */
+            email: string;
+            id: string;
+            isBlocked: boolean;
+            nickname: string | null;
+            password: string;
+            roles: string;
         };
         NaitiDubliUnita: {
             /** @example feature/123 */
@@ -1821,6 +1876,86 @@ export type components = {
         PostavitVOcheredNaUdalenie: {
             id: string;
         };
+        /** @description Ветка проекта (VetkaProekta) */
+        ProjectBranch: {
+            /** @example feature/123 */
+            name: string;
+        };
+        /** @description Настройки webhook проекта (NastroikiHukaProekta) */
+        ProjectHookSettings: {
+            avtoobnovlenie: boolean;
+            avtosozdanie: boolean;
+            avtoudalenie: boolean;
+            obnovlenieBezSbrosaPodgotovki: boolean;
+        };
+        /** @description Проект (read-модель ProjectList) */
+        ProjectListItem: {
+            /** @example my-app */
+            code: string;
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            /** @example master */
+            mainBranch: string;
+            /** @example 3072 */
+            memoryLimit: number;
+            /** @example my-app */
+            name: string;
+            nastroikiHukaProekta: components["schemas"]["ProjectHookSettings"];
+            /** @example proxy.example */
+            proxyHost: string | null;
+            repoId: string;
+            /** @enum {string} */
+            state: "NEW" | "BUILD_PENDING" | "BUILD_SUCCESS" | "BUILD_ERROR" | "REMOVE_PENDING" | "REMOVE_ERROR";
+            users: components["schemas"]["ProjectUser"][];
+            variables: components["schemas"]["ProjectVariable"][];
+            waitResultRunner: boolean;
+        };
+        /** @description Задание раннера по проекту без шагов (ProjectRunnerJobWithoutSteps) */
+        ProjectRunnerJob: {
+            id: string;
+            /** @enum {string} */
+            jobType: "SBORKA_PROEKTA" | "UDALENIE_PROEKTA" | "OCHISTKA_PROEKTA";
+            projectId: string;
+            success: boolean;
+        };
+        /** @description Задание раннера по проекту с шагами (ProjectRunnerJob) */
+        ProjectRunnerJobDetailed: {
+            id: string;
+            /** @enum {string} */
+            jobType: "SBORKA_PROEKTA" | "UDALENIE_PROEKTA" | "OCHISTKA_PROEKTA";
+            projectId: string;
+            steps: components["schemas"]["RunnerJobStep"][];
+            success: boolean;
+        };
+        /** @description Статистика по проекту (StatistikaPoProektu) */
+        ProjectStatistics: {
+            active: number;
+            deleted: number;
+            projectId: string;
+            projectName: string;
+            total: number;
+        };
+        /** @description Пользователь проекта (ProjectUsersList) */
+        ProjectUser: {
+            role: string;
+            userId: string;
+        };
+        /** @description Переменная проекта (ProjectListVariable) */
+        ProjectVariable: {
+            code: string;
+            tip: string;
+            value: string;
+        };
+        /** @description Webhook проекта (ProjectWebhookReadModel) */
+        ProjectWebhook: {
+            /** Format: uuid */
+            id: string;
+            isActive: boolean;
+            projectId: string;
+            /** Format: uri */
+            url: string;
+        };
         ProveritKonteinerUnita: {
             /** Format: uuid */
             id: string;
@@ -1828,6 +1963,10 @@ export type components = {
         ProveritProxyHost: {
             /** @default  */
             proxyHost?: string;
+        };
+        /** @description Результат проверки доступности proxy host */
+        ProxyHostCheckResult: {
+            result: boolean;
         };
         RegisterAccount: {
             /**
@@ -1853,6 +1992,67 @@ export type components = {
         RemoveUserFromProject: {
             id: string;
             userId: string;
+        };
+        /** @description Репозиторий (RepoList) */
+        Repo: {
+            confirmed: boolean;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: uri */
+            repoUrl: string;
+            token: string;
+            /** @example gitlab */
+            type: string;
+        };
+        /** @description Проект репозитория (ProektHranilisha) */
+        RepoProject: {
+            name: string;
+            value: string;
+        };
+        /** @description Тип репозитория (RepoTypeList) */
+        RepoType: {
+            /** @example gitlab */
+            code: string;
+            /** @example GitLab */
+            name: string;
+        };
+        /** @description Статистика контейнера раннера (DockerContainerStats) */
+        RunnerContainerStats: {
+            containerId: string;
+            containerName: string;
+            /** @example 12.5 */
+            cpuPercent: string;
+            /** @example 34.1 */
+            memoryPercent: string;
+            /** @example 120MiB / 512MiB */
+            memoryUsage: string;
+            /** @example 1.2kB / 3.4kB */
+            netIO: string;
+        };
+        /** @description Шаг выполнения задания (RunnerJobStep::toArray) */
+        RunnerJobStep: {
+            command: string;
+            response: string;
+            success: boolean;
+            /** @example 1730000000 */
+            unixtime: number;
+        };
+        /** @description Информация о памяти раннера (MemoryInfo) */
+        RunnerMemoryInfo: {
+            /** @example 8388608 */
+            freeAsKb: number;
+            /** @example 16777216 */
+            totalAsKb: number;
+        };
+        /** @description Состояние раннера (RunnerState::jsonSerialize) */
+        RunnerState: {
+            active: boolean;
+            dockerStats: components["schemas"]["RunnerContainerStats"][];
+            id: string;
+            memoryInfo: components["schemas"]["RunnerMemoryInfo"];
+            /** @example unitman-runner-queue */
+            taskQueue: string;
         };
         SaveStepsCommand: {
             /** @example b5f1f0c4-6d1e-4a1e-9a3b-1c2d3e4f5a6b */
@@ -1915,6 +2115,179 @@ export type components = {
             /** @example Апелляция удовлетворена */
             reason?: string | null;
         };
+        /** @description Действие, доступное для юнита (KonfigDeistviya::toArray) */
+        UnitAction: {
+            commands: string[];
+            id: string;
+            name: string;
+            prepare: boolean;
+            variables: components["schemas"]["UnitActionVariable"][];
+        };
+        UnitActionVariable: {
+            defaultValue: string;
+            helper: Record<string, never> | null;
+            id: string;
+            label: string;
+            options: Record<string, never> | null;
+            /** @enum {string} */
+            type: "string" | "integer" | "float" | "collection" | "unit";
+        };
+        /** @description Конфигурация юнита; пустой массив, если конфигурация ещё не задана */
+        UnitConfig: {
+            actions: components["schemas"]["UnitAction"][];
+            build: components["schemas"]["UnitConfigBuild"];
+            down: string[];
+            prepare: string[];
+            reset_prepare: string[];
+            services: components["schemas"]["UnitConfigService"][];
+            up: string[];
+            variables: components["schemas"]["UnitConfigVariable"][];
+        };
+        /** @description Стадия сборки юнита (KonfigStadiiSborki::toArray) */
+        UnitConfigBuild: {
+            commands: string[];
+            /** @example asdozzz/unitman-unit:latest */
+            image: string;
+        };
+        /** @description Сервис юнита (KonfigServisa::toArray) */
+        UnitConfigService: {
+            /** @description Пустой массив, если кеш не настроен */
+            cache: components["schemas"]["UnitConfigServiceCache"] | unknown[];
+            /** @example backend */
+            name: string | null;
+            ports: components["schemas"]["UnitConfigServicePort"][];
+        };
+        /** @description Настройки кеширования сервиса (CacheServisa::toArray) */
+        UnitConfigServiceCache: {
+            files: string[];
+            paths: string[];
+        };
+        /** @description Порт сервиса (PortServisa::toArray) */
+        UnitConfigServicePort: {
+            /** @example 8080 */
+            port: number | null;
+            /** @example /api/health */
+            startUri: string | null;
+            /** @example http */
+            type: string | null;
+        };
+        /** @description Переменная конфигурации юнита (AbstractConfigVariable::toArray) */
+        UnitConfigVariable: {
+            defaultValue: string;
+            /** @description Помощник подстановки ссылки на сервис другого юнита, null если не задан */
+            helper: components["schemas"]["ConfigVariableHelper"] | null;
+            id: string;
+            label: string;
+            /** @description Параметры выбора; пустой объект, если опций нет */
+            options: Record<string, never> | null;
+            /** @enum {string} */
+            type: "string" | "integer" | "float" | "collection" | "unit";
+        };
+        /** @description Ссылка на сервис запущенного юнита */
+        UnitLink: {
+            /** @example http://8080.feature-123.my-app.proxy.example */
+            path: string;
+            /** @example 8080 */
+            port: number;
+            /** @example http */
+            protocol: string;
+            /** @example backend */
+            service: string;
+            /** @example /api/health */
+            startUri?: string | null;
+        };
+        /** @description Ссылка на сервис юнита */
+        UnitLinkHolder: {
+            /** Format: uri */
+            link: string;
+        };
+        /** @description Элемент списка юнитов (payload read-модели spisok_unitov) */
+        UnitListItem: {
+            authorId: string;
+            /**
+             * @description Email или никнейм автора юнита
+             * @example user@example.com
+             */
+            authorName: string;
+            /** @example feature/123 */
+            branch: string;
+            /** @description Команды, доступные пользователю в текущем состоянии юнита */
+            commands: ("nachatSborku" | "nachatObnovlenie" | "zapolnitPeremenie" | "nachatPodgotovku" | "ustanovitResultatPodgotovki" | "nachatSbrosPodgotovki" | "nachatZapusk" | "nachatOstanovku" | "nachatUdalenie" | "udalitVruchnuyu" | "nachatObnovleniePosleZapuska" | "nachatUdaleniePosleZapuska" | "vipolnitDeistvie" | "ustanovitResultatDeistviya" | "proveritKonteinerUnita")[];
+            deistviya: components["schemas"]["UnitAction"][];
+            error: boolean;
+            /** Format: uuid */
+            id: string;
+            links: components["schemas"]["UnitLink"][];
+            /** @example feature-123 */
+            name: string;
+            peremenie: components["schemas"]["UnitVariableValue"][];
+            projectId: string;
+            /** @example my-app */
+            projectName: string;
+            prozesi: components["schemas"]["UnitProcess"][];
+            statistikaKonteinera?: components["schemas"]["ContainerStats"] | null;
+            unitSozdanSystemoi: boolean;
+            /** @example 1730000000 */
+            unixtimePoslednegoObnovleniyaUnita?: number | null;
+            /** @example 1730000000 */
+            unixtimePoslednegoObnovleniyaVHranilishe?: number | null;
+            zapushen: boolean;
+        };
+        /** @description Процесс юнита (UnitProcess::toArray) */
+        UnitProcess: {
+            id: string;
+            jobs: components["schemas"]["UnitProcessJob"][];
+            /** @enum {string} */
+            state: "NEW" | "ZADACHI_DOBAVLENI" | "PENDING" | "SUCCESS" | "ERROR" | "CANCLED";
+            /** @enum {string} */
+            type: "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
+            /** @description Объявлено в read-модели, но проекция сохраняет процесс без этого поля */
+            unitId?: string;
+            userId: string;
+        };
+        /** @description Процесс юнита без шагов задач (ProzesUnitaBezShagov) */
+        UnitProcessBrief: {
+            id: string;
+            jobs: components["schemas"]["UnitProcessBriefJob"][];
+            /** @enum {string} */
+            state: "NEW" | "ZADACHI_DOBAVLENI" | "PENDING" | "SUCCESS" | "ERROR" | "CANCLED";
+            /** @enum {string} */
+            type: "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
+            unitId: string;
+            userId: string;
+        };
+        /** @description Задача процесса юнита без шагов (ZadachaProzesaUnitaBezShagovZadachi) */
+        UnitProcessBriefJob: {
+            id: string;
+            /** @enum {string} */
+            state: "NEW" | "PENDING" | "CANCLED" | "SUCCESS" | "ERROR";
+            /** @enum {string} */
+            type: "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
+        };
+        UnitProcessJob: {
+            id: string;
+            /** @enum {string} */
+            state: "NEW" | "PENDING" | "CANCLED" | "SUCCESS" | "ERROR";
+            steps: components["schemas"]["UnitProcessJobStep"][];
+            /** @enum {string} */
+            type: "SBORKA" | "OBNOVLENIE" | "PODGOTOVKA" | "ZAPUSK" | "OSTANOVKA" | "SBROS_PODGOTOVKI" | "UDALENIE" | "DEISTVIE";
+        };
+        UnitProcessJobStep: {
+            command: string;
+            response: string;
+            success: boolean;
+            /** @example 1730000000 */
+            unixtime: number;
+        };
+        /** @description Значение переменной юнита (PeremenyaUnita::toArray) */
+        UnitVariable: {
+            konfig: components["schemas"]["UnitConfigVariable"];
+            value: string;
+        };
+        UnitVariableValue: {
+            id: string;
+            value: string;
+        };
         UpdateProjectData: {
             id: string;
             memoryLimit: number;
@@ -1927,6 +2300,23 @@ export type components = {
             id: string;
             /** @description Параметры выполняемого действия */
             values: components["schemas"]["ZnacheniePeremenoi"][];
+        };
+        /** @description Событие webhook (WebhookEventDlySpiska) */
+        WebhookEvent: {
+            id: string;
+            /** @description JSON-строка тела события */
+            payload: string;
+            response: string | null;
+            sent: boolean;
+            type: string;
+            /** @example 1730000000 */
+            unixtime: number;
+        };
+        /** @description Страница событий webhook */
+        WebhookEventPage: {
+            list: components["schemas"]["WebhookEvent"][];
+            /** @example 42 */
+            totalRecords: number;
         };
         ZapolnitPeremenieUnita: {
             /** Format: uuid */
@@ -1966,17 +2356,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: аккаунт заблокирован */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: аккаунт заблокирован */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1997,17 +2402,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: email изменён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: email изменён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2028,17 +2448,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: локаль изменена */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: локаль изменена */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2059,17 +2494,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: свой никнейм изменён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: свой никнейм изменён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2090,17 +2540,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: свой пароль изменён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: свой пароль изменён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2121,17 +2586,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: никнейм изменён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: никнейм изменён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2152,17 +2632,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: пароль изменён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: пароль изменён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2183,17 +2678,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: роль изменена */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: роль изменена */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2210,17 +2720,31 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Настройки текущего пользователя */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["AccountSettings"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2237,17 +2761,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Список всех пользователей */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список всех пользователей */
+                        data: components["schemas"]["AccountUser"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2268,17 +2807,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Список пользователей с данными для администрирования */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список пользователей с данными для администрирования */
+                        data: components["schemas"]["ManagedAccount"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2299,17 +2853,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Идентификатор созданного аккаунта */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["IdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2330,17 +2898,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: аккаунт разблокирован */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: аккаунт разблокирован */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2357,13 +2940,21 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Параметры инициализации. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Параметры инициализации */
+                        data: components["schemas"]["InitializationRecord"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
         };
@@ -2381,13 +2972,21 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: defoltnyi proxy host обновлён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: defoltnyi proxy host обновлён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
@@ -2421,13 +3020,21 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        data?: {
-                            eventId?: string;
-                        };
-                        /** @example success */
-                        status?: string;
+                        data: components["schemas"]["EventIdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
                     };
                 };
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2444,17 +3051,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Список активных проектов */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список активных проектов */
+                        data: components["schemas"]["ProjectListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2475,17 +3097,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проект добавлен */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проект добавлен */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2506,17 +3143,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: пользователь добавлен в проект */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: пользователь добавлен в проект */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2537,17 +3189,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Ветки проекта в хранилище */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Ветки проекта в хранилище */
+                        data: components["schemas"]["ProjectBranch"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2568,17 +3235,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проект поставлен в очередь на сборку */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проект поставлен в очередь на сборку */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2599,17 +3281,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проект выключен */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проект выключен */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2630,17 +3327,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: переменная добавлена в проект */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: переменная добавлена в проект */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2661,17 +3373,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проект включён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проект включён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2692,17 +3419,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проект удалён принудительно */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проект удалён принудительно */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2723,17 +3465,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: значение переменной проекта изменено */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: значение переменной проекта изменено */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2754,17 +3511,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Список проектов, ограниченный фильтрами запроса */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список проектов, ограниченный фильтрами запроса */
+                        data: components["schemas"]["ProjectListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2785,17 +3557,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Проекты текущего пользователя */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Проекты текущего пользователя */
+                        data: components["schemas"]["ProjectListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2816,17 +3603,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: настройки webhook проекта обновлены */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: настройки webhook проекта обновлены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2847,17 +3649,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Задание runner по проекту с шагами. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["ProjectRunnerJobDetailed"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2878,17 +3694,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Задания runner по проекту без шагов. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Задания runner по проекту без шагов */
+                        data: components["schemas"]["ProjectRunnerJob"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2909,17 +3740,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Результат проверки доступности proxy host. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["ProxyHostCheckResult"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2938,17 +3783,31 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Проект по идентификатору */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["ProjectListItem"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2969,17 +3828,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проект поставлен в очередь на удаление. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проект поставлен в очередь на удаление */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3000,17 +3874,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: пользователь удалён из проекта */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: пользователь удалён из проекта */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3031,17 +3920,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Переменные проекта */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Переменные проекта */
+                        data: components["schemas"]["ProjectVariable"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3058,17 +3962,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Статистика единиц по проектам */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Статистика единиц по проектам */
+                        data: components["schemas"]["ProjectStatistics"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3089,17 +4008,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: переменная удалена из проекта */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: переменная удалена из проекта */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3120,17 +4054,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: данные проекта обновлены */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: данные проекта обновлены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3149,17 +4098,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Проекты указанного пользователя */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Проекты указанного пользователя */
+                        data: components["schemas"]["ProjectListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3180,17 +4144,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пользователи проекта */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пользователи проекта */
+                        data: components["schemas"]["ProjectUser"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3209,17 +4188,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: webhook отключён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: webhook отключён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3238,17 +4232,31 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Webhook по идентификатору. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["ProjectWebhook"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3267,17 +4275,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: webhook удалён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: webhook удалён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3296,17 +4319,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: webhook включён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: webhook включён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3325,17 +4363,32 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Webhook проектов; пустой массив, если webhook нет. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Webhook проектов; пустой массив, если webhook нет */
+                        data: components["schemas"]["ProjectWebhook"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3356,17 +4409,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Идентификатор созданного webhook. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["IdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3387,17 +4454,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: URL webhook изменён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: URL webhook изменён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3418,17 +4500,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Страница событий webhook. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["WebhookEventPage"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3449,17 +4545,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Список активных репозиториев */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список активных репозиториев */
+                        data: components["schemas"]["Repo"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3480,17 +4591,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: репозиторий добавлен */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: репозиторий добавлен */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3511,17 +4637,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: учётные данные изменены */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: учётные данные изменены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3542,17 +4683,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: доступ к репозиторию подтверждён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: доступ к репозиторию подтверждён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3573,17 +4729,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: репозиторий удалён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: репозиторий удалён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3604,17 +4775,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Список репозиториев */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список репозиториев */
+                        data: components["schemas"]["Repo"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3635,17 +4821,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Проекты, доступные в репозитории */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Проекты, доступные в репозитории */
+                        data: components["schemas"]["RepoProject"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3666,17 +4867,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Поддерживаемые типы репозиториев */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Поддерживаемые типы репозиториев */
+                        data: components["schemas"]["RepoType"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3700,12 +4916,19 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        active?: boolean;
+                        active: boolean;
                     };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3747,15 +4970,24 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Состояние раннера */
+            /** @description Текущее состояние раннера по умолчанию */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunnerState"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Не авторизован */
-            401: {
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3776,17 +5008,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Массив юнитов, ограниченный параметрами filter, limit и offset */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список юнитов; пустой массив, если ничего не найдено */
+                        data: components["schemas"]["UnitListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3807,17 +5054,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Массив юнитов текущего пользователя */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Список юнитов текущего пользователя; пустой массив, если юнитов нет */
+                        data: components["schemas"]["UnitListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3838,17 +5100,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Дубли юнитов по проекту и ветке; пустой массив, если дублей нет */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Дубли юнитов по проекту и ветке; пустой массив, если дублей нет */
+                        data: components["schemas"]["UnitListItem"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3869,17 +5146,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Один юнит по его идентификатору */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["UnitListItem"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Юнит не найден либо ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3900,17 +5191,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: обновление кода юнита поставлено в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: обновление кода юнита поставлено в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3931,17 +5237,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: остановка юнита поставлена в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: остановка юнита поставлена в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3962,17 +5283,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: подготовка юнита поставлена в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: подготовка юнита поставлена в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3993,17 +5329,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Переменные конфигурации, полученной из хранилища. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Переменные конфигурации, полученной из хранилища */
+                        data: components["schemas"]["UnitVariable"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4024,17 +5375,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Конфигурация юнита; пустой массив, если конфигурация не задана. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Конфигурация юнита; пустой массив, если конфигурация не задана */
+                        data: components["schemas"]["UnitConfig"] | unknown[];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4055,17 +5421,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Переменные конфигурации с текущими значениями. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Переменные конфигурации с текущими значениями */
+                        data: components["schemas"]["UnitVariable"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4086,17 +5467,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Шаги задачи runner по юниту. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Шаги задачи runner по юниту */
+                        data: components["schemas"]["RunnerJobStep"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4117,17 +5513,31 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Ссылка на сервис юнита, вычисленная по помощнику ссылки. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        data: components["schemas"]["UnitLinkHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4148,17 +5558,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Процессы юнита с задачами без шагов; пустой массив, если процессов нет. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Процессы юнита с задачами без шагов; пустой массив, если процессов нет */
+                        data: components["schemas"]["UnitProcessBrief"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4179,17 +5604,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: юнит помечен как сломанный. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: юнит помечен как сломанный */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4210,17 +5650,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проверка контейнера поставлена в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проверка контейнера поставлена в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4241,17 +5696,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: проекция списка юнитов пересобрана. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: проекция списка юнитов пересобрана */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4272,17 +5742,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: сброс подготовки поставлен в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: сброс подготовки поставлен в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4303,17 +5788,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: сборка юнита поставлена в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: сборка юнита поставлена в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4334,17 +5834,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: команда создания юнита принята. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: команда создания юнита принята */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4365,17 +5880,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: удаление юнита поставлено в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: удаление юнита поставлено в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4396,17 +5926,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: сломанный юнит удалён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: сломанный юнит удалён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4427,17 +5972,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: действие поставлено в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: действие поставлено в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4458,17 +6018,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: значения переменных сохранены. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: значения переменных сохранены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4489,17 +6064,32 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Успешный ответ либо ошибка */
+            /** @description Пустой ответ: запуск юнита поставлен в очередь. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SuccessEnvelope"] | components["schemas"]["ErrorEnvelope"];
+                    "application/json": {
+                        /** @description Пустой ответ: запуск юнита поставлен в очередь */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
                 };
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -4,18 +4,26 @@ import LoginView from "@/modules/account/store/auth/LoginView";
 import {Notify} from "quasar";
 import i18n from "@/bootstrap/translator";
 import dayjs from "dayjs";
+import type {ApiResponseData} from "@/api/types";
 
 const LOCAL_STORAGE_KEY = 'tokenData';
 
-interface TokenData {
-    token: string | null;
-    expired: string | null;
-    user: {
-        id: string;
-        email: string;
-        roles: string[];
-        locale: "en" | "ru";
-    }
+/**
+ * Данные пользователя, которые бэкенд добавляет в ответ `/login`
+ * (`AuthenticationSuccessListener`). В спецификации объявлен только `token`,
+ * поэтому `user` описывается здесь как дополнение к сгенерированному типу.
+ */
+type LoginUser = {
+    id: string;
+    email: string;
+    roles: string[];
+    locale: string;
+}
+
+/** Ответ `/login` из схемы плюс добавленный бэкендом `user`. */
+type TokenData = ApiResponseData<"/login", "post"> & {
+    expired?: string | null;
+    user: LoginUser;
 }
 
 
@@ -50,27 +58,23 @@ export const useAuthStore = defineStore('auth', {
             return state.tokenData != null && state.tokenData.token != null;
         },
         userId(state: State): string | null {
-            return state.tokenData && state.tokenData.user.id || null;
+            return state.tokenData?.user?.id || null;
         },
         email(state: State): string | null {
-            return state.tokenData && state.tokenData.user.email || null;
+            return state.tokenData?.user?.email || null;
         },
         getToken(state: State): string | null {
             return state.tokenData && state.tokenData.token || null;
         },
         getRoles(state: State): string[] {
-            if (!state.tokenData) {
-                return [];
-            }
-
-            return state.tokenData.user.roles;
+            return state.tokenData?.user?.roles ?? [];
         },
         getLocale(state: State): "en" | "ru" {
-            if (!state.tokenData) {
+            if (!state.tokenData?.user?.locale) {
                 return import.meta.env.VITE_DEFAULT_LOCALE;
             }
 
-            return state.tokenData.user.locale
+            return state.tokenData.user.locale as "en" | "ru";
         },
         checkRole() {
             const _this = this;
@@ -94,7 +98,7 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
         updateLocale(locale: "en" | "ru") {
-            if (this.tokenData) {
+            if (this.tokenData?.user) {
                 this.tokenData.user.locale = locale;
             }
             i18n.global.locale.value = locale;
@@ -105,9 +109,11 @@ export const useAuthStore = defineStore('auth', {
             const response = await AccountService.login(this.loginView.form.login, this.loginView.form.pass);
 
             if (response.status === "success") {
-                this.tokenData = response.data;
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(response.data));
-                const locale = response.data.user.locale as ("en" | "ru") || "ru";
+                // Бэкенд дополняет ответ /login полем user (см. LoginUser).
+                const tokenData = response.data as TokenData;
+                this.tokenData = tokenData;
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokenData));
+                const locale = (tokenData.user?.locale || "ru") as "en" | "ru";
                 this.updateLocale(locale);
             }
 

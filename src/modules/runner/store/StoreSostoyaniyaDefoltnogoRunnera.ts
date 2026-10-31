@@ -1,9 +1,5 @@
 import { defineStore } from 'pinia';
 import RunnerService from "@/modules/runner/services/RunnerService";
-import {ApiResponse} from "@/bootstrap/apiClient/ApiResponse";
-import {
-    OtvetNaPoluchenieSostoyanieDefoltnogoRunnera
-} from "@/modules/runner/services/RunnerService/OtvetNaPoluchenieSostoyanieDefoltnogoRunnera";
 
 type SostoyaniyaDefoltnogoRunnera = {
     loader: boolean;
@@ -27,7 +23,7 @@ export const storeSostoyaniyaDefoltnogoRunnera = defineStore('SostoyaniyaDefoltn
         async getDefaultRunnerActive() {
             this.loader = true;
 
-            const response: ApiResponse<OtvetNaPoluchenieSostoyanieDefoltnogoRunnera> = await RunnerService.getDefaultRunnerActive();
+            const response = await RunnerService.getDefaultRunnerActive();
 
             if (response.status === "fail") {
                 this.active = false;

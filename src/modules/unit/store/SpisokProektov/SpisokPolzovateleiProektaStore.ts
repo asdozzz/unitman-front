@@ -1,10 +1,7 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
-import PolzovatelProekta from "@/modules/unit/store/SpisokProektov/model/PolzovatelProekta";
+import type {PolzovatelProekta} from "@/modules/unit/store/SpisokProektov/model/PolzovatelProekta";
 
-import {
-    ModelDlySpiskaPolzovateleiProekta
-} from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPolzovateleiProekta";
 import {Notify} from "quasar";
 
 type SpisokPolzovateleiProektaState = {
@@ -53,7 +50,7 @@ export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovatelei
             const response = await ProektiService.poluchitSpisokPolzovatelei({ id: this.projectId});
 
             if (response.status === "success") {
-                this.spisok = response.data.map((item:ModelDlySpiskaPolzovateleiProekta) => new PolzovatelProekta(item))
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;
@@ -98,7 +95,7 @@ export const useSpisokPolzovateleiProektaStore = defineStore('SpisokPolzovatelei
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             } else if (response.status === "success") {
-                this.spisok.push(new PolzovatelProekta({ userId, role: "USER"}))
+                this.spisok.push({ userId, role: "USER" });
             }
 
             return response;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Unit, {Deistviye} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Unit, Deistviye} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import { useRouter } from 'vue-router'
 import {storeToRefs} from "pinia";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";

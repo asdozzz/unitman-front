@@ -1,20 +1,12 @@
 import apiClient from "@/bootstrap/apiClient";
+import { buildPath } from "@/api/paths";
 import type { Schema } from "@/api/types";
-import {LoginResponse} from "@/modules/account/services/model/LoginResponse";
-import {ApiModelPolzovatelya} from "@/modules/account/services/model/ApiModelPolzovatelya";
-import {
-    ApiModelPolzovatelyaDlyAdministrorovaniya
-} from "@/modules/account/services/model/ApiModelPolzovatelyaDlyAdministrorovaniya";
-import {
-    OtvetNaPoluchenieNastroekPolzovatelya
-} from "@/modules/account/services/model/OtvetNaPoluchenieNastroekPolzovatelya";
 
 /**
  * Сервис аккаунтов.
  *
- * Типы тел запросов берутся из OpenAPI-схемы (`Schema<"...">`),
- * типы ответов задаются явно: в спецификации `SuccessEnvelope.data` описан
- * как `object|null`, поэтому полезная нагрузка из контракта не выводится.
+ * Тела запросов и типы ответов выводятся из сгенерированной OpenAPI-схемы
+ * (`yarn gen:api`). Ручные модели ответов удалены.
  */
 class AccountService {
     /**
@@ -24,81 +16,73 @@ class AccountService {
      * от пустой формы приводится к пустой строке.
      */
     login(login: string | null, password: string | null) {
-        // Схема тела запроса для /login объявлена inline в спецификации,
-        // поэтому повторяем её минимальную форму здесь.
-        const params = {
+        return apiClient.post('/login', {
             username: login ?? "",
             password: password ?? "",
-        };
-
-        return apiClient.post<LoginResponse>('/login', params);
+        });
     }
 
-    /**
-     * ИСПРАВЛЕНО: контракт объявляет эндпоинт как GET, ранее здесь был POST.
-     */
+    /** Контракт объявляет эндпоинт как GET. */
     poluchitVsehPolzovatelei() {
-        return apiClient.get<ApiModelPolzovatelya[]>('/account/poluchitVsehPolzovatelei');
+        return apiClient.get('/account/poluchitVsehPolzovatelei');
     }
 
     poluchitPolzovateleiDlyAdmininstrirovaniya(query: string | null) {
         const params: Schema<"PoluchitSpisokVsehPolzovateleiDlyAdministrirovaniya"> = {query};
 
-        return apiClient.post<ApiModelPolzovatelyaDlyAdministrorovaniya[]>(
+        return apiClient.post(
             '/account/poluchitVsehPolzovateleiDlyAdministrorovaniya',
             params,
         );
     }
 
     poluchitProektiPolzovatelya(id: string) {
-        return apiClient.post<{id: string, name: string}[]>('/project/user/'+id, {});
+        return apiClient.post(buildPath('/project/user/{id}', { id }));
     }
 
     registraziyaPolzovatelya(params: Schema<"RegisterAccount">) {
-        return apiClient.post<{ id: string }>('/account/register', params);
+        return apiClient.post('/account/register', params);
     }
 
     blockirovkaPolzovatelya(params: Schema<"BlockByAdmin">) {
-        return apiClient.post<null>('/account/blockByAdmin', params);
+        return apiClient.post('/account/blockByAdmin', params);
     }
 
     razblockirovkaPolzovatelya(params: Schema<"UnblockByAdmin">) {
-        return apiClient.post<null>('/account/unblockByAdmin', params);
+        return apiClient.post('/account/unblockByAdmin', params);
     }
 
     izmenitParolAdminom(params: Schema<"ChangePasswordByAdmin">) {
-        return apiClient.post<null>('/account/changePasswordByAdmin', params);
+        return apiClient.post('/account/changePasswordByAdmin', params);
     }
 
     izmenitSvoiParol(params: Schema<"ChangeMyPassword">) {
-        return apiClient.post<null>('/account/changeMyPassword', params);
+        return apiClient.post('/account/changeMyPassword', params);
     }
 
     izmenitNickAdminom(params: Schema<"ChangeNicknameByAdmin">) {
-        return apiClient.post<null>('/account/changeNicknameByAdmin', params);
+        return apiClient.post('/account/changeNicknameByAdmin', params);
     }
 
     izmenitRoleAdminom(params: Schema<"ChangeRoleByAdmin">) {
-        return apiClient.post<null>('/account/changeRoleByAdmin', params);
+        return apiClient.post('/account/changeRoleByAdmin', params);
     }
 
     izmenitSvoiNick(params: Schema<"ChangeMyNickname">) {
-        return apiClient.post<null>('/account/changeMyNickname', params);
+        return apiClient.post('/account/changeMyNickname', params);
     }
 
     izmenitEmaildminom(params: Schema<"ChangeEmailByAdmin">) {
-        return apiClient.post<null>('/account/changeEmailByAdmin', params);
+        return apiClient.post('/account/changeEmailByAdmin', params);
     }
 
     izmenitYazik(params: Schema<"ChangeMyLocale">) {
-        return apiClient.post<null>('/account/changeMyLocale', params);
+        return apiClient.post('/account/changeMyLocale', params);
     }
 
-    /**
-     * ИСПРАВЛЕНО: контракт объявляет эндпоинт как GET, ранее здесь был POST.
-     */
+    /** Контракт объявляет эндпоинт как GET. */
     poluchitNastroikiPolzovatelya() {
-        return apiClient.get<OtvetNaPoluchenieNastroekPolzovatelya>('/account/poluchitNastroikiPolzovatelya');
+        return apiClient.get('/account/poluchitNastroikiPolzovatelya');
     }
 }
 

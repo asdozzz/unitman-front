@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import ProektiService from "@/modules/unit/services/ProektiService";
-import Proekt from "@/modules/unit/store/SpisokProektov/model/Proekt";
-import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
+import type {Proekt} from "@/modules/unit/store/SpisokProektov/model/Proekt";
 
 import {Notify} from "quasar";
 
@@ -95,7 +94,7 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             this.loaderSpiskaProektov = true;
             const response = await ProektiService.list();
             if (response.status === "success") {
-                this.spisok = response.data.map((item: ModelDlySpiskaProektov) => new Proekt(item));
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;

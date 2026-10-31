@@ -1,26 +1,5 @@
-export default class PolzovatelDlyAdmininstrirovaniya {
-    id: string;
-    email: string;
-    isBlocked: boolean;
-    roles: string;
-    password: string;
-    nickname: string | null;
+import type {Schema} from "@/api/types";
 
-    constructor(
-        data: {
-            id: string,
-            email: string,
-            isBlocked: boolean,
-            roles: string;
-            password: string;
-            nickname: string | null;
-        }
-    ) {
-        this.id = data.id;
-        this.email = data.email;
-        this.isBlocked = data.isBlocked;
-        this.roles = data.roles;
-        this.password = data.password;
-        this.nickname = data.nickname;
-    }
-}
+export type PolzovatelDlyAdmininstrirovaniya = Schema<"ManagedAccount">;
+
+export default PolzovatelDlyAdmininstrirovaniya;

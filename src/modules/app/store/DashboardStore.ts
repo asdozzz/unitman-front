@@ -1,13 +1,9 @@
 import { defineStore } from 'pinia';
 import DashboardService from "@/modules/app/services/DashboardService";
+import type {Schema} from "@/api/types";
 
-type StatistikaPoProektam = {
-    projectId: string;
-    projectName: string;
-    total: number;
-    active: number;
-    deleted: number;
-}
+/** Статистика по проекту из сгенерированной схемы (`StatistikaPoProektu`). */
+type StatistikaPoProektam = Schema<"ProjectStatistics">;
 
 type DashboardState = {
     loaderStatistikiPoProektam: boolean;

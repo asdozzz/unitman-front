@@ -32,7 +32,7 @@ async function otpravitFormu() {
       <template v-for="peremenaya in form.values">
         <template v-if="peremenaya.konfig.type === 'collection'">
           <q-select v-model="peremenaya.value" option-value="id" option-label="name"
-                    :options="peremenaya.konfig.options.options ?? []" :label="peremenaya.konfig.label" emit-value map-options/>
+                    :options="peremenaya.konfig.options?.options ?? []" :label="peremenaya.konfig.label" emit-value map-options/>
         </template>
         <template v-else>
           <q-input v-model="peremenaya.value" :label="peremenaya.konfig.label" />

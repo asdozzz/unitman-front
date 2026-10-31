@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
-import Polzovatel from "@/modules/account/store/SpisokVsehPolzovatelei/model/Polzovatel";
+import type Polzovatel from "@/modules/account/store/SpisokVsehPolzovatelei/model/Polzovatel";
 import AccountService from "@/modules/account/services/AccountService";
-import {ApiModelPolzovatelya} from "@/modules/account/services/model/ApiModelPolzovatelya";
 
 export type SpisokVsehPolzovateleiState = {
     spisok: Polzovatel[];
@@ -50,7 +49,7 @@ export const useSpisokVsehPolzovateleiStore = defineStore('SpisokVsehPolzovatele
             this.loaderSpiska = true;
             const response = await AccountService.poluchitVsehPolzovatelei();
             if (response.status === "success") {
-                this.spisok = response.data.map((item: ApiModelPolzovatelya) => new Polzovatel(item));
+                this.spisok = response.data;
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaPolucheniyaSpiska = response.data.message;
