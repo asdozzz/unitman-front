@@ -5,8 +5,16 @@ import {Notify} from "quasar";
 import i18n from "@/bootstrap/translator";
 import dayjs from "dayjs";
 import type {ApiResponseData} from "@/api/types";
+import {isTokenExpired as isJwtExpired} from "@/utils/jwt";
 
 const LOCAL_STORAGE_KEY = 'tokenData';
+
+/**
+ * Запас времени (мс), на который токен должен быть валиден, чтобы считаться
+ * живым. Позволяет обновить токен заранее, не отправляя запрос с уже
+ * просроченным JWT.
+ */
+const TOKEN_EXPIRY_LEEWAY_MS = 30_000;
 
 /**
  * Данные пользователя, которые бэкенд добавляет в ответ `/login`
@@ -26,6 +34,22 @@ type TokenData = ApiResponseData<"/login", "post"> & {
     user: LoginUser;
 }
 
+/**
+ * Пара токенов, которую возвращает `/account/refreshToken`.
+ *
+ * `user` в ответе на обновление не приходит, поэтому данные пользователя
+ * переносятся из текущего `tokenData`.
+ */
+type RefreshTokenData = ApiResponseData<"/account/refreshToken", "post">;
+
+/**
+ * Единственное обновление токена в полёте.
+ *
+ * Refresh-токен одноразовый: параллельные запросы, получившие 401, не должны
+ * обменивать один и тот же токен повторно — иначе первый из них отзовёт его
+ * и остальные получат ошибку. Все ожидающие подписываются на один промис.
+ */
+let obnovlenieTokenaPromise: Promise<boolean> | null = null;
 
 interface State {
     tokenData: TokenData | null,
@@ -65,6 +89,18 @@ export const useAuthStore = defineStore('auth', {
         },
         getToken(state: State): string | null {
             return state.tokenData && state.tokenData.token || null;
+        },
+        getRefreshToken(state: State): string | null {
+            return state.tokenData?.refreshToken || null;
+        },
+        /**
+         * Истёк (или вот-вот истечёт) ли access-токен.
+         *
+         * Решение принимается по `exp` из JWT. Токены без разбираемого `exp`
+         * считаются валидными — тогда обновление произойдёт по ответу 401.
+         */
+        isTokenExpired(): boolean {
+            return isJwtExpired(this.getToken, TOKEN_EXPIRY_LEEWAY_MS);
         },
         getRoles(state: State): string[] {
             return state.tokenData?.user?.roles ?? [];
@@ -119,8 +155,88 @@ export const useAuthStore = defineStore('auth', {
 
             return response;
         },
+        /**
+         * Обновление пары токенов по refresh-токену.
+         *
+         * Бэкенд отзывает использованный refresh-токен, поэтому новый
+         * сохраняется сразу. Если обновить не удалось (refresh-токен истёк
+         * или уже был использован), сессия сбрасывается.
+         *
+         * @returns `true`, если токены обновлены.
+         */
+        async obnovitToken(): Promise<boolean> {
+            const refreshToken = this.getRefreshToken;
+
+            if (!refreshToken) {
+                // Обновить нечем (refresh-токена нет) — сессия невосстановима.
+                this.logout();
+                return false;
+            }
+
+            // Один и тот же одноразовый токен нельзя обменять дважды.
+            if (obnovlenieTokenaPromise) {
+                return obnovlenieTokenaPromise;
+            }
+
+            const promise = (async (): Promise<boolean> => {
+                const response = await AccountService.obnovitToken(refreshToken);
+
+                if (response.status !== "success") {
+                    this.logout();
+                    return false;
+                }
+
+                const data = response.data as RefreshTokenData;
+                this.ustanovitToken(data.token, data.refreshToken);
+                return true;
+            })();
+
+            obnovlenieTokenaPromise = promise;
+
+            try {
+                return await promise;
+            } finally {
+                if (obnovlenieTokenaPromise === promise) {
+                    obnovlenieTokenaPromise = null;
+                }
+            }
+        },
+        /**
+         * Гарантирует, что перед запросом будет валидный access-токен:
+         * если текущий истёк — обновляет его по refresh-токену.
+         *
+         * @returns `true`, если после вызова есть рабочий токен.
+         */
+        async obespechitAktualniyToken(): Promise<boolean> {
+            if (!this.getToken) {
+                return false;
+            }
+
+            if (!this.isTokenExpired) {
+                return true;
+            }
+
+            return this.obnovitToken();
+        },
+        /**
+         * Сохраняет новую пару токенов, сохраняя данные пользователя
+         * (их в ответе на обновление нет).
+         */
+        ustanovitToken(token: string, refreshToken: string) {
+            if (!this.tokenData) {
+                return;
+            }
+
+            this.tokenData = {
+                ...this.tokenData,
+                token,
+                refreshToken,
+            };
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
+        },
         logout() {
             this.tokenData = null;
+            obnovlenieTokenaPromise = null;
             localStorage.removeItem(LOCAL_STORAGE_KEY);
         },
         async izmeniyYazik(locale: string) {

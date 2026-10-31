@@ -1,4 +1,4 @@
-# Vue 3 + TypeScript + Vite
+  # Vue 3 + TypeScript + Vite
 
 This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
@@ -88,6 +88,31 @@ await apiClient.post("/unit/create", params);
 
 `apiClient.post/put/get` перегружены: если первым аргументом передан литерал пути из спецификации,
 тело запроса проверяется автоматически.
+
+### Авторизация и обновление токена
+
+Пара токенов выдаётся в [`POST /login`](openapi/unitman.json:9) (`token` + одноразовый `refreshToken`)
+и хранится в `localStorage` под ключом `tokenData`. Когда access-токен истекает, он обновляется через
+`POST /account/refreshToken` ([`AccountService.obnovitToken()`](src/modules/account/services/AccountService.ts:30)).
+
+Обновление выполняется автоматически в двух случаях:
+
+| Ситуация | Где обрабатывается |
+| --- | --- |
+| токен уже истёк по `exp` (с запасом 30 с) | [`ApiClient.request()`](src/bootstrap/apiClient.ts:139) до отправки запроса |
+| сервер ответил `401` | [`ApiClient.request()`](src/bootstrap/apiClient.ts:163) — обновление и один повтор запроса |
+| переход по маршруту при сохранённой сессии | [`router.beforeEach`](src/bootstrap/router.ts:25) |
+
+Особенности:
+
+- refresh-токен **одноразовый** и отзывается при обновлении, поэтому новый сохраняется сразу, а
+  параллельные запросы делят одно обновление ([`obnovlenieTokenaPromise`](src/modules/account/store/auth.ts:47));
+- `401` не приводит к разлогину, если refresh-токен ещё есть; сессия сбрасывается только когда
+  обновить её нечем или бэкенд отказал;
+- `/login` и `/account/refreshToken` исключены из автообновления и не отправляют `Authorization`
+  (см. `ANONYMOUS_URLS` / `REFRESH_EXCLUDED_URLS` в [`apiClient`](src/bootstrap/apiClient.ts:18));
+- разбор `exp` — в [`src/utils/jwt.ts`](src/utils/jwt.ts): подпись не проверяется, токены без `exp`
+  считаются валидными, и тогда срабатывает ветка с `401`.
 
 ### Ограничения контракта
 

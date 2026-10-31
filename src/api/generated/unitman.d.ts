@@ -199,6 +199,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/account/refreshToken": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Обновить пару токенов по refresh-токену
+         * @description Публичный эндпоинт. Refresh-токен одноразовый: после успешного обновления старый отзывается.
+         */
+        post: operations["post_app_account_infra_account_refreshtoken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/register": {
         parameters: {
             query?: never;
@@ -311,8 +331,14 @@ export type paths = {
                     };
                     content: {
                         "application/json": {
+                            /**
+                             * @description Одноразовый токен для /api/account/refreshToken
+                             * @example a1b2c3d4e5f6...
+                             */
+                            refreshToken: string;
                             /** @example eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9... */
                             token: string;
+                            user?: components["schemas"]["AccountLoginUser"];
                         };
                     };
                 };
@@ -1514,6 +1540,21 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        /** @description Данные аутентифицированного пользователя в ответе /api/login */
+        AccountLoginUser: {
+            /** Format: email */
+            email?: string;
+            /** Format: uuid */
+            id?: string;
+            /** @example ru */
+            locale?: string;
+            /**
+             * @example [
+             *       "ROLE_USER"
+             *     ]
+             */
+            roles?: string[];
+        };
         /** @description Настройки пользователя (AccountSettingsReadModel) */
         AccountSettings: {
             nickname: string | null;
@@ -1792,6 +1833,13 @@ export type components = {
             avtoudalenie: boolean;
             id: string;
             obnovlenieBezSbrosaPodgotovki: boolean;
+        };
+        ObnovitToken: {
+            /**
+             * @description Ранее выданный refresh-токен (одноразовый)
+             * @example a1b2c3d4e5f6...
+             */
+            refreshToken: string;
         };
         OstanovitUnit: {
             /** Format: uuid */
@@ -2830,6 +2878,49 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_account_refreshtoken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ObnovitToken"];
+            };
+        };
+        responses: {
+            /** @description Новая пара токенов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @example a1b2c3... */
+                            refreshToken: string;
+                            /** @example eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9... */
+                            token: string;
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {

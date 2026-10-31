@@ -34,9 +34,16 @@ const value: Schema<"ZnacheniePeremenoi"> = { id: "1", type: "string", value: "v
 type NoQuery = ApiQuery<"/unit/list", "post">;
 const noQuery: NoQuery = undefined;
 
+// 7. Обновление токена: тело `ObnovitToken` и развёрнутый ответ из схемы.
+const refreshBody: ApiRequestBody<"/account/refreshToken", "post"> = { refreshToken: "a1b2c3" };
+// @ts-expect-error — обязательное поле refreshToken отсутствует
+const badRefresh: ApiRequestBody<"/account/refreshToken", "post"> = {};
+type RefreshResponse = ApiResponseData<"/account/refreshToken", "post">;
+const refreshResponseToken: RefreshResponse["token"] = "eyJ0eXAi...";
+
 export const typecheck = {
     postPath, badPost, listBody, badCreate, createBody, hookParams, value, noQuery,
-    listResponseItem,
+    listResponseItem, refreshBody, badRefresh, refreshResponseToken,
 } as const;
 
-export type TypecheckResult = [ListResponse];
+export type TypecheckResult = [ListResponse, RefreshResponse];

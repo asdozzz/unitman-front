@@ -22,6 +22,14 @@ router.beforeEach(async (to, _from, next) => {
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
     const initStore = storeInizializii();
+
+    if (authRequired && authStore.tokenData) {
+        // Сессия сохранена в localStorage, но access-токен мог истечь за время
+        // простоя — обновляем его по refresh-токену до перехода. Если не
+        // удалось, `obnovitToken` сбросит сессию и пользователь уйдёт на /login.
+        await authStore.obespechitAktualniyToken();
+    }
+
     if (initStore.list.data.length === 0) {
         await initStore.poluchitSpisok();
     }

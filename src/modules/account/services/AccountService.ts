@@ -22,6 +22,17 @@ class AccountService {
         });
     }
 
+    /**
+     * Обновление пары токенов по refresh-токену.
+     *
+     * Публичный эндпоинт: заголовок Authorization не требуется.
+     * Refresh-токен одноразовый — после успешного обновления старый отзывается,
+     * поэтому в хранилище нужно сохранять и новый `refreshToken`.
+     */
+    obnovitToken(refreshToken: string) {
+        return apiClient.post('/account/refreshToken', {refreshToken});
+    }
+
     /** Контракт объявляет эндпоинт как GET. */
     poluchitVsehPolzovatelei() {
         return apiClient.get('/account/poluchitVsehPolzovatelei');
