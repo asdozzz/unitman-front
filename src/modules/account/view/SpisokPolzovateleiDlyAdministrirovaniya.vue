@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
-import {onMounted} from "vue";
+import {onMounted, ref} from "vue";
 import { useTimeout } from 'quasar'
-const { registerTimeout, isTimeoutPending } = useTimeout()
+// В Quasar 2.17 `useTimeout()` возвращает только registerTimeout/removeTimeout,
+// свойства isTimeoutPending в контракте нет — держим своё состояние.
+const { registerTimeout } = useTimeout()
+const isTimeoutPending = ref(false)
 import {
   useSpisokPolzovateleiDlyAdmininstrirovaniyaStore
 } from "@/modules/account/store/SpisokVsehPolzovateleiDlyAdmininstrirovaniyaStore";
@@ -32,8 +35,10 @@ onMounted(async () => {
 })
 
 async function search() {
+  isTimeoutPending.value = true;
   registerTimeout(() => {
     getList();
+    isTimeoutPending.value = false;
   }, 200)
 }
 

@@ -1,5 +1,6 @@
 import axios, {AxiosError, AxiosInstance, AxiosResponse} from "axios";
 import {ApiResponse, ApiResponseFactory, FailApiResponse} from "@/bootstrap/apiClient/ApiResponse";
+import type {ApiPath, ApiQuery, ApiRequestBody, ApiResponseData} from "@/api/types";
 import {useAuthStore} from "@/modules/account/store/auth";
 
 type ServerResponseError =
@@ -63,7 +64,17 @@ class ApiClient {
 
         return modifyResponse;
     }
-    async post<T>(url: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
+    /**
+     * Типизированный вызов по сгенерированной OpenAPI-схеме.
+     * Путь проверяется по ключам `paths`, тело — по `requestBody` операции.
+     */
+    post<P extends ApiPath<"post">>(
+        url: P,
+        data: ApiRequestBody<P, "post">
+    ): Promise<ApiResponse<ApiResponseData<P, "post">>>;
+    /** Нетипизированный вызов (совместимость с существующим кодом). */
+    post<T>(url: string, data: unknown): Promise<ApiResponse<T>>;
+    async post<T>(url: string, data: unknown): Promise<ApiResponse<T>> {
         const axiosInstance = this.makeAxiosInstance();
 
         let modifyResponse: ApiResponse<T> = ApiResponseFactory.makeFail("Unknown error");
@@ -88,7 +99,14 @@ class ApiClient {
 
         return modifyResponse;
     }
-    async put<T>(url: string, data: Record<string, unknown>): Promise<ApiResponse<T>> {
+    /** Типизированный вызов по сгенерированной OpenAPI-схеме. */
+    put<P extends ApiPath<"put">>(
+        url: P,
+        data: ApiRequestBody<P, "put">
+    ): Promise<ApiResponse<ApiResponseData<P, "put">>>;
+    /** Нетипизированный вызов (совместимость с существующим кодом). */
+    put<T>(url: string, data: unknown): Promise<ApiResponse<T>>;
+    async put<T>(url: string, data: unknown): Promise<ApiResponse<T>> {
         const axiosInstance = this.makeAxiosInstance();
 
         let modifyResponse: ApiResponse<T> = ApiResponseFactory.makeFail("Unknown error");
@@ -113,7 +131,14 @@ class ApiClient {
 
         return modifyResponse;
     }
-    async get<T>(url: string, params: Record<string, unknown> = {}): Promise<ApiResponse<T>> {
+    /** Типизированный вызов по сгенерированной OpenAPI-схеме. */
+    get<P extends ApiPath<"get">>(
+        url: P,
+        params?: ApiQuery<P, "get">
+    ): Promise<ApiResponse<ApiResponseData<P, "get">>>;
+    /** Нетипизированный вызов (совместимость с существующим кодом). */
+    get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>>;
+    async get<T>(url: string, params: Record<string, unknown> | undefined = {}): Promise<ApiResponse<T>> {
         const axiosInstance = this.makeAxiosInstance();
 
         let modifyResponse: ApiResponse<T> = ApiResponseFactory.makeFail("Unknown error");

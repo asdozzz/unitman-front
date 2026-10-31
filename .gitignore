@@ -26,3 +26,5 @@ dist-ssr
 /.vscode/
 .env.local
 /.env
+graphify-out
+plans

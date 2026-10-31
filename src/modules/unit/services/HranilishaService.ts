@@ -1,13 +1,14 @@
 import apiClient from "@/bootstrap/apiClient";
+import type { Schema } from "@/api/types";
 import ModelDlySpiskaHranilish from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaHranilish";
-import {ModelDlyDobavleniyaHranilisha} from "@/modules/unit/services/HranilishaService/model/ModelDlyDobavleniyaHranilisha";
-import {ModelDlyUdaleniyaHranilisha} from "@/modules/unit/services/HranilishaService/model/ModelDlyUdaleniyaHranilisha";
-import {ModelDlyActivaziiHranilisha} from "@/modules/unit/services/HranilishaService/model/ModelDlyActivaziiHranilisha";
-import {
-    ModelDlyObnovleniyaRekvizitovHranilisha
-} from "@/modules/unit/services/HranilishaService/model/ModelDlyObnovleniyaRekvizitovHranilisha";
 import ModelDlySpiskaTipovHranilisha from "@/modules/unit/services/HranilishaService/model/ModelDlySpiskaTipovHranilisha";
 
+/**
+ * Сервис хранилищ (репозиториев).
+ *
+ * Тела запросов типизированы по OpenAPI-схеме. Типы ответов задаются явно:
+ * в спецификации `SuccessEnvelope.data` описан как `object|null`.
+ */
 class HranilishaService {
     list() {
         return apiClient.post<ModelDlySpiskaHranilish[]>('/repo/list', {});
@@ -16,25 +17,28 @@ class HranilishaService {
     poluchitSpisokActivnih() {
         return apiClient.post<ModelDlySpiskaHranilish[]>('/repo/activeList', {});
     }
-    poluchitProektiHranilisha(params: {id: string, query: string | null}) {
+
+    poluchitProektiHranilisha(params: Schema<"PoluchitSpisokProektovRepi">) {
         return apiClient.post<{ value: string, name: string }[]>('/repo/projectList', params);
     }
+
     typeList() {
         return apiClient.post<ModelDlySpiskaTipovHranilisha[]>('/repo/type/list', {});
     }
 
-    add(params: ModelDlyDobavleniyaHranilisha) {
+    add(params: Schema<"AddRepo">) {
         return apiClient.post<null>('/repo/add', params);
     }
-    delete(params: ModelDlyUdaleniyaHranilisha) {
+
+    delete(params: Schema<"DeleteRepo">) {
         return apiClient.post<null>('/repo/delete', params);
     }
 
-    confirm(params: ModelDlyActivaziiHranilisha) {
+    confirm(params: Schema<"CheckAccessToRepo">) {
         return apiClient.post<null>('/repo/confirm', params);
     }
 
-    changeCredentials(params: ModelDlyObnovleniyaRekvizitovHranilisha) {
+    changeCredentials(params: Schema<"ChangeCredentialsOfRepo">) {
         return apiClient.post<null>('/repo/changeCredentials', params);
     }
 }

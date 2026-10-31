@@ -1,8 +1,0 @@
-export type ModelDlyDobavleniyaProekta = {
-    repoId: string;
-    projectCode: string;
-    projectName: string;
-    mainBranch: string;
-    proxyHost: string;
-    memoryLimit: number;
-}

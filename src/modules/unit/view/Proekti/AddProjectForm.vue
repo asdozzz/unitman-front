@@ -40,12 +40,13 @@ function projectCodeSelected(data: { value: string, label: string } | null): voi
   if (data) {
     form.value.projectCode = data.value;
     form.value.projectName = data.label.replace(/[^a-zA-Z0-9_-]+/g, "_");
+    // getProxyHost получен через storeToRefs, то есть это ComputedRef<string>.
+    form.value.proxyHost = getProxyHost.value;
   } else {
     form.value.projectCode = "";
     form.value.projectName = "";
+    form.value.proxyHost = "";
   }
-  form.value.proxyHost = getProxyHost;
-  //form.value.proxyHost
 }
 
 function filterSpiskaProektov(val: string | null, update: any): void {

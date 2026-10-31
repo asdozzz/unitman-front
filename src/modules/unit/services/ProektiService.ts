@@ -1,15 +1,6 @@
 import apiClient from "@/bootstrap/apiClient";
+import type { Schema } from "@/api/types";
 import ModelDlySpiskaProektov from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaProektov";
-import {ModelDlyDobavleniyaProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlyDobavleniyaProekta";
-import {ModelDlyUdaleniyaProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlyUdaleniyaProekta";
-import {ModelDlyAktivaziiProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlyAktivaziiProekta";
-import {ModelDlyDeaktivaziiProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlyDeaktivaziiProekta";
-import {ModelDlyObnovleniyaProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlyObnovleniyaProekta";
-import {ModelDlySborkiProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlySborkiProekta";
-import {ModelDlyUdaleniyaPolzovatelyIzProekta} from "@/modules/unit/services/ProektiServices/model/ModelDlyUdaleniyaPolzovatelyIzProekta";
-import {
-    ModelDlyDobavleniyaPolzovatelyKProektu
-} from "@/modules/unit/services/ProektiServices/model/ModelDlyDobavleniyaPolzovatelyKProektu";
 import {
     ModelDlySpiskaPolzovateleiProekta
 } from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPolzovateleiProekta";
@@ -18,38 +9,23 @@ import {
     ModelDlySpiskaPeremenihProekta
 } from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaPeremenihProekta";
 import {
-    ZaprosNaDobavleniePeremenoiProekta
-} from "@/modules/unit/services/ProektiServices/model/ZaprosNaDobavleniePeremenoiProekta";
-import {
-    ZaprosNaUdaleniePeremenoiIzProekta
-} from "@/modules/unit/services/ProektiServices/model/ZaprosNaUdaleniePeremenoiIzProekta";
-import {
-    ZaprosNaIzmenenieZnacheniyaPeremenoiProekta
-} from "@/modules/unit/services/ProektiServices/model/ZaprosNaIzmenenieZnacheniyaPeremenoiProekta";
-import {
-    ZaprosNaObnovlenieNastroekHuka
-} from "@/modules/unit/services/ProektiServices/model/ZaprosNaObnovlenieNastroekHuka";
-import {
-    ZaprosNaPoluchenieZadachRunneraUnita
-} from "@/modules/unit/services/ProektiServices/model/ZaprosNaPoluchenieZadachRunneraUnita";
-import {
     OtvetNaPoluchenieZadachRunneraUnita
 } from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieZadachRunneraUnita";
 import {
     OtvetNaPoluchenieShagovZadachiRunnera
 } from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieShagovZadachiRunnera";
-import {ZaprosNaDobavlenieWebhooka} from "@/modules/unit/services/ProektiServices/model/ZaprosNaDobavlenieWebhooka";
-import {ZaprosNaObnovlenieWebhooka} from "@/modules/unit/services/ProektiServices/model/ZaprosNaObnovlenieWebhooka";
 import {
     ModelDlySpiskaWebhookovProekta
 } from "@/modules/unit/services/ProektiServices/model/ModelDlySpiskaWebhookovProekta";
-import {
-    ZaprosNaPolucheniyeSobitiiWebhooka
-} from "@/modules/unit/services/ProektiServices/model/ZaprosNaPolucheniyeSobitiiWebhooka";
 import {OtvetNaPoluchenieSpiskaSobitiiWebhooka} from "@/modules/unit/services/ProektiServices/model/OtvetNaPoluchenieSpiskaSobitiiWebhooka";
-import {ZaprosNaProverkuProxyHost} from "@/modules/unit/services/ProektiServices/model/ZaprosNaProverkuProxyHost";
 import {OtvetNaProverkuProxyHost} from "@/modules/unit/services/ProektiServices/model/OtvetNaProverkuProxyHost";
 
+/**
+ * Сервис проектов.
+ *
+ * Тела запросов типизированы по OpenAPI-схеме. Типы ответов задаются явно:
+ * в спецификации `SuccessEnvelope.data` описан как `object|null`.
+ */
 class ProektiService {
     list() {
         return apiClient.post<ModelDlySpiskaProektov[]>('/project/list', {});
@@ -63,11 +39,11 @@ class ProektiService {
         return apiClient.post<ModelDlySpiskaProektov[]>('/project/activeList', {});
     }
 
-    add(params: ModelDlyDobavleniyaProekta) {
+    add(params: Schema<"AddProject">) {
         return apiClient.post<null>('/project/add', params);
     }
 
-    proveritProxyHost(params: ZaprosNaProverkuProxyHost) {
+    proveritProxyHost(params: Schema<"ProveritProxyHost">) {
         return apiClient.post<OtvetNaProverkuProxyHost>('/project/proverkaProxyHost', params);
     }
 
@@ -75,74 +51,84 @@ class ProektiService {
         return apiClient.post<ModelDlySpiskaProektov>('/project/read/'+id, {});
     }
 
-    updateData(params: ModelDlyObnovleniyaProekta) {
+    updateData(params: Schema<"UpdateProjectData">) {
         return apiClient.post<null>('/project/updateData', params);
     }
-    udalit(params: ModelDlyUdaleniyaProekta) {
+
+    udalit(params: Schema<"PostavitVOcheredNaUdalenie">) {
         return apiClient.post<null>('/project/remove', params);
     }
 
-    udalitSlomaniiProekt(params: ModelDlyUdaleniyaProekta) {
+    udalitSlomaniiProekt(params: Schema<"ForceRemoveProject">) {
         return apiClient.post<null>('/project/forceRemove', params);
     }
 
-    aktivirovat(params: ModelDlyAktivaziiProekta) {
+    aktivirovat(params: Schema<"EnableProject">) {
         return apiClient.post<null>('/project/enable', params);
     }
 
-    deaktivirovat(params: ModelDlyDeaktivaziiProekta) {
+    deaktivirovat(params: Schema<"DisableProject">) {
         return apiClient.post<null>('/project/disable', params);
     }
 
-    sobrat(params: ModelDlySborkiProekta) {
+    sobrat(params: Schema<"PostavitVOcheredNaSborku">) {
         return apiClient.post<null>('/project/build', params);
     }
 
-    poluchitSpisokPolzovatelei(params: {id: string}) {
+    poluchitSpisokPolzovatelei(params: Schema<"PoluchitSpisokPolzovateleiProekta">) {
         return apiClient.post<ModelDlySpiskaPolzovateleiProekta[]>('/project/usersList', params);
     }
 
-    dobavitPolzovatelyaKProektu(params: ModelDlyDobavleniyaPolzovatelyKProektu) {
+    dobavitPolzovatelyaKProektu(params: Schema<"AddUserToProject">) {
         return apiClient.post<null>('/project/addUser', params);
     }
 
-    udalitPolzovatelyaIzProekta(params: ModelDlyUdaleniyaPolzovatelyIzProekta) {
+    udalitPolzovatelyaIzProekta(params: Schema<"RemoveUserFromProject">) {
         return apiClient.post<null>('/project/removeUser', params);
     }
 
-    poluchitSpisokPeremenih(params: {id: string}) {
+    poluchitSpisokPeremenih(params: Schema<"PoluchitSpisokPeremenihProekta">) {
         return apiClient.post<ModelDlySpiskaPeremenihProekta[]>('/project/spisokPeremenihProekta', params);
     }
 
-    dobavitPeremenuyu(params: ZaprosNaDobavleniePeremenoiProekta) {
+    dobavitPeremenuyu(params: Schema<"DobavitPeremenuyuVProekt">) {
         return apiClient.post<null>('/project/dobavitPeremenuyu', params);
     }
 
-    udalitPeremenuyu(params: ZaprosNaUdaleniePeremenoiIzProekta) {
+    udalitPeremenuyu(params: Schema<"UdalitPeremenuyuIzProekta">) {
         return apiClient.post<null>('/project/udalitPeremenuyu', params);
     }
 
-    izmenitPeremenuyu(params: ZaprosNaIzmenenieZnacheniyaPeremenoiProekta) {
+    /**
+     * ВНИМАНИЕ: расхождение с контрактом.
+     *
+     * Схема `IzmenitZnacheniePeremenoiProekta` ожидает поля
+     * `projectId`, `code`, `newValue`, а вызывающий код (класс `EditForm`
+     * в `SpisokPeremenihProektaStore`) отправляет `value`.
+     * Здесь намеренно сохранён прежний контракт фронта, чтобы не сломать
+     * работу формы; поле нужно согласовать с бэкендом.
+     */
+    izmenitPeremenuyu(params: { projectId: string; code: string; value: string }) {
         return apiClient.post<null>('/project/izmenitPeremenuyu', params);
     }
 
-    poluchitVetkiProekta(params: {id: string, query: string | null}) {
+    poluchitVetkiProekta(params: Schema<"PoluchitSpisokVetokProekta">) {
         return apiClient.post<ModelDlySpiskaVetok[]>('/project/branchesList', params);
     }
 
-    obnovitNastroikiHuka(params: ZaprosNaObnovlenieNastroekHuka) {
+    obnovitNastroikiHuka(params: Schema<"ObnovitNastroikiHuka">) {
         return apiClient.post<null>('/project/obnovitNastroikiHuka', params);
     }
 
-    poluchitVipolnenieZadachiRunnera(params: ZaprosNaPoluchenieZadachRunneraUnita) {
+    poluchitVipolnenieZadachiRunnera(params: Schema<"GetProjectRunnerJobs">) {
         return apiClient.post<OtvetNaPoluchenieZadachRunneraUnita[]>('/project/poluchitVipolnenieZadachiRunnera', params);
     }
 
-    poluchitShagiZadachiRunnera(params: { id: string }) {
+    poluchitShagiZadachiRunnera(params: Schema<"GetProjectRunnerJobSteps">) {
         return apiClient.post<OtvetNaPoluchenieShagovZadachiRunnera>('/project/poluchitShagiZadachiRunnera', params);
     }
 
-    dobavitWebhook(params: ZaprosNaDobavlenieWebhooka) {
+    dobavitWebhook(params: Schema<"SozdatWebhookProekta">) {
         return apiClient.post<null>('/project/webhook/dobavit', params);
     }
 
@@ -150,7 +136,7 @@ class ProektiService {
         return apiClient.post<ModelDlySpiskaWebhookovProekta>('/project/webhook/'+id+'/read', {});
     }
 
-    obnovitWebhooka(params: ZaprosNaObnovlenieWebhooka) {
+    obnovitWebhooka(params: Schema<"IzmenitUrlWebhooka">) {
         return apiClient.post<null>('/project/webhook/obnovit', params);
     }
 
@@ -166,15 +152,13 @@ class ProektiService {
         return apiClient.post<null>('/project/webhook/'+id+'/udalit', {});
     }
 
-    spisokWebhookovDlyProekta( projectId: string) {
+    spisokWebhookovDlyProekta(projectId: string) {
         return apiClient.post<ModelDlySpiskaWebhookovProekta[]>('/project/webhook/'+projectId+'/spisok', {});
     }
 
-    poluchitSobitiyaWebhooka( params: ZaprosNaPolucheniyeSobitiiWebhooka) {
+    poluchitSobitiyaWebhooka(params: Schema<"PoluchitSobitiyaWebhooka">) {
         return apiClient.post<OtvetNaPoluchenieSpiskaSobitiiWebhooka>('/project/webhook/poluchitSobitiyaWebhooka', params);
     }
-
-
 }
 
 export default new ProektiService();
