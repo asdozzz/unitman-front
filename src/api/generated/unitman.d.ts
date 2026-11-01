@@ -1647,6 +1647,8 @@ export type components = {
             port: number | null;
             projectId: string | null;
             service: string | null;
+            /** @description Суффикс, добавляемый в конец ссылки на юнит, null если не задан */
+            suffix: string | null;
         };
         /** @description Статистика контейнера юнита */
         ContainerStats: {
@@ -1911,6 +1913,11 @@ export type components = {
             projectId: string;
             /** @example backend */
             service: string;
+            /**
+             * @description Суффикс, добавляемый в конец ссылки на юнит; null или пустая строка, если не задан
+             * @example /api/v1
+             */
+            suffix?: string | null;
             /** Format: uuid */
             targetUnitId: string;
         };

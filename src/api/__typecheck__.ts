@@ -41,9 +41,15 @@ const badRefresh: ApiRequestBody<"/account/refreshToken", "post"> = {};
 type RefreshResponse = ApiResponseData<"/account/refreshToken", "post">;
 const refreshResponseToken: RefreshResponse["token"] = "eyJ0eXAi...";
 
+// 8. Помощник ссылки: суффикс необязателен в запросе и есть в описании переменной.
+const helperBody: ApiRequestBody<"/unit/poluchitSsylkuPoPomoschniku", "post"> = {
+    port: 8080, projectId: "uuid", service: "backend", targetUnitId: "uuid", suffix: "/api/v1",
+};
+const helperSuffix: Schema<"ConfigVariableHelper">["suffix"] = null;
+
 export const typecheck = {
     postPath, badPost, listBody, badCreate, createBody, hookParams, value, noQuery,
-    listResponseItem, refreshBody, badRefresh, refreshResponseToken,
+    listResponseItem, refreshBody, badRefresh, refreshResponseToken, helperBody, helperSuffix,
 } as const;
 
 export type TypecheckResult = [ListResponse, RefreshResponse];

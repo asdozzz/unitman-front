@@ -3,29 +3,47 @@ import UnitiService from "@/modules/unit/services/UnitiService";
 import type {PomoschnikSsylki, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 /**
- * Помощник с гарантированно заполненными полями — только такой можно
- * отправить в `poluchitSsylkuPoPomoschniku`.
+ * Помощник с гарантированно заполненными обязательными полями — только такой
+ * можно отправить в `poluchitSsylkuPoPomoschniku`.
+ *
+ * `suffix` остаётся необязательным: он лишь дописывается в конец ссылки.
  */
 export type ZapolnennyPomoschnikSsylki = {
     projectId: string;
     service: string;
     port: number;
+    suffix: string | null;
 };
 
 /**
  * Проверяет, что в помощнике заданы все обязательные поля запроса.
  * Служит type guard'ом для сужения `PomoschnikSsylki` до
  * {@link ZapolnennyPomoschnikSsylki}.
+ *
+ * `suffix` не обязателен: без него бэкенд вернёт ссылку на сервис без хвоста.
  */
 export function pomoschnikZapolnen(helper: PomoschnikSsylki | null | undefined): helper is ZapolnennyPomoschnikSsylki {
     return !!helper && !!helper.projectId && !!helper.service && helper.port !== null && helper.port !== undefined;
 }
 
 /**
+ * Приводит суффикс ссылки к виду, который ожидает бэкенд.
+ *
+ * Пустая строка и строка из пробелов для бэкенда равнозначны отсутствию
+ * суффикса, поэтому они нормализуются в `null`.
+ */
+export function normalizovatSuffiks(suffix: string | null | undefined): string | null {
+    const znachenie = suffix?.trim();
+
+    return znachenie ? znachenie : null;
+}
+
+/**
  * Стор помощника подстановки ссылки.
  *
  * Помощник (`helper`) приходит в описании переменной конфигурации юнита
- * и содержит проект/сервис/порт юнита, ссылку на который нужно подставить.
+ * и содержит проект/сервис/порт юнита, ссылку на который нужно подставить,
+ * а также необязательный суффикс, который бэкенд дописывает в конец ссылки.
  * Стор загружает список юнитов выбранного проекта и запрашивает готовую
  * ссылку через `poluchitSsylkuPoPomoschniku`.
  */
@@ -87,6 +105,7 @@ export const useStorPomoschnikaSsylki = defineStore('StorPomoschnikaSsylki', {
         },
         /**
          * Запрашивает ссылку на сервис выбранного юнита.
+         * Суффикс из помощника дописывается бэкендом в конец ссылки.
          * Возвращает ссылку либо `null`, если получить её не удалось
          * (текст ошибки при этом кладётся в `oshibka`).
          */
@@ -104,6 +123,7 @@ export const useStorPomoschnikaSsylki = defineStore('StorPomoschnikaSsylki', {
                 service: helper.service,
                 port: helper.port,
                 targetUnitId,
+                suffix: normalizovatSuffiks(helper.suffix),
             });
 
             this.loaderSsylki = false;

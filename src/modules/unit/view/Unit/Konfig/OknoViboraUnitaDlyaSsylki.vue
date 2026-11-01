@@ -2,7 +2,11 @@
 import {computed, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
 import type {PomoschnikSsylki, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import {pomoschnikZapolnen, useStorPomoschnikaSsylki} from "@/modules/unit/store/SpisokUnitov/StorPomoschnikaSsylki";
+import {
+  normalizovatSuffiks,
+  pomoschnikZapolnen,
+  useStorPomoschnikaSsylki,
+} from "@/modules/unit/store/SpisokUnitov/StorPomoschnikaSsylki";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -19,6 +23,9 @@ const {spisok, loaderSpiska, loaderSsylki, oshibka} = storeToRefs(storPomoschnik
 
 const zapros = ref<string>("");
 const vibraliUnitId = ref<string | null>(null);
+
+/** Суффикс из помощника; `null`, если он не задан или пуст. */
+const suffiks = computed<string | null>(() => normalizovatSuffiks(props.helper?.suffix));
 
 const spisokSFiltrom = computed<Unit[]>(() => {
   const zaprosNizhniy = zapros.value.trim().toLowerCase();
@@ -88,6 +95,9 @@ async function vibratUnit(unit: Unit) {
               port: props.helper?.port ?? '-',
             })
           }}
+        </div>
+        <div class="text-caption text-grey-8" v-if="suffiks">
+          {{ $t('unit.pomoschnik_ssylki.podskazka_suffiks', {suffix: suffiks}) }}
         </div>
       </q-card-section>
 

@@ -150,6 +150,7 @@
     "pomoschnik_ssylki": {
       "title": "Select unit to insert link",
       "podskazka": "The link to service \"{service}\" (port {port}) of the selected unit will be fetched",
+      "podskazka_suffiks": "The suffix \"{suffix}\" will be appended to the link",
       "poisk": "Search unit by name or branch",
       "empty_result": "No units found",
       "buttons": {
