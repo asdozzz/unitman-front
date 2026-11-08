@@ -1,0 +1,52 @@
+variables:
+  - id: ARG_API_HOST
+    label: ARG_API_HOST
+    type: string
+    defaultValue: "http://localhost:8082/api"
+    helper:
+      projectId: 01a1973b-e6b8-7081-a590-acbd147068a0
+      service: nginx
+      port: 8081
+      suffix: /api
+  
+  - id: ARG_CENTRIFUGE_HOST
+    label: ARG_CENTRIFUGE_HOST
+    type: string
+    defaultValue: "ws://localhost:8000/connection/websocket"
+    helper:
+      projectId: 01a1973b-e6b8-7081-a590-acbd147068a0
+      service: centrifugo
+      port: 8000
+      type: 'ws'
+      suffix: /connection/websocket
+
+build:
+  image: asdozzz/dind-unit:latest
+
+prepare:
+  - envsubst < .env.dist > .env.local
+
+reset_prepare:
+  - rm -rf .env.local
+
+up:
+  - docker-compose -f docker-compose.unitman.yaml up -d --build
+
+down:
+  - docker-compose -f docker-compose.unitman.yaml down
+
+actions:
+  - id: docker-compose-logs
+    name: "podman-compose logs"
+    variables:
+      - id: SERVICE_NAME
+        label: SERVICE_NAME
+        type: collection
+        defaultValue: app
+        options:
+          options:
+            - id: app
+              name: app
+    commands:
+      - docker-compose logs ${UNITMAN_ACTION_SERVICE_NAME}
+    prepare: true

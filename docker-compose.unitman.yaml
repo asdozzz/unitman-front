@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    ports:
+      - 8033:80
+    args:
+      - ARG_API_HOST: ${UNITMAN_ARG_API_HOST}
+      - ARG_CENTRIFUGE_HOST: ${UNITMAN_ARG_CENTRIFUGE_HOST}
