@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
-import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {SvyazUnita, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";
@@ -17,7 +17,34 @@ const authStore = useAuthStore();
 const { isAdmin } = storeToRefs(authStore);
 
 const unitiStore = useSpisokUnitovStore();
-const { showForceRemove, esliJdemRunner, getUnitLoader, esliZapushen, nazvanieTekusheiZadachi } = storeToRefs(unitiStore);
+const {
+  showForceRemove,
+  esliJdemRunner,
+  getUnitLoader,
+  esliZapushen,
+  nazvanieTekusheiZadachi,
+  svyazannieUniti,
+  nazvanieUnitaPoId,
+  vibranLiUnitVFiltreSvyazei,
+} = storeToRefs(unitiStore);
+
+/** Связанные юниты карточки без дублей по `targetUnitId`. */
+const spisokSvyazei = computed<SvyazUnita[]>(() => svyazannieUniti.value(props.item));
+
+/**
+ * Подпись бейджа: имя юнита из кеша, иначе сервис из помощника,
+ * иначе укороченный идентификатор — чтобы бейдж не оставался пустым.
+ */
+function podpisSvyazi(svyaz: SvyazUnita): string {
+  return nazvanieUnitaPoId.value(svyaz.targetUnitId)
+      ?? svyaz.service
+      ?? `${svyaz.targetUnitId.slice(0, 8)}…`;
+}
+
+/** Добавляет или убирает связанный юнит в фильтре списка. */
+async function perekluchitSvyaz(targetUnitId: string) {
+  await unitiStore.perekluchitSvyazUnita(targetUnitId);
+}
 
 const itemHeaderClass = computed(() => {
   let headerColor = 'bg-primary';
@@ -138,6 +165,27 @@ function showRemovePrompt() {
             </div>
           </template>
         </template>
+      </div>
+      <div class="q-mt-xs" v-if="spisokSvyazei.length > 0">
+        <div class="text-left fs-12">
+          <strong>{{ $t('unit.spisok_unitov.card.fields.svyazi') }}:</strong>
+        </div>
+        <div class="row q-gutter-xs q-mt-xs">
+          <q-chip
+              v-for="svyaz in spisokSvyazei"
+              :key="svyaz.targetUnitId"
+              dense
+              square
+              clickable
+              :color="vibranLiUnitVFiltreSvyazei(svyaz.targetUnitId) ? 'primary' : 'grey-4'"
+              :text-color="vibranLiUnitVFiltreSvyazei(svyaz.targetUnitId) ? 'white' : 'dark'"
+              icon="link"
+              :label="podpisSvyazi(svyaz)"
+              @click="perekluchitSvyaz(svyaz.targetUnitId)"
+          >
+            <q-tooltip>{{ $t('unit.spisok_unitov.card.tooltips.svyaz', {id: svyaz.targetUnitId}) }}</q-tooltip>
+          </q-chip>
+        </div>
       </div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
       <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.projectName')}}:</strong> {{ item.projectName }}</div>

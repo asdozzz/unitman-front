@@ -1981,13 +1981,45 @@ export type components = {
             offset?: number;
         };
         GetUnitList: {
-            filter?: components["schemas"]["GetUnitListFilter"];
+            filter?: components["schemas"]["GetUnitListFilter2"];
             /** @default 100 */
             limit?: number;
             /** @default 0 */
             offset?: number;
         };
         GetUnitListFilter: {
+            /**
+             * @description Подстрока имени ветки
+             * @default null
+             */
+            branch?: string | null;
+            /**
+             * @description Подстрока имени юнита
+             * @default null
+             */
+            name?: string | null;
+            /**
+             * @description Вернуть только юниты текущего пользователя
+             * @default false
+             */
+            onlyMine?: boolean;
+            /**
+             * @description Ограничить выборку одним проектом. Должен быть доступен пользователю, иначе результат пустой
+             * @default null
+             */
+            projectId?: string | null;
+            /**
+             * @description Идентификатор конкретного юнита
+             * @default null
+             */
+            unitId?: string | null;
+            /**
+             * @description Вернуть переданные юниты и связанные с ними (связи через хелпер переменной, в обе стороны)
+             * @default []
+             */
+            unitIds?: string[];
+        };
+        GetUnitListFilter2: {
             /** @default null */
             branch?: string | null;
             /** @default null */
@@ -1998,6 +2030,10 @@ export type components = {
             projectId?: string | null;
             /** @default null */
             unitId?: string | null;
+            /** @default [] */
+            unitIds?: string[] | {
+                [key: string]: string;
+            };
         };
         GetUnitReadModelById: {
             /** Format: uuid */
@@ -2469,6 +2505,13 @@ export type components = {
              */
             status: "success";
         };
+        /** @description Связь переменной конфига юнита с юнитом, выбранным через хелпер */
+        SvyazPeremenoi: {
+            /** @description Идентификатор выбранного юнита. Должен существовать, быть доступен по проекту и отличаться от самого юнита */
+            targetUnitId: string;
+            /** @description Идентификатор переменной конфига юнита */
+            variableId: string;
+        };
         UdalitPeremenuyuIzProekta: {
             code: string;
             projectId: string;
@@ -2606,6 +2649,8 @@ export type components = {
             projectName: string;
             prozesi: components["schemas"]["UnitProcess"][];
             statistikaKonteinera?: components["schemas"]["ContainerStats"] | null;
+            /** @description Связи переменных юнита с юнитами, выбранными через хелпер. Заполняется из проекции `svyazi_unitov` и реконсилируется при изменении конфига */
+            svyazi?: components["schemas"]["UnitSvyaz"][];
             unitSozdanSystemoi: boolean;
             /** @example 1730000000 */
             unixtimePoslednegoObnovleniyaUnita?: number | null;
@@ -2678,6 +2723,21 @@ export type components = {
             success: boolean;
             /** @example 1730000000 */
             unixtime: number;
+        };
+        /** @description Связь переменной юнита с юнитом, выбранным через хелпер (проекция svyazi_unitov) */
+        UnitSvyaz: {
+            /** @description Порт из конфигурации хелпера переменной */
+            port?: number | null;
+            /** @description Идентификатор проекта целевого юнита (денормализован для фильтрации списка) */
+            projectId: string;
+            /** @description Сервис из конфигурации хелпера переменной */
+            service?: string | null;
+            /** @description Суффикс из конфигурации хелпера переменной */
+            suffix?: string | null;
+            /** @description Идентификатор юнита, выбранного через хелпер */
+            targetUnitId: string;
+            /** @description Идентификатор переменной конфига юнита, для которой использован хелпер */
+            variableId: string;
         };
         /** @description Значение переменной юнита (PeremenyaUnita::toArray) */
         UnitVariable: {
@@ -2771,6 +2831,8 @@ export type components = {
         ZapolnitPeremenieUnita: {
             /** Format: uuid */
             id: string;
+            /** @description Связи переменных с юнитами, выбранными через хелпер. Пустой массив — связи не меняются; непустой список — полная замена набора связей юнита */
+            svyazi?: components["schemas"]["SvyazPeremenoi"][];
             /** @description Список заполняемых переменных юнита. Можно не передавать, если заполняются только тома */
             values?: components["schemas"]["ZnacheniePeremenoi"][];
             /** @description Тома юнита, которые нужно заполнить. `dir` обязан присутствовать в блоке `unitman_volumes` конфига юнита; имя тома берётся из конфига */
@@ -2794,6 +2856,8 @@ export type components = {
         };
         ZnacheniePeremenoi: {
             id: string;
+            /** @description Идентификатор юнита, выбранного пользователем через хелпер переменной. Для переменных без хелпера игнорируется; `null` — хелпер не использовался */
+            targetUnitId?: string | null;
             /** @example string */
             type: string;
             value: string;

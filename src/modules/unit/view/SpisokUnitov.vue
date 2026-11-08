@@ -16,7 +16,7 @@ import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorForm
 import {useRoute} from "vue-router";
 
 const unitiStore = useSpisokUnitovStore();
-const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska, proekti } = storeToRefs(unitiStore);
+const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska, proekti, nazvanieUnitaPoId } = storeToRefs(unitiStore);
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
 const { enable: enableAddForm } = storeToRefs(addFormStore);
@@ -75,6 +75,19 @@ function clearUnitIdFilter() {
   unitiStore.poluchitSpisokUnitov();
 }
 
+/** Подпись чипа фильтра связей: имя юнита из кеша либо его идентификатор. */
+function podpisSvyazi(unitId: string): string {
+  return nazvanieUnitaPoId.value(unitId) ?? unitId;
+}
+
+function clearSvyaziFilter() {
+  unitiStore.ochistitSvyaziUnita();
+}
+
+async function udalitSvyazIzFiltra(unitId: string) {
+  await unitiStore.perekluchitSvyazUnita(unitId);
+}
+
 </script>
 
 <template>
@@ -127,6 +140,23 @@ function clearUnitIdFilter() {
           :label="'id: '+ nastroikiSpiska.filter.unitId"
           @remove="clearUnitIdFilter"
       />
+    </div>
+    <div class="q-mb-md row items-center q-gutter-xs" v-if="nastroikiSpiska.filter.unitIds.length > 0">
+      <span class="fs-12 text-grey-8">{{ $t('unit.spisok_unitov.filter.svyazi') }}:</span>
+      <q-chip
+          v-for="unitId in nastroikiSpiska.filter.unitIds"
+          :key="'svyaz_filter_' + unitId"
+          removable
+          square
+          color="primary"
+          text-color="white"
+          icon="link"
+          :label="podpisSvyazi(unitId)"
+          @remove="udalitSvyazIzFiltra(unitId)"
+      />
+      <q-btn flat dense size="sm" color="primary" icon="clear" @click="clearSvyaziFilter">
+        <q-tooltip>{{ $t('unit.spisok_unitov.filter.clear_svyazi') }}</q-tooltip>
+      </q-btn>
     </div>
     <div class="row wrap items-start content-start">
       <template v-if="oshibkaZagruzkiSpiska">

@@ -191,6 +191,7 @@
       "podskazka_suffiks": "The suffix \"{suffix}\" will be appended to the link",
       "poisk": "Search unit by name or branch",
       "empty_result": "No units found",
+      "fiksaziya_hint": "The variable is linked to this unit. Click to unlink (id: {id})",
       "buttons": {
         "close": "Close",
         "refresh": "Refresh unit list"
@@ -319,7 +320,9 @@
         "only_mine": "Only mine",
         "unit_name": "Unit name",
         "branch": "Branch",
-        "project": "Project"
+        "project": "Project",
+        "svyazi": "Related units",
+        "clear_svyazi": "Clear related units filter"
       },
       "list": {
         "empty_result": "Empty list"
@@ -332,7 +335,11 @@
         "fields": {
           "id": "Id",
           "branch": "Branch",
-          "projectName": "Project"
+          "projectName": "Project",
+          "svyazi": "Related units"
+        },
+        "tooltips": {
+          "svyaz": "Show unit and units related to it (id: {id})"
         },
         "buttons": {
           "jobs": "jobs",

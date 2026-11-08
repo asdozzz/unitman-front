@@ -49,6 +49,25 @@ export type Statistika = Schema<"ContainerStats">;
 
 export type Link = Schema<"UnitLink">;
 
+/**
+ * Связь переменной конфига юнита с юнитом, выбранным через помощник.
+ *
+ * Отправляется в `ZapolnitPeremenieUnita.svyazi`: непустой список полностью
+ * заменяет набор связей юнита, пустой — оставляет связи без изменений.
+ */
+export type SvyazPeremenoi = Schema<"SvyazPeremenoi">;
+
+/**
+ * Связь юнита с другим юнитом, выбранным через помощник переменной
+ * (проекция `svyazi_unitov`).
+ *
+ * Приходит в read-модели списка юнитов (`UnitListItem.svyazi`). Одна связь
+ * описывает одну переменную конфига: несколько переменных могут указывать
+ * на один и тот же целевой юнит, поэтому для бейджей связи группируются
+ * по `targetUnitId`.
+ */
+export type SvyazUnita = Schema<"UnitSvyaz">;
+
 export type ZadachaUnitaBezShagov = Schema<"UnitProcessBriefJob">;
 
 export type ProzesUnitaBezShagov = Schema<"UnitProcessBrief">;
@@ -62,10 +81,39 @@ export type {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi};
 export class PeremenayaKonfiga {
     konfig: KonfigPeremenoi;
     value: string;
+    /**
+     * Юнит, зафиксированный при подстановке значения из помощника.
+     *
+     * Уходит на бэкенд как `ZnacheniePeremenoi.targetUnitId` (создание юнита
+     * и заполнение переменных), поэтому по нему строятся связи юнитов
+     * в read-модели списка.
+     */
+    targetUnitId: string | null;
+    /**
+     * Имя зафиксированного юнита — только для подписи в форме,
+     * на бэкенд не отправляется.
+     */
+    targetUnitName: string | null;
+    /**
+     * Пользователь изменил связь в текущей сессии формы.
+     *
+     * Нужно, чтобы отправить `targetUnitId: null` при снятии связи:
+     * `svyazi: []` на бэкенде означает «связи не меняются», поэтому
+     * удаление последней связи иначе до бэкенда не дойдёт.
+     */
+    svyazIzmenena: boolean;
 
-    constructor(konfig: KonfigPeremenoi, value: string = "") {
+    constructor(
+        konfig: KonfigPeremenoi,
+        value: string = "",
+        targetUnitId: string | null = null,
+        targetUnitName: string | null = null,
+    ) {
         this.konfig = konfig;
         this.value = value.length > 0 ? value : konfig.defaultValue;
+        this.targetUnitId = targetUnitId;
+        this.targetUnitName = targetUnitName;
+        this.svyazIzmenena = false;
     }
 }
 

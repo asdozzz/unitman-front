@@ -15,7 +15,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  ssylkaPoluchena: [link: string];
+  /**
+   * Ссылка вместе с юнитом, который её дал.
+   *
+   * `targetUnitId` уходит на бэкенд в `ZnacheniePeremenoi.targetUnitId`:
+   * бэкенд строит по нему связи юнитов в read-модели списка.
+   */
+  ssylkaPoluchena: [link: string, targetUnitId: string, targetUnitName: string];
 }>();
 
 const storPomoschnika = useStorPomoschnikaSsylki();
@@ -76,7 +82,9 @@ async function vibratUnit(unit: Unit) {
   vibraliUnitId.value = null;
 
   if (ssylka) {
-    emit("ssylkaPoluchena", ssylka);
+    // Юнит запоминается вместе со ссылкой: форма отправит его на бэкенд
+    // как `targetUnitId`, чтобы связать переменную с этим юнитом.
+    emit("ssylkaPoluchena", ssylka, unit.id, unit.name);
     zakrit();
   }
 }

@@ -355,11 +355,15 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 branch: this.form.branch,
                 unitName: this.form.unitName,
                 memoryLimit: this.form.memoryLimit,
+                // `targetUnitId` — юнит, выбранный через помощник переменной:
+                // по нему бэкенд создаёт связи юнитов в read-модели списка.
+                // Для переменных без помощника поле не передаётся.
                 znacheniePeremenoi: this.form.peremenieKonfiga.map((item) => {
                     return {
                         "id": item.konfig.id,
                         "value": item.value,
-                        "type": item.konfig.type
+                        "type": item.konfig.type,
+                        ...(item.targetUnitId ? {"targetUnitId": item.targetUnitId} : {}),
                     }
                 }),
                 volumes: this.form.volumes.map((volume) => ({

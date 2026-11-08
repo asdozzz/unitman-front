@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import UnitiService from "@/modules/unit/services/UnitiService";
-import type {Deistviye, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Deistviye, SvyazUnita, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {Schema} from "@/api/types";
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import {safeJsonParse} from "@/utils/json";
@@ -12,6 +13,12 @@ type NastroikiSpiska = {
         branch: string | null
         projectId: string | null,
         unitId: string | null,
+        /**
+         * Идентификаторы юнитов, выбранных через бейджи связей на карточке.
+         * Бэкенд возвращает сами юниты и связанные с ними (связи через
+         * помощник переменной, в обе стороны).
+         */
+        unitIds: string[],
     },
     limit: number,
     offset: number
@@ -41,6 +48,17 @@ const FILTER_UNITOV_STORAGE_KEY = 'FILTER_UNITOV_STORAGE_KEY';
 export type SpisokUnitovState = {
     nastroikiSpiska: NastroikiSpiska;
     spisok: Unit[];
+    /**
+     * Кеш «ид юнита → имя», чтобы подписывать бейджи связей и чипы фильтра
+     * даже когда юнит отсутствует в текущей выборке.
+     */
+    nazvaniyaUnitov: Record<string, string>;
+    /**
+     * Иды связанных юнитов, имена которых уже запрашивались отдельно.
+     * Защищает от повторных запросов при каждом обновлении списка, если
+     * имя получить так и не удалось.
+     */
+    zaproshennieNazvaniyaSvyazei: string[];
     proekti: {
         spisok: Proekt[];
         loader: boolean;
@@ -57,28 +75,47 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
         const nastroikiIzLocalStorageAsJson = localStorage.getItem(FILTER_UNITOV_STORAGE_KEY);
 
-        let nastroiki: NastroikiSpiska = {
+        const nastroikiPoUmolchaniyu: NastroikiSpiska = {
             filter: {
                 onlyMine: false,
                 name: null,
                 branch: null,
                 projectId: null,
                 unitId: null,
+                unitIds: [],
             },
             limit: 100,
             offset: 0
         };
 
+        let nastroiki: NastroikiSpiska = nastroikiPoUmolchaniyu;
+
         if (nastroikiIzLocalStorageAsJson) {
             const nastroikiIzLocalStorage: NastroikiSpiska | null = safeJsonParse<NastroikiSpiska>(nastroikiIzLocalStorageAsJson) || null;
             if (nastroikiIzLocalStorage) {
-                nastroiki = nastroikiIzLocalStorage;
+                // Сохранённые настройки могли быть записаны старой версией
+                // приложения, поэтому недостающие поля добираем значениями
+                // по умолчанию.
+                nastroiki = {
+                    ...nastroikiPoUmolchaniyu,
+                    ...nastroikiIzLocalStorage,
+                    filter: {
+                        ...nastroikiPoUmolchaniyu.filter,
+                        ...(nastroikiIzLocalStorage.filter ?? {}),
+                    },
+                };
             }
+        }
+
+        if (!Array.isArray(nastroiki.filter.unitIds)) {
+            nastroiki.filter.unitIds = [];
         }
 
         return {
             nastroikiSpiska: nastroiki,
             spisok:[],
+            nazvaniyaUnitov: {},
+            zaproshennieNazvaniyaSvyazei: [],
             proekti: {
                 spisok: [],
                 loader: false
@@ -97,6 +134,76 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         stopUnitLoader(id: string) {
             this.unitLoaders[id] = false;
         },
+        /**
+         * Кладёт имена юнитов в кеш `nazvaniyaUnitov`.
+         *
+         * Нужен, чтобы бейджи связей на карточке и чипы фильтра подписывались
+         * именами, даже если связанный юнит не попал в текущую выборку.
+         */
+        zapomnitNazvaniya(uniti: Unit[]) {
+            uniti.forEach((unit: Unit) => {
+                this.nazvaniyaUnitov[unit.id] = unit.name;
+            });
+        },
+        /**
+         * Дочитывает имена связанных юнитов, которых нет в текущей выборке.
+         *
+         * Без этого бейджи связей и чипы фильтра подписывались бы сервисом
+         * помощника либо сырым идом. Имена запрашиваются одним вызовом через
+         * фильтр `unitIds` — бэкенд вернёт переданные юниты вместе со связанными.
+         */
+        async dopolnitNazvaniyaSvyazei(uniti: Unit[]) {
+            const neizvestnie = new Set<string>();
+
+            uniti.forEach((unit: Unit) => {
+                (unit.svyazi ?? []).forEach((svyaz: SvyazUnita) => {
+                    if (!this.nazvaniyaUnitov[svyaz.targetUnitId]) {
+                        neizvestnie.add(svyaz.targetUnitId);
+                    }
+                });
+            });
+
+            const zaprosit = [...neizvestnie].filter((id: string) => {
+                return !this.zaproshennieNazvaniyaSvyazei.includes(id);
+            });
+
+            if (zaprosit.length === 0) {
+                return;
+            }
+
+            this.zaproshennieNazvaniyaSvyazei.push(...zaprosit);
+
+            const response = await UnitiService.list({filter: {unitIds: zaprosit}, limit: 1000});
+
+            if (response.status === "success") {
+                this.zapomnitNazvaniya(response.data);
+            }
+        },
+        /**
+         * Добавляет либо убирает юнит из фильтра связей и перезапрашивает список.
+         *
+         * Фильтр `unitIds` на бэкенде возвращает сами переданные юниты и
+         * связанные с ними (связи через помощник переменной, в обе стороны).
+         */
+        async perekluchitSvyazUnita(unitId: string) {
+            const unitIds = this.nastroikiSpiska.filter.unitIds;
+
+            this.nastroikiSpiska.filter.unitIds = unitIds.includes(unitId)
+                ? unitIds.filter((id: string) => id !== unitId)
+                : [...unitIds, unitId];
+
+            await this.poluchitSpisokUnitov();
+        },
+        /** Сбрасывает фильтр связей и перезапрашивает список. */
+        async ochistitSvyaziUnita() {
+            if (this.nastroikiSpiska.filter.unitIds.length === 0) {
+                return;
+            }
+
+            this.nastroikiSpiska.filter.unitIds = [];
+
+            await this.poluchitSpisokUnitov();
+        },
         udalitUnitIzSpiska(id: string): void {
             const index = this.spisok.findIndex((item: Unit) => item.id === id);
 
@@ -107,9 +214,23 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
         async poluchitSpisokUnitov() {
             this.loaderSpiskaUnitov = true;
             localStorage.setItem(FILTER_UNITOV_STORAGE_KEY, JSON.stringify(this.nastroikiSpiska))
-            const response = await UnitiService.list(this.nastroikiSpiska);
+            // Пустой массив равнозначен отсутствию фильтра — не отправляем его,
+            // чтобы не менять форму запроса без необходимости.
+            const filter = this.nastroikiSpiska.filter;
+            const params: Schema<"GetUnitList"> = {
+                filter: filter.unitIds.length > 0
+                    ? {...filter, unitIds: filter.unitIds}
+                    : {...filter, unitIds: undefined},
+                limit: this.nastroikiSpiska.limit,
+                offset: this.nastroikiSpiska.offset,
+            };
+            const response = await UnitiService.list(params);
             if (response.status === "success") {
                 this.spisok = response.data;
+                this.zapomnitNazvaniya(this.spisok);
+                // Имена связанных юнитов нужны для подписей бейджей и чипов;
+                // список при этом уже отрисован, поэтому не ждём этот запрос.
+                this.dopolnitNazvaniyaSvyazei(this.spisok);
             } else if (response.status === "fail") {
                 this.spisok = [];
                 this.oshibkaZagruzkiSpiska = response.data.message;
@@ -130,6 +251,8 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
             if (response.status === "fail"){
                 Notify.create(response.data.message);
             } else if (response.status === "success") {
+                this.zapomnitNazvaniya([response.data]);
+
                 const unitIndex = this.spisok.findIndex((unit: Unit) => unit.id === id);
 
                 if (unitIndex !== -1) {
@@ -389,6 +512,40 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 return item.deistviya.filter((action: Deistviye) => {
                     return store.esliZapushen(item) || action.prepare;
                 });
+            }
+        },
+        /**
+         * Уникальные связанные юниты карточки.
+         *
+         * В read-модели связь описана на уровне переменной, поэтому несколько
+         * записей могут указывать на один и тот же `targetUnitId` — для бейджей
+         * оставляем по одному представителю.
+         */
+        svyazannieUniti() {
+            return (item: Unit): SvyazUnita[] => {
+                const unikalnie = new Map<string, SvyazUnita>();
+
+                (item.svyazi ?? []).forEach((svyaz: SvyazUnita) => {
+                    if (!unikalnie.has(svyaz.targetUnitId)) {
+                        unikalnie.set(svyaz.targetUnitId, svyaz);
+                    }
+                });
+
+                return [...unikalnie.values()];
+            }
+        },
+        /** Имя юнита из кеша; `null`, если оно ещё не загружено. */
+        nazvanieUnitaPoId() {
+            const store = this;
+            return (unitId: string): string | null => {
+                return store.nazvaniyaUnitov[unitId] ?? null;
+            }
+        },
+        /** Выбран ли юнит в фильтре связей. */
+        vibranLiUnitVFiltreSvyazei() {
+            const store = this;
+            return (unitId: string): boolean => {
+                return store.nastroikiSpiska.filter.unitIds.includes(unitId);
             }
         }
     }
