@@ -20,6 +20,13 @@ variables:
       type: 'ws'
       suffix: /connection/websocket
 
+services:
+    app:
+      ports:
+        - port: 8083
+          type: 'http'
+          
+
 build:
   image: asdozzz/dind-unit:latest
 
