@@ -442,7 +442,7 @@ export type paths = {
         put?: never;
         /**
          * Загрузить zip-архив
-         * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Поле unitId необязательно: без него файл сохраняется как черновик (unitId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Поле name необязательно: при отсутствии берётся имя загруженного файла.
+         * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Владелец файла ровно один: unitId — файл юнита, projectId — архив каталога типов томов проекта (общий, к юниту не привязывается). Без обоих полей файл сохраняется как черновик (unitId = null, projectId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Одновременная передача unitId и projectId — ошибка. Поле name необязательно: при отсутствии берётся имя загруженного файла.
          */
         post: operations["post_app_mediateka_infra_mediateka_upload"];
         delete?: never;
@@ -1630,6 +1630,91 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/volumeType/add": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Добавить тип тома */
+        post: operations["post_app_unitman_infra_volumetype_add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/volumeType/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить тип тома */
+        post: operations["post_app_unitman_infra_volumetype_delete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/volumeType/file/add": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Прикрепить архив к типу тома */
+        post: operations["post_app_unitman_infra_volumetype_addfile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/volumeType/file/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Открепить архив от типа тома */
+        post: operations["post_app_unitman_infra_volumetype_deletefile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/volumeType/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Список типов томов проекта */
+        post: operations["post_app_unitman_infra_volumetype_list"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
@@ -1681,6 +1766,28 @@ export type components = {
         AddUserToProject: {
             id: string;
             userId: string;
+        };
+        AddVolumeType: {
+            /**
+             * @description Код типа тома; должен совпадать с `dir` тома
+             * @example config
+             */
+            code: string;
+            /** @example Конфигурация */
+            name: string;
+            /** Format: uuid */
+            projectId: string;
+        };
+        AddVolumeTypeFile: {
+            /** @example config */
+            code: string;
+            /**
+             * Format: uuid
+             * @description Идентификатор архива проекта, загруженного в медиатеку
+             */
+            fileId: string;
+            /** Format: uuid */
+            projectId: string;
         };
         BlockByAdmin: {
             /** Format: uuid */
@@ -1758,6 +1865,28 @@ export type components = {
         DeleteRepo: {
             repoId: string;
         };
+        DeleteVolumeType: {
+            /**
+             * @description Код типа тома. Удаление запрещено, если к типу привязаны архивы
+             * @example config
+             */
+            code: string;
+            /** Format: uuid */
+            projectId: string;
+        };
+        DeleteVolumeTypeFile: {
+            /** @example config */
+            code: string;
+            /** Format: uuid */
+            fileId: string;
+            /** Format: uuid */
+            projectId: string;
+            /**
+             * @description Если true — файл удаляется из медиатеки вместе с отвязкой (при условии, что он не привязан к другим типам)
+             * @default false
+             */
+            udalitFayl?: boolean;
+        };
         DisableProject: {
             id: string;
         };
@@ -1766,6 +1895,14 @@ export type components = {
             projectId: string;
             tip: string;
             value: string;
+        };
+        DobavitTipVoluma: {
+            /** @default  */
+            code?: string;
+            /** @default  */
+            name?: string;
+            /** @default  */
+            projectId?: string;
         };
         EnableProject: {
             id: string;
@@ -1929,13 +2066,18 @@ export type components = {
              */
             name: string;
             /**
+             * Format: uuid
+             * @description Идентификатор проекта-владельца. Заполняется для архива каталога томов проекта; null для черновика и файлов юнита. Ровно один владелец: unitId либо projectId
+             */
+            projectId?: string | null;
+            /**
              * @description Размер файла в байтах
              * @example 1048576
              */
             size: number;
             /**
              * Format: uuid
-             * @description Идентификатор юнита, к которому прикреплён файл; null для черновика (загружен до создания юнита)
+             * @description Идентификатор юнита, к которому прикреплён файл. null для черновика (загружен до создания юнита) и для архива каталога проекта
              */
             unitId?: string | null;
             /**
@@ -1986,6 +2128,16 @@ export type components = {
         OstanovitUnit: {
             /** Format: uuid */
             id: string;
+        };
+        OtkrepitFaylOtTipaVoluma: {
+            /** @default  */
+            code?: string;
+            /** @default  */
+            fileId?: string;
+            /** @default  */
+            projectId?: string;
+            /** @default false */
+            udalitFayl?: boolean;
         };
         PeresobratModelSpisokUnitov: {
             /** Format: uuid */
@@ -2061,6 +2213,10 @@ export type components = {
             /** Format: uuid */
             targetUnitId: string;
         };
+        PoluchitTipyVolumov: {
+            /** @default  */
+            projectId?: string;
+        };
         PometitKakSlomanii: {
             /** Format: uuid */
             id: string;
@@ -2070,6 +2226,14 @@ export type components = {
         };
         PostavitVOcheredNaUdalenie: {
             id: string;
+        };
+        PrikrepitFaylKTipuVoluma: {
+            /** @default  */
+            code?: string;
+            /** @default  */
+            fileId?: string;
+            /** @default  */
+            projectId?: string;
         };
         /** @description Ветка проекта (VetkaProekta) */
         ProjectBranch: {
@@ -2272,7 +2436,7 @@ export type components = {
             projectId: string;
             /** @example feature-123 */
             unitName: string;
-            /** @description Тома юнита. Значения `dir` и `name` берутся из ответа `poluchitKonfigIzHranilisha`, `fileId` — идентификатор файла, загруженного в медиатеку как черновик (может отсутствовать) */
+            /** @description Тома юнита. Значения `dir` и `name` берутся из ответа `poluchitKonfigIzHranilisha`, `fileId` — идентификатор файла из медиатеки (может отсутствовать) */
             volumes?: components["schemas"]["SozdatUnitVolume"][];
             znacheniePeremenoi?: components["schemas"]["ZnacheniePeremenoi"][];
         };
@@ -2281,7 +2445,7 @@ export type components = {
             dir: string;
             /**
              * Format: uuid
-             * @description Идентификатор файла-черновика в медиатеке. Если не передан — том описывает каталог без файла
+             * @description Идентификатор файла из медиатеки: либо черновик, загруженный пользователем, либо архив каталога проекта, привязанный к типу тома с `code` = `dir`. Арбитражные файлы проекта отклоняются. Если не передан — том описывает каталог без файла
              */
             fileId?: string | null;
             /** @example uploads */
@@ -2312,6 +2476,12 @@ export type components = {
         UdalitSlomaniyUnit: {
             /** Format: uuid */
             id: string;
+        };
+        UdalitTipVoluma: {
+            /** @default  */
+            code?: string;
+            /** @default  */
+            projectId?: string;
         };
         UdalitUnit: {
             /** Format: uuid */
@@ -2362,7 +2532,7 @@ export type components = {
         /** @description Сервис юнита (KonfigServisa::toArray) */
         UnitConfigService: {
             /** @description Пустой массив, если кеш не настроен */
-            cache: components["schemas"]["UnitConfigServiceCache"] | unknown[];
+            cache: components["schemas"]["UnitConfigServiceCache"] | Record<string, never>[];
             /** @example backend */
             name: string | null;
             ports: components["schemas"]["UnitConfigServicePort"][];
@@ -2443,6 +2613,26 @@ export type components = {
             unixtimePoslednegoObnovleniyaVHranilishe?: number | null;
             zapushen: boolean;
         };
+        /** @description Архив, привязанный к типу тома (VolumeTypeFileItem::toArray) */
+        UnitmanVolumeTypeFile: {
+            /**
+             * @description Момент привязки, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            createdAt: number;
+            /**
+             * Format: uuid
+             * @description Идентификатор файла в медиатеке
+             */
+            fileId: string;
+            /** @example config.zip */
+            name: string;
+            /**
+             * @description Размер файла в байтах
+             * @example 1048576
+             */
+            size: number;
+        };
         /** @description Процесс юнита (UnitProcess::toArray) */
         UnitProcess: {
             id: string;
@@ -2501,13 +2691,13 @@ export type components = {
         /** @description Том юнита — описание из блока unitman_volumes плюс привязанный файл медиатеки (UnitVolume::toArray) */
         UnitVolume: {
             /**
-             * @description Уникальный ключ тома внутри контейнера юнита
+             * @description Уникальный ключ тома внутри контейнера юнита; соответствует `code` типа тома в каталоге проекта
              * @example config
              */
             dir: string;
             /**
              * Format: uuid
-             * @description Идентификатор привязанного файла медиатеки; null, пока файл не загружен
+             * @description Идентификатор привязанного файла медиатеки (черновик юнита либо архив каталога проекта); null, пока файл не загружен
              */
             fileId: string | null;
             /**
@@ -2519,7 +2709,7 @@ export type components = {
         /** @description Описание тома из блока unitman_volumes в конфиге юнита (VolumeConfig::toArray) */
         UnitVolumeConfig: {
             /**
-             * @description Уникальный ключ тома
+             * @description Уникальный ключ тома; соответствует `code` типа тома в каталоге проекта (`/api/volumeType/list`)
              * @example config
              */
             dir: string;
@@ -2538,6 +2728,28 @@ export type components = {
             id: string;
             /** @description Параметры выполняемого действия */
             values: components["schemas"]["ZnacheniePeremenoi"][];
+        };
+        /** @description Тип тома проекта с привязанными архивами (VolumeTypeList::toArray) */
+        VolumeTypeList: {
+            /**
+             * @description Код типа тома; должен совпадать с `dir` тома
+             * @example config
+             */
+            code: string;
+            /** @description Архивы каталога, привязанные к типу */
+            files: components["schemas"]["UnitmanVolumeTypeFile"][];
+            /**
+             * @description Отображаемое название типа
+             * @example Конфигурация
+             */
+            name: string;
+        };
+        VolumeTypeListRequest: {
+            /**
+             * Format: uuid
+             * @description Идентификатор проекта
+             */
+            projectId: string;
         };
         /** @description Событие webhook (WebhookEventDlySpiska) */
         WebhookEvent: {
@@ -3472,7 +3684,12 @@ export interface operations {
                     name?: string;
                     /**
                      * Format: uuid
-                     * @description Идентификатор юнита; не передаётся при загрузке черновика
+                     * @description Идентификатор проекта для архива каталога типов томов; не передаётся одновременно с unitId
+                     */
+                    projectId?: string | null;
+                    /**
+                     * Format: uuid
+                     * @description Идентификатор юнита; не передаётся при загрузке черновика или проектного архива
                      */
                     unitId?: string | null;
                 };
@@ -5893,7 +6110,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description Конфигурация юнита; пустой массив, если конфигурация не задана */
-                        data: components["schemas"]["UnitConfig"] | unknown[];
+                        data: components["schemas"]["UnitConfig"] | Record<string, never>[];
                         /**
                          * @example success
                          * @enum {string}
@@ -6587,6 +6804,236 @@ export interface operations {
                     "application/json": {
                         /** @description Пустой ответ: запуск юнита поставлен в очередь */
                         data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_volumetype_add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddVolumeType"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: тип тома добавлен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: тип тома добавлен */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_volumetype_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteVolumeType"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: тип тома удалён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: тип тома удалён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_volumetype_addfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddVolumeTypeFile"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: архив прикреплён к типу тома */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: архив прикреплён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_volumetype_deletefile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteVolumeTypeFile"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: архив откреплён от типа тома */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: архив откреплён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_volumetype_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VolumeTypeListRequest"];
+            };
+        };
+        responses: {
+            /** @description Типы томов проекта с привязанными архивами */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Типы томов проекта */
+                        data: components["schemas"]["VolumeTypeList"][];
                         /**
                          * @example success
                          * @enum {string}

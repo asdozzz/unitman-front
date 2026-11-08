@@ -2,9 +2,11 @@ import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import UnitiService from "@/modules/unit/services/UnitiService";
 import MediatekaService from "@/modules/unit/services/MediatekaService";
+import VolumeTypesService from "@/modules/unit/services/VolumeTypesService";
 import type {Schema} from "@/api/types";
 import type {Unit, TomKonfiga, TomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {PeremenayaKonfiga, sozdatTomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {FaylTipaToma, TipToma} from "@/modules/unit/store/SpisokProektov/model/TipToma";
 
 export class FormaDobavleniyaUnita {
     projectId: string;
@@ -116,18 +118,70 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
          *
          * Иды берутся из томов: после успешного создания юнита бэкенд уже
          * привязал файлы, поэтому форма сбрасывает их перед закрытием.
+         *
+         * Архивы каталога проекта — не черновики: они принадлежат проекту
+         * и могут использоваться другими юнитами, поэтому не удаляются.
          */
         otchistitChernoviki() {
             const fileIds = this.form.volumes
+                .filter((volume) => !volume.izProekta)
                 .map((volume) => volume.volume.fileId)
                 .filter((fileId): fileId is string => Boolean(fileId));
 
             this.form.volumes.forEach((volume) => {
                 volume.volume.fileId = null;
+                volume.izProekta = false;
             });
 
             fileIds.forEach((fileId) => {
                 MediatekaService.udalitFayl(fileId);
+            });
+        },
+        /**
+         * Получить архивы каталога типов томов проекта.
+         *
+         * `code` типа тома совпадает с `dir` тома конфига, поэтому файлы
+         * раскладываются по томам: каждый том видит только архивы своего
+         * типа. Ошибка загрузки каталога не блокирует создание юнита:
+         * тома останутся без бейджей проекта.
+         */
+        async poluchitFaylyTipovTomov(): Promise<TipToma[]> {
+            if (!this.form.projectId) {
+                return [];
+            }
+
+            const response = await VolumeTypesService.list(this.form.projectId);
+
+            if (response.status === "success") {
+                return response.data;
+            }
+
+            if (response.status === "fail") {
+                this.oshibkaOtBackenda = response.data.message;
+            } else if (response.status === "error") {
+                this.oshibkaOtBackenda = response.message;
+            }
+
+            return [];
+        },
+        /**
+         * Применить архивы каталога проекта к томам формы по `dir`/`code`.
+         *
+         * Если том уже ссылается на архив проекта (файл совпал с одним из
+         * архивов каталога), он помечается `izProekta`: такой файл
+         * запрещено удалять.
+         */
+        primenitFaylyTipovTomov(tipiTomov: TipToma[]) {
+            const faylyPoKodu = new Map<string, FaylTipaToma[]>(
+                tipiTomov.map((tip) => [tip.code, tip.files]));
+
+            this.form.volumes.forEach((volume) => {
+                const fayly = faylyPoKodu.get(volume.volume.dir) ?? [];
+                volume.faylyProekta = fayly;
+
+                if (volume.volume.fileId) {
+                    volume.izProekta = fayly.some((file) => file.fileId === volume.volume.fileId);
+                }
             });
         },
         async poluchitVetki() {
@@ -199,6 +253,11 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 this.form.volumes = response.data.volumes.map(
                     (volume: TomKonfiga) => sozdatTomUnita(volume));
 
+                // Архивы каталога проекта подставляются в тома бейджами:
+                // тип тома совпадает с `dir` тома конфига.
+                const tipiTomov = await this.poluchitFaylyTipovTomov();
+                this.primenitFaylyTipovTomov(tipiTomov);
+
                 this.initPeremenie = true;
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
@@ -227,20 +286,62 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 }
 
                 volume.volume.fileId = response.data.id;
+                volume.izProekta = false;
             } else if (response.status === "fail") {
                 volume.oshibka = response.data.message;
             } else if (response.status === "error") {
                 volume.oshibka = response.message;
             }
         },
+        /**
+         * Подставить ид архива проекта в том.
+         *
+         * Архив принадлежит проекту, поэтому помечается `izProekta`:
+         * удалять его нельзя, доступна только очистка поля.
+         */
+        vibratFaylProekta(volume: TomUnita, fileId: string) {
+            // Прежний черновик юнита при замене удаляется из медиатеки,
+            // архивы проекта при этом не трогаются.
+            if (volume.volume.fileId && !volume.izProekta) {
+                const chernovikId = volume.volume.fileId;
+                volume.volume.fileId = null;
+                MediatekaService.udalitFayl(chernovikId);
+            }
+
+            volume.volume.fileId = fileId;
+            volume.izProekta = true;
+            volume.oshibka = null;
+        },
+        /**
+         * Очистить поле файла тома.
+         *
+         * Для архива проекта файл не удаляется — только отвязывается от
+         * формы. Черновик юнита удаляется из медиатеки, чтобы не оставлять
+         * сироту.
+         */
+        ochistitFaylToma(volume: TomUnita) {
+            const fileId = volume.volume.fileId;
+            const izProekta = volume.izProekta;
+
+            volume.volume.fileId = null;
+            volume.izProekta = false;
+            volume.oshibka = null;
+
+            if (fileId && !izProekta) {
+                MediatekaService.udalitFayl(fileId);
+            }
+        },
         /** Отвязать файл от тома и удалить черновик из медиатеки. */
         udalitFaylToma(volume: TomUnita) {
             const fileId = volume.volume.fileId;
+            const izProekta = volume.izProekta;
 
             volume.volume.fileId = null;
+            volume.izProekta = false;
             volume.oshibka = null;
 
-            if (!fileId) {
+            // Архив проекта не удаляем: он общий для всех юнитов проекта.
+            if (!fileId || izProekta) {
                 return;
             }
 
@@ -274,6 +375,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 // поэтому иды сбрасываются: закрытие формы не тронет медиатеку.
                 this.form.volumes.forEach((volume) => {
                     volume.volume.fileId = null;
+                    volume.izProekta = false;
                 });
                 this.oshibkaOtBackenda = null;
             } else if (response.status === "fail") {

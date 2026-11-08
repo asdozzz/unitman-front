@@ -1,5 +1,6 @@
 import type {Schema} from "@/api/types";
 import {StatusProzesa, StatusZadachi, TipProzesa, TipZadachi} from "@/modules/unit/store/SpisokUnitov/model/UnitEnums";
+import type {FaylTipaToma} from "@/modules/unit/store/SpisokProektov/model/TipToma";
 
 /**
  * Модели юнита — тонкие алиасы над схемами OpenAPI.
@@ -85,18 +86,27 @@ export type TomKonfiga = Schema<"UnitVolume">;
  *
  * `volume.fileId` — ид файла в медиатеке (`null`, пока файл не загружен),
  * `zagruzka` и `oshibka` — состояние запроса к медиатеке.
+ *
+ * `faylyProekta` — архивы каталога типов томов проекта, у которых `code`
+ * совпадает с `dir` тома: их можно подставить в том нажатием на бейдж.
+ * `izProekta` — выбран именно архив проекта: такой файл принадлежит
+ * проекту, поэтому его нельзя удалить, но можно очистить поле.
  */
 export type TomUnita = {
     volume: TomKonfiga;
     zagruzka: boolean;
     oshibka: string | null;
+    faylyProekta: FaylTipaToma[];
+    izProekta: boolean;
 };
 
 /** Создать строку тома для формы. */
-export function sozdatTomUnita(volume: TomKonfiga): TomUnita {
+export function sozdatTomUnita(volume: TomKonfiga, faylyProekta: FaylTipaToma[] = []): TomUnita {
     return {
         volume,
         zagruzka: false,
         oshibka: null,
+        faylyProekta,
+        izProekta: false,
     };
 }

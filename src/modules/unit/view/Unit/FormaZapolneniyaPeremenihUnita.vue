@@ -51,6 +51,8 @@ async function otpravitFormu() {
                 :volume="volume"
                 @zagruzit="formStore.zagruzitFaylToma"
                 @udalit="formStore.udalitFaylToma"
+                @vibrat="formStore.vibratFaylProekta"
+                @ochistit="formStore.ochistitFaylToma"
             />
           </template>
         </template>

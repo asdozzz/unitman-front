@@ -136,7 +136,8 @@
         "users": "Users",
         "variables": "Variables",
         "repo_event_handler": "Repository Events Handler",
-        "webhooks": "Webhooks"
+        "webhooks": "Webhooks",
+        "volume_types": "Volume types"
       }
     },
     "spisok_rep": {
@@ -156,7 +157,32 @@
       },
       "hints": {
         "delete_file": "Delete volume file",
-        "file_attached": "File uploaded and will be attached to the unit"
+        "file_attached": "File uploaded and will be attached to the unit",
+        "project_files": "Project archives for this volume type",
+        "project_file_selected": "A project archive is selected: it cannot be deleted, but the field can be cleared",
+        "clear_file": "Clear field"
+      }
+    },
+    "tipi_toma": {
+      "title": "Project volume types",
+      "fields": {
+        "labels": {
+          "code": "Type code (volume dir)",
+          "name": "Name",
+          "files": "type zip archives"
+        }
+      },
+      "buttons": {
+        "add": "Add type"
+      },
+      "list": {
+        "empty_result": "No volume types added yet",
+        "no_files": "No archives attached to this type"
+      },
+      "hints": {
+        "delete_type": "Delete volume type",
+        "delete_type_forbidden": "A type with attached archives cannot be deleted",
+        "delete_file": "Detach and delete archive"
       }
     },
     "pomoschnik_ssylki": {

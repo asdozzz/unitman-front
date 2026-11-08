@@ -7,6 +7,7 @@ import SpisokPeremenihProekta from "@/modules/unit/view/Proekti/SpisokPeremenihP
 import FormaObnovleniyaNastroekHuka from "@/modules/unit/view/Proekti/FormaObnovleniyaNastroekHuka.vue";
 import SpisokWebhookovProekta from "@/modules/unit/view/Proekti/SpisokWebhookovProekta.vue";
 import SobitiyaWebhooka from "@/modules/unit/view/Proekti/SobitiyaWebhooka.vue";
+import TipiTomaProekta from "@/modules/unit/view/Proekti/TipiTomaProekta.vue";
 
 export default [
     {
@@ -50,6 +51,11 @@ export default [
                 path: 'webhooks',
                 component: SpisokWebhookovProekta,
                 name: 'project_webhooks',
+            },
+            {
+                path: 'volume_types',
+                component: TipiTomaProekta,
+                name: 'project_volume_types',
             }
         ]
     },

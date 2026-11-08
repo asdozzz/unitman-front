@@ -1,20 +1,30 @@
 import {defineStore} from "pinia";
 import UnitiService from "@/modules/unit/services/UnitiService";
 import MediatekaService from "@/modules/unit/services/MediatekaService";
+import VolumeTypesService from "@/modules/unit/services/VolumeTypesService";
 import type {Schema} from "@/api/types";
 import type {TomKonfiga, TomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import { PeremenayaKonfiga, sozdatTomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type {FaylTipaToma, TipToma} from "@/modules/unit/store/SpisokProektov/model/TipToma";
 
 
 
 class FormaZapolneniyaPeremenih {
     id: string;
+    /** Проект юнита — нужен для загрузки каталога типов томов. */
+    projectId: string;
     values: PeremenayaKonfiga[];
     /** Тома из блока конфига `unitman_volumes` с состоянием загрузки файлов. */
     volumes: TomUnita[];
 
-    constructor(id: string = "", values: PeremenayaKonfiga[] = [], volumes: TomUnita[] = []) {
+    constructor(
+        id: string = "",
+        projectId: string = "",
+        values: PeremenayaKonfiga[] = [],
+        volumes: TomUnita[] = [],
+    ) {
         this.id = id;
+        this.projectId = projectId;
         this.values = values;
         this.volumes = volumes;
     }
@@ -37,8 +47,8 @@ export const useFormaZapolneniyaPeremenihUnitaStore = defineStore('FormaZapolnen
         };
     },
     actions: {
-        otkritFormu(id: string) {
-            this.form = new FormaZapolneniyaPeremenih(id);
+        otkritFormu(id: string, projectId: string = "") {
+            this.form = new FormaZapolneniyaPeremenih(id, projectId);
             this.enable = true;
             this.oshibkaOtBackenda = null;
             this.loader = false;
@@ -61,6 +71,10 @@ export const useFormaZapolneniyaPeremenihUnitaStore = defineStore('FormaZapolnen
                     (item: Schema<"UnitVariable">) => new PeremenayaKonfiga(item.konfig, item.value));
                 this.form.volumes = response.data.volumes.map(
                     (volume: TomKonfiga) => sozdatTomUnita(volume));
+
+                // Архивы каталога проекта подставляются в тома бейджами.
+                const tipiTomov = await this.poluchitFaylyTipovTomov();
+                this.primenitFaylyTipovTomov(tipiTomov);
             } else if (response.status === "fail") {
                 this.oshibkaOtBackenda = response.data.message;
             } else if (response.status === "error") {
@@ -88,22 +102,100 @@ export const useFormaZapolneniyaPeremenihUnitaStore = defineStore('FormaZapolnen
                 }
 
                 volume.volume.fileId = response.data.id;
+                volume.izProekta = false;
             } else if (response.status === "fail") {
                 volume.oshibka = response.data.message;
             } else if (response.status === "error") {
                 volume.oshibka = response.message;
             }
         },
+        /**
+         * Получить архивы каталога типов томов проекта.
+         *
+         * Архивы раскладываются по томам по совпадению `code` типа и `dir`
+         * тома. Недоступность каталога не блокирует форму: тома просто
+         * останутся без бейджей проекта.
+         */
+        async poluchitFaylyTipovTomov(): Promise<TipToma[]> {
+            const projectId = this.form.projectId;
+
+            if (!projectId) {
+                return [];
+            }
+
+            const response = await VolumeTypesService.list(projectId);
+
+            if (response.status === "success") {
+                return response.data;
+            }
+
+            return [];
+        },
+        /**
+         * Применить архивы каталога проекта к томам формы по `dir`/`code`.
+         *
+         * Если том уже ссылается на архив проекта (файл совпал с одним из
+         * архивов каталога), он помечается `izProekta`: такой файл
+         * запрещено удалять.
+         */
+        primenitFaylyTipovTomov(tipiTomov: TipToma[]) {
+            const faylyPoKodu = new Map<string, FaylTipaToma[]>(
+                tipiTomov.map((tip) => [tip.code, tip.files]));
+
+            this.form.volumes.forEach((volume) => {
+                const fayly = faylyPoKodu.get(volume.volume.dir) ?? [];
+                volume.faylyProekta = fayly;
+
+                if (volume.volume.fileId) {
+                    volume.izProekta = fayly.some((file) => file.fileId === volume.volume.fileId);
+                }
+            });
+        },
+        /**
+         * Подставить ид архива проекта в том.
+         *
+         * Архив проекта помечается `izProekta`: удалять его нельзя,
+         * доступна только очистка поля.
+         */
+        vibratFaylProekta(volume: TomUnita, fileId: string) {
+            if (volume.volume.fileId && !volume.izProekta) {
+                const chernovikId = volume.volume.fileId;
+                volume.volume.fileId = null;
+                MediatekaService.udalitFayl(chernovikId);
+            }
+
+            volume.volume.fileId = fileId;
+            volume.izProekta = true;
+            volume.oshibka = null;
+        },
+        /** Очистить поле файла: архив проекта не удаляется, черновик — удаляется. */
+        ochistitFaylToma(volume: TomUnita) {
+            const fileId = volume.volume.fileId;
+            const izProekta = volume.izProekta;
+
+            volume.volume.fileId = null;
+            volume.izProekta = false;
+            volume.oshibka = null;
+
+            if (fileId && !izProekta) {
+                MediatekaService.udalitFayl(fileId);
+            }
+        },
         /** Отвязать файл от тома и удалить его из медиатеки. */
         udalitFaylToma(volume: TomUnita) {
             const fileId = volume.volume.fileId;
+            const izProekta = volume.izProekta;
 
             volume.volume.fileId = null;
+            volume.izProekta = false;
             volume.oshibka = null;
 
-            if (fileId) {
-                MediatekaService.udalitFayl(fileId);
+            // Архив проекта не удаляем: он общий для всех юнитов проекта.
+            if (!fileId || izProekta) {
+                return;
             }
+
+            MediatekaService.udalitFayl(fileId);
         },
         async otpravitFormu() {
             this.loader = true;

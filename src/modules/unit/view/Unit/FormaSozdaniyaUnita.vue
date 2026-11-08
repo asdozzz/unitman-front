@@ -116,6 +116,8 @@ function projectChanged() {
               :volume="volume"
               @zagruzit="addFormStore.zagruzitFaylToma"
               @udalit="addFormStore.udalitFaylToma"
+              @vibrat="addFormStore.vibratFaylProekta"
+              @ochistit="addFormStore.ochistitFaylToma"
           />
         </template>
       </template>

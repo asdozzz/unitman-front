@@ -21,14 +21,27 @@ class MediatekaService {
      * доступен для привязки к создаваемому юниту.
      */
     zagruzitChernovik(file: File, name?: string): Promise<ApiResponse<ChernovikFayla>> {
-        const body = this.sobratFormuZagruzki(file, undefined, name);
+        const body = this.sobratFormuZagruzki(file, {}, name);
 
         return apiClient.post<ChernovikFayla>("/mediateka/upload", body);
     }
 
     /** Загрузить zip-архив сразу к существующему юниту. */
     zagruzitDlyaUnita(file: File, unitId: string, name?: string): Promise<ApiResponse<ChernovikFayla>> {
-        const body = this.sobratFormuZagruzki(file, unitId, name);
+        const body = this.sobratFormuZagruzki(file, {unitId}, name);
+
+        return apiClient.post<ChernovikFayla>("/mediateka/upload", body);
+    }
+
+    /**
+     * Загрузить zip-архив как файл проекта (каталог типов томов).
+     *
+     * Владелец файла — проект: архив общий для всех юнитов и не привязан
+     * к конкретному юниту. Ид файла затем привязывается к типу тома
+     * через `/volumeType/file/add`.
+     */
+    zagruzitFaylProekta(file: File, projectId: string, name?: string): Promise<ApiResponse<ChernovikFayla>> {
+        const body = this.sobratFormuZagruzki(file, {projectId}, name);
 
         return apiClient.post<ChernovikFayla>("/mediateka/upload", body);
     }
@@ -39,12 +52,22 @@ class MediatekaService {
      * Тело передаётся как `FormData`, поэтому типизированный overload
      * apiClient (он ожидает JSON-схему тела) не применим — в вызывающих
      * методах тип ответа задаётся параметром `post<T>`.
+     *
+     * Владелец файла ровно один: `unitId` (файл юнита, в том числе черновик)
+     * либо `projectId` (общий архив каталога типов томов проекта).
      */
-    private sobratFormuZagruzki(file: File, unitId?: string, name?: string): FormData {
+    private sobratFormuZagruzki(
+        file: File,
+        vladelec: { unitId?: string; projectId?: string },
+        name?: string,
+    ): FormData {
         const body: FormData = new FormData();
         body.append("file", file);
-        if (unitId) {
-            body.append("unitId", unitId);
+        if (vladelec.unitId) {
+            body.append("unitId", vladelec.unitId);
+        }
+        if (vladelec.projectId) {
+            body.append("projectId", vladelec.projectId);
         }
         if (name) {
             body.append("name", name);

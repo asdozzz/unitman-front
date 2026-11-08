@@ -51,6 +51,11 @@ const route = useRoute();
         :to="{name:'project_webhooks', params: {id:route.params.id}}"
         exact
     />
+    <q-route-tab
+        :label="$t('unit.proekt.tabs.volume_types')"
+        :to="{name:'project_volume_types', params: {id:route.params.id}}"
+        exact
+    />
   </q-tabs>
   <div class="q-pt-xs">
     <router-view></router-view>

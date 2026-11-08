@@ -9,7 +9,7 @@ import {
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
 
-defineProps<{
+const props = defineProps<{
   item: Unit,
 }>();
 
@@ -54,7 +54,7 @@ async function ostanovitMoiUnit(id: string) {
 }
 
 function zapolnitPeremenie(id: string) {
-  konfigFormStore.otkritFormu(id);
+  konfigFormStore.otkritFormu(id, props.item.projectId);
 }
 
 function pokazatFormuDeistviya(id: string, deistviye: Deistviye) {
