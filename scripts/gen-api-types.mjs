@@ -155,6 +155,125 @@ function parseSpec(text, origin) {
     }
 }
 
+/** Разворачивает JSON Pointer (`/components/schemas/Foo`) в значение внутри спецификации. */
+function resolvePointer(document, pointer) {
+    const segments = pointer
+        .split("/")
+        .slice(1)
+        .map((segment) => segment.replace(/~1/g, "/").replace(/~0/g, "~"));
+
+    let current = document;
+    for (const segment of segments) {
+        if (current === null || typeof current !== "object" || !(segment in current)) {
+            return undefined;
+        }
+        current = current[segment];
+    }
+    return current;
+}
+
+/**
+ * Ищет неразрешимые локальные `$ref`.
+ *
+ * openapi-typescript прогоняет спецификацию через Redocly с правилом
+ * `no-unresolved-refs: error`, поэтому одна «битая» ссылка (обычно из-за
+ * недополненной спецификации бэкенда) обрывает генерацию без внятного
+ * указания места. Поиск заранее даёт читаемое сообщение с путём до ссылки.
+ */
+function collectMissingRefs(spec) {
+    const missing = [];
+
+    const walk = (node, trail) => {
+        if (Array.isArray(node)) {
+            node.forEach((item, index) => walk(item, `${trail}/${index}`));
+            return;
+        }
+        if (node === null || typeof node !== "object") return;
+
+        for (const [key, value] of Object.entries(node)) {
+            if (key === "$ref" && typeof value === "string" && value.startsWith("#")) {
+                if (resolvePointer(spec, value.slice(1)) === undefined) {
+                    missing.push({ ref: value, at: trail || "/" });
+                }
+                continue;
+            }
+            walk(value, `${trail}/${key}`);
+        }
+    };
+
+    walk(spec, "");
+    return missing;
+}
+
+/** Возвращает имя последнего сегмента JSON Pointer: `/components/schemas/Foo` -> `Foo`. */
+function pointerName(pointer) {
+    const segments = pointer.split("/");
+    return segments[segments.length - 1];
+}
+
+/**
+ * Сериализует спецификацию в том же виде, в каком её отдаёт NelmioApiDocBundle:
+ * отступ 4 пробела и `\uXXXX`-экранирование не-ASCII символов.
+ *
+ * Без экранирования любой перезаписанный снимок давал бы diff на весь файл
+ * из-за кириллицы в описаниях. Переводы строк приводятся к тому же виду,
+ * что и в существующем снимке, чтобы diff не раздувался на Windows.
+ */
+function stringifySpec(spec, eol = "\n") {
+    const json = JSON.stringify(spec, null, 4);
+    const escaped = json.replace(
+        /[\u007F-\uFFFF]/g,
+        (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0"),
+    );
+    return (eol === "\r\n" ? escaped.replace(/\n/g, "\r\n") : escaped) + eol;
+}
+
+/**
+ * Пробует закрыть неразрешимые `$ref` схемами из снимка спецификации.
+ *
+ * Бэкенд иногда отдаёт `doc.json`, где часть эндпоинтов ссылается на схемы,
+ * которых нет в `components.schemas` (у нас так было с Mediateka). Полностью
+ * починить контракт за бэкенд нельзя, но если нужная схема уже есть в
+ * проверенном снимке `openapi/unitman.json`, её можно подставить, чтобы
+ * генерация не падала целиком.
+ *
+ * Возвращает `{ unresolved, repaired }`: имена схем, которых не нашлось даже
+ * в снимке, и имена схем, которые удалось подставить.
+ */
+function repairMissingRefs(spec, snapshot) {
+    const snapshotSchemas = snapshot?.components?.schemas ?? {};
+    const schemas = spec.components?.schemas;
+    const unresolved = [];
+    const repaired = [];
+
+    const missingRefs = collectMissingRefs(spec);
+
+    if (!schemas) {
+        for (const { ref } of missingRefs) {
+            const name = pointerName(ref);
+            if (!unresolved.includes(name)) unresolved.push(name);
+        }
+        return { unresolved, repaired };
+    }
+
+    for (const { ref } of missingRefs) {
+        const name = pointerName(ref);
+        if (unresolved.includes(name) || repaired.includes(name)) continue;
+
+        const fromSnapshot = snapshotSchemas[name];
+        if (fromSnapshot === undefined) {
+            unresolved.push(name);
+            continue;
+        }
+
+        schemas[name] = fromSnapshot;
+        repaired.push(name);
+        console.warn(`[api-types] Схема "${name}" отсутствует в источнике — подставлена из снимка openapi/unitman.json`);
+    }
+
+    return { unresolved, repaired };
+}
+
 /** Определяет общий префикс путей, который уже содержится в baseURL клиента. */
 function detectBasePrefix(paths) {
     const keys = Object.keys(paths);
@@ -237,9 +356,32 @@ async function main() {
     console.log(`[api-types] Источник спецификации: ${source.origin}`);
     const rawSpec = parseSpec(source.text, source.origin);
 
+    // Неразрешимые $ref не даст обработать openapi-typescript, поэтому сначала
+    // пробуем закрыть их схемами из снимка, а если не вышло — падаем с понятным текстом.
+    const snapshotText = existsSync(SNAPSHOT_PATH) ? await readFile(SNAPSHOT_PATH, "utf8") : null;
+    const snapshotSpec = snapshotText === null
+        ? null
+        : parseSpec(snapshotText, `file:${path.relative(ROOT, SNAPSHOT_PATH)}`);
+    // Сохраняем те же переводы строк, что уже приняты в репозитории.
+    const snapshotEol = snapshotText !== null && snapshotText.includes("\r\n") ? "\r\n" : "\n";
+
+    const { unresolved, repaired } = repairMissingRefs(rawSpec, snapshotSpec);
+    if (unresolved.length > 0) {
+        throw new Error(
+            `В спецификации (${source.origin}) есть неразрешимые $ref: ${unresolved.length}.\n` +
+            unresolved.map((name) => `  • #/components/schemas/${name}`).join("\n") + "\n" +
+            "Эти схемы отсутствуют в components.schemas и не найдены в снимке " +
+            "openapi/unitman.json. Обычно это пробел в спецификации бэкенда: " +
+            "добавьте схемы в компоненты и повторите генерацию.",
+        );
+    }
+
     if (args.snapshot && !args.file && /^https?:/.test(source.origin)) {
         await mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
-        await writeFile(SNAPSHOT_PATH, source.text);
+        // Если пришлось что-то починить, сохраняем починенный вариант, иначе —
+        // исходный текст как есть, чтобы не менять форматирование файла.
+        const nextSnapshot = repaired.length > 0 ? stringifySpec(rawSpec, snapshotEol) : source.text;
+        await writeFile(SNAPSHOT_PATH, nextSnapshot);
         console.log(`[api-types] Снимок спецификации сохранён: ${path.relative(ROOT, SNAPSHOT_PATH)}`);
     }
 

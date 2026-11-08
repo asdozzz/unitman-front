@@ -3,6 +3,7 @@ import {storeToRefs} from "pinia";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
+import FaylVoluma from "@/modules/unit/view/Unit/Konfig/FaylVoluma.vue";
 import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
@@ -104,11 +105,21 @@ function projectChanged() {
       <q-input v-model="form.unitName" label="Unit Name" />
       <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
       <template v-if="form.peremenieKonfiga.length > 0">
-        <template v-for="peremenaya in form.peremenieKonfiga">
+        <template v-for="peremenaya in form.peremenieKonfiga" :key="peremenaya.konfig.id">
           <PeremenayaKonfiga :peremenaya="peremenaya"/>
         </template>
       </template>
-      <template v-if="initPeremenie && form.peremenieKonfiga.length == 0">
+      <template v-if="form.volumes.length > 0">
+        <div class="text-subtitle1 q-mt-md">{{ $t('unit.form_volume.title') }}</div>
+        <template v-for="volume in form.volumes" :key="volume.volume.dir">
+          <FaylVoluma
+              :volume="volume"
+              @zagruzit="addFormStore.zagruzitFaylToma"
+              @udalit="addFormStore.udalitFaylToma"
+          />
+        </template>
+      </template>
+      <template v-if="initPeremenie && form.peremenieKonfiga.length == 0 && form.volumes.length == 0">
         В конфиге отсутствуют переменные
       </template>
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>

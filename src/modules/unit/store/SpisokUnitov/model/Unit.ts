@@ -67,3 +67,36 @@ export class PeremenayaKonfiga {
         this.value = value.length > 0 ? value : konfig.defaultValue;
     }
 }
+
+/**
+ * Том юнита из блока конфига `unitman_volumes` плюс привязанный файл медиатеки.
+ *
+ * `dir` — уникальный ключ тома, `name` — имя каталога, `fileId` — ид
+ * zip-архива в медиатеке (`null`, пока файл не загружен). Тома больше не
+ * связаны с переменными конфига: ид файла передаётся бэкенду в `volumes`.
+ */
+export type TomKonfiga = Schema<"UnitVolume">;
+
+/**
+ * Том в форме: описание из конфига и состояние загрузки файла.
+ *
+ * Чисто UI-модель. Хранится в состоянии Pinia, поэтому это обычный объект,
+ * а не класс: у реактивного прокси экземпляров классов теряются методы.
+ *
+ * `volume.fileId` — ид файла в медиатеке (`null`, пока файл не загружен),
+ * `zagruzka` и `oshibka` — состояние запроса к медиатеке.
+ */
+export type TomUnita = {
+    volume: TomKonfiga;
+    zagruzka: boolean;
+    oshibka: string | null;
+};
+
+/** Создать строку тома для формы. */
+export function sozdatTomUnita(volume: TomKonfiga): TomUnita {
+    return {
+        volume,
+        zagruzka: false,
+        oshibka: null,
+    };
+}

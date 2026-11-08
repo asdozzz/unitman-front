@@ -147,6 +147,18 @@
         "confirm": "confirm"
       }
     },
+    "form_volume": {
+      "title": "Volumes and files",
+      "fields": {
+        "labels": {
+          "file": "volume zip archive"
+        }
+      },
+      "hints": {
+        "delete_file": "Delete volume file",
+        "file_attached": "File uploaded and will be attached to the unit"
+      }
+    },
     "pomoschnik_ssylki": {
       "title": "Select unit to insert link",
       "podskazka": "The link to service \"{service}\" (port {port}) of the selected unit will be fetched",

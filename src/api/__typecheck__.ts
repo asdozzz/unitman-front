@@ -47,9 +47,41 @@ const helperBody: ApiRequestBody<"/unit/poluchitSsylkuPoPomoschniku", "post"> = 
 };
 const helperSuffix: Schema<"ConfigVariableHelper">["suffix"] = null;
 
+// 9. Медиатека: multipart-загрузка, удаление файла и привязка к юниту.
+const uploadBody: ApiRequestBody<"/mediateka/upload", "post"> = {
+    file: "blob", name: "volume", unitId: null,
+};
+// @ts-expect-error — обязательное поле file отсутствует
+const badUpload: ApiRequestBody<"/mediateka/upload", "post"> = { name: "volume" };
+const uploadResponse: ApiResponseData<"/mediateka/upload", "post"> = {} as Schema<"MediatekaFaylUnita">;
+const deleteUrl: ApiPath<"delete"> = "/mediateka/file/{id}/udalit";
+type DeleteResponse = ApiResponseData<"/mediateka/file/{id}/udalit", "delete">;
+const deleteResponse: DeleteResponse = null;
+
+// 10. Тома не связаны с переменными конфига: ид файла живёт в самом томе.
+const volume: Schema<"UnitVolume"> = { dir: "data", fileId: null, name: "data" };
+// @ts-expect-error — обязательное поле dir отсутствует
+const badVolume: Schema<"UnitVolume"> = { fileId: null, name: "data" };
+const createWithFiles: ApiRequestBody<"/unit/sozdat", "post"> = {
+    branch: "feature/1",
+    projectId: "uuid",
+    unitName: "feature-1",
+    volumes: [{ dir: "data", fileId: "file-1", name: "data" }],
+};
+// @ts-expect-error — отсутствует обязательное имя тома
+const badCreateVolume: Schema<"SozdatUnitVolume"> = { dir: "data" };
+// В форме заполнения `fileId` необязателен: отсутствие сохраняет текущий файл.
+const fillVolumes: ApiRequestBody<"/unit/zapolnitPeremenie", "post"> = {
+    id: "uuid",
+    values: [{ id: "1", type: "string", value: "v" }],
+    volumes: [{ dir: "data", fileId: null }],
+};
+
 export const typecheck = {
     postPath, badPost, listBody, badCreate, createBody, hookParams, value, noQuery,
     listResponseItem, refreshBody, badRefresh, refreshResponseToken, helperBody, helperSuffix,
+    uploadBody, badUpload, uploadResponse, deleteUrl, deleteResponse, volume, badVolume, createWithFiles,
+    badCreateVolume, fillVolumes,
 } as const;
 
-export type TypecheckResult = [ListResponse, RefreshResponse];
+export type TypecheckResult = [ListResponse, RefreshResponse, DeleteResponse];

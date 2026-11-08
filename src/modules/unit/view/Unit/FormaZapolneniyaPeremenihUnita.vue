@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import {storeToRefs} from "pinia";
 import {onMounted} from "vue";
+import {storeToRefs} from "pinia";
 import {
   useFormaZapolneniyaPeremenihUnitaStore
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
+import FaylVoluma from "@/modules/unit/view/Unit/Konfig/FaylVoluma.vue";
 
 const formStore = useFormaZapolneniyaPeremenihUnitaStore();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(formStore);
@@ -38,8 +39,21 @@ async function otpravitFormu() {
       <div class="flex flex-center" v-if="loader">
         <q-spinner  color="primary" size="3em"/>
       </div>
-      <template v-for="peremenaya in form.values" v-else>
-        <PeremenayaKonfiga :peremenaya="peremenaya"/>
+      <template v-else>
+        <template v-for="peremenaya in form.values" :key="peremenaya.konfig.id">
+          <PeremenayaKonfiga :peremenaya="peremenaya"/>
+        </template>
+
+        <template v-if="form.volumes.length > 0">
+          <div class="text-subtitle1 q-mt-md">{{ $t('unit.form_volume.title') }}</div>
+          <template v-for="volume in form.volumes" :key="volume.volume.dir">
+            <FaylVoluma
+                :volume="volume"
+                @zagruzit="formStore.zagruzitFaylToma"
+                @udalit="formStore.udalitFaylToma"
+            />
+          </template>
+        </template>
       </template>
 
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>

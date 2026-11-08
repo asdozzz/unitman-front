@@ -15,13 +15,23 @@ const REFRESH_EXCLUDED_URLS = ['/login', '/account/refreshToken'];
  */
 const ANONYMOUS_URLS = ['/login', '/account/refreshToken'];
 
-type HttpMethod = 'get' | 'post' | 'put';
+type HttpMethod = 'get' | 'post' | 'put' | 'delete';
 
 class ApiClient {
 
+    /**
+     * Глобальный `Content-type` здесь не задаётся намеренно.
+     *
+     * Значение по умолчанию из настроек инстанса доливается в каждый запрос и
+     * перебивается только явно переданным заголовком, поэтому при
+     * `Content-type: application/json` axios (`transformRequest`) превращает
+     * `FormData` в JSON-строку (`JSON.stringify(formDataToJSON(data))`).
+     * Файл при этом теряется (`File` сериализуется в `{}`), и бэкенд отвечает
+     * `mediateka.upload.file_is_missing`. Тип содержимого задаётся на запрос
+     * в `headersFor` — только для не-`FormData` тел.
+     */
     private static readonly CLIENT: AxiosInstance = axios.create({
         headers: {
-            "Content-type": "application/json",
             "Accept": "application/json",
             "Pragma": "no-cache",
         },
@@ -154,7 +164,7 @@ class ApiClient {
             data,
             params,
             baseURL: window._env_?.VITE_API_HOST || import.meta.env.VITE_API_HOST,
-            headers: this.headersFor(url),
+            headers: this.headersFor(url, data),
         });
 
         try {
@@ -184,11 +194,23 @@ class ApiClient {
         }
     }
 
-    private headersFor(url: string): Record<string, string> {
-        const headers: Record<string, string> = {
-            "Content-type": "application/json",
+    /**
+     * Заголовки запроса.
+     *
+     * Для `FormData` (загрузка файлов) `Content-Type` явно обнуляется
+     * (`false`): браузер сам проставит `multipart/form-data` с корректным
+     * `boundary`. Одного «не выставлять» здесь мало — axios в
+     * `dispatchRequest` добавляет `application/x-www-form-urlencoded`, а при
+     * наличии `application/json` (`transformRequest`) сериализует `FormData`
+     * в JSON, из-за чего файл до бэкенда не доезжает и тот отвечает
+     * `mediateka.upload.file_is_missing`. Значение `false` axios-заголовки
+     * трактуют как «не отправлять» и не перетирают.
+     */
+    private headersFor(url: string, data?: unknown): Record<string, string | false> {
+        const headers: Record<string, string | false> = {
             "Accept": "application/json",
             "Pragma": "no-cache",
+            "Content-type": data instanceof FormData ? false : "application/json",
         };
 
         if (!ANONYMOUS_URLS.includes(url)) {
@@ -237,6 +259,17 @@ class ApiClient {
     get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>>;
     get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>> {
         return this.request<T>('get', url, undefined, params);
+    }
+
+    /** Типизированный вызов по сгенерированной OpenAPI-схеме. */
+    delete<P extends ApiPath<"delete">>(
+        url: P,
+        ...args: ApiRequestArgs<P, "delete">
+    ): Promise<ApiResponse<ApiResponseData<P, "delete">>>;
+    /** Нетипизированный вызов (совместимость с существующим кодом). */
+    delete<T>(url: string, data?: unknown): Promise<ApiResponse<T>>;
+    delete<T>(url: string, data?: unknown): Promise<ApiResponse<T>> {
+        return this.request<T>('delete', url, data);
     }
 }
 

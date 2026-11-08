@@ -357,6 +357,100 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/mediateka/file/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Получить информацию о файле и ссылку на скачивание */
+        get: operations["get_app_mediateka_infra_mediateka_fileinfo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mediateka/file/{id}/udalit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Удалить файл
+         * @description Удаляет метаданные файла и объект в MinIO. При ошибке тело всё равно приходит с HTTP 200 в виде ErrorEnvelope.
+         */
+        delete: operations["delete_app_mediateka_infra_mediateka_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mediateka/prikrepit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Прикрепить ранее загруженные файлы к юниту
+         * @description Привязывает черновики (файлы, загруженные без unitId) к юниту. Файл, уже привязанный к другому юниту, принять нельзя. Объект в MinIO не копируется — меняется только запись в реестре.
+         */
+        post: operations["post_app_mediateka_infra_mediateka_prikrepit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mediateka/unit/{unitId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список файлов юнита */
+        get: operations["get_app_mediateka_infra_mediateka_unitfiles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mediateka/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Загрузить zip-архив
+         * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Поле unitId необязательно: без него файл сохраняется как черновик (unitId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Поле name необязательно: при отсутствии берётся имя загруженного файла.
+         */
+        post: operations["post_app_mediateka_infra_mediateka_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project/{id}/hook": {
         parameters: {
             query?: never;
@@ -1812,6 +1906,52 @@ export type components = {
             password: string;
             roles: string;
         };
+        /** @description Метаданные файла юнита (FaylUnita::toArray) */
+        MediatekaFaylUnita: {
+            /**
+             * @description Момент загрузки, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            createdAt: number;
+            /**
+             * Format: uuid
+             * @description Идентификатор файла
+             */
+            id: string;
+            /**
+             * @example application/zip
+             * @enum {string}
+             */
+            mimeType: "application/zip";
+            /**
+             * @description Отображаемое имя файла
+             * @example logs.zip
+             */
+            name: string;
+            /**
+             * @description Размер файла в байтах
+             * @example 1048576
+             */
+            size: number;
+            /**
+             * Format: uuid
+             * @description Идентификатор юнита, к которому прикреплён файл; null для черновика (загружен до создания юнита)
+             */
+            unitId?: string | null;
+            /**
+             * Format: uuid
+             * @description Идентификатор загрузившего пользователя
+             */
+            uploadedBy: string | null;
+        };
+        MediatekaFaylUnitaSoSsylkoy: components["schemas"]["MediatekaFaylUnita"] & {
+            /**
+             * Format: uri
+             * @description Подписанная (presigned) ссылка на скачивание из MinIO
+             * @example http://minio:9000/unitman-mediateka/units/1/file.zip?X-Amz-Signature=...
+             */
+            url: string;
+        };
         NaitiDubliUnita: {
             /** @example feature/123 */
             branch: string;
@@ -2132,7 +2272,20 @@ export type components = {
             projectId: string;
             /** @example feature-123 */
             unitName: string;
+            /** @description Тома юнита. Значения `dir` и `name` берутся из ответа `poluchitKonfigIzHranilisha`, `fileId` — идентификатор файла, загруженного в медиатеку как черновик (может отсутствовать) */
+            volumes?: components["schemas"]["SozdatUnitVolume"][];
             znacheniePeremenoi?: components["schemas"]["ZnacheniePeremenoi"][];
+        };
+        SozdatUnitVolume: {
+            /** @example /var/www/uploads */
+            dir: string;
+            /**
+             * Format: uuid
+             * @description Идентификатор файла-черновика в медиатеке. Если не передан — том описывает каталог без файла
+             */
+            fileId?: string | null;
+            /** @example uploads */
+            name: string;
         };
         SozdatWebhookProekta: {
             /** Format: uuid */
@@ -2195,6 +2348,8 @@ export type components = {
             prepare: string[];
             reset_prepare: string[];
             services: components["schemas"]["UnitConfigService"][];
+            /** @description Тома юнита. `dir` — уникальный ключ тома. Файл тома (zip-архив) загружается в медиатеку, его ид передаётся в `volumes` при создании юнита или в `zapolnitPeremenie` */
+            unitman_volumes: components["schemas"]["UnitVolumeConfig"][];
             up: string[];
             variables: components["schemas"]["UnitConfigVariable"][];
         };
@@ -2343,6 +2498,34 @@ export type components = {
             id: string;
             value: string;
         };
+        /** @description Том юнита — описание из блока unitman_volumes плюс привязанный файл медиатеки (UnitVolume::toArray) */
+        UnitVolume: {
+            /**
+             * @description Уникальный ключ тома внутри контейнера юнита
+             * @example config
+             */
+            dir: string;
+            /**
+             * Format: uuid
+             * @description Идентификатор привязанного файла медиатеки; null, пока файл не загружен
+             */
+            fileId: string | null;
+            /**
+             * @description Имя тома
+             * @example config-volume
+             */
+            name: string;
+        };
+        /** @description Описание тома из блока unitman_volumes в конфиге юнита (VolumeConfig::toArray) */
+        UnitVolumeConfig: {
+            /**
+             * @description Уникальный ключ тома
+             * @example config
+             */
+            dir: string;
+            /** @example config-volume */
+            name: string;
+        };
         UpdateProjectData: {
             id: string;
             memoryLimit: number;
@@ -2376,8 +2559,22 @@ export type components = {
         ZapolnitPeremenieUnita: {
             /** Format: uuid */
             id: string;
-            /** @description Список заполняемых переменных юнита */
-            values: components["schemas"]["ZnacheniePeremenoi"][];
+            /** @description Список заполняемых переменных юнита. Можно не передавать, если заполняются только тома */
+            values?: components["schemas"]["ZnacheniePeremenoi"][];
+            /** @description Тома юнита, которые нужно заполнить. `dir` обязан присутствовать в блоке `unitman_volumes` конфига юнита; имя тома берётся из конфига */
+            volumes?: components["schemas"]["ZapolnitPeremenieUnitaVolume"][];
+        };
+        ZapolnitPeremenieUnitaVolume: {
+            /**
+             * @description Уникальный ключ тома из блока `unitman_volumes`
+             * @example config
+             */
+            dir: string;
+            /**
+             * Format: uuid
+             * @description Идентификатор архива, загруженного в медиатеку. Если поле не передано — текущий файл тома сохраняется; `null` — файл тома очищается
+             */
+            fileId?: string | null;
         };
         ZapustitUnit: {
             /** Format: uuid */
@@ -3085,6 +3282,217 @@ export interface operations {
                          */
                         status: "success";
                     };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_mediateka_infra_mediateka_fileinfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Идентификатор файла (UUID) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Информация о файле со ссылкой (SuccessEnvelope) либо файл не найден/ошибка (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MediatekaFaylUnitaSoSsylkoy"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_app_mediateka_infra_mediateka_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Идентификатор файла (UUID) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Файл удалён (SuccessEnvelope с data: null) либо ошибка (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: файл удалён */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_mediateka_infra_mediateka_prikrepit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Идентификаторы файлов */
+                    fileIds: string[];
+                    /**
+                     * Format: uuid
+                     * @description Идентификатор юнита
+                     */
+                    unitId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Файлы привязаны (SuccessEnvelope) либо ошибка (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Привязанные файлы */
+                        data: components["schemas"]["MediatekaFaylUnita"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_mediateka_infra_mediateka_unitfiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Идентификатор юнита (UUID) */
+                unitId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Файлы юнита (SuccessEnvelope) либо ошибка (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Файлы юнита (пустой массив, если файлов нет) */
+                        data: components["schemas"]["MediatekaFaylUnita"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_mediateka_infra_mediateka_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description zip-архив (проверяется по сигнатуре)
+                     */
+                    file: string;
+                    /** @description Отображаемое имя файла; по умолчанию — имя загруженного файла */
+                    name?: string;
+                    /**
+                     * Format: uuid
+                     * @description Идентификатор юнита; не передаётся при загрузке черновика
+                     */
+                    unitId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Файл загружен (SuccessEnvelope) либо ошибка валидации/хранилища (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MediatekaFaylUnita"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Не авторизован */
@@ -5427,15 +5835,19 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Переменные конфигурации, полученной из хранилища. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
+            /** @description Переменные и тома конфигурации, полученной из хранилища. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description Переменные конфигурации, полученной из хранилища */
-                        data: components["schemas"]["UnitVariable"][];
+                        data: {
+                            /** @description Переменные конфигурации, полученной из хранилища */
+                            peremenie: components["schemas"]["UnitVariable"][];
+                            /** @description Тома из блока unitman_volumes; fileId ещё не задан (юнит не создан) */
+                            volumes: components["schemas"]["UnitVolume"][];
+                        };
                         /**
                          * @example success
                          * @enum {string}
@@ -5519,15 +5931,19 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Переменные конфигурации с текущими значениями. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
+            /** @description Переменные конфигурации с текущими значениями и тома юнита (unitman_volumes). При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description Переменные конфигурации с текущими значениями */
-                        data: components["schemas"]["UnitVariable"][];
+                        data: {
+                            /** @description Переменные конфигурации с текущими значениями */
+                            peremenie: components["schemas"]["UnitVariable"][];
+                            /** @description Тома юнита из блока конфига unitman_volumes с привязанными файлами медиатеки */
+                            volumes: components["schemas"]["UnitVolume"][];
+                        };
                         /**
                          * @example success
                          * @enum {string}

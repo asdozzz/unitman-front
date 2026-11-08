@@ -7,7 +7,7 @@
 import type { components, operations, paths } from "@/api/generated/unitman";
 
 /** HTTP-методы, которые поддерживает apiClient. */
-export type ApiMethod = "get" | "post" | "put";
+export type ApiMethod = "get" | "post" | "put" | "delete";
 
 type MethodOperation<P extends keyof paths, M extends ApiMethod> = paths[P] extends Record<M, infer O>
     ? O
@@ -26,18 +26,35 @@ export type ApiPath<M extends ApiMethod = ApiMethod> = {
     [P in keyof paths]: [MethodOperation<P, M>] extends [never] ? never : P;
 }[keyof paths];
 
-/**
- * Тело запроса (`requestBody`).
- * `undefined`, если у операции тела нет — тогда второй аргумент не обязателен.
- */
-export type ApiRequestBody<P extends keyof paths, M extends ApiMethod> =
+/** Тело запроса в формате JSON (`requestBody.content["application/json"]`). */
+type JsonRequestBody<P extends keyof paths, M extends ApiMethod> =
     MethodOperation<P, M> extends {
         requestBody: { content: { "application/json": infer B } };
     }
-        ? [B] extends [never]
+        ? B
+        : never;
+
+/** Тело запроса в формате `multipart/form-data` (загрузка файлов). */
+type MultipartRequestBody<P extends keyof paths, M extends ApiMethod> =
+    MethodOperation<P, M> extends {
+        requestBody: { content: { "multipart/form-data": infer B } };
+    }
+        ? B
+        : never;
+
+/**
+ * Тело запроса (`requestBody`).
+ *
+ * Приоритет у `application/json`; если операция принимает только
+ * `multipart/form-data`, берётся оно. `undefined`, если тела нет — тогда
+ * второй аргумент не обязателен.
+ */
+export type ApiRequestBody<P extends keyof paths, M extends ApiMethod> =
+    [JsonRequestBody<P, M>] extends [never]
+        ? [MultipartRequestBody<P, M>] extends [never]
             ? undefined
-            : B
-        : undefined;
+            : MultipartRequestBody<P, M>
+        : JsonRequestBody<P, M>;
 
 /** Query-параметры операции (`parameters.query`). */
 export type ApiQuery<P extends keyof paths, M extends ApiMethod> =
