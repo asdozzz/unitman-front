@@ -23,4 +23,4 @@ WORKDIR /usr/src/app
 COPY ./entry.sh /usr/src/app/entrypoint.sh
 RUN chmod +x /usr/src/app/entrypoint.sh
 
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash","/usr/src/app/entrypoint.sh"]
