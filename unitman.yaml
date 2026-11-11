@@ -26,10 +26,6 @@ services:
         - port: 8083
           type: 'http'
           
-
-build:
-  image: asdozzz/dind-unit:latest
-
 prepare:
   - envsubst < .env.dist > .env.local
 
