@@ -111,6 +111,14 @@ function convertDate(unixtime: number): string {
         </div>
       </div>
     </div>
+    <q-page-scroller
+        reverse
+        position="bottom-right"
+        :scroll-offset="150"
+        :offset="[18, 80]"
+    >
+      <q-btn fab icon="keyboard_arrow_down" color="accent" />
+    </q-page-scroller>
   </div>
 </template>
 
