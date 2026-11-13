@@ -5,8 +5,8 @@ variables:
     defaultValue: "http://localhost:8082/api"
     helper:
       projectId: 01a1973b-e6b8-7081-a590-acbd147068a0
-      service: nginx
-      port: 8081
+      service: web
+      port: 8082
       suffix: /api
   
   - id: ARG_CENTRIFUGE_HOST
