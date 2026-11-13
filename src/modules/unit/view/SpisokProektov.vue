@@ -2,11 +2,18 @@
 import {useSpisokProektovStore} from "@/modules/unit/store/SpisokProekotovStore";
 import {useAddProjectFormStore} from "@/modules/unit/store/SpisokProektov/AddProjectFormStore";
 import {storeToRefs} from "pinia";
-import {onMounted} from "vue";
+import {onMounted, onUnmounted} from "vue";
 import AddForm from "@/modules/unit/view/Proekti/AddProjectForm.vue";
 import {useRouter} from "vue-router";
 import {storeHelper} from "@/modules/app/store/HelperStore";
 import {copyToClipboard} from "quasar";
+import {
+  type ModelForChannelSpisokProektov,
+  OBNOVLENIE_PROEKTA,
+  SOZDANIE_PROEKTA,
+  UDALENIE_PROEKTA,
+} from "@/modules/unit/model/websocket/ModelForChannelSpisokProektov";
+import {podpisatsyaNaSobitiyaProektov} from "@/modules/unit/model/websocket/PodpiskaNaSobitiyaProektov";
 
 const helperStore = storeHelper();
 const { baseUrl } = storeToRefs(helperStore);
@@ -19,9 +26,51 @@ const { enable: enableAddForm } = storeToRefs(addFormStore);
 
 const router = useRouter();
 
+/**
+ * Отписка от канала событий проектов.
+ *
+ * Подписка создаётся и снимается через модуль-реестр, а не напрямую через
+ * клиент Centrifugo: канал общий, и подписка на клиента может быть только одна.
+ */
+let otpisatsyaOtSobitiyProektov: (() => void) | null = null;
+
 onMounted(async () => {
+  // Подписка ставится до запроса списка: если экран закроют, пока идёт
+  // загрузка, `onUnmounted` уже должен иметь что снять.
+  otpisatsyaOtSobitiyProektov = podpisatsyaNaSobitiyaProektov(obrabotatSobitiyeProekta);
+
   await proektiStore.poluchitSpisokProektov();
 })
+
+onUnmounted(() => {
+  otpisatsyaOtSobitiyProektov?.();
+  otpisatsyaOtSobitiyProektov = null;
+
+  proektiStore.otmenitObnovleniyaProektov();
+})
+
+/**
+ * Реакция на событие канала `spisok_proektov`.
+ *
+ * Создание и удаление меняют состав списка, поэтому список перезапрашивается
+ * (для удаления достаточно убрать карточку). Обновление касается одного
+ * проекта — перезапрашивается только он, чтобы не дёргать бэкенд на каждое
+ * изменение и не сбрасывать лоадеры/скролл всего списка.
+ */
+function obrabotatSobitiyeProekta(sobitiye: ModelForChannelSpisokProektov) {
+  switch (sobitiye.eventType) {
+    case SOZDANIE_PROEKTA:
+      proektiStore.poluchitSpisokProektov();
+      break;
+    case UDALENIE_PROEKTA:
+      proektiStore.udalitProektIzSpiska(sobitiye.id);
+      break;
+    case OBNOVLENIE_PROEKTA:
+      proektiStore.zaplanirovatObnovlenieProekta(sobitiye.id);
+      break;
+  }
+}
+
 function openAddForm() {
   addFormStore.otkritFormu();
 }
