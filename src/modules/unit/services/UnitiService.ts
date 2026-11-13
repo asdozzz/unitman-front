@@ -93,6 +93,16 @@ class UnitiService {
         return apiClient.post('/unit/poluchitShagiZadachiRunnera', params);
     }
 
+    /**
+     * Снимок прогресса задачи runner'а.
+     *
+     * Источник истины по прогрессу. Тот же `data`, что приходит пушем
+     * в канал `unit_progress#<jobId>`.
+     */
+    poluchitProgressZadachiRunnera(params: Schema<"PoluchitProgressZadachiUnita">) {
+        return apiClient.post('/unit/poluchitProgressZadachiRunnera', params);
+    }
+
     proveritKonteinerUnita(params: Schema<"ProveritKonteinerUnita">) {
         return apiClient.post('/unit/proveritKonteinerUnita', params);
     }

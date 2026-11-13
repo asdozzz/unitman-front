@@ -15,7 +15,17 @@ type StorVipolnenihZadachRunneraState = {
     projectId: string | null;
 }
 
-export const storVipolnenihZadachRunnera = defineStore('StorVipolnenihZadachRunnera', {
+/**
+ * Стор окна задач runner'а на странице проекта.
+ *
+ * ID стора ОБЯЗАН отличаться от ID стора страницы юнита
+ * (`SpisokUnitov/StorVipolnenihZadachRunnera.ts`): Pinia ищет инстанс по ID,
+ * поэтому при совпадении второй экран получал бы уже созданный чужой стор —
+ * с другим набором полей. В результате `selectJob` оказывался объектом
+ * `{prozesId, zadachaId, steps}`, а `selectJob.value?.steps` на странице
+ * проекта был `undefined`, и никакие изменения туда не попадали.
+ */
+export const storVipolnenihZadachRunneraProekta = defineStore('StorVipolnenihZadachRunneraProekta', {
     state: (): StorVipolnenihZadachRunneraState => {
         return {
             loader: false,

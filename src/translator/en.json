@@ -378,6 +378,18 @@
       "SBROS_PODGOTOVKI": "Сброс подготовка" ,
       "UDALENIE": "Удаление" ,
       "DEISTVIE": "Выполнение действия"
+    },
+    "okno_zadach_runnera": {
+      "waiting": "Waiting to start",
+      "running": "Running",
+      "finished_success": "Completed successfully",
+      "finished_error": "Completed with errors",
+      "updated_at": "Updated: {time}",
+      "live": "Live",
+      "reconnecting": "Reconnecting",
+      "readonly": "Read only",
+      "refresh_button": "Refresh",
+      "refresh_failed": "Failed to update progress automatically"
     }
   },
   "dashboard": {

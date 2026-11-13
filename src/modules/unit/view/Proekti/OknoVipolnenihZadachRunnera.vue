@@ -1,24 +1,34 @@
 <script setup lang="ts">
-import { format, fromUnixTime } from "date-fns";
+import {computed, onMounted} from "vue";
 import {storeToRefs} from "pinia";
-import {onMounted} from "vue";
 import { useRoute } from 'vue-router'
-import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokProektov/StorVipolnenihZadachRunnera";
+import {storVipolnenihZadachRunneraProekta} from "@/modules/unit/store/SpisokProektov/StorVipolnenihZadachRunnera";
+import {convertDateTime, dlitelnostShaga} from "@/utils/dates";
 
-const store = storVipolnenihZadachRunnera();
+const store = storVipolnenihZadachRunneraProekta();
 const { spisok, loader, selectJob } = storeToRefs(store);
 
 const route = useRoute();
 
+/**
+ * Шаги вместе с длительностью выполнения.
+ *
+ * Длительность считается один раз на шаг: `unixtime - unixtimeStart`.
+ * Для старых записей без `unixtimeStart` хелпер откатывается на разницу
+ * с `unixtime` предыдущего шага.
+ */
+const shagiSDlitelnostyu = computed(() => {
+  const spisokShagov = selectJob.value?.steps ?? [];
+
+  return spisokShagov.map((step, i) => ({
+    step,
+    dlitelnost: dlitelnostShaga(step, i > 0 ? spisokShagov[i - 1] : null),
+  }));
+});
+
 onMounted(async () => {
   await store.poluchitVipolnenieZadachiRunnera(route.params.id as string);
 })
-
-function convertDate(unixtime: number): string {
-  const s = format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
-  console.log("AAA", s);
-  return s;
-}
 
 </script>
 
@@ -35,16 +45,16 @@ function convertDate(unixtime: number): string {
           <div class="col-9" style="overflow: hidden;">
             <q-card class="no-border-radius bg-grey-10">
               <q-card-section v-if="selectJob">
-                <div v-for="(step, i) in selectJob.steps">
+                <div v-for="({step, dlitelnost}, i) in shagiSDlitelnostyu" :key="i">
                   <div class="text-light-green-14 fs-12">
                     <div class="row">
                       <div class="col"># {{step.command}}</div>
                       <div class="col-auto">
                         <div v-if="i===0">
-                          {{convertDate(step.unixtime)}}
+                          {{convertDateTime(step.unixtime)}}
                         </div>
-                        <div v-if="i > 0">
-                          {{(step.unixtime - selectJob.steps[i - 1].unixtime) + ' s'}}
+                        <div v-if="dlitelnost !== null">
+                          {{dlitelnost + ' s'}}
                         </div>
                       </div>
                     </div>

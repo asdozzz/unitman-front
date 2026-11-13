@@ -1,25 +1,178 @@
 <script setup lang="ts">
-import { format, fromUnixTime } from "date-fns";
 import {storeToRefs} from "pinia";
-import {onMounted} from "vue";
-import { useRoute } from 'vue-router'
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from "vue";
+import {useRoute} from 'vue-router'
 import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
+import {logProgressa} from "@/modules/unit/model/websocket/LogProgressaZadachi";
+import {convertDateTime, convertTime, dlitelnostShaga} from "@/utils/dates";
+
+/** Порог «пользователь у нижней границы», px: в пределах него автоскролл разрешён. */
+const POROG_AVTOSKROLLA = 40;
 
 const store = storVipolnenihZadachRunnera();
-const { spisok, loader, selectJob } = storeToRefs(store);
+const {
+  spisok,
+  loader,
+  selectJob,
+  progressOtobrazhaemiya,
+  channelState,
+  neUdalosObnovitProgress,
+  oshibkaOtBackenda,
+} = storeToRefs(store);
 
 const route = useRoute();
 
-onMounted(async () => {
-  await store.poluchitVipolnenieZadachiRunnera(route.params.id as string);
-})
+/** Пользователь был у нижней границы страницы до прихода новой порции шагов. */
+let polzovatelUNizhnegoKraya = true;
 
-function convertDate(unixtime: number): string {
-  const s = format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
-  console.log("AAA", s);
-  return s;
+/** Идёт ручное обновление прогресса. */
+const obnovlenieVruchnuyu = ref(false);
+
+const shagi = computed(() => progressOtobrazhaemiya.value.steps);
+
+/**
+ * Шаги вместе с длительностью выполнения.
+ *
+ * Длительность считается один раз на шаг: `unixtime - unixtimeStart`.
+ * Для старых записей без `unixtimeStart` хелпер откатывается на разницу
+ * с `unixtime` предыдущего шага, поэтому панель логов остаётся читаемой.
+ */
+const shagiSDlitelnostyu = computed(() => {
+  const spisokShagov = shagi.value;
+
+  return spisokShagov.map((step, i) => ({
+    step,
+    dlitelnost: dlitelnostShaga(step, i > 0 ? spisokShagov[i - 1] : null),
+  }));
+});
+
+const sostoyanie = computed(() => progressOtobrazhaemiya.value.status);
+
+const bannerSostoyaniya = computed(() => {
+  switch (sostoyanie.value) {
+    case 'success':
+      return {klass: 'bg-positive text-white', ikonka: 'check_circle', tekst: 'finished_success'};
+    case 'error':
+      return {klass: 'bg-negative text-white', ikonka: 'error', tekst: 'finished_error'};
+    case 'running':
+      return {klass: 'bg-primary text-white', ikonka: 'autorenew', tekst: 'running'};
+    default:
+      return {klass: 'bg-grey-8 text-white', ikonka: 'hourglass_empty', tekst: 'waiting'};
+  }
+});
+
+const indikatorKanala = computed(() => {
+  switch (channelState.value) {
+    case 'live':
+      return {cvet: 'green', ikonka: 'circle', tekst: 'live'};
+    case 'reconnecting':
+      return {cvet: 'amber', ikonka: 'circle', tekst: 'reconnecting'};
+    default:
+      return {cvet: 'grey', ikonka: 'circle', tekst: 'readonly'};
+  }
+});
+
+onMounted(async () => {
+  window.addEventListener('scroll', obnovitPriznakNizhnegoKraya, {passive: true});
+  obnovitPriznakNizhnegoKraya();
+
+  logProgressa('страница выполненных задач открыта', {
+    unitId: route.params.id,
+    kanalSostoyanie: channelState.value,
+  });
+
+  await store.poluchitVipolnenieZadachiRunnera(route.params.id as string);
+
+  logProgressa('страница выполненных задач загрузила список', {
+    unitId: route.params.id,
+    prozesov: spisok.value.length,
+    vybrannayaZadacha: selectJob.value.zadachaId,
+    kanalSostoyanie: channelState.value,
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', obnovitPriznakNizhnegoKraya);
+  // Уходим со страницы — снимаем подписки на канал прогресса и на события юнита.
+  store.zakritOkno();
+});
+
+watch(
+    () => [progressOtobrazhaemiya.value.updatedAt, shagi.value.length] as const,
+    () => {
+      if (!polzovatelUNizhnegoKraya) {
+        return;
+      }
+
+      void nextTick(prokrutitVNiz);
+    },
+    {flush: 'post'},
+);
+
+/**
+ * Наблюдение за отображаемым прогрессом.
+ *
+ * Логи здесь — уровень страницы: если события приходят, но UI не меняется,
+ * значит снапшот отброшен в сторе (причина будет в логе `[unit_progress]`
+ * из `primenitProgress`), а если этот watcher молчит — событие не дошло
+ * до стора вовсе (подписка, фильтр payload'а или `jobId`).
+ */
+watch(
+    () => progressOtobrazhaemiya.value,
+    (novoe, staroe) => {
+      logProgressa('прогресс на странице изменился', {
+        bylo: {
+          updatedAt: staroe.updatedAt,
+          shagov: staroe.steps.length,
+          status: staroe.status,
+        },
+        stalo: {
+          updatedAt: novoe.updatedAt,
+          shagov: novoe.steps.length,
+          status: novoe.status,
+        },
+        vybrannayaZadacha: selectJob.value.zadachaId,
+      });
+    },
+);
+
+/** Подписка на смену выбранной задачи: видно, какая задача реально наблюдается. */
+watch(
+    () => selectJob.value.zadachaId,
+    (novaya, staraya) => {
+      logProgressa('выбранная задача изменилась', {
+        bylo: staraya,
+        stalo: novaya,
+        kanal: novaya === '' ? null : `unit_progress#${novaya}`,
+      });
+    },
+);
+
+/** Индикатор канала: `readonly` после `finished` — ожидаемое поведение. */
+watch(channelState, (novoe, staroe) => {
+  logProgressa(`состояние канала на странице: ${staroe} → ${novoe}`);
+});
+
+function obnovitPriznakNizhnegoKraya(): void {
+  const vsego = document.documentElement.scrollHeight;
+  const vidno = window.scrollY + window.innerHeight;
+
+  polzovatelUNizhnegoKraya = vsego - vidno <= POROG_AVTOSKROLLA;
 }
 
+function prokrutitVNiz(): void {
+  window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'smooth'});
+}
+
+async function obnovitVruchnuyu(): Promise<void> {
+  obnovlenieVruchnuyu.value = true;
+
+  try {
+    await store.obnovitProgressVruchnuyu();
+  } finally {
+    obnovlenieVruchnuyu.value = false;
+  }
+}
 </script>
 
 <template>
@@ -34,17 +187,79 @@ function convertDate(unixtime: number): string {
         <div class="full-height full-width row inline wrap justify-start items-start content-start">
           <div class="col-9" style="overflow: hidden;">
             <q-card class="no-border-radius bg-grey-10">
-              <q-card-section v-if="selectJob">
-                <div v-for="(step, i) in selectJob.steps">
+              <q-card-section class="q-pb-none">
+                <div class="row items-center q-gutter-sm q-pb-sm">
+                  <div class="col">
+                    <q-banner
+                        dense
+                        rounded
+                        :class="bannerSostoyaniya.klass"
+                    >
+                      <template v-slot:avatar>
+                        <q-icon :name="bannerSostoyaniya.ikonka"/>
+                      </template>
+                      {{ $t('unit.okno_zadach_runnera.' + bannerSostoyaniya.tekst) }}
+                    </q-banner>
+                  </div>
+                  <div class="col-auto row items-center q-gutter-xs">
+                    <q-icon :name="indikatorKanala.ikonka" :color="indikatorKanala.cvet" size="12px"/>
+                    <span class="text-grey-5 fs-12">
+                      {{ $t('unit.okno_zadach_runnera.' + indikatorKanala.tekst) }}
+                    </span>
+                    <q-btn
+                        v-if="channelState === 'readonly'"
+                        dense
+                        flat
+                        size="sm"
+                        color="grey-5"
+                        icon="refresh"
+                        :loading="obnovlenieVruchnuyu"
+                        :label="$t('unit.okno_zadach_runnera.refresh_button')"
+                        @click="obnovitVruchnuyu"
+                    />
+                  </div>
+                </div>
+
+                <div v-if="progressOtobrazhaemiya.updatedAt > 0" class="text-grey-5 fs-12 q-pb-sm">
+                  {{ $t('unit.okno_zadach_runnera.updated_at', {time: convertTime(progressOtobrazhaemiya.updatedAt)}) }}
+                </div>
+
+                <q-banner
+                    v-if="oshibkaOtBackenda !== null"
+                    dense
+                    rounded
+                    class="bg-negative text-white q-mb-sm"
+                >
+                  <template v-slot:avatar>
+                    <q-icon name="warning"/>
+                  </template>
+                  {{ oshibkaOtBackenda }}
+                </q-banner>
+
+                <q-banner
+                    v-if="neUdalosObnovitProgress"
+                    dense
+                    rounded
+                    class="bg-grey-9 text-grey-4 q-mb-sm"
+                >
+                  <template v-slot:avatar>
+                    <q-icon name="cloud_off"/>
+                  </template>
+                  {{ $t('unit.okno_zadach_runnera.refresh_failed') }}
+                </q-banner>
+              </q-card-section>
+
+              <q-card-section v-if="selectJob.zadachaId !== ''">
+                <div v-for="({step, dlitelnost}, i) in shagiSDlitelnostyu" :key="i">
                   <div class="text-light-green-14 fs-12">
                     <div class="row">
                       <div class="col"><pre class="bash-output">{{step.command}}</pre></div>
                       <div class="col-auto">
                         <div v-if="i===0">
-                          {{convertDate(step.unixtime)}}
+                          {{convertDateTime(step.unixtime)}}
                         </div>
-                        <div v-if="i > 0">
-                          {{(step.unixtime - selectJob.steps[i - 1].unixtime) + ' s'}}
+                        <div v-if="dlitelnost !== null">
+                          {{dlitelnost + ' s'}}
                         </div>
                       </div>
                     </div>

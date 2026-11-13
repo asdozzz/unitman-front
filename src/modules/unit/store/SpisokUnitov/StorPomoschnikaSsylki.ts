@@ -13,6 +13,8 @@ export type ZapolnennyPomoschnikSsylki = {
     service: string;
     port: number;
     suffix: string | null;
+    /** Протокол ссылки (`http` по умолчанию, `ws` для websocket). */
+    type: string;
 };
 
 /**

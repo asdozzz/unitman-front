@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { useCentrifugo } from "@/bootstrap/centrifugeClient";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {storeToRefs} from "pinia";
-import {onMounted} from "vue";
+import {onMounted, onUnmounted} from "vue";
 import FormaSozdaniyaUnita from "@/modules/unit/view/Unit/FormaSozdaniyaUnita.vue";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {
@@ -11,6 +10,7 @@ import {
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
 import UnitCard from "@/modules/unit/view/Unit/SpisokUnitov/UnitCard.vue";
 import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
+import {podpisatsyaNaSobitiyaUnitov} from "@/modules/unit/model/websocket/PodpiskaNaSobitiyaUnitov";
 import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
 import {useRoute} from "vue-router";
@@ -32,6 +32,14 @@ function openAddForm() {
 }
 
 
+/**
+ * Отписка от канала событий юнитов.
+ *
+ * Подписка общая с окном задач runner'а, поэтому создаётся и снимается
+ * через модуль-реестр, а не напрямую через клиент Centrifugo.
+ */
+let otpisatsyaOtSobitiy: (() => void) | null = null;
+
 onMounted(async () => {
   const route = useRoute();
   if (route.query.id) {
@@ -41,15 +49,12 @@ onMounted(async () => {
   unitiStore.poluchitMoiProekti();
   unitiStore.poluchitSpisokUnitov();
 
-  const centrifuge = useCentrifugo();
-  const unitSub = centrifuge.newSubscription('spisok_unitov');
-  unitSub.on('publication', (ctx) => {
-    handleWebsocketEvent(ctx.data as ModelForChannelSpisokUnitov);
+  otpisatsyaOtSobitiy = podpisatsyaNaSobitiyaUnitov(handleWebsocketEvent);
+})
 
-  });
-  unitSub.subscribe();
-
-  centrifuge.connect();
+onUnmounted(() => {
+  otpisatsyaOtSobitiy?.();
+  otpisatsyaOtSobitiy = null;
 })
 
 function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {

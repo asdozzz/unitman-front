@@ -442,7 +442,7 @@ export type paths = {
         put?: never;
         /**
          * Загрузить zip-архив
-         * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Владелец файла ровно один: unitId — файл юнита, projectId — архив каталога типов томов проекта (общий, к юниту не привязывается). Без обоих полей файл сохраняется как черновик (unitId = null, projectId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Одновременная передача unitId и projectId — ошибка. Поле name необязательно: при отсутствии берётся имя загруженного файла.
+         * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Владелец файла ровно один: unitId — файл юнита, projectId — архив каталога типов томов проекта (общий, к юниту не привязывается). Без обоих полей файл сохраняется как черновик (unitId = null, projectId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Одновременная передача unitId и projectId — ошибка. Поле name необязательно: при отсутствии берётся имя загруженного файла. Имя всегда нормализуется: латиница в нижнем регистре, только символы a-z, 0-9, _, ., -, так как оно используется как имя docker-тома; кириллица транслитерируется, недопустимые символы заменяются на дефис, расширение .zip добавляется при отсутствии.
          */
         post: operations["post_app_mediateka_infra_mediateka_upload"];
         delete?: never;
@@ -1196,7 +1196,7 @@ export type paths = {
         put?: never;
         /**
          * Сохранить шаги выполнения задачи
-         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. `responseId` содержит токен прогресса (workflowId/jobId), `stepsContent` — полный снапшот шагов. При настроенном RUNNER_CALLBACK_SECRET обязателен заголовок X-Runner-Signature: hex(HMAC-SHA256(responseId . stepsContent, secret)).
          */
         post: operations["post_app_runner_infra_runner_savesteps"];
         delete?: never;
@@ -1232,7 +1232,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Список юнитов с фильтрацией */
-        post: operations["post_app_unitman_infra_unitconroller_list"];
+        post: operations["post_app_unitman_infra_unit_list"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1249,7 +1249,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Мои юниты */
-        post: operations["post_app_unitman_infra_unitconroller_moi"];
+        post: operations["post_app_unitman_infra_unit_moi"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1266,7 +1266,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Найти дубли юнитов по проектe и ветке */
-        post: operations["post_app_unitman_infra_unitconroller_naitidubliunita"];
+        post: operations["post_app_unitman_infra_unit_naitidubliunita"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1283,7 +1283,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Юнит по идентификатору */
-        post: operations["post_app_unitman_infra_unitconroller_read"];
+        post: operations["post_app_unitman_infra_unit_read"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1300,7 +1300,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Обновить код юнита */
-        post: operations["post_app_unitman_infra_unitconroller_obnovitkodunita"];
+        post: operations["post_app_unitman_infra_unit_obnovitkodunita"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1317,7 +1317,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Остановить юнит */
-        post: operations["post_app_unitman_infra_unitconroller_ostanovit"];
+        post: operations["post_app_unitman_infra_unit_ostanovit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1334,7 +1334,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Подготовить юнит к запуску */
-        post: operations["post_app_unitman_infra_unitconroller_podgotovit"];
+        post: operations["post_app_unitman_infra_unit_podgotovit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1351,7 +1351,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Конфигурация из хранилища по проекту и ветке */
-        post: operations["post_app_unitman_infra_unitconroller_poluchitkonfigizhranilisha"];
+        post: operations["post_app_unitman_infra_unit_poluchitkonfigizhranilisha"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1368,7 +1368,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Конфигурация юнита */
-        post: operations["post_app_unitman_infra_unitconroller_poluchitkonfigunita"];
+        post: operations["post_app_unitman_infra_unit_poluchitkonfigunita"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1385,7 +1385,27 @@ export type paths = {
         get?: never;
         put?: never;
         /** Переменные юнита */
-        post: operations["post_app_unitman_infra_unitconroller_poluchitperemenieunita"];
+        post: operations["post_app_unitman_infra_unit_poluchitperemenieunita"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/unit/poluchitProgressZadachiRunnera": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Текущий прогресс задачи runner'а (pull-режим)
+         * @description Возвращает снапшот шагов задачи без ожидания завершения Temporal-активити. Источник данных выбирается по состоянию задачи: если она уже завершена (SUCCESS/ERROR/CANCLED) и шаги проставлены в БД, прогресс собирается из БД (переживает истечение TTL снимка); иначе — из снимка раннера. Если раннер ещё не присылал шагов, возвращается пустой прогресс с finished=false. Для push-режима подписывайтесь в Centrifugo на канал unit_progress#<jobId> — payload события идентичен полю data этого ответа.
+         */
+        post: operations["post_app_unitman_infra_unit_poluchitprogresszadachirunnera"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1402,7 +1422,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Шаги задачи runner'а */
-        post: operations["post_app_unitman_infra_unitconroller_poluchitshagizadachirunnera"];
+        post: operations["post_app_unitman_infra_unit_poluchitshagizadachirunnera"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1419,7 +1439,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Ссылка на помощника (кросс-сервисный адрес) */
-        post: operations["post_app_unitman_infra_unitconroller_poluchitssylkupopomoschniku"];
+        post: operations["post_app_unitman_infra_unit_poluchitssylkupopomoschniku"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1436,7 +1456,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Выполнение задачи runner'а для юнита */
-        post: operations["post_app_unitman_infra_unitconroller_poluchitvipolneniezadachirunnera"];
+        post: operations["post_app_unitman_infra_unit_poluchitvipolneniezadachirunnera"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1453,7 +1473,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Пометить юнит как сломанный */
-        post: operations["post_app_unitman_infra_unitconroller_pometitkakslomanii"];
+        post: operations["post_app_unitman_infra_unit_pometitkakslomanii"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1470,7 +1490,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Проверить контейнер юнита */
-        post: operations["post_app_unitman_infra_unitconroller_proveritkonteinerunita"];
+        post: operations["post_app_unitman_infra_unit_proveritkonteinerunita"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1487,7 +1507,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Пересобрать проекцию списка юнитов */
-        post: operations["post_app_unitman_infra_unitconroller_rebuildspisokunitov"];
+        post: operations["post_app_unitman_infra_unit_rebuildspisokunitov"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1504,7 +1524,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Сбросить подготовку юнита */
-        post: operations["post_app_unitman_infra_unitconroller_sbrositpodgotovku"];
+        post: operations["post_app_unitman_infra_unit_sbrositpodgotovku"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1521,7 +1541,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Собрать юнит */
-        post: operations["post_app_unitman_infra_unitconroller_sobrat"];
+        post: operations["post_app_unitman_infra_unit_sobrat"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1538,7 +1558,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Создать юнит */
-        post: operations["post_app_unitman_infra_unitconroller_sozdat"];
+        post: operations["post_app_unitman_infra_unit_sozdat"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1555,7 +1575,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Удалить юнит */
-        post: operations["post_app_unitman_infra_unitconroller_udalit"];
+        post: operations["post_app_unitman_infra_unit_udalit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1572,7 +1592,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Удалить сломанный юнит */
-        post: operations["post_app_unitman_infra_unitconroller_udalitslomaniyunit"];
+        post: operations["post_app_unitman_infra_unit_udalitslomaniyunit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1589,7 +1609,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Выполнить действие над юнитом */
-        post: operations["post_app_unitman_infra_unitconroller_vipolnitdeistviye"];
+        post: operations["post_app_unitman_infra_unit_vipolnitdeistviye"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1606,7 +1626,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Заполнить переменные юнита */
-        post: operations["post_app_unitman_infra_unitconroller_zapolnitperemenie"];
+        post: operations["post_app_unitman_infra_unit_zapolnitperemenie"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1623,7 +1643,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Запустить юнит */
-        post: operations["post_app_unitman_infra_unitconroller_zapustit"];
+        post: operations["post_app_unitman_infra_unit_zapustit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1850,6 +1870,11 @@ export type components = {
             service: string | null;
             /** @description Суффикс, добавляемый в конец ссылки на юнит, null если не задан */
             suffix: string | null;
+            /**
+             * @description Протокол ссылки на сервис; по умолчанию `http`, для websocket — `ws`
+             * @example http
+             */
+            type: string;
         };
         /** @description Статистика контейнера юнита */
         ContainerStats: {
@@ -2097,7 +2122,7 @@ export type components = {
              */
             mimeType: "application/zip";
             /**
-             * @description Отображаемое имя файла
+             * @description Имя файла, нормализованное под правила docker-тома: латиница в нижнем регистре, разрешены только a-z, 0-9, _, ., -, кириллица транслитерируется, расширение .zip добавляется при отсутствии
              * @example logs.zip
              */
             name: string;
@@ -2203,6 +2228,13 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
+        /** @description Запрос текущего прогресса выполнения задачи runner'а */
+        PoluchitProgressZadachiUnita: {
+            /** @description Идентификатор процесса юнита */
+            prozesId: string;
+            /** @description Идентификатор задачи процесса (он же jobId/workflowId) */
+            zadachaId: string;
+        };
         PoluchitShagiZadachiUnita: {
             prozesId: string;
             zadachaId: string;
@@ -2242,12 +2274,17 @@ export type components = {
             /** @example backend */
             service: string;
             /**
-             * @description Суффикс, добавляемый в конец ссылки на юнит; null или пустая строка, если не задан
+             * @description Суффикс, подставляемый в конец ссылки вместо startUri из конфига юнита; null или пустая строка — ссылка без суффикса
              * @example /api/v1
              */
             suffix?: string | null;
             /** Format: uuid */
             targetUnitId: string;
+            /**
+             * @description Протокол искомого порта целевого юнита; null или пустая строка — `http`
+             * @example ws
+             */
+            type?: string | null;
         };
         PoluchitTipyVolumov: {
             /** @default  */
@@ -2425,13 +2462,37 @@ export type components = {
             /** @example 1.2kB / 3.4kB */
             netIO: string;
         };
-        /** @description Шаг выполнения задания (RunnerJobStep::toArray) */
+        /** @description Текущий прогресс задачи runner'а (RunnerJobProgress::toArray). Совпадает по структуре с payload push-канала Centrifugo `unit_progress#<jobId>`, поэтому фронтенд обрабатывает push и pull одинаково. */
+        RunnerJobProgress: {
+            /** @description Признак завершения задачи */
+            finished: boolean;
+            /** @description Идентификатор задачи (он же Temporal workflowId) */
+            jobId: string;
+            /** @description Полный снапшот шагов на момент updatedAt */
+            steps: components["schemas"]["RunnerJobStep"][];
+            /** @description Итог выполнения (имеет смысл только при finished=true) */
+            success: boolean;
+            /**
+             * @description Unix-время последнего обновления снапшота (0 — снапшота ещё нет)
+             * @example 1730000000
+             */
+            updatedAt: number;
+        };
+        /** @description Шаг выполнения задания (RunnerJobStep::toArray). `unixtime` — время окончания шага, `unixtimeStart` — необязательное время начала. Ключ `unixtimeStart` не эмитится, если время начала не известно (старый раннер, старые события). */
         RunnerJobStep: {
             command: string;
             response: string;
             success: boolean;
-            /** @example 1730000000 */
+            /**
+             * @description Время окончания шага (unix-секунды)
+             * @example 1730000000
+             */
             unixtime: number;
+            /**
+             * @description Необязательное время начала шага (unix-секунды). Отсутствует, если раннер его не прислал; длительность шага = unixtime - unixtimeStart (при наличии поля).
+             * @example 1729999975
+             */
+            unixtimeStart?: number | null;
         };
         /** @description Информация о памяти раннера (MemoryInfo) */
         RunnerMemoryInfo: {
@@ -2551,7 +2612,7 @@ export type components = {
             label: string;
             options: Record<string, never> | null;
             /** @enum {string} */
-            type: "string" | "integer" | "float" | "collection" | "unit";
+            type: "string" | "integer" | "float" | "collection";
         };
         /** @description Конфигурация юнита; пустой массив, если конфигурация ещё не задана */
         UnitConfig: {
@@ -2604,7 +2665,7 @@ export type components = {
             /** @description Параметры выбора; пустой объект, если опций нет */
             options: Record<string, never> | null;
             /** @enum {string} */
-            type: "string" | "integer" | "float" | "collection" | "unit";
+            type: "string" | "integer" | "float" | "collection";
         };
         /** @description Ссылка на сервис запущенного юнита */
         UnitLink: {
@@ -2736,6 +2797,11 @@ export type components = {
             suffix?: string | null;
             /** @description Идентификатор юнита, выбранного через хелпер */
             targetUnitId: string;
+            /**
+             * @description Протокол из конфигурации хелпера переменной; по умолчанию `http`
+             * @example ws
+             */
+            type?: string | null;
             /** @description Идентификатор переменной конфига юнита, для которой использован хелпер */
             variableId: string;
         };
@@ -3744,7 +3810,10 @@ export interface operations {
                      * @description zip-архив (проверяется по сигнатуре)
                      */
                     file: string;
-                    /** @description Отображаемое имя файла; по умолчанию — имя загруженного файла */
+                    /**
+                     * @description Отображаемое имя файла; по умолчанию — имя загруженного файла. Приводится к правилам docker-тома: латиница в нижнем регистре, разрешены только a-z, 0-9, _, ., -, кириллица транслитерируется, расширение .zip добавляется при отсутствии
+                     * @example dump-bd.zip
+                     */
                     name?: string;
                     /**
                      * Format: uuid
@@ -5746,6 +5815,20 @@ export interface operations {
                     "application/json": boolean;
                 };
             };
+            /** @description Неизвестный токен прогресса либо превышен размер снапшота */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректная подпись запроса */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     get_app_runner_infra_runner_test: {
@@ -5782,7 +5865,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_list: {
+    post_app_unitman_infra_unit_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -5828,7 +5911,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_moi: {
+    post_app_unitman_infra_unit_moi: {
         parameters: {
             query?: never;
             header?: never;
@@ -5874,7 +5957,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_naitidubliunita: {
+    post_app_unitman_infra_unit_naitidubliunita: {
         parameters: {
             query?: never;
             header?: never;
@@ -5920,7 +6003,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_read: {
+    post_app_unitman_infra_unit_read: {
         parameters: {
             query?: never;
             header?: never;
@@ -5965,7 +6048,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_obnovitkodunita: {
+    post_app_unitman_infra_unit_obnovitkodunita: {
         parameters: {
             query?: never;
             header?: never;
@@ -6011,7 +6094,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_ostanovit: {
+    post_app_unitman_infra_unit_ostanovit: {
         parameters: {
             query?: never;
             header?: never;
@@ -6057,7 +6140,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_podgotovit: {
+    post_app_unitman_infra_unit_podgotovit: {
         parameters: {
             query?: never;
             header?: never;
@@ -6103,7 +6186,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_poluchitkonfigizhranilisha: {
+    post_app_unitman_infra_unit_poluchitkonfigizhranilisha: {
         parameters: {
             query?: never;
             header?: never;
@@ -6153,7 +6236,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_poluchitkonfigunita: {
+    post_app_unitman_infra_unit_poluchitkonfigunita: {
         parameters: {
             query?: never;
             header?: never;
@@ -6199,7 +6282,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_poluchitperemenieunita: {
+    post_app_unitman_infra_unit_poluchitperemenieunita: {
         parameters: {
             query?: never;
             header?: never;
@@ -6249,7 +6332,52 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_poluchitshagizadachirunnera: {
+    post_app_unitman_infra_unit_poluchitprogresszadachirunnera: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitProgressZadachiUnita"];
+            };
+        };
+        responses: {
+            /** @description Текущий прогресс задачи runner по юниту. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RunnerJobProgress"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_unit_poluchitshagizadachirunnera: {
         parameters: {
             query?: never;
             header?: never;
@@ -6295,7 +6423,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_poluchitssylkupopomoschniku: {
+    post_app_unitman_infra_unit_poluchitssylkupopomoschniku: {
         parameters: {
             query?: never;
             header?: never;
@@ -6340,7 +6468,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_poluchitvipolneniezadachirunnera: {
+    post_app_unitman_infra_unit_poluchitvipolneniezadachirunnera: {
         parameters: {
             query?: never;
             header?: never;
@@ -6386,7 +6514,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_pometitkakslomanii: {
+    post_app_unitman_infra_unit_pometitkakslomanii: {
         parameters: {
             query?: never;
             header?: never;
@@ -6432,7 +6560,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_proveritkonteinerunita: {
+    post_app_unitman_infra_unit_proveritkonteinerunita: {
         parameters: {
             query?: never;
             header?: never;
@@ -6478,7 +6606,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_rebuildspisokunitov: {
+    post_app_unitman_infra_unit_rebuildspisokunitov: {
         parameters: {
             query?: never;
             header?: never;
@@ -6524,7 +6652,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_sbrositpodgotovku: {
+    post_app_unitman_infra_unit_sbrositpodgotovku: {
         parameters: {
             query?: never;
             header?: never;
@@ -6570,7 +6698,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_sobrat: {
+    post_app_unitman_infra_unit_sobrat: {
         parameters: {
             query?: never;
             header?: never;
@@ -6616,7 +6744,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_sozdat: {
+    post_app_unitman_infra_unit_sozdat: {
         parameters: {
             query?: never;
             header?: never;
@@ -6662,7 +6790,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_udalit: {
+    post_app_unitman_infra_unit_udalit: {
         parameters: {
             query?: never;
             header?: never;
@@ -6708,7 +6836,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_udalitslomaniyunit: {
+    post_app_unitman_infra_unit_udalitslomaniyunit: {
         parameters: {
             query?: never;
             header?: never;
@@ -6754,7 +6882,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_vipolnitdeistviye: {
+    post_app_unitman_infra_unit_vipolnitdeistviye: {
         parameters: {
             query?: never;
             header?: never;
@@ -6800,7 +6928,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_zapolnitperemenie: {
+    post_app_unitman_infra_unit_zapolnitperemenie: {
         parameters: {
             query?: never;
             header?: never;
@@ -6846,7 +6974,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_unitconroller_zapustit: {
+    post_app_unitman_infra_unit_zapustit: {
         parameters: {
             query?: never;
             header?: never;

@@ -3,7 +3,7 @@ import {useRoute} from "vue-router";
 import {SobitiyaWebhookaStore} from "@/modules/unit/store/SpisokProektov/SobitiyaWebhookaStore";
 import {storeToRefs} from "pinia";
 import {onMounted} from "vue";
-import {format, fromUnixTime} from "date-fns";
+import {convertDateTime} from "@/utils/dates";
 
 const storeWebhookov = SobitiyaWebhookaStore();
 const { form, loaderIzmeneniya, sobitiya } = storeToRefs(storeWebhookov);
@@ -16,11 +16,6 @@ onMounted(async () => {
 
 function changePage(newPage: number) {
   storeWebhookov.newPage(newPage);
-}
-
-function convertDate(unixtime: number): string {
-  const s = format(fromUnixTime(unixtime), 'dd.MM.yyy H:mm:ss');
-  return s;
 }
 </script>
 
@@ -61,7 +56,7 @@ function convertDate(unixtime: number): string {
             <q-item-section>
               <div class="row">
                 <div class="col">{{item.type}}</div>
-                <div class="col-auto" style="font-size: 12px">{{convertDate(item.unixtime)}}</div>
+                <div class="col-auto" style="font-size: 12px">{{convertDateTime(item.unixtime)}}</div>
               </div>
             </q-item-section>
           </q-item>
