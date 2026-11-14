@@ -14,7 +14,7 @@ variables:
     type: string
     defaultValue: "ws://localhost:8000/connection/websocket"
     helper:
-      projectId: 01a1973b-e6b8-7081-a590-acbd147068a0
+      projectId: 01a1bb1c-46c7-722c-985e-b97fc8229979
       service: centrifugo
       port: 8000
       type: 'ws'
