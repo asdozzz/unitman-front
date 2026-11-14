@@ -4,7 +4,7 @@ variables:
     type: string
     defaultValue: "http://localhost:8082/api"
     helper:
-      projectId: 01a1973b-e6b8-7081-a590-acbd147068a0
+      projectId: 01a1bb1c-46c7-722c-985e-b97fc8229979
       service: web
       port: 8082
       suffix: /api
