@@ -8,6 +8,7 @@ import {
 } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
+import {useStorFormiSozdaniyaSessii} from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
 
 const props = defineProps<{
   item: Unit,
@@ -21,6 +22,8 @@ const { getUnitLoader, esliZapushen,getUserRoleByProjectIdAndUserId, esliJdemRun
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 
 const storFormaDeistviy = storFormiDeistviyUnita();
+
+const formaSessiiStore = useStorFormiSozdaniyaSessii();
 
 async function sobrat(id: string) {
   await unitiStore.sobratMoiUnit(id);
@@ -65,6 +68,17 @@ function otkritOknoSZadachamiRunnera(id: string) {
   router.push({ name: 'unit_jobs', params: { id }});
 }
 
+/**
+ * Создать сессию OpenCode с этим юнитом.
+ *
+ * Диалог общий со списком сессий и смонтирован в `SpisokUnitov.vue`; здесь
+ * достаточно открыть его с предвыбранным юнитом. Переход в чат выполняет
+ * обработчик `sozdana` в списке юнитов.
+ */
+function sozdatSessiyuSUnitom(id: string) {
+  formaSessiiStore.otkrit([id]);
+}
+
 const authStore = useAuthStore();
 const { userId, isAdmin } = storeToRefs(authStore);
 
@@ -74,6 +88,9 @@ const { userId, isAdmin } = storeToRefs(authStore);
   <template v-if="item.unitSozdanSystemoi || userId === item.authorId || getUserRoleByProjectIdAndUserId(item.projectId, userId as string) === 'ADMIN'">
     <q-btn square color="primary" padding="5px 6px" size="sm" icon="info" @click="otkritOknoSZadachamiRunnera(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.jobs')}}</q-tooltip>
+    </q-btn>
+    <q-btn square color="primary" padding="5px 6px" size="sm" icon="forum" @click="sozdatSessiyuSUnitom(item.id)">
+      <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.create_session')}}</q-tooltip>
     </q-btn>
     <q-btn size="md" square color="primary" padding="5px 6px" v-if="esliJdemRunner(item)" icon="refresh" @click="obnovit(item.id)" :loading="getUnitLoader(item.id)">
       <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.update')}}</q-tooltip>

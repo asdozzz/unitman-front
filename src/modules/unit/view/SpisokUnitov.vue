@@ -13,7 +13,9 @@ import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelF
 import {podpisatsyaNaSobitiyaUnitov} from "@/modules/unit/model/websocket/PodpiskaNaSobitiyaUnitov";
 import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
+import FormaSozdaniyaSessii from "@/modules/opencode/view/FormaSozdaniyaSessii.vue";
+import {useStorSpiskaRekvizitovOpenCode} from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 
 const unitiStore = useSpisokUnitovStore();
 const { spisok, oshibkaZagruzkiSpiska, nastroikiSpiska, proekti, nazvanieUnitaPoId } = storeToRefs(unitiStore);
@@ -26,6 +28,14 @@ const { enable: enableKonfigForm } = storeToRefs(konfigFormStore);
 
 const storFormiDeistviy = storFormiDeistviyUnita();
 const { enable: enableFormiDeistviya } = storeToRefs(storFormiDeistviy);
+
+const router = useRouter();
+const storRekvizitov = useStorSpiskaRekvizitovOpenCode();
+
+/** После создания сессии из карточки юнита сразу открываем её чат. */
+function pereytiVSessiyu(id: string) {
+  router.push({name: "opencode_chat", params: {id}});
+}
 
 function openAddForm() {
   addFormStore.otkritFormu();
@@ -48,6 +58,8 @@ onMounted(async () => {
 
   unitiStore.poluchitMoiProekti();
   unitiStore.poluchitSpisokUnitov();
+  // Реквизиты нужны диалогу создания сессии из карточки юнита.
+  storRekvizitov.poluchitSpisok();
 
   otpisatsyaOtSobitiy = podpisatsyaNaSobitiyaUnitov(handleWebsocketEvent);
 })
@@ -183,6 +195,10 @@ async function udalitSvyazIzFiltra(unitId: string) {
         <FormaDeistviyUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()"/>
       </q-dialog>
     </div>
+
+    <!-- Диалог создания сессии общий с модулем OpenCode: карточка юнита
+         только открывает его с предвыбранным юнитом. -->
+    <FormaSozdaniyaSessii @sozdana="pereytiVSessiyu"/>
   </div>
 
 </template>

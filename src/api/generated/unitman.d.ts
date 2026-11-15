@@ -148,6 +148,74 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/account/opencode/izmenitRekvizity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Изменить реквизиты OpenCode */
+        post: operations["post_app_account_infra_opencodecredential_izmenitrekvizity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/opencode/sozdatRekvizity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Добавить реквизиты OpenCode */
+        post: operations["post_app_account_infra_opencodecredential_sozdatrekvizity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/opencode/spisokRekvizitov": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список реквизитов OpenCode текущего пользователя */
+        get: operations["get_app_account_infra_opencodecredential_spisokrekvizitov"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/opencode/udalitRekvizity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить реквизиты OpenCode */
+        post: operations["post_app_account_infra_opencodecredential_udalitrekvizity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/poluchitNastroikiPolzovatelya": {
         parameters: {
             query?: never;
@@ -445,6 +513,197 @@ export type paths = {
          * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Владелец файла ровно один: unitId — файл юнита, projectId — архив каталога типов томов проекта (общий, к юниту не привязывается). Без обоих полей файл сохраняется как черновик (unitId = null, projectId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Одновременная передача unitId и projectId — ошибка. Поле name необязательно: при отсутствии берётся имя загруженного файла. Имя всегда нормализуется: латиница в нижнем регистре, только символы a-z, 0-9, _, ., -, так как оно используется как имя docker-тома; кириллица транслитерируется, недопустимые символы заменяются на дефис, расширение .zip добавляется при отсутствии.
          */
         post: operations["post_app_mediateka_infra_mediateka_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/arhivirovatSessiyu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Архивировать сессию: остаётся в списке, новые ходы запрещены */
+        post: operations["post_app_opencode_infra_opencode_arhivirovatsessiyu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/istoriyaSessii": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** История ходов сессии */
+        post: operations["post_app_opencode_infra_opencode_istoriyasessii"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/otvetit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ответить на вопрос OpenCode и запустить новый ход */
+        post: operations["post_app_opencode_infra_opencode_otvetit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/poluchitProgressHoda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Снапшот шагов выполнения хода */
+        post: operations["post_app_opencode_infra_opencode_poluchitprogresshoda"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/poluchitResultatHoda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Опросить результат хода */
+        post: operations["post_app_opencode_infra_opencode_poluchitresultathoda"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/privezatKUnitu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Привязать свободную сессию к юниту */
+        post: operations["post_app_opencode_infra_opencode_privezatkunitu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отправить промпт и запустить ход */
+        post: operations["post_app_opencode_infra_opencode_prompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/sostoyanieSessii": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Состояние сессии: причина блокировки ходов */
+        post: operations["post_app_opencode_infra_opencode_sostoyaniesessii"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/sozdatSessiyu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Создать сессию OpenCode, при необходимости сразу с юнитом */
+        post: operations["post_app_opencode_infra_opencode_sozdatsessiyu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/spisokSessiy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список сессий текущего пользователя */
+        get: operations["get_app_opencode_infra_opencode_spisoksessiy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/udalitSessiyu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Устаревший алиас архивации сессии
+         * @deprecated
+         * @description Полное удаление сессии заменено архивацией; тело и ответ совпадают с `arhivirovatSessiyu`.
+         */
+        post: operations["post_app_opencode_infra_opencode_udalitsessiyu"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1809,6 +2068,11 @@ export type components = {
             /** Format: uuid */
             projectId: string;
         };
+        /** @description Архивация сессии: ходы и история сохраняются, сессия остаётся в списке с флагом `archived`, новые ходы запрещены */
+        ArhivirovatSessiyu: {
+            /** Format: uuid */
+            sessionId: string;
+        };
         BlockByAdmin: {
             /** Format: uuid */
             accountId: string;
@@ -2080,6 +2344,19 @@ export type components = {
             prop: string;
             value: string | null;
         };
+        /** @description Частичное изменение реквизитов OpenCode: непереданные поля не меняются */
+        IzmenitRekvizityOpenCode: {
+            /**
+             * Format: password
+             * @description Новый API-ключ. null или пустая строка — оставить прежний
+             */
+            apiKey?: string | null;
+            /** Format: uuid */
+            id: string;
+            model?: string | null;
+            name?: string | null;
+            url?: string | null;
+        };
         IzmenitUrlWebhooka: {
             /** Format: uuid */
             id: string;
@@ -2155,6 +2432,16 @@ export type components = {
              */
             url: string;
         };
+        /** @description Промпт пользователя, запускающий новый ход */
+        NachatPrompt: {
+            /** Format: uuid */
+            sessionId: string;
+            /**
+             * @description Текст промпта в открытом виде
+             * @example Добавь ретраи в клиент оплаты
+             */
+            text: string;
+        };
         NaitiDubliUnita: {
             /** @example feature/123 */
             branch: string;
@@ -2186,6 +2473,196 @@ export type components = {
              */
             refreshToken: string;
         };
+        /** @description Ответ на один вопрос: выбранный вариант и/или свободный текст */
+        OpenCodeAnswer: {
+            /** @description Id выбранного варианта; обязателен, если вопрос не допускает свободный текст */
+            optionId?: string | null;
+            /** @description Id вопроса из result.Questions предыдущего хода */
+            questionId: string;
+            /** @description Свободный текстовый ответ; допустим только при AllowFreeText */
+            text?: string | null;
+        };
+        /** @description Реквизиты OpenCode для показа пользователю (OpenCodeCredentialReadModel). Полный API-ключ отсутствует — только маска */
+        OpenCodeCredential: {
+            /**
+             * @description Маска ключа: последние 4 символа
+             * @example ****a1b2
+             */
+            apiKeyHint: string;
+            /**
+             * @description Момент создания, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            createdAt: number;
+            /** Format: uuid */
+            id: string;
+            /** @example claude-sonnet-4 */
+            model: string;
+            /** @example Рабочий ключ */
+            name: string;
+            /**
+             * @description Момент последнего изменения, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            updatedAt: number;
+            /** @example https://api.opencode.ai */
+            url: string;
+        };
+        OpenCodeQuestion: {
+            /** @description Разрешён ли свободный текстовый ответ вместо выбора варианта */
+            AllowFreeText: boolean;
+            Id: string;
+            Options: components["schemas"]["OpenCodeQuestionOption"][];
+            /** @description Текст вопроса */
+            Text: string;
+        };
+        OpenCodeQuestionOption: {
+            Description?: string | null;
+            Id: string;
+            Label: string;
+        };
+        /** @description Сессия OpenCode (SessiyaOpenCodeReadModel) */
+        OpenCodeSession: {
+            /** @description Сессия в архиве: отображается в списке, но новые ходы запрещены */
+            archived: boolean;
+            /**
+             * @description Причина архивации: `manual` — пользователь, `unit_deleted` — все юниты сессии удалены
+             * @enum {string|null}
+             */
+            archiveReason?: "manual" | "unit_deleted" | null;
+            /**
+             * @description Момент создания, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            createdAt: number;
+            /**
+             * Format: uuid
+             * @description Реквизиты, под которыми создана сессия
+             */
+            credentialId: string;
+            /** @description Идентификатор сессии на стороне OpenCode; появляется после первого завершённого хода */
+            externalSessionId?: string | null;
+            /** Format: uuid */
+            id: string;
+            /** @example Рефакторинг модуля биллинга */
+            title: string;
+            /**
+             * Format: uuid
+             * @description Первый юнит сессии (cwd), дубль `units[0].unitId`; `null` — свободная сессия
+             */
+            unitId?: string | null;
+            /**
+             * Format: uuid
+             * @description Проект первого юнита (cwd), дубль `units[0].unitProjectId`
+             */
+            unitProjectId?: string | null;
+            /** @description Юниты сессии в порядке привязки: первый — рабочий каталог хода (cwd), остальные — дополнительные корни workspace. Проекты юнитов уникальны: в сессии не может быть двух юнитов одного проекта */
+            units: components["schemas"]["OpenCodeSessionUnit"][];
+            /**
+             * @description Момент последнего изменения, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            updatedAt: number;
+        };
+        /** @description Юнит сессии (PrivyazkaKUnituReadModel) */
+        OpenCodeSessionUnit: {
+            /** Format: uuid */
+            unitId: string;
+            /**
+             * Format: uuid
+             * @description Проект юнита: передаётся в раннер как ProjectId
+             */
+            unitProjectId: string;
+        };
+        /** @description Ход OpenCode (HodOpenCodeReadModel) */
+        OpenCodeTurn: {
+            /** @description Нормализованные ответы, породившие этот ход (для первого хода и хода после промпта — пустой массив) */
+            answers: components["schemas"]["OpenCodeAnswer"][];
+            /**
+             * @description Момент создания, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            createdAt: number;
+            /**
+             * @description Ключ перевода ошибки, если ход завершился неудачей
+             * @example opencode.turn.failed
+             */
+            errorKey?: string | null;
+            /**
+             * @description Момент завершения хода; null пока ход выполняется
+             * @example 1762000030
+             */
+            finishedAt?: number | null;
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Имя Centrifugo-канала прогресса этого хода. Для завершённых ходов остаётся прежним и может использоваться для дозагрузки снапшота через /poluchitProgressHoda.
+             * @example unit_progress#6f1c5e0a-7d1f-4d59-9a54-0c2f8a2e6f11
+             */
+            progressChannel: string;
+            /** @description Текст, отправленный раннеру: промпт пользователя либо сводка ответов */
+            requestText: string;
+            result?: components["schemas"]["OpenCodeTurnResult"];
+            /**
+             * @description Порядковый номер хода внутри сессии, начиная с 1
+             * @example 1
+             */
+            seq: number;
+            /** Format: uuid */
+            sessionId: string;
+            /**
+             * @example AWAITING_INPUT
+             * @enum {string}
+             */
+            status: "RUNNING" | "AWAITING_INPUT" | "ANSWERED" | "FAILED";
+        };
+        /** @description Ход запущен: клиент подписывается на progressChannel и опрашивает /poluchitResultatHoda по turnId */
+        OpenCodeTurnLaunch: {
+            /**
+             * @description Имя Centrifugo-канала, в который раннер публикует шаги хода. Подписка возможна сразу после старта, без ожидания первого saveSteps.
+             * @example unit_progress#6f1c5e0a-7d1f-4d59-9a54-0c2f8a2e6f11
+             */
+            progressChannel: string;
+            /**
+             * @example RUNNING
+             * @enum {string}
+             */
+            status: "RUNNING" | "AWAITING_INPUT" | "ANSWERED" | "FAILED";
+            /** Format: uuid */
+            turnId: string;
+        };
+        /** @description Снапшот шагов хода из KV раннера (ProgressHodaOpenCode) */
+        OpenCodeTurnProgress: {
+            /** @description Признак завершения выполнения */
+            finished: boolean;
+            /** @description Шаги раннера как есть: Command, Response, Success, Unixtime */
+            steps: {
+                [key: string]: unknown;
+            }[];
+            /** @description Итог выполнения; осмысленно только при finished=true */
+            success: boolean;
+            /**
+             * @description Момент последней публикации шагов, unix timestamp (секунды)
+             * @example 1762000015
+             */
+            updatedAt: number;
+        } | null;
+        /** @description Результат хода в контракте раннера; API-ключа в нём нет по построению */
+        OpenCodeTurnResult: {
+            /** @description Финальный ответ ассистента при Kind=ANSWER */
+            Answer?: string | null;
+            /** @description Ключ перевода ошибки при Kind=ERROR */
+            ErrorKey?: string | null;
+            /** @description Идентификатор сессии на стороне OpenCode */
+            ExternalSessionId?: string | null;
+            /**
+             * @example QUESTION
+             * @enum {string}
+             */
+            Kind: "ANSWER" | "QUESTION" | "ERROR";
+            Questions: components["schemas"]["OpenCodeQuestion"][];
+            Success: boolean;
+        } | null;
         OstanovitUnit: {
             /** Format: uuid */
             id: string;
@@ -2200,6 +2677,16 @@ export type components = {
             /** @default false */
             udalitFayl?: boolean;
         };
+        /** @description Ответ на вопросы предыдущего хода; запускает новый ход */
+        OtvetitNaVopros: {
+            /** @description Ответы по каждому вопросу хода */
+            answers: components["schemas"]["OpenCodeAnswer"][];
+            /**
+             * Format: uuid
+             * @description Ход в статусе AWAITING_INPUT
+             */
+            turnId: string;
+        };
         PeresobratModelSpisokUnitov: {
             /** Format: uuid */
             id: string;
@@ -2207,6 +2694,10 @@ export type components = {
         PodgotovitUnitKZapusku: {
             /** Format: uuid */
             id: string;
+        };
+        PoluchitIstoriyuSessii: {
+            /** Format: uuid */
+            sessionId: string;
         };
         PoluchitKonfigIzHranilisha: {
             /** @example feature/123 */
@@ -2228,12 +2719,20 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
+        PoluchitProgressHoda: {
+            /** Format: uuid */
+            turnId: string;
+        };
         /** @description Запрос текущего прогресса выполнения задачи runner'а */
         PoluchitProgressZadachiUnita: {
             /** @description Идентификатор процесса юнита */
             prozesId: string;
             /** @description Идентификатор задачи процесса (он же jobId/workflowId) */
             zadachaId: string;
+        };
+        PoluchitResultatHoda: {
+            /** Format: uuid */
+            turnId: string;
         };
         PoluchitShagiZadachiUnita: {
             prozesId: string;
@@ -2246,6 +2745,11 @@ export type components = {
             offset: number;
             /** Format: uuid */
             webhookId: string;
+        };
+        /** @description Запрос состояния сессии: причина блокировки ходов */
+        PoluchitSostoyanieSessii: {
+            /** Format: uuid */
+            sessionId: string;
         };
         PoluchitSpisokPeremenihProekta: {
             id: string;
@@ -2307,6 +2811,13 @@ export type components = {
             fileId?: string;
             /** @default  */
             projectId?: string;
+        };
+        /** @description Привязка сессии к существующим юнитам (дополняет уже привязанные): после привязки ходы выполняются в директории первого юнита, остальные юниты становятся дополнительными корнями workspace. В сессии может быть только один юнит на проект */
+        PrivezatKUnitu: {
+            /** Format: uuid */
+            sessionId: string;
+            /** @description Юниты пользователя: должны существовать и быть доступны по проекту. Уже привязанные к сессии юниты повторно не добавляются (привязка идемпотентна). Если проект юнита уже представлен в сессии, запрос отклоняется с `opencode.session.unit_project_conflict` и состав сессии не меняется */
+            unitIds: string[];
         };
         /** @description Ветка проекта (VetkaProekta) */
         ProjectBranch: {
@@ -2524,6 +3035,116 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
+        /** @description Состояние сессии для интерфейса (SostoyanieSessiiReadModel); правило `canAcceptMessages` совпадает с гейтом старта хода */
+        SostoyanieSessii: {
+            /** @description Сессия в архиве: новые ходы запрещены */
+            archived: boolean;
+            /**
+             * @description Причина архивации: `manual` — пользователь, `unit_deleted` — все юниты сессии удалены
+             * @enum {string|null}
+             */
+            archiveReason?: "manual" | "unit_deleted" | null;
+            /** @description Сессия не в архиве И (нет юнитов ЛИБО есть хотя бы один неудалённый юнит И все неудалённые юниты готовы: USPESHNO_ZAPUSHEN или любой OSHIBKA_*) */
+            canAcceptMessages: boolean;
+            /** Format: uuid */
+            sessionId: string;
+            /**
+             * Format: uuid
+             * @description Первый юнит сессии (cwd); `null` — свободная сессия
+             */
+            unitId?: string | null;
+            /**
+             * Format: uuid
+             * @description Проект первого юнита сессии
+             */
+            unitProjectId?: string | null;
+            /** @description Состояние всех юнитов сессии в порядке привязки: первый — рабочий каталог хода (cwd), остальные — дополнительные корни workspace */
+            units: components["schemas"]["SostoyanieUnitaSessii"][];
+            /**
+             * @description Код первого блокирующего юнита; если блокировки нет — код первого юнита. `null` — у сессии нет юнитов
+             * @example USPESHNO_ZAPUSHEN
+             */
+            unitStateCode?: string | null;
+        };
+        /** @description Состояние одного юнита сессии (SostoyanieUnitaSessiiReadModel) */
+        SostoyanieUnitaSessii: {
+            /** @description Юнит удалён в Unitman */
+            deleted: boolean;
+            /**
+             * @description Группа матрицы готовности: `ready` — не блокирует, `blocked` — сессия ждёт, `archived` — юнит удалён и пропускается гейтом
+             * @enum {string}
+             */
+            group: "ready" | "blocked" | "archived";
+            /** @description Юнит в группе `ready` и не удалён */
+            ready: boolean;
+            /** Format: uuid */
+            unitId: string;
+            /**
+             * Format: uuid
+             * @description Проект юнита: передаётся в раннер как ProjectId
+             */
+            unitProjectId: string;
+            /**
+             * @description Код состояния юнита (Unitman)
+             * @example SBORKA
+             */
+            unitStateCode?: string | null;
+        };
+        /** @description Реквизиты подключения к OpenCode (API-ключ шифруется на бэкенде) */
+        SozdatRekvizityOpenCode: {
+            /**
+             * Format: password
+             * @description API-ключ в открытом виде; на сервере шифруется AES-256-GCM и наружу больше не отдаётся
+             */
+            apiKey: string;
+            /**
+             * @description Идентификатор модели OpenCode
+             * @example claude-sonnet-4
+             */
+            model: string;
+            /**
+             * @description Произвольное имя реквизитов, уникальное в рамках аккаунта
+             * @example Рабочий ключ
+             */
+            name: string;
+            /**
+             * @description Базовый URL API OpenCode
+             * @example https://api.opencode.ai
+             */
+            url: string;
+        };
+        /** @description Создание сессии OpenCode под выбранные реквизиты; сессию можно сразу привязать к существующим юнитам (`unitIds`) либо создать один новый юнит вместе с ней (`unit`) */
+        SozdatSessiyu: {
+            /**
+             * Format: uuid
+             * @description Идентификатор реквизитов из /api/account/opencode (обязателен: ключ выбирает пользователь)
+             */
+            credentialId: string;
+            /**
+             * @description Необязательный заголовок сессии; при пустом значении подставляется по первому промпту
+             * @example Рефакторинг модуля биллинга
+             */
+            title?: string | null;
+            /** @description Параметры нового юнита: он создаётся от имени владельца сессии по логике процессов Unitman. Нельзя указывать одновременно с `unitIds` */
+            unit?: components["schemas"]["SozdatSessiyuUnit"];
+            /** @description Существующие юниты пользователя: сессия сразу привязывается к ним. Порядок сохраняется, первый юнит — рабочий каталог хода (cwd), остальные передаются раннеру как дополнительные корни workspace. Не более одного юнита на проект: вторая привязка юнита того же проекта даёт `opencode.session.unit_project_conflict`. Нельзя указывать одновременно с `unit` */
+            unitIds?: string[];
+        };
+        /** @description Параметры юнита, создаваемого вместе с сессией (ParametriSozdaniyaUnita). Отличается от `SozdatUnit` именем поля переменных: `peremenie` вместо `znacheniePeremenoi` */
+        SozdatSessiyuUnit: {
+            /** @example feature/123 */
+            branch: string;
+            /** @example 0 */
+            memoryLimit?: number;
+            /** @description Переменные конфига юнита */
+            peremenie?: components["schemas"]["ZnacheniePeremenoi"][];
+            /** Format: uuid */
+            projectId: string;
+            /** @example feature-123 */
+            unitName: string;
+            /** @description Тома юнита. Значения `dir` и `name` берутся из ответа `poluchitKonfigIzHranilisha`, `fileId` — идентификатор файла из медиатеки (может отсутствовать) */
+            volumes?: components["schemas"]["SozdatUnitVolume"][];
+        };
         SozdatUnit: {
             /** @example feature/123 */
             branch: string;
@@ -2576,6 +3197,18 @@ export type components = {
         UdalitPeremenuyuIzProekta: {
             code: string;
             projectId: string;
+        };
+        UdalitRekvizityOpenCode: {
+            /** Format: uuid */
+            id: string;
+        };
+        /**
+         * @deprecated
+         * @description Устаревший алиас архивации сессии: ходы и история сохраняются, сессия остаётся в списке с флагом `archived`
+         */
+        UdalitSessiyu: {
+            /** Format: uuid */
+            sessionId: string;
         };
         UdalitSlomaniyUnit: {
             /** Format: uuid */
@@ -3305,6 +3938,185 @@ export interface operations {
             };
         };
     };
+    post_app_account_infra_opencodecredential_izmenitrekvizity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IzmenitRekvizityOpenCode"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: реквизиты изменены */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: реквизиты изменены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_opencodecredential_sozdatrekvizity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SozdatRekvizityOpenCode"];
+            };
+        };
+        responses: {
+            /** @description Идентификатор созданных реквизитов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["IdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_account_infra_opencodecredential_spisokrekvizitov: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список реквизитов (API-ключ замаскирован) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Реквизиты OpenCode текущего пользователя */
+                        data: components["schemas"]["OpenCodeCredential"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_opencodecredential_udalitrekvizity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UdalitRekvizityOpenCode"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: реквизиты удалены */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: реквизиты удалены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_app_account_infra_account_poluchitnastroikipolzovatelya: {
         parameters: {
             query?: never;
@@ -3847,6 +4659,505 @@ export interface operations {
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_arhivirovatsessiyu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArhivirovatSessiyu"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: сессия архивирована */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: сессия архивирована */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_istoriyasessii: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitIstoriyuSessii"];
+            };
+        };
+        responses: {
+            /** @description Ходы сессии по возрастанию seq */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OpenCodeTurn"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_otvetit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtvetitNaVopros"];
+            };
+        };
+        responses: {
+            /** @description Идентификатор запущенного хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OpenCodeTurnLaunch"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_poluchitprogresshoda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitProgressHoda"];
+            };
+        };
+        responses: {
+            /** @description Шаги из KV раннера; null — прогресса ещё нет */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OpenCodeTurnProgress"] | null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_poluchitresultathoda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitResultatHoda"];
+            };
+        };
+        responses: {
+            /** @description Состояние хода: пока RUNNING — результата ещё нет */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OpenCodeTurn"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_privezatkunitu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrivezatKUnitu"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: сессия привязана к юниту */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: сессия привязана к юниту */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_prompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NachatPrompt"];
+            };
+        };
+        responses: {
+            /** @description Идентификатор запущенного хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OpenCodeTurnLaunch"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_sostoyaniesessii: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitSostoyanieSessii"];
+            };
+        };
+        responses: {
+            /** @description Состояние сессии для интерфейса */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SostoyanieSessii"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_sozdatsessiyu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SozdatSessiyu"];
+            };
+        };
+        responses: {
+            /** @description Идентификатор созданной сессии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["IdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_opencode_infra_opencode_spisoksessiy: {
+        parameters: {
+            query?: {
+                /** @description Только неархивные сессии (по умолчанию показываются все) */
+                onlyActive?: boolean;
+                /** @description Подстрока названия сессии (поиск через LIKE) */
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сессии текущего пользователя */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["OpenCodeSession"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencode_udalitsessiyu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UdalitSessiyu"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: сессия архивирована */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: сессия архивирована */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };

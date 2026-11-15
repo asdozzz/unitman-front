@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import {useAuthStore} from "@/modules/account/store/auth";
 import account from '@/modules/account/routes';
 import unit from '@/modules/unit/routes';
+import opencode from '@/modules/opencode/routes';
 import app from  '@/modules/app/routes';
 import {storeInizializii} from "@/modules/app/store/InitializationStore";
 
@@ -11,6 +12,7 @@ const router = createRouter({
     routes:[
         ...account,
         ...unit,
+        ...opencode,
         ...app,
     ]
 })

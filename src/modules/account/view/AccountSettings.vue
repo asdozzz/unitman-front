@@ -2,6 +2,7 @@
 import {storNastroekPolzovatelya} from "@/modules/account/store/StorNastroekPolzovatelya";
 import {storeToRefs} from "pinia";
 import {onMounted} from "vue";
+import SpisokRekvizitovOpenCode from "@/modules/account/view/AccountSettings/SpisokRekvizitovOpenCode.vue";
 
 const storeNastroekPolzovatelya = storNastroekPolzovatelya();
 const { formPassword, formNickname, oshibkaOtBackenda, oshibkaOtBackendaNick, loader } = storeToRefs(storeNastroekPolzovatelya);
@@ -49,6 +50,11 @@ onMounted(async () => {
         <q-btn color="primary" :loading="loader" @click="izmenitNick()">Сохранить</q-btn>
       </q-card-actions>
     </q-card>
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <SpisokRekvizitovOpenCode />
   </div>
 </div>
 </template>

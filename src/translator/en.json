@@ -10,6 +10,7 @@
       "projects": "Projects",
       "repos": "Repositories",
       "accounts": "Accounts",
+      "opencode": "OpenCode",
       "settings": "Settings"
     },
     "header": {
@@ -27,9 +28,6 @@
     }
   },
   "account": {
-    "filter": {
-      "query" : "Search"
-    },
     "form_projects": {
       "projects": "Projects"
     },
@@ -44,8 +42,13 @@
       }
     },
     "spisok": {
+      "filter": {
+        "query" : "Search"
+      },
       "buttons": {
         "add": "add",
+        "search": "search",
+        "edit": "edit",
         "block": "block",
         "unblock": "unblock",
         "change_password": "change password",
@@ -343,6 +346,7 @@
         },
         "buttons": {
           "jobs": "jobs",
+          "create_session": "Create an OpenCode session with this unit",
           "update": "update",
           "delete": "delete",
           "sync": "sync",
@@ -397,5 +401,175 @@
     "total": "Total",
     "active": "Active",
     "deleted": "Deleted"
+  },
+  "opencode": {
+    "rekvizity": {
+      "caption": "Access credentials",
+      "empty": "No credentials yet. Add an API key, URL and model to start creating sessions.",
+      "buttons": {
+        "add": "Add credentials",
+        "refresh": "Refresh list",
+        "edit": "Edit credentials",
+        "delete": "Delete credentials"
+      },
+      "fields": {
+        "api_key_hint": "Key",
+        "updated_at": "Updated"
+      },
+      "delete": {
+        "caption": "Delete credentials?",
+        "message": "Sessions created with these credentials will no longer be able to run turns. This action cannot be undone."
+      },
+      "form": {
+        "caption_create": "New OpenCode credentials",
+        "caption_edit": "Edit OpenCode credentials",
+        "fields": {
+          "name": "Name",
+          "url": "Gateway URL",
+          "model": "Model",
+          "api_key": "API key",
+          "api_key_new": "The key is encrypted and never shown after saving",
+          "api_key_keep": "Leave empty to keep the current key ({hint})"
+        },
+        "buttons": {
+          "close": "Cancel",
+          "ok": "Save"
+        }
+      }
+    },
+    "sessions": {
+      "caption": "OpenCode sessions",
+      "empty": "No sessions yet. Create the first session by picking credentials.",
+      "empty_active": "No active sessions. Create a new one or show archived sessions.",
+      "no_credentials": "Add OpenCode credentials in your profile settings first",
+      "no_credentials_hint": "Add OpenCode credentials in your {link} first",
+      "no_credentials_link": "profile settings",
+      "buttons": {
+        "add": "New session",
+        "refresh": "Refresh list",
+        "open": "Open session",
+        "archive": "Archive session",
+        "attach_unit": "Attach a unit to the session",
+        "show_archive": "Show archived sessions",
+        "hide_archive": "Hide archived sessions"
+      },
+      "archive": {
+        "badge": "Archived",
+        "badge_hint": "Session is archived: history is read-only",
+        "confirm_caption": "Archive the session?",
+        "confirm_message": "The session \"{title}\" will be archived: its history is kept, but new turns are no longer allowed.",
+        "reason_manual": "Archived by the user",
+        "reason_unit_deleted": "Archived: all session units were deleted",
+        "reason_unknown": "Archive reason is unknown"
+      },
+      "fields": {
+        "title": "Title",
+        "credential": "Credentials",
+        "units": "Units",
+        "no_units": "none attached",
+        "created_at": "Created",
+        "updated_at": "Updated"
+      },
+      "form": {
+        "caption": "Create session",
+        "hint_title": "If the title is left empty, it is generated automatically",
+        "hint_units": "The first selected unit becomes the working directory, the rest are added as extra roots",
+        "fields": {
+          "title": "Title (optional)",
+          "credential": "Credentials",
+          "units": "Units (optional)"
+        },
+        "buttons": {
+          "close": "Cancel",
+          "ok": "Create"
+        }
+      },
+      "attach": {
+        "caption": "Attach units to the session",
+        "hint_units": "Already attached units are hidden; new ones are added as extra roots",
+        "empty": "No units available to attach",
+        "fields": {
+          "units": "Units"
+        },
+        "buttons": {
+          "close": "Cancel",
+          "ok": "Attach"
+        }
+      }
+    },
+    "chat": {
+      "caption": "OpenCode chat",
+      "empty": "Send the first prompt to start the conversation",
+      "placeholder": "Describe the task for OpenCode",
+      "archived_placeholder": "The session is archived: new messages are not allowed",
+      "archived_hint": "This session is archived. Its history is kept, but new messages cannot be sent.",
+      "units": "Session units",
+      "buttons": {
+        "send": "Send",
+        "answer": "Answer",
+        "refresh": "Refresh",
+        "attach_unit": "Attach a unit",
+        "back": "Back to sessions"
+      },
+      "roles": {
+        "user": "You",
+        "assistant": "OpenCode",
+        "system": "System"
+      },
+      "status": {
+        "RUNNING": "Running",
+        "AWAITING_INPUT": "Awaiting input",
+        "ANSWERED": "Answered",
+        "FAILED": "Failed"
+      },
+      "kind": {
+        "ANSWER": "Answer",
+        "QUESTION": "Question",
+        "ERROR": "Error"
+      },
+      "turn": {
+        "seq": "Turn #{seq}",
+        "request": "Request"
+      },
+      "steps": {
+        "caption": "Execution steps",
+        "empty": "No steps yet",
+        "finished": "Finished",
+        "in_progress": "In progress",
+        "updated_at": "Updated: {time}"
+      },
+      "questions": {
+        "caption": "Input required",
+        "select_option": "Pick an option",
+        "free_text": "Custom answer",
+        "submit": "Send answer"
+      },
+      "progress": {
+        "live": "Live",
+        "polling": "Polling",
+        "reconnecting": "Reconnecting"
+      },
+      "errors": {
+        "load_history": "Failed to load the session history",
+        "send_prompt": "Failed to send the prompt",
+        "send_answers": "Failed to send the answers",
+        "progress": "Failed to update progress automatically"
+      }
+    },
+    "turn": {
+      "failed": "The turn failed",
+      "cancelled": "The turn was cancelled",
+      "runner_unavailable": "The runner is unavailable",
+      "not_found": "The turn was not found",
+      "invalid_status": "The turn is in an unsuitable status",
+      "awaiting_answer": "Answer the turn questions first",
+      "not_awaiting_answer": "The turn does not expect an answer",
+      "answers_required": "At least one answer is required",
+      "option_required": "Select an answer option",
+      "request_required": "Enter a request",
+      "unknown_question": "The question does not belong to this turn",
+      "unknown_option": "No such answer option",
+      "unexpected_kind": "The runner returned an unexpected result kind"
+    }
   }
 }

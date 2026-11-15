@@ -139,6 +139,9 @@ const menu = reactive([
   {icon: 'inbox', href:"/unit/repositories", label: 'app.tabs.repos', show: isAdmin },
   {icon: 'list', href:"/unit/projects", label: 'app.tabs.projects', show: isAdmin },
   {icon: 'star', href:"/unit/list", label: 'app.tabs.units', show: isAuth },
+  // Реквизиты и сессии OpenCode привязаны к аккаунту, поэтому пункт виден
+  // всем авторизованным, а не только администраторам.
+  {icon: 'forum', href:"/opencode/sessions", label: 'app.tabs.opencode', show: isAuth },
   {icon: 'settings', href:"/init", label: 'app.tabs.settings', show: isAuth },
 ]);
 

@@ -34,6 +34,7 @@ export default [
             {
                 path: 'settings',
                 component: AccountSettings,
+                name: "account_settings",
             }
         ]
     },

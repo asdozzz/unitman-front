@@ -56,9 +56,21 @@ export type ApiRequestBody<P extends keyof paths, M extends ApiMethod> =
             : MultipartRequestBody<P, M>
         : JsonRequestBody<P, M>;
 
-/** Query-параметры операции (`parameters.query`). */
+/**
+ * Query-параметры операции (`parameters.query`).
+ *
+ * В сгенерированной схеме `query` объявлен необязательным (`query?: {...}` либо
+ * `query?: never`), поэтому шаблон тоже необязателен. Отсутствие параметров
+ * сводится к `undefined`: тогда второй аргумент `apiClient.get` не объявляется.
+ * Проверка `[Q] extends [...]` в квадратных скобках отключает раздачу по
+ * `never`, из-за которой тип схлопнулся бы в `never`.
+ */
 export type ApiQuery<P extends keyof paths, M extends ApiMethod> =
-    MethodOperation<P, M> extends { parameters: { query: infer Q } } ? Q : undefined;
+    MethodOperation<P, M> extends { parameters?: { query?: infer Q } }
+        ? [Q] extends [undefined | never]
+            ? undefined
+            : Q
+        : undefined;
 
 /** Path-параметры операции (`parameters.path`). */
 export type ApiPathParams<P extends keyof paths, M extends ApiMethod> =

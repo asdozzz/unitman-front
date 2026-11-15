@@ -102,6 +102,50 @@ await apiClient.post("/unit/create", params);
 `apiClient.post/put/get` перегружены: если первым аргументом передан литерал пути из спецификации,
 тело запроса проверяется автоматически.
 
+### OpenCode: реквизиты, сессии и ходы
+
+Модуль OpenCode состоит из двух частей с разными владельцами данных:
+
+| Часть | Эндпоинты в типах | Где код |
+| --- | --- | --- |
+| реквизиты (API-ключ, URL, модель) | `/account/opencode/*` | [`src/modules/account/services/OpenCodeCredentialService.ts`](src/modules/account/services/OpenCodeCredentialService.ts) |
+| сессии и ходы (чат) | `/opencode/*` | [`src/modules/opencode/services/OpenCodeService.ts`](src/modules/opencode/services/OpenCodeService.ts) |
+
+Особенности контракта:
+
+- **API-ключ не возвращается.** В списке реквизитов (`OpenCodeCredential`) есть только маска
+  `apiKeyHint`. При изменении пустой `apiKey` означает «оставить прежний ключ».
+- **`izmenitRekvizity` и `udalitRekvizity` отвечают `data: null`**, поэтому после них список реквизитов
+  перезапрашивается, а не правится на клиенте по ответу.
+- **Архивация сессии.** Полного удаления на бэкенде нет: кнопка «архивировать» в списке вызывает
+  `arhivirovatSessiyu` (ответ `data: null`), после чего список перезапрашивается. Сессия остаётся в
+  `spisokSessiy` с `archived: true` и `archiveReason`, история сохраняется, новые ходы запрещены.
+  Устаревший алиас `udalitSessiyu` помечен `deprecated` и не используется.
+- **`spisokSessiy` отдаёт и архивные сессии.** Фильтр `onlyActive=true` оставляет только активные,
+  `search` — подстрока названия. Список скрывает архивные на клиенте и включает обратно по
+  переключателю, а чат блокирует отправку при `sessiya.archived`.
+- **`poluchitResultatHoda` возвращает сам ход (`OpenCodeTurn`)** — это и есть поллинг терминального
+  статуса; отдельного «результата» в ответе нет, он лежит в `turn.result`.
+- **`poluchitProgressHoda` может вернуть `data: null`** (снапшот шагов ещё не опубликован) — это
+  нормальное состояние ожидания, а не ошибка.
+
+#### Прогресс хода и Centrifugo
+
+`sozdatSessiyu` не запускает работу, а `prompt`/`otvetit` возвращают `OpenCodeTurnLaunch` с готовым
+именем канала.
+
+- Фронт **не собирает имя канала сам** и использует `progressChannel` из ответа (`OpenCodeTurnLaunch`
+  либо `OpenCodeTurn`) как есть: префикс канала принадлежит бэкенду (в примерах спеки —
+  `unit_progress#<workflowId>`).
+- Клиент сразу подписывается на канал ([`useCentrifugo()`](src/bootstrap/centrifugeClient.ts:1)) и
+  параллельно опрашивает `poluchitResultatHoda`, пока `status` не станет `ANSWERED`, `AWAITING_INPUT`
+  или `FAILED`. Подписка даёт живые шаги, поллинг — терминальный статус: события могут теряться.
+- `AWAITING_INPUT` — не ошибка: `result.Questions` заполняется, ответы отправляются в `otvetit`,
+  который **запускает новый ход** с новым `progressChannel`.
+- После перезагрузки страницы наблюдение восстанавливается по истории: у последнего хода в
+  `istoriyaSessii` есть `progressChannel`, поэтому подписка и дозагрузка снапшота возможны и для
+  уже завершённых ходов.
+
 ### Авторизация и обновление токена
 
 Пара токенов выдаётся в [`POST /login`](openapi/unitman.json:9) (`token` + одноразовый `refreshToken`)
@@ -136,6 +180,12 @@ await apiClient.post("/unit/create", params);
 - Спецификация ожидает `values: ZnacheniePeremenoi[]` в запросах заполнения переменных и выполнения
   действий, а фронт отправляет `Record<string, string>`. Места помечены комментариями
   «ВНИМАНИЕ: расхождение с контрактом» в [`src/modules/unit/services/UnitiService.ts`](src/modules/unit/services/UnitiService.ts).
+- У OpenCode **разный регистр полей в запросе и ответе**: ответы на вопросы отправляются в `answers`
+  схемой `OpenCodeAnswer` (`questionId` / `optionId` / `text`), а приходят обратно в `turn.answers` и
+  в `turn.result` с заглавной буквы (`QuestionId` / `OptionId` / `Text`, `Kind` / `Questions` /
+  `Answer` / `ErrorKey` / `Success`). Это части `result` из контракта раннера, отданные как есть.
+  Приведение к единому виду выполняется только при отображении, типы не переписываются:
+  [`normalizovatOtvet()`](src/modules/opencode/model/ChatOpenCode.ts:1).
 
 ### Обновление типов после изменений бэкенда
 

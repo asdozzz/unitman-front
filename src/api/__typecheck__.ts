@@ -77,11 +77,25 @@ const fillVolumes: ApiRequestBody<"/unit/zapolnitPeremenie", "post"> = {
     volumes: [{ dir: "data", fileId: null }],
 };
 
+// 11. OpenCode: query-параметры списка сессий и архивация.
+// В схеме `query` объявлен необязательным, но тип параметров из него всё равно выводится.
+const sessionListQuery: ApiQuery<"/opencode/spisokSessiy", "get"> = { onlyActive: true, search: null };
+// @ts-expect-error — фильтра по реквизитам в контракте нет
+const badSessionListQuery: ApiQuery<"/opencode/spisokSessiy", "get"> = { credentialId: "uuid" };
+
+const archiveBody: ApiRequestBody<"/opencode/arhivirovatSessiyu", "post"> = { sessionId: "uuid" };
+// @ts-expect-error — обязательное поле sessionId отсутствует
+const badArchiveBody: ApiRequestBody<"/opencode/arhivirovatSessiyu", "post"> = {};
+
+type ArchiveResponse = ApiResponseData<"/opencode/arhivirovatSessiyu", "post">;
+const archiveResponse: ArchiveResponse = null;
+
 export const typecheck = {
     postPath, badPost, listBody, badCreate, createBody, hookParams, value, noQuery,
     listResponseItem, refreshBody, badRefresh, refreshResponseToken, helperBody, helperSuffix,
     uploadBody, badUpload, uploadResponse, deleteUrl, deleteResponse, volume, badVolume, createWithFiles,
-    badCreateVolume, fillVolumes,
+    badCreateVolume, fillVolumes, sessionListQuery, badSessionListQuery, archiveBody, badArchiveBody,
+    archiveResponse,
 } as const;
 
-export type TypecheckResult = [ListResponse, RefreshResponse, DeleteResponse];
+export type TypecheckResult = [ListResponse, RefreshResponse, DeleteResponse, ArchiveResponse];
