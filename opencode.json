@@ -1,0 +1,54 @@
+{
+  "$schema": "https://opencode.ai",
+  "watcher": {
+    "ignore": [
+      ".git/**",
+      "node_modules/**",
+      ".yarn/cache/**",
+      ".yarn/unplugged/**",
+      ".yarn/build-state.yml",
+      ".yarn/install-state.gz",
+      ".pnp.*",
+      "dist/**",
+      "dist-ssr/**",
+      "coverage/**",
+      ".vite/**",
+      "*.tsbuildinfo",
+      ".eslintcache",
+      ".stylelintcache",
+      "*.log"
+    ]
+  },
+  "permissions": {
+    "read": {
+      ".env*": "deny",
+      "!.env.example": "allow",
+      "node_modules/**": "deny",
+      ".yarn/cache/**": "deny",
+      ".yarn/unplugged/**": "deny",
+      ".yarn/releases/**": "deny",
+      ".yarn/plugins/**": "deny",
+      ".yarn/install-state.gz": "deny",
+      ".pnp.*": "deny",
+      "yarn.lock": "deny",
+      "dist/**": "deny",
+      "dist-ssr/**": "deny",
+      "coverage/**": "deny",
+      ".vite/**": "deny",
+      "*.tsbuildinfo": "deny",
+      ".eslintcache": "deny"
+    },
+    "glob": {
+      "node_modules/**": "deny",
+      ".yarn/**": "deny",
+      "dist/**": "deny",
+      "coverage/**": "deny"
+    },
+    "grep": {
+      "node_modules/**": "deny",
+      ".yarn/**": "deny",
+      "dist/**": "deny",
+      "coverage/**": "deny"
+    }
+  }
+}
