@@ -2,6 +2,78 @@
 
 This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
+## Docker: хосты внешних зависимостей
+
+Образ универсальный: адреса API и Centrifugo задаются при **запуске** контейнера,
+пересобирать образ под каждое окружение не нужно.
+
+Как это работает:
+
+1. На сборке Vite инлайнит `VITE_API_HOST` и `VITE_CENTRIFUGE_HOST` в бандл.
+   Источник — `--build-arg`, иначе значения из `.env.dist` (`localhost`).
+   Это запасной вариант.
+2. При старте [`entry.sh`](entry.sh:1) генерирует `/env-config.js` из переменных
+   окружения контейнера и заполняет `window._env_`.
+3. [`src/utils/runtimeEnv.ts`](src/utils/runtimeEnv.ts:1) читает сначала
+   `window._env_`, затем `import.meta.env`. Поэтому браузер использует хосты,
+   переданные в `docker run` или compose.
+4. [`index.html`](index.html:21) подключает `env-config.js` до приложения.
+
+### Переменные
+
+| Переменная | Когда задаётся | Назначение |
+| --- | --- | --- |
+| `VITE_API_HOST` | сборка (`ARG_API_HOST`) и запуск (`-e`) | базовый URL API, например `http://localhost:8082/api` |
+| `VITE_CENTRIFUGE_HOST` | сборка (`ARG_CENTRIFUGE_HOST`) и запуск (`-e`) | WebSocket Centrifugo, например `ws://localhost:8000/connection/websocket` |
+| `VITE_DEBUG_PROGRESS` | запуск (`-e`) | `false` выключает диагностический лог прогресса |
+| `VITE_DEFAULT_LOCALE`, `VITE_FALLBACK_LOCALE` | только сборка | локали интерфейса (читаются из `import.meta.env`) |
+
+### Сборка и запуск
+
+```bash
+# Образ с адресами по умолчанию (localhost)
+docker build -t unitman-front .
+
+# Образ с другими адресами по умолчанию (запекаются в бандл)
+docker build \
+  --build-arg ARG_API_HOST=https://unitman.example.com/api \
+  --build-arg ARG_CENTRIFUGE_HOST=wss://unitman.example.com/connection/websocket \
+  -t unitman-front .
+
+# Один и тот же образ под разные окружения: адреса задаются при запуске
+docker run -d -p 8033:80 \
+  -e VITE_API_HOST=https://unitman.example.com/api \
+  -e VITE_CENTRIFUGE_HOST=wss://unitman.example.com/connection/websocket \
+  -e VITE_DEBUG_PROGRESS=false \
+  unitman-front
+```
+
+То же через compose ([`docker-compose.yaml`](docker-compose.yaml:1)):
+
+```yaml
+services:
+  app:
+    image: unitman-front
+    environment:
+      VITE_API_HOST: https://unitman.example.com/api
+      VITE_CENTRIFUGE_HOST: wss://unitman.example.com/connection/websocket
+    ports:
+      - "8033:80"
+```
+
+### Важно
+
+- **Адреса читает браузер, а не контейнер.** `localhost` внутри контейнера
+  пользователю недоступен: указывайте домен или адрес хоста, доступный из браузера.
+- **CORS.** Бэкенд должен разрешать origin, с которого открыт интерфейс.
+- **Смешанный контент.** Если страница открыта по HTTPS, API и WebSocket тоже
+  должны быть `https://` и `wss://`.
+- **Кэш.** `env-config.js` отдаётся с `Cache-Control: no-store`
+  ([`nginx.conf`](.docker/nginx/nginx.conf:1)), иначе после перезапуска с новыми
+  адресами браузер мог бы использовать старый конфиг.
+- **Обратный прокси.** Если API проксируется тем же nginx, задайте относительный
+  `VITE_API_HOST=/api` и добавьте `location /api` с `proxy_pass`; тогда CORS не нужен.
+
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).

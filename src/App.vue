@@ -7,6 +7,16 @@
           <q-toolbar-title>
             Unitman
           </q-toolbar-title>
+          <q-btn
+              dense
+              flat
+              round
+              :icon="darkMode ? 'light_mode' : 'dark_mode'"
+              :aria-label="$t('app.header.toggle_theme')"
+              @click="toggleDarkMode"
+          >
+            <q-tooltip>{{ $t('app.header.toggle_theme') }}</q-tooltip>
+          </q-btn>
           <div class="q-gutter-sm text-white" v-if="!loaderIzmemeniyaYazika">
             <q-radio color="warning" dark left-label :model-value="getLocale" @update:model-value="changeLocal" val="ru" label="ru" />
             <q-radio color="warning" dark left-label :model-value="getLocale" @update:model-value="changeLocal" val="en" label="en" />
@@ -99,22 +109,17 @@ import {useAuthStore} from "@/modules/account/store/auth";
 import {storeToRefs} from "pinia";
 import { useRouter, useRoute } from "vue-router";
 import {computed, onMounted, reactive, ref} from "vue";
+import {useQuasar} from "quasar";
 import 'dayjs/locale/ru'
 import 'dayjs/locale/en'
 import dayjs from "dayjs";
-import {safeJsonParse} from "@/utils/json";
+import {loadAppSettings, saveAppSettings} from "@/utils/appSettings";
 
-const NASTROIKI_STORAGE_KEY = 'AppSettings';
+const $q = useQuasar();
 
-type AppSettings = {
-  leftDrawerOpen: boolean;
-}
-
-const defoltnieNastroiki: AppSettings = {
-  leftDrawerOpen: false
-};
-
-const nastroiki: AppSettings = safeJsonParse<AppSettings>(localStorage.getItem(NASTROIKI_STORAGE_KEY) || "") || defoltnieNastroiki;
+// Настройки интерфейса общие для приложения: тема применяется в main.ts,
+// состояние меню — здесь.
+const nastroiki = loadAppSettings();
 
 const router = useRouter();
 const route = useRoute();
@@ -125,12 +130,17 @@ const { isAuth, email, isAdmin, loaderIzmemeniyaYazika, getLocale } = storeToRef
 
 let currentLocale = ref("");
 const leftDrawerOpen = ref(nastroiki.leftDrawerOpen);
+const darkMode = ref(nastroiki.darkMode);
 //const miniState = ref(false);
 
 onMounted(() => {
   currentLocale.value = getLocale.value;
   authStore.updateLocale(getLocale.value);
-  dayjs.locale(getLocale.value)
+  dayjs.locale(getLocale.value);
+  document.documentElement.lang = getLocale.value;
+  // Повторно применяем тему на случай, если main.ts не успел выставить её
+  // до монтирования (например, значение изменили в другой вкладке).
+  $q.dark.set(nastroiki.darkMode);
 })
 
 const menu = reactive([
@@ -151,16 +161,19 @@ const showedMenu = computed(() => {
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
-  sohranitNastroikiVStor({
+  saveAppSettings({
     leftDrawerOpen: leftDrawerOpen.value
   })
 }
 
-function sohranitNastroikiVStor(newValue: AppSettings) {
-  localStorage.setItem(NASTROIKI_STORAGE_KEY, JSON.stringify(newValue));
+function toggleDarkMode() {
+  darkMode.value = !darkMode.value;
+  $q.dark.set(darkMode.value);
+  saveAppSettings({ darkMode: darkMode.value });
 }
 
 async function changeLocal(newLocale: "en" | "ru") {
+  document.documentElement.lang = newLocale;
   authStore.izmeniyYazik(newLocale);
 }
 

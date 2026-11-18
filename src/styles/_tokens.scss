@@ -1,0 +1,102 @@
+// Дизайн-токены Unitman.
+//
+// Единственный источник значений для цветов, отступов, радиусов, типографики,
+// теней и анимаций. Токены объявлены как CSS-переменные, чтобы их можно было
+// использовать в любом SFC без импортов и переключать между светлой и тёмной
+// темой во время работы приложения.
+//
+// Правило: новые стили не используют «магические» цвета и пиксели — только
+// переменные из этого файла.
+
+:root {
+  color-scheme: light;
+
+  // Бренд
+  --app-primary: #2f6fb0;
+  --app-primary-hover: #255a8f;
+  --app-primary-contrast: #ffffff;
+  --app-accent: #e89a2b;
+  --app-positive: #3e9e5b;
+  --app-negative: #c4485a;
+  --app-warning: #d89020;
+  --app-info: #3f8fbf;
+
+  // Поверхности и текст
+  --app-bg: #f5f7fa;
+  --app-surface: #ffffff;
+  --app-surface-muted: #eef2f7;
+  --app-border: #e3e8ef;
+  --app-text: #1f2933;
+  --app-text-secondary: #5b6773;
+  --app-text-disabled: #97a1ac;
+  --app-focus-ring: #2f6fb0;
+
+  // Типографика
+  --app-font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --app-font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --app-font-size-caption: 12px;
+  --app-font-size-body: 14px;
+  --app-font-size-subtitle: 16px;
+  --app-font-size-title: 20px;
+  --app-font-size-headline: 24px;
+  --app-font-size-display: 32px;
+  --app-line-height-tight: 1.25;
+  --app-line-height-base: 1.5;
+
+  // Отступы
+  --app-space-1: 4px;
+  --app-space-2: 8px;
+  --app-space-3: 12px;
+  --app-space-4: 16px;
+  --app-space-5: 24px;
+  --app-space-6: 32px;
+  --app-space-7: 48px;
+
+  // Радиусы
+  --app-radius-sm: 4px;
+  --app-radius-md: 8px;
+  --app-radius-lg: 12px;
+  --app-radius-pill: 999px;
+
+  // Тени
+  --app-shadow-sm: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 8%);
+  --app-shadow-md: 0 4px 12px rgb(16 24 40 / 8%), 0 2px 4px rgb(16 24 40 / 6%);
+  --app-shadow-lg: 0 12px 32px rgb(16 24 40 / 14%);
+
+  // Анимации
+  --app-duration-fast: 150ms;
+  --app-duration-base: 200ms;
+  --app-easing: cubic-bezier(0.2, 0, 0.2, 1);
+
+  // Раскладка
+  --app-content-max-width: 1440px;
+}
+
+body.body--dark {
+  color-scheme: dark;
+
+  // Бренд остаётся насыщенным: Quasar вычисляет цвет текста кнопок по
+  // brand-конфигу, поэтому осветление фона сделало бы белый текст нечитаемым.
+  // Меняются только поверхности, текст и тени — это и даёт эффект тёмной темы.
+  --app-primary: #3c79b8;
+  --app-primary-hover: #4f8cc9;
+  --app-primary-contrast: #ffffff;
+  --app-accent: #e89a2b;
+  --app-positive: #3e9e5b;
+  --app-negative: #c4485a;
+  --app-warning: #d89020;
+  --app-info: #3f8fbf;
+
+  --app-bg: #11151a;
+  --app-surface: #1a2027;
+  --app-surface-muted: #222a33;
+  --app-border: #2c343d;
+  --app-text: #e6eaef;
+  --app-text-secondary: #a5b0bb;
+  --app-text-disabled: #6c7783;
+  --app-focus-ring: #7cb6e8;
+
+  --app-shadow-sm: 0 1px 2px rgb(0 0 0 / 32%), 0 1px 3px rgb(0 0 0 / 24%);
+  --app-shadow-md: 0 4px 12px rgb(0 0 0 / 36%), 0 2px 4px rgb(0 0 0 / 24%);
+  --app-shadow-lg: 0 12px 32px rgb(0 0 0 / 48%);
+}

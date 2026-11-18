@@ -1,0 +1,24 @@
+# Локальные артефакты и настройки не должны попадать в контекст сборки:
+# иначе `.env.local` перебивает значения из `.env` и build-arg, а node_modules
+# и dist многократно увеличивают контекст.
+.git
+.gitignore
+.vscode
+.idea
+
+node_modules
+dist
+dist-ssr
+coverage
+.yarn
+.vite
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+*.log
+
+plans
+graphify-out
+README.md

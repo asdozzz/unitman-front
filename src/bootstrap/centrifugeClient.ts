@@ -4,6 +4,7 @@ import {
     logProgressaOshibka,
     logProgressaPreduprezhdenie,
 } from '@/modules/unit/model/websocket/LogProgressaZadachi';
+import { centrifugeHost } from '@/utils/runtimeEnv';
 
 /**
  * Единственный экземпляр клиента Centrifugo на всё приложение.
@@ -47,7 +48,7 @@ function podklyuchitLogirovanie(klient: Centrifuge): void {
 
 export function useCentrifugo(): Centrifuge {
     if (instance === null) {
-        const adres = window._env_?.VITE_CENTRIFUGE_HOST || import.meta.env.VITE_CENTRIFUGE_HOST;
+        const adres = centrifugeHost();
 
         logProgressa('Centrifugo: создаю клиент', {adres, estToken: false});
 

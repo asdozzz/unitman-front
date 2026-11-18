@@ -1,4 +1,5 @@
 import {defineStore} from "pinia";
+import {apiHost} from "@/utils/runtimeEnv";
 
 type State = {
     baseUrl: string;
@@ -6,7 +7,9 @@ type State = {
 export const storeHelper = defineStore('storeHelper', {
     state: (): State => {
         return {
-            baseUrl: import.meta.env.VITE_API_HOST
+            // Тот же резолвер, что у apiClient: иначе ссылки на вебхуки
+            // указывали бы на build-time хост при runtime-переопределении.
+            baseUrl: apiHost()
         };
     }
 });

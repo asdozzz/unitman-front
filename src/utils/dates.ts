@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import {format, fromUnixTime} from "date-fns";
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
@@ -55,7 +54,7 @@ export function convertDate(unixtime: UnixTimeVhod): string {
         return '';
     }
 
-    return dayjs(fromUnixTime(sekundi)).fromNow();
+    return dayjs.unix(sekundi).fromNow();
 }
 
 /**
@@ -71,7 +70,7 @@ export function convertDateTime(unixtime: UnixTimeVhod): string {
         return '';
     }
 
-    return format(fromUnixTime(sekundi), 'dd.MM.yyyy H:mm:ss');
+    return dayjs.unix(sekundi).format('DD.MM.YYYY H:mm:ss');
 }
 
 /**
@@ -87,7 +86,7 @@ export function convertTime(unixtime: UnixTimeVhod): string {
         return '';
     }
 
-    return format(fromUnixTime(sekundi), 'H:mm:ss');
+    return dayjs.unix(sekundi).format('H:mm:ss');
 }
 
 /** Минимум полей шага, нужный для расчёта длительности. */

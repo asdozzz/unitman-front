@@ -2,6 +2,7 @@ import axios, {AxiosError, AxiosInstance} from "axios";
 import {ApiResponse, ApiResponseFactory, FailApiResponse} from "@/bootstrap/apiClient/ApiResponse";
 import type {ApiPath, ApiQueryArgs, ApiRequestArgs, ApiResponseData} from "@/api/types";
 import {useAuthStore} from "@/modules/account/store/auth";
+import {apiHost} from "@/utils/runtimeEnv";
 
 /**
  * Запросы, для которых нельзя запускать обновление токена:
@@ -163,7 +164,7 @@ class ApiClient {
             url,
             data,
             params,
-            baseURL: window._env_?.VITE_API_HOST || import.meta.env.VITE_API_HOST,
+            baseURL: apiHost(),
             headers: this.headersFor(url, data),
         });
 

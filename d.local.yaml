@@ -5,5 +5,9 @@ services:
       args:
         ARG_API_HOST: http://localhost:8082/api
         ARG_CENTRIFUGE_HOST: ws://localhost:8000/connection/websocket
+    environment:
+      VITE_API_HOST: http://localhost:8082/api
+      VITE_CENTRIFUGE_HOST: ws://localhost:8000/connection/websocket
+      VITE_DEBUG_PROGRESS: "true"
     ports:
       - 8033:80

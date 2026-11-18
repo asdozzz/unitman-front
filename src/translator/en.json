@@ -13,11 +13,35 @@
       "opencode": "OpenCode",
       "settings": "Settings"
     },
+    "meta": {
+      "title_suffix": "Unitman"
+    },
+    "titles": {
+      "login": "Sign in",
+      "account_settings": "Account settings",
+      "init": "Initialization",
+      "unit_jobs": "Unit jobs",
+      "unauthorized": "Access denied",
+      "not_found": "Page not found"
+    },
     "header": {
       "profile": "Profile",
       "help": "Help",
       "settings": "Settings",
+      "toggle_theme": "Toggle theme",
       "sign_out": "Sign out"
+    },
+    "unauthorized": {
+      "caption": "Access denied",
+      "description": "You do not have access to this page. Contact an administrator if this looks like a mistake.",
+      "home": "Go to dashboard",
+      "units": "Go to units"
+    },
+    "not_found": {
+      "caption": "Page not found",
+      "description": "The address may be outdated or the page may have been moved.",
+      "home": "Go to dashboard",
+      "units": "Go to units"
     },
     "form_proxy_host": {
       "caption": "Proxy Host Form",

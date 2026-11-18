@@ -1,1 +1,135 @@
-// @import '~quasar-addon-styl';
+// Глобальные стили и переопределения Quasar.
+//
+// Файл подключается в main.ts после CSS Quasar, поэтому правила ниже
+// перекрывают значения по умолчанию. Все значения берутся из токенов.
+
+@use "./tokens";
+
+// ---------------------------------------------------------------------------
+// Бренд Quasar из тех же токенов.
+//
+// `config.brand` в main.ts задаёт стартовые значения, но переменные ниже
+// остаются единственным источником правды: они же меняются в тёмной теме.
+// ---------------------------------------------------------------------------
+:root {
+  --q-primary: var(--app-primary);
+  --q-secondary: var(--app-text-secondary);
+  --q-accent: var(--app-accent);
+  --q-positive: var(--app-positive);
+  --q-negative: var(--app-negative);
+  --q-info: var(--app-info);
+  --q-warning: var(--app-warning);
+  --q-dark: #1f2933;
+}
+
+body.body--dark {
+  --q-primary: var(--app-primary);
+  --q-secondary: var(--app-text-secondary);
+  --q-accent: var(--app-accent);
+  --q-positive: var(--app-positive);
+  --q-negative: var(--app-negative);
+  --q-info: var(--app-info);
+  --q-warning: var(--app-warning);
+  --q-dark: #1a2027;
+}
+
+// ---------------------------------------------------------------------------
+// База документа
+// ---------------------------------------------------------------------------
+html,
+body {
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-size-body);
+  line-height: var(--app-line-height-base);
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+body.body--dark {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+.q-layout {
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+// Видимый фокус для клавиатурной навигации: не полагаемся только на браузер.
+:focus-visible {
+  outline: 2px solid var(--app-focus-ring);
+  outline-offset: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// Базовые утилиты
+// ---------------------------------------------------------------------------
+
+// Контейнер страницы: ограничивает ширину на больших экранах и задаёт
+// адаптивные отступы. Используется вместо повторяющегося q-pa-md.
+.app-page {
+  width: 100%;
+  max-width: var(--app-content-max-width);
+  margin-inline: auto;
+  padding: var(--app-space-4);
+}
+
+@media (max-width: 599px) {
+  .app-page {
+    padding: var(--app-space-3);
+  }
+}
+
+// Вторичный текст: подписи, метаданные, счётчики.
+.text-caption-muted {
+  color: var(--app-text-secondary);
+  font-size: var(--app-font-size-caption);
+  line-height: var(--app-line-height-tight);
+}
+
+// Идентификаторы, токены и значения конфига читаются лучше моноширинным.
+.text-mono {
+  font-family: var(--app-font-family-mono);
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+// Карточки без явного `square` получают общий радиус. Класс `square`
+// Quasar остаётся сильнее за счёт !important и не затрагивается.
+.q-card:not(.square) {
+  border-radius: var(--app-radius-lg);
+}
+
+// ---------------------------------------------------------------------------
+// Скелетоны загрузки
+// ---------------------------------------------------------------------------
+.app-skeleton {
+  border-radius: var(--app-radius-md);
+  background: linear-gradient(
+      90deg,
+      var(--app-surface-muted) 25%,
+      var(--app-border) 37%,
+      var(--app-surface-muted) 63%
+  );
+  background-size: 400% 100%;
+  animation: app-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes app-skeleton-pulse {
+  0% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-skeleton {
+    animation: none;
+  }
+}

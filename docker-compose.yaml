@@ -1,6 +1,16 @@
 services:
   app:
-    build: .
+    build:
+      context: .
+      args:
+        # Значения по умолчанию, которые запекаются в бандл при сборке.
+        ARG_API_HOST: ${VITE_API_HOST:-http://localhost:8082/api}
+        ARG_CENTRIFUGE_HOST: ${VITE_CENTRIFUGE_HOST:-ws://localhost:8000/connection/websocket}
+    environment:
+      # Runtime-значения: entry.sh превращает их в env-config.js,
+      # который читает браузер. Переопределяют то, что запечено при сборке.
+      VITE_API_HOST: ${VITE_API_HOST:-http://localhost:8082/api}
+      VITE_CENTRIFUGE_HOST: ${VITE_CENTRIFUGE_HOST:-ws://localhost:8000/connection/websocket}
+      VITE_DEBUG_PROGRESS: ${VITE_DEBUG_PROGRESS:-true}
     ports:
       - 8033:80
-  

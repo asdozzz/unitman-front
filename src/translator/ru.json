@@ -13,11 +13,35 @@
       "opencode": "OpenCode",
       "settings": "Настройки"
     },
+    "meta": {
+      "title_suffix": "Unitman"
+    },
+    "titles": {
+      "login": "Вход",
+      "account_settings": "Настройки аккаунта",
+      "init": "Инициализация",
+      "unit_jobs": "Задачи юнита",
+      "unauthorized": "Доступ запрещён",
+      "not_found": "Страница не найдена"
+    },
     "header": {
       "profile": "Профиль",
-      "help": "Помошь",
+      "help": "Помощь",
       "settings": "Настройки",
+      "toggle_theme": "Переключить тему",
       "sign_out": "Выход"
+    },
+    "unauthorized": {
+      "caption": "Недостаточно прав",
+      "description": "У вас нет доступа к этой странице. Если это ошибка, обратитесь к администратору.",
+      "home": "На главную",
+      "units": "К списку юнитов"
+    },
+    "not_found": {
+      "caption": "Страница не найдена",
+      "description": "Возможно, адрес устарел или страница была перемещена.",
+      "home": "На главную",
+      "units": "К списку юнитов"
     },
     "form_proxy_host": {
       "caption": "Укажите дефолтный Proxy Host",

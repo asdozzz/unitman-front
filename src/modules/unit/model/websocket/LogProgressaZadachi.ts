@@ -8,39 +8,25 @@
  * от «дошло, но было отброшено», поэтому все точки ветвления пишут сюда.
  *
  * Логи включены по умолчанию. Выключить можно переменной окружения
- * `VITE_DEBUG_PROGRESS=false` — в `.env` (`import.meta.env`) или в
- * `window._env_` (`env-config.js`, docker).
+ * `VITE_DEBUG_PROGRESS=false` — в `.env` (`import.meta.env`) или при запуске
+ * контейнера (`docker run -e`, `window._env_`).
  */
-const PREFIX = '[unit_progress]';
+import { debugProgress } from '@/utils/runtimeEnv';
 
-/** Имя переменной окружения, выключающей лог. */
-const PEREMENNAYA_OTLADKI = 'VITE_DEBUG_PROGRESS';
+const PREFIX = '[unit_progress]';
 
 /** Максимальная длина значения в логе: payload может быть очень большим. */
 const MAKSIMALNAYA_DLINA_ZNACHENIYA = 400;
 
 /**
- * Флаг отладки из окружения сборки.
- *
- * Обращение статическое (`import.meta.env.VITE_...`), иначе Vite не подставит
- * значение на этапе сборки и переменная будет всегда `undefined`.
- */
-const OTLADKA_IZ_SBORKI: unknown = import.meta.env.VITE_DEBUG_PROGRESS;
-
-/**
  * Проверка флага отладки.
  *
- * Читается лениво (в момент записи), потому что `window._env_` заполняется
- * скриптом `env-config.js` уже после загрузки модуля.
+ * Читается лениво (в момент записи): `window._env_` заполняется скриптом
+ * `env-config.js` уже после загрузки модуля, а `runtimeEnv` смотрит в него
+ * при каждом вызове.
  */
 function otladkaViklyuchena(): boolean {
-    const izOkruzheniya: unknown = typeof window === 'undefined'
-        ? undefined
-        : window._env_?.[PEREMENNAYA_OTLADKI];
-
-    const znachenie = izOkruzheniya ?? OTLADKA_IZ_SBORKI;
-
-    return znachenie === false || znachenie === 'false';
+    return !debugProgress();
 }
 
 /** Обрезать длинное значение, чтобы лог оставался читаемым. */

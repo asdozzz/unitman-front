@@ -5,6 +5,7 @@ import unit from '@/modules/unit/routes';
 import opencode from '@/modules/opencode/routes';
 import app from  '@/modules/app/routes';
 import {storeInizializii} from "@/modules/app/store/InitializationStore";
+import i18n from "@/bootstrap/translator";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -47,14 +48,26 @@ router.beforeEach(async (to, _from, next) => {
 
     if (to.meta && to.meta.requiredRoles) {
         if (!authStore.checkRoles(to.meta.requiredRoles as string[])) {
-            console.log('unauthorized route');
             return next('/unauthorized');
         }
     }
 
-
-    console.log('next route');
     return next();
+});
+
+/**
+ * Заголовок страницы и язык документа.
+ *
+ * `meta.titleKey` объявляется на маршруте, поэтому новая страница не может
+ * забыть заголовок: при отсутствии ключа остаётся общее имя продукта.
+ */
+router.afterEach((to) => {
+    const klyuch = to.meta.titleKey as string | undefined;
+    const nazvanie = klyuch && i18n.global.te(klyuch) ? i18n.global.t(klyuch) : '';
+    const suffiks = i18n.global.t('app.meta.title_suffix');
+
+    document.title = nazvanie ? `${nazvanie} · ${suffiks}` : suffiks;
+    document.documentElement.lang = i18n.global.locale.value;
 });
 
 

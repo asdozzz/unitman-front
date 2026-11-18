@@ -10,6 +10,9 @@ export default [
     {
         path: '/login',
         component: Login,
+        meta: {
+            titleKey: 'app.titles.login'
+        }
     },
     {
         path: '/account',
@@ -20,7 +23,8 @@ export default [
                 component: SpisokPolzovateleiDlyAdministrirovaniya,
                 name: "account_list",
                 meta: {
-                    requiredRoles: ['ROLE_ADMIN']
+                    requiredRoles: ['ROLE_ADMIN'],
+                    titleKey: 'app.tabs.accounts'
                 }
             },
             {
@@ -28,13 +32,17 @@ export default [
                 component: EditPage,
                 name: "account_edit",
                 meta: {
-                    requiredRoles: ['ROLE_ADMIN']
+                    requiredRoles: ['ROLE_ADMIN'],
+                    titleKey: 'app.tabs.accounts'
                 }
             },
             {
                 path: 'settings',
                 component: AccountSettings,
                 name: "account_settings",
+                meta: {
+                    titleKey: 'app.titles.account_settings'
+                }
             }
         ]
     },

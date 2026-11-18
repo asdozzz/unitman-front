@@ -15,7 +15,8 @@ export default [
                 path: 'repositories',
                 component: SpisokHranilish,
                 meta: {
-                    requiredRoles: ['ROLE_ADMIN']
+                    requiredRoles: ['ROLE_ADMIN'],
+                    titleKey: 'app.tabs.repos'
                 }
             },
         ]

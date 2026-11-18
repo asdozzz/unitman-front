@@ -22,12 +22,18 @@ export default [
                 path: "sessions",
                 component: SpisokSessiyOpenCode,
                 name: "opencode_sessions",
+                meta: {
+                    titleKey: "app.tabs.opencode"
+                }
             },
             {
                 path: "sessions/:id",
                 component: ChatOpenCode,
                 name: "opencode_chat",
                 props: true,
+                meta: {
+                    titleKey: "app.tabs.opencode"
+                }
             },
         ],
     },

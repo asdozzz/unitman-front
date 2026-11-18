@@ -1,10 +1,14 @@
+import type { RuntimeEnvKey, RuntimeEnvValue } from '@/utils/runtimeEnv';
+
 declare global {
     interface Window {
-        // Add your custom properties here
-        _env_: Record<string, any>;
+        /**
+         * Настройки, которые entry.sh записывает в `/env-config.js` при старте
+         * контейнера. Ключи, не заданные в окружении, отсутствуют или равны
+         * `null` (шаблон для dev-сервера).
+         */
+        _env_?: Partial<Record<RuntimeEnvKey, RuntimeEnvValue>>;
     }
 }
 
-// Crucial: If your file doesn't have any imports or exports,
-// add this line to force TypeScript to treat it as a module.
 export {};

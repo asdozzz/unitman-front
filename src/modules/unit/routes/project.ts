@@ -14,7 +14,8 @@ export default [
         path: 'projects',
         component: SpisokProektov,
         meta: {
-            requiredRoles: ['ROLE_ADMIN']
+            requiredRoles: ['ROLE_ADMIN'],
+            titleKey: 'app.tabs.projects'
         },
         name: 'project_list',
     },
@@ -26,36 +27,57 @@ export default [
                 path: 'home',
                 component: EditProjectForm,
                 name: 'project_edit',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.project_data'
+                }
             },
             {
                 path: 'jobs',
                 component: OknoVipolnenihZadachRunnera,
                 name: 'project_jobs',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.jobs'
+                }
             },
             {
                 path: 'users',
                 component: SpisokPolzovateleiProekta,
                 name: 'project_users',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.users'
+                }
             },
             {
                 path: 'variables',
                 component: SpisokPeremenihProekta,
                 name: 'project_variables',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.variables'
+                }
             },
             {
                 path: 'repo_event_handler',
                 component: FormaObnovleniyaNastroekHuka,
                 name: 'project_repo_event_handler',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.repo_event_handler'
+                }
             },
             {
                 path: 'webhooks',
                 component: SpisokWebhookovProekta,
                 name: 'project_webhooks',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.webhooks'
+                }
             },
             {
                 path: 'volume_types',
                 component: TipiTomaProekta,
                 name: 'project_volume_types',
+                meta: {
+                    titleKey: 'unit.proekt.tabs.volume_types'
+                }
             }
         ]
     },
@@ -63,5 +85,8 @@ export default [
         path: 'projects/:id/webhooks/:webhookId',
         component: SobitiyaWebhooka,
         name: 'webhook_events',
+        meta: {
+            titleKey: 'unit.proekt.tabs.webhooks'
+        }
     }
 ];
