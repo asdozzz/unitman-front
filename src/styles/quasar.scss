@@ -97,6 +97,16 @@ body.body--dark {
   font-variant-numeric: tabular-nums;
 }
 
+// Заголовок секции внутри карточки юнита: ссылки, связи, переменные.
+.unit-card__section-title {
+  color: var(--app-text-secondary);
+  font-size: var(--app-font-size-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: var(--app-line-height-tight);
+  text-transform: uppercase;
+}
+
 // Карточки без явного `square` получают общий радиус. Класс `square`
 // Quasar остаётся сильнее за счёт !important и не затрагивается.
 .q-card:not(.square) {

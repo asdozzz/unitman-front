@@ -354,19 +354,50 @@
       "list": {
         "empty_result": "Empty list"
       },
+      "view": {
+        "cards": "Cards",
+        "workspace": "Workspace",
+        "workspace_list": "Unit list",
+        "empty_selection": "Select a unit from the list"
+      },
       "card": {
         "header": {
           "by": "by",
           "updated_at": "updated at"
         },
+        "status": {
+          "running": "Running",
+          "busy": "Busy",
+          "prepared": "Prepared",
+          "stopped": "Stopped",
+          "error": "Error",
+          "broken": "Broken"
+        },
         "fields": {
           "id": "Id",
           "branch": "Branch",
           "projectName": "Project",
-          "svyazi": "Related units"
+          "svyazi": "Related units",
+          "links": "Links",
+          "variables": "Config variables"
         },
         "tooltips": {
           "svyaz": "Show unit and units related to it (id: {id})"
+        },
+        "hints": {
+          "links_stopped": "Links become available after the unit starts"
+        },
+        "messages": {
+          "link_copied": "Link copied",
+          "id_copied": "Identifier copied",
+          "error_hint": "The last operation finished with an error",
+          "no_variables": "No variables configured"
+        },
+        "delete_confirm": {
+          "title": "Delete this unit?",
+          "message": "Unit \"{name}\" will be deleted. This action cannot be undone.",
+          "no": "No",
+          "yes": "Delete"
         },
         "buttons": {
           "jobs": "jobs",
@@ -374,16 +405,23 @@
           "update": "update",
           "delete": "delete",
           "sync": "sync",
-          "build": "build",
-          "fetch_changes" : "fetch changes",
-          "preparing": "preparing",
-          "remove_preparing": "remove_preparing",
-          "up": "up",
-          "down": "down",
+          "build": "Build",
+          "fetch_changes" : "Fetch changes",
+          "preparing": "Prepare",
+          "remove_preparing": "Reset preparation",
+          "up": "Run",
+          "down": "Stop",
           "change_branch": "change_branch",
           "set_config" : "set config",
-          "actions" : "actions",
-          "check_container": "check unit container"
+          "actions" : "Actions",
+          "check_container": "check unit container",
+          "more": "More",
+          "rebuild": "Rebuild",
+          "mark_broken": "Mark as broken",
+          "details": "Details",
+          "open_link": "Open link",
+          "copy_link": "Copy link",
+          "copy_id": "Copy identifier"
         }
       }
     },

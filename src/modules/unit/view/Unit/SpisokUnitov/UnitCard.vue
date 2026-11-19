@@ -1,35 +1,44 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
-import type {SvyazUnita, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
-import {useAuthStore} from "@/modules/account/store/auth";
+import {computed, ref} from "vue";
 import {storeToRefs} from "pinia";
+import type {SvyazUnita, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import {useAuthStore} from "@/modules/account/store/auth";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
-import {convertDate} from "@/utils/dates";
+import {useUnitUiState} from "@/modules/unit/utils/useUnitUiState";
+import UnitStatusBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitStatusBadge.vue";
+import UnitCardMenu from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardMenu.vue";
+import UnitCardHeader from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardHeader.vue";
+import UnitCardLinks from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardLinks.vue";
+import UnitCardRelated from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardRelated.vue";
+import UnitCardStats from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardStats.vue";
+import UnitCardDetails from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardDetails.vue";
+import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 
-
-const expanded = ref(false);
-const props = defineProps<{
-  item: Unit,
-}>();
-
-const authStore = useAuthStore();
-const { isAdmin } = storeToRefs(authStore);
+const props = withDefaults(defineProps<{
+  item: Unit;
+  variant?: "grid" | "detail";
+}>(), {
+  variant: "grid",
+});
 
 const unitiStore = useSpisokUnitovStore();
 const {
   showForceRemove,
-  esliJdemRunner,
   getUnitLoader,
-  esliZapushen,
-  nazvanieTekusheiZadachi,
   svyazannieUniti,
   nazvanieUnitaPoId,
   vibranLiUnitVFiltreSvyazei,
 } = storeToRefs(unitiStore);
 
-/** Связанные юниты карточки без дублей по `targetUnitId`. */
-const spisokSvyazei = computed<SvyazUnita[]>(() => svyazannieUniti.value(props.item));
+const authStore = useAuthStore();
+const {isAdmin} = storeToRefs(authStore);
+
+const state = useUnitUiState(() => props.item);
+
+/** Уникальные связанные юниты: связь описана на уровне переменной. */
+const spisokSvyazei = computed<SvyazUnita[]>(() => {
+  return svyazannieUniti.value(props.item);
+});
 
 /**
  * Подпись бейджа: имя юнита из кеша, иначе сервис из помощника,
@@ -41,57 +50,24 @@ function podpisSvyazi(svyaz: SvyazUnita): string {
       ?? `${svyaz.targetUnitId.slice(0, 8)}…`;
 }
 
-/** Добавляет или убирает связанный юнит в фильтре списка. */
 async function perekluchitSvyaz(targetUnitId: string) {
   await unitiStore.perekluchitSvyazUnita(targetUnitId);
 }
 
-const itemHeaderClass = computed(() => {
-  let headerColor = 'bg-primary';
-  /*const timestamp = Math.floor(Date.now() / 1000);
-  const week = 60*60*24*7;
-  const week2 = 60*60*24*7*2;
-  const month = 60*60*24*7*4;
-  if (props.item.unixtimePoslednegoObnovleniyaUnita) {
-    if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week) {
-      headerColor = 'bg-indigo-8';
-    }
-    if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > week2) {
-      headerColor = 'bg-blue-grey-8';
-    }
-    if (timestamp - props.item.unixtimePoslednegoObnovleniyaUnita > month) {
-      headerColor = 'bg-grey-8';
-    }
-  }*/
-
-  let classHeader = '';
-
-  if (props.item.error) {
-    classHeader = 'bg-negative text-white';
-  } else {
-    classHeader = `text-white ${headerColor}`;
-  }
-
-  return classHeader;
+const isShowRemoveBtn = computed<boolean>(() => {
+  return showForceRemove.value(props.item) || isAdmin.value;
 });
 
-const isShowRemoveBtn = computed(() => {
-  if (showForceRemove) {
-    return true;
-  }
+const prompt = ref(false);
 
-  return isAdmin;
-});
+function showRemovePrompt() {
+  prompt.value = true;
+}
 
 async function udalit() {
   await unitiStore.udalit(props.item);
   prompt.value = false;
 }
-
-/*async function udalitSlomanii() {
-  await unitiStore.udalitSlomaniiUnit(props.item.id);
-  prompt.value = false;
-}*/
 
 async function rebuildModel() {
   await unitiStore.rebuildModel(props.item.id);
@@ -100,145 +76,123 @@ async function rebuildModel() {
 async function pometitKakSlomanii() {
   await unitiStore.pometitKakSlomanii(props.item.id);
 }
-
-const prompt =  ref(false);
-
-function showRemovePrompt() {
-  prompt.value = true;
-}
-
 </script>
 
 <template>
   <q-dialog v-model="prompt" persistent>
     <q-card style="min-width: 350px">
       <q-card-section>
-        <div class="text-h6">Вы уверены, что хотите этого?</div>
+        <div class="text-h6">{{ $t('unit.spisok_unitov.card.delete_confirm.title') }}</div>
+        <div class="text-caption-muted q-mt-sm">
+          {{ $t('unit.spisok_unitov.card.delete_confirm.message', {name: item.name}) }}
+        </div>
       </q-card-section>
 
       <q-card-actions align="right" class="text-primary">
-        <q-btn flat label="Нет" v-close-popup />
-        <q-btn flat label="Да" :loading="getUnitLoader(props.item.id)" @click="udalit()" />
+        <q-btn flat :label="$t('unit.spisok_unitov.card.delete_confirm.no')" v-close-popup />
+        <q-btn
+            flat
+            color="negative"
+            :label="$t('unit.spisok_unitov.card.delete_confirm.yes')"
+            :loading="getUnitLoader(item.id)"
+            @click="udalit"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
-  <q-card square class="q-mr-md q-mb-md" style="width: 335px">
-    <q-card-section class="q-py-xs q-px-sm" :class="itemHeaderClass">
-      <div class="row">
-        <div class="col" >
-          <div class="unit-card-name">
-            {{ item.name }}
-          </div>
-        </div>
-        <div class="col-auto">
-          <q-btn size="sm" padding="4px 5px" flat round icon="delete_forever" v-if="isAdmin" @click="pometitKakSlomanii" :loading="getUnitLoader(props.item.id)">
-            <q-tooltip>mark as broken</q-tooltip>
-          </q-btn>
-<!--          <q-btn size="sm" padding="4px 5px" flat round icon="delete_forever" v-if="isAdmin" @click="udalitSlomanii" :loading="getUnitLoader(props.item.id)"/>-->
-          <q-btn size="sm" padding="4px 5px" flat round icon="restore" v-if="isAdmin" @click="rebuildModel" :loading="getUnitLoader(props.item.id)">
-            <q-tooltip>rebuild</q-tooltip>
-          </q-btn>
-          <q-btn size="sm" padding="4px 5px" flat round icon="close" v-if="isShowRemoveBtn" @click="showRemovePrompt" :loading="getUnitLoader(props.item.id)">
-            <q-tooltip>{{$t('unit.spisok_unitov.card.buttons.delete')}}</q-tooltip>
-          </q-btn>
-        </div>
+
+  <article
+      class="unit-card"
+      :class="[`unit-card--${variant}`, {'unit-card--error': item.error}]"
+  >
+    <div class="unit-card__status-row">
+      <UnitStatusBadge :state="state" />
+      <UnitCardMenu
+          :is-admin="isAdmin"
+          :can-remove="isShowRemoveBtn"
+          @mark-broken="pometitKakSlomanii"
+          @rebuild="rebuildModel"
+          @remove="showRemovePrompt"
+      />
+    </div>
+
+    <div class="unit-card__body">
+      <UnitCardHeader :item="item" />
+
+      <div v-if="item.error" class="unit-card__error text-caption-muted" role="alert">
+        <q-icon name="error_outline" size="14px" />
+        {{ $t('unit.spisok_unitov.card.messages.error_hint') }}
       </div>
-      <div class="row">
-        <div class="col">
-          <div class="unit-card-author">
-            {{$t('unit.spisok_unitov.card.header.by')}} {{ item.authorName }}, {{$t('unit.spisok_unitov.card.header.updated_at')}} {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}
-          </div>
-        </div>
-      </div>
-    </q-card-section>
-    <q-card-section class="q-pa-sm">
-      <div class="text-left" v-if="item.links.length > 0">
-        <template v-for="link in item.links">
-          <template v-if="link.protocol === 'http' && esliZapushen(item)">
-            <div class="text-italic fs-12">
-              <a :href="link.path" target="_blank">{{ link.protocol }}://{{link.service}}:{{link.port}}{{link.startUri}}</a>
-            </div>
-          </template>
-          <template v-else>
-            <div class="text-italic fs-12">
-              {{ link.protocol }}://{{link.service}}:{{link.port}}{{link.startUri}}
-            </div>
-          </template>
-        </template>
-      </div>
-      <div class="q-mt-xs" v-if="spisokSvyazei.length > 0">
-        <div class="text-left fs-12">
-          <strong>{{ $t('unit.spisok_unitov.card.fields.svyazi') }}:</strong>
-        </div>
-        <div class="row q-gutter-xs q-mt-xs">
-          <q-chip
-              v-for="svyaz in spisokSvyazei"
-              :key="svyaz.targetUnitId"
-              dense
-              square
-              clickable
-              :color="vibranLiUnitVFiltreSvyazei(svyaz.targetUnitId) ? 'primary' : 'grey-4'"
-              :text-color="vibranLiUnitVFiltreSvyazei(svyaz.targetUnitId) ? 'white' : 'dark'"
-              icon="link"
-              :label="podpisSvyazi(svyaz)"
-              @click="perekluchitSvyaz(svyaz.targetUnitId)"
-          >
-            <q-tooltip>{{ $t('unit.spisok_unitov.card.tooltips.svyaz', {id: svyaz.targetUnitId}) }}</q-tooltip>
-          </q-chip>
-        </div>
-      </div>
-      <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.id')}}:</strong> {{ item.id }}</div>
-      <div class="text-left fs-12"><strong>{{$t('unit.spisok_unitov.card.fields.projectName')}}:</strong> {{ item.projectName }}</div>
-      <div class="text-left fs-12" style="white-space: pre-line;word-break: break-all">
-        <strong>{{$t('unit.spisok_unitov.card.fields.branch')}}:</strong> {{ item.branch }}
-      </div>
-      <div class="text-left fs-12"  v-if="item.statistikaKonteinera">
-        <div class="row">
-          <div class="col-3"><strong>cpu: {{item.statistikaKonteinera.cpuPercent}}</strong></div>
-          <div class="col"><strong>mem: {{item.statistikaKonteinera.memoryUsage}} ( {{item.statistikaKonteinera.memoryPercent}} )</strong></div>
-        </div>
-      </div>
-      <q-inner-loading :showing="esliJdemRunner(props.item)">
-        <q-spinner-gears size="30px" color="primary" />
-        <p class="text-primary">{{$t('unit.tipi_zadach.'+nazvanieTekusheiZadachi(item))}}</p>
-      </q-inner-loading>
-    </q-card-section>
-    <q-separator/>
-    <q-card-actions>
-      <UnitActions :item="item"/>
-      <q-space />
-      <q-btn
-          color="grey"
-          round
-          flat
-          dense
-          :icon="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-          @click="expanded = !expanded"
-      >
-        <q-tooltip>config variables</q-tooltip>
-      </q-btn>
-    </q-card-actions>
-    <q-slide-transition>
-      <div v-show="expanded">
-        <q-separator />
-        <q-card-section class="text-subtitle2">
-          <template v-for="peremenaya in item.peremenie" :key="peremenaya.id">
-            <div class="text-left" >{{ peremenaya.id }}: {{ peremenaya.value }}</div>
-          </template>
-        </q-card-section>
-      </div>
-    </q-slide-transition>
-  </q-card>
+
+      <UnitActions :item="item" :state="state" />
+
+      <UnitCardLinks :links="item.links" :can-open="state.canOpenLinks" />
+
+      <UnitCardRelated
+          :svyazi="spisokSvyazei"
+          :label-for="podpisSvyazi"
+          :is-selected="vibranLiUnitVFiltreSvyazei"
+          @toggle="perekluchitSvyaz"
+      />
+
+      <UnitCardStats :stats="item.statistikaKonteinera ?? null" />
+    </div>
+
+    <q-separator />
+    <UnitCardDetails :item="item" />
+  </article>
 </template>
 
 <style scoped>
-.unit-card-name {
-  font-size: 1.25rem;
-  font-weight: 500;
+.unit-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow-sm);
+  transition: box-shadow var(--app-duration-base) var(--app-easing);
 }
 
-.unit-card-author {
-  font-size: 12px;
-  font-weight: 500;
+.unit-card:hover {
+  box-shadow: var(--app-shadow-md);
+}
+
+.unit-card--error {
+  border-color: var(--app-negative);
+}
+
+.unit-card--detail,
+.unit-card--detail:hover {
+  box-shadow: none;
+}
+
+.unit-card--detail .unit-card__body {
+  gap: var(--app-space-4);
+}
+
+.unit-card__status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-2);
+  padding: var(--app-space-2) var(--app-space-3) 0;
+}
+
+.unit-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-3);
+  padding: var(--app-space-2) var(--app-space-3) var(--app-space-3);
+}
+
+.unit-card__error {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-1);
+  color: var(--app-negative);
 }
 </style>
