@@ -385,7 +385,8 @@
           "svyaz": "Show unit and units related to it (id: {id})"
         },
         "hints": {
-          "links_stopped": "Links become available after the unit starts"
+          "links_stopped": "Links become available after the unit starts",
+          "editor_readonly": "Read-only file and git diff viewer"
         },
         "messages": {
           "link_copied": "Link copied",
@@ -432,7 +433,8 @@
           "details": "Details",
           "open_link": "Open link",
           "copy_link": "Copy link",
-          "copy_id": "Copy identifier"
+          "copy_id": "Copy identifier",
+          "open_editor": "Open unit files"
         }
       }
     },

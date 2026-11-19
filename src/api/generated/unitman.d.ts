@@ -3447,6 +3447,11 @@ export type components = {
             /** @example my-app */
             projectName: string;
             prozesi: components["schemas"]["UnitProcess"][];
+            /**
+             * @description Ссылка на read-only редактор файлов юнита. Появляется после успешной подготовки, очищается при сбросе подготовки или пересборке.
+             * @example https://47000.feature-123.my-app.proxy.example
+             */
+            redaktorLink?: string | null;
             statistikaKonteinera?: components["schemas"]["ContainerStats"] | null;
             /** @description Связи переменных юнита с юнитами, выбранными через хелпер. Заполняется из проекции `svyazi_unitov` и реконсилируется при изменении конфига */
             svyazi?: components["schemas"]["UnitSvyaz"][];
