@@ -462,6 +462,46 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/mediateka/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Завершить прямую загрузку zip-архива
+         * @description Проверяет подпись и срок uploadToken, делает HEAD объекта в MinIO и требует, чтобы его фактический размер совпал с заявленным при presign. При успехе сохраняет файл в реестре и возвращает его в том же формате, что и /upload.
+         */
+        post: operations["post_app_mediateka_infra_mediateka_finalize"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mediateka/presign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Подготовить прямую загрузку zip-архива в MinIO
+         * @description Проверяет те же правила, что и /upload, но не принимает тело файла: возвращает presigned PUT URL, набор заголовков и подписанный uploadToken. Файл загружается клиентом напрямую в MinIO, после чего вызывается /finalize. unitId и projectId взаимоисключающие; без обоих создаётся черновик. contentType должен быть application/zip (пустое значение трактуется как application/zip). Размер size — точный размер файла в байтах, не больше MEDIATEKA_MAX_FILE_SIZE.
+         */
+        post: operations["post_app_mediateka_infra_mediateka_presign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/mediateka/prikrepit": {
         parameters: {
             query?: never;
@@ -1444,6 +1484,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/runner/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Health-push раннера
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. Обновляет состояние раннера и статистику контейнеров. При настроенном RUNNER_CALLBACK_SECRET обязателен заголовок X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
+         */
+        post: operations["post_app_runner_infra_runner_health"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/runner/saveSteps": {
         parameters: {
             query?: never;
@@ -1475,6 +1535,26 @@ export type paths = {
         get: operations["get_app_runner_infra_runner_test"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runner/unitStateNotifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Уведомления раннера о состоянии контейнеров юнитов
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. При настроенном RUNNER_CALLBACK_SECRET обязателен заголовок X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
+         */
+        post: operations["post_app_runner_infra_runner_unitstatenotifications"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3330,6 +3410,26 @@ export type components = {
             branch: string;
             /** @description Команды, доступные пользователю в текущем состоянии юнита */
             commands: ("nachatSborku" | "nachatObnovlenie" | "zapolnitPeremenie" | "nachatPodgotovku" | "ustanovitResultatPodgotovki" | "nachatSbrosPodgotovki" | "nachatZapusk" | "nachatOstanovku" | "nachatUdalenie" | "udalitVruchnuyu" | "nachatObnovleniePosleZapuska" | "nachatUdaleniePosleZapuska" | "vipolnitDeistvie" | "ustanovitResultatDeistviya" | "proveritKonteinerUnita")[];
+            /**
+             * @description Признак расхождения ожидаемого и фактического состояния контейнера юнита
+             * @example true
+             */
+            containerStateMismatch?: boolean;
+            /**
+             * @description Фактическое состояние контейнера на момент последней проверки
+             * @example absent
+             */
+            containerStateMismatchActual?: ("running" | "stopped" | "absent" | "unknown") | null;
+            /**
+             * @description Unix timestamp обнаружения расхождения
+             * @example 1730000000
+             */
+            containerStateMismatchDetectedAt?: number | null;
+            /**
+             * @description Ожидаемое состояние контейнера по последней успешной активности
+             * @example running
+             */
+            containerStateMismatchExpected?: ("running" | "absent") | null;
             deistviya: components["schemas"]["UnitAction"][];
             error: boolean;
             /** Format: uuid */
@@ -3338,6 +3438,11 @@ export type components = {
             /** @example feature-123 */
             name: string;
             peremenie: components["schemas"]["UnitVariableValue"][];
+            /**
+             * @description Причина занятости: `opencode_hod` — юнит захвачен ходом OpenCode, `prozes` — у юнита есть незавершённый процесс; null — юнит свободен. Значение `opencode_hod` приходит из таблицы `unit_zanyatost`, `prozes` вычисляется по незавершённым процессам read-модели.
+             * @example opencode_hod
+             */
+            prichinaZanyatosti?: ("opencode_hod" | "prozes") | null;
             projectId: string;
             /** @example my-app */
             projectName: string;
@@ -3350,6 +3455,11 @@ export type components = {
             unixtimePoslednegoObnovleniyaUnita?: number | null;
             /** @example 1730000000 */
             unixtimePoslednegoObnovleniyaVHranilishe?: number | null;
+            /**
+             * @description Юнит занят: либо его захватил внешний владелец (ход OpenCode), либо по нему есть незавершённый процесс. Пока юнит занят, мутирующие действия над ним блокируются, а события вебхука откладываются до освобождения.
+             * @example false
+             */
+            zanyat?: boolean;
             zapushen: boolean;
         };
         /** @description Архив, привязанный к типу тома (VolumeTypeFileItem::toArray) */
@@ -3481,6 +3591,26 @@ export type components = {
             newProjectName: string;
             newProxyHost: string;
         };
+        /** @description Уведомление о расхождении/изменении состояния контейнера юнита */
+        UvedomlenieOSostoyaniiKonteynera: {
+            /** @example stopped */
+            actualState: string;
+            /**
+             * @description Момент обнаружения, unix timestamp (секунды)
+             * @example 1762000000
+             */
+            detectedAt: number;
+            /** @example mismatch */
+            eventType: string;
+            /** @example running */
+            expectedState: string;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
+            /** Format: uuid */
+            unitId: string;
+            unitName: string;
+        };
         VipolnitDeistviye: {
             actionId: string;
             /** Format: uuid */
@@ -3552,6 +3682,27 @@ export type components = {
         ZapustitUnit: {
             /** Format: uuid */
             id: string;
+        };
+        /** @description Health-push от Golang-раннера */
+        ZaregistrirovatHealthRunnera: {
+            /** @default true */
+            active?: boolean;
+            /** @description Построчный вывод `docker stats --format json` */
+            dockerStats?: string | null;
+            /** @description Содержимое `/proc/meminfo` */
+            memInfo?: string | null;
+            /** @example runner-1 */
+            runnerId: string;
+            /** @example unitman-runner-queue */
+            taskQueue: string;
+            /** @description Момент отправки, unix timestamp (секунды) */
+            unixtime?: number | null;
+        };
+        /** @description Пакет уведомлений раннера о состоянии контейнеров юнитов */
+        ZaregistrirovatUvedomleniyaOSostoyaniiKonteynera: {
+            notifications?: components["schemas"]["UvedomlenieOSostoyaniiKonteynera"][];
+            /** @example runner-1 */
+            runnerId: string;
         };
         ZnacheniePeremenoi: {
             id: string;
@@ -4505,6 +4656,135 @@ export interface operations {
                     "application/json": {
                         /** @description Пустой ответ: файл удалён */
                         data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_mediateka_infra_mediateka_finalize: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Токен, полученный от /api/mediateka/presign */
+                    uploadToken: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Файл сохранён (SuccessEnvelope) либо ошибка (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MediatekaFaylUnita"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    } | components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_mediateka_infra_mediateka_presign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description MIME-тип файла; допускается только application/zip
+                     * @example application/zip
+                     */
+                    contentType?: string | null;
+                    /**
+                     * @description Отображаемое имя файла; нормализуется по правилам docker-тома
+                     * @example dump-bd.zip
+                     */
+                    name: string;
+                    /**
+                     * Format: uuid
+                     * @description Идентификатор проекта для архива каталога типов томов; не передаётся одновременно с unitId
+                     */
+                    projectId?: string | null;
+                    /**
+                     * Format: int64
+                     * @description Точный размер файла в байтах
+                     */
+                    size: number;
+                    /**
+                     * Format: uuid
+                     * @description Идентификатор юнита; не передаётся одновременно с projectId
+                     */
+                    unitId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Параметры загрузки (SuccessEnvelope) либо ошибка валидации/хранилища (ErrorEnvelope) — в обоих случаях HTTP 200 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /**
+                             * Format: int64
+                             * @description Unix timestamp истечения ссылки
+                             */
+                            expiresAt: number;
+                            /** Format: uuid */
+                            fileId: string;
+                            /**
+                             * @description Заголовки для PUT-запроса
+                             * @example {
+                             *       "Content-Type": "application/zip"
+                             *     }
+                             */
+                            headers: Record<string, never>;
+                            /**
+                             * @example PUT
+                             * @enum {string}
+                             */
+                            method: "PUT";
+                            storageKey: string;
+                            uploadToken: string;
+                            /** Format: uri */
+                            uploadUrl: string;
+                        };
                         /**
                          * @example success
                          * @enum {string}
@@ -7103,6 +7383,45 @@ export interface operations {
             };
         };
     };
+    post_app_runner_infra_runner_health: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ZaregistrirovatHealthRunnera"];
+            };
+        };
+        responses: {
+            /** @description Признак успешной обработки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /** @example true */
+                    "application/json": boolean;
+                };
+            };
+            /** @description Пустой runnerId либо превышен размер тела */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректная подпись запроса */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_runner_infra_runner_savesteps: {
         parameters: {
             query?: never;
@@ -7169,6 +7488,45 @@ export interface operations {
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_runner_infra_runner_unitstatenotifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ZaregistrirovatUvedomleniyaOSostoyaniiKonteynera"];
+            };
+        };
+        responses: {
+            /** @description Признак успешной обработки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /** @example true */
+                    "application/json": boolean;
+                };
+            };
+            /** @description Пустой список уведомлений либо превышен размер тела */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректная подпись запроса */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

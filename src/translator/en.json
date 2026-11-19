@@ -393,6 +393,17 @@
           "error_hint": "The last operation finished with an error",
           "no_variables": "No variables configured"
         },
+        "container_state": {
+          "title": "Container state does not match the expected state",
+          "message": "Expected: {expected}. Actual: {actual}.",
+          "detected_at": "Detected",
+          "states": {
+            "running": "running",
+            "stopped": "stopped",
+            "absent": "absent",
+            "unknown": "unknown"
+          }
+        },
         "delete_confirm": {
           "title": "Delete this unit?",
           "message": "Unit \"{name}\" will be deleted. This action cannot be undone.",

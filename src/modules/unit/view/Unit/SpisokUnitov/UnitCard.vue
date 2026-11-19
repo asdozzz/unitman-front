@@ -12,6 +12,7 @@ import UnitCardLinks from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardLinks.v
 import UnitCardRelated from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardRelated.vue";
 import UnitCardStats from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardStats.vue";
 import UnitCardDetails from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardDetails.vue";
+import UnitCardContainerState from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardContainerState.vue";
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 
 const props = withDefaults(defineProps<{
@@ -123,6 +124,8 @@ async function pometitKakSlomanii() {
         <q-icon name="error_outline" size="14px" />
         {{ $t('unit.spisok_unitov.card.messages.error_hint') }}
       </div>
+
+      <UnitCardContainerState :unit="item" />
 
       <UnitActions :item="item" :state="state" />
 

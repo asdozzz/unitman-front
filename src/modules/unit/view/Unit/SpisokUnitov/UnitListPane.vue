@@ -93,7 +93,23 @@ function fokusNaKray(kray: "nachalo" | "konec") {
         @keydown.home.prevent="fokusNaKray('nachalo')"
         @keydown.end.prevent="fokusNaKray('konec')"
     >
-      <UnitStatusBadge :state="sostoyaniya[item.id]" compact />
+      <span class="unit-list__status">
+        <UnitStatusBadge :state="sostoyaniya[item.id]" compact />
+        <q-icon
+            v-if="item.containerStateMismatch"
+            name="warning"
+            size="15px"
+            color="warning"
+            class="unit-list__warning"
+        >
+          <q-tooltip>
+            {{ $t('unit.spisok_unitov.card.container_state.message', {
+              expected: $t(`unit.spisok_unitov.card.container_state.states.${item.containerStateMismatchExpected ?? 'unknown'}`),
+              actual: $t(`unit.spisok_unitov.card.container_state.states.${item.containerStateMismatchActual ?? 'unknown'}`),
+            }) }}
+          </q-tooltip>
+        </q-icon>
+      </span>
 
       <span class="unit-list__main">
         <span class="unit-list__name" :title="item.name">{{ item.name }}</span>
@@ -176,6 +192,12 @@ function fokusNaKray(kray: "nachalo" | "konec") {
   font-size: var(--app-font-size-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.unit-list__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--app-space-1);
 }
 
 .unit-list__updated {
