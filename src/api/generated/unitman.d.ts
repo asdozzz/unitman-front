@@ -593,6 +593,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/opencode/otmetitUvedomleniyaProchitannimi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Захватить уведомления и пометить их прочитанными
+         * @description Возвращает только идентификаторы, которые именно этот запрос перевёл из непрочитанных в прочитанные: чужие, уже прочитанные и повторяющиеся идентификаторы отсутствуют.
+         */
+        post: operations["post_app_opencode_infra_opencode_otmetituvedomleniyaprochitannimi"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/opencode/otvetit": {
         parameters: {
             query?: never;
@@ -744,6 +764,23 @@ export type paths = {
          * @description Полное удаление сессии заменено архивацией; тело и ответ совпадают с `arhivirovatSessiyu`.
          */
         post: operations["post_app_opencode_infra_opencode_udalitsessiyu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/uvedomleniya": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Непрочитанные уведомления OpenCode и имя канала */
+        get: operations["get_app_opencode_infra_opencode_uvedomleniya"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5042,6 +5079,55 @@ export interface operations {
             };
         };
     };
+    post_app_opencode_infra_opencode_otmetituvedomleniyaprochitannimi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Идентификаторы уведомлений, реально переведённых в прочитанные */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            ids: string[];
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_opencode_infra_opencode_otvetit: {
         parameters: {
             query?: never;
@@ -5426,6 +5512,80 @@ export interface operations {
                     "application/json": {
                         /** @description Пустой ответ: сессия архивирована */
                         data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_opencode_infra_opencode_uvedomleniya: {
+        parameters: {
+            query?: {
+                /** @description Максимум уведомлений: 1..100, по умолчанию 50 */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Канал уведомлений и непрочитанные уведомления текущего пользователя */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /**
+                             * @description Готовое имя персонального Centrifugo-канала
+                             * @example opencode_notifications#6f1c5e0a7d1f4d599a540c2f8a2e6f11
+                             */
+                            channel: string;
+                            notifications: {
+                                /** @example 1762000000 */
+                                createdAt: number;
+                                /**
+                                 * @example new_message
+                                 * @enum {string}
+                                 */
+                                eventType: "new_message";
+                                /** Format: uuid */
+                                id: string;
+                                /** @enum {string|null} */
+                                kind: "ANSWER" | "QUESTION" | "ERROR" | null;
+                                /** Format: uuid */
+                                sessionId: string;
+                                /** @example Рефакторинг модуля биллинга */
+                                sessionTitle: string;
+                                /**
+                                 * @example ANSWERED
+                                 * @enum {string}
+                                 */
+                                status: "ANSWERED" | "AWAITING_INPUT" | "FAILED";
+                                /** Format: uuid */
+                                turnId: string;
+                            }[];
+                        };
                         /**
                          * @example success
                          * @enum {string}

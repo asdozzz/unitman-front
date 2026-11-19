@@ -478,6 +478,13 @@
     "deleted": "Deleted"
   },
   "opencode": {
+    "notifications": {
+      "new_answer": "New message in the session \"{title}\"",
+      "new_question": "OpenCode is waiting for an answer in the session \"{title}\"",
+      "new_error": "Execution error in the session \"{title}\"",
+      "open_new_tab": "Open in a new tab",
+      "close": "Close"
+    },
     "rekvizity": {
       "caption": "Access credentials",
       "empty": "No credentials yet. Add an API key, URL and model to start creating sessions.",

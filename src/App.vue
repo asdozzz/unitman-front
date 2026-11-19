@@ -86,6 +86,7 @@
       <q-page-container>
         <q-page>
           <router-view />
+          <UvedomleniyaOpenCode />
           <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
             <q-btn fab icon="keyboard_arrow_up" color="accent" />
           </q-page-scroller>
@@ -114,6 +115,7 @@ import 'dayjs/locale/ru'
 import 'dayjs/locale/en'
 import dayjs from "dayjs";
 import {loadAppSettings, saveAppSettings} from "@/utils/appSettings";
+import UvedomleniyaOpenCode from "@/modules/opencode/view/UvedomleniyaOpenCode.vue";
 
 const $q = useQuasar();
 

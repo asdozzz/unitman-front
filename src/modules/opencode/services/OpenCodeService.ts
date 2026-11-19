@@ -1,5 +1,9 @@
 import apiClient from "@/bootstrap/apiClient";
 import type { Schema } from "@/api/types";
+import type {
+    UvedomleniyaOpenCodeResponse,
+    ZahvatUvedomleniyResponse,
+} from "@/modules/opencode/model/UvedomlenieOpenCode";
 
 /**
  * Сервис сессий и ходов OpenCode (`/opencode/*`).
@@ -123,6 +127,28 @@ class OpenCodeService {
      */
     arhivirovatSessiyu(params: Schema<"ArhivirovatSessiyu">) {
         return apiClient.post('/opencode/arhivirovatSessiyu', params);
+    }
+
+    /**
+     * Непрочитанные уведомления текущего аккаунта и имя канала Centrifugo.
+     *
+     * Канал вычисляет только бэкенд, поэтому клиент не строит его сам.
+     * Ответ типизирован локальной моделью: до регенерации OpenAPI этого
+     * endpoint-а нет в `unitman.d.ts`.
+     */
+    uvedomleniya(params?: { limit?: number }) {
+        return apiClient.get<UvedomleniyaOpenCodeResponse>('/opencode/uvedomleniya', params);
+    }
+
+    /**
+     * Атомарно захватить уведомления и пометить их прочитанными.
+     *
+     * В ответе `ids` — только те уведомления, которые этот запрос реально
+     * перевёл из непрочитанных в прочитанные. Именно их и нужно показывать:
+     * так исключаются дубли между вкладками.
+     */
+    otmetitUvedomleniyaProchitannimi(params: { ids: string[] }) {
+        return apiClient.post<ZahvatUvedomleniyResponse>('/opencode/otmetitUvedomleniyaProchitannimi', params);
     }
 }
 
