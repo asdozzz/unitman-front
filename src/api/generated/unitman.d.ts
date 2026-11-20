@@ -787,6 +787,108 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/opencode/workspace/arhivirovat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Архивировать workspace (при незакоммиченных изменениях требует force) */
+        post: operations["post_app_opencode_infra_workspace_arhivirovat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/sostoyanie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Состояние workspace: причина блокировки ходов и последний ход */
+        post: operations["post_app_opencode_infra_workspace_sostoyanie"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/sozdat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Создать workspace-сессию */
+        post: operations["post_app_opencode_infra_workspace_sozdat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/spisok": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список workspace-сессий текущего пользователя */
+        get: operations["get_app_opencode_infra_workspace_spisok"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/udalit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить workspace: контейнеры и тома удаляет Runner, записи БД — фоновая задача */
+        post: operations["post_app_opencode_infra_workspace_udalit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/vosstanovit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Восстановить архивный workspace */
+        post: operations["post_app_opencode_infra_workspace_vosstanovit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project/{id}/hook": {
         parameters: {
             query?: never;
@@ -1607,7 +1709,10 @@ export type paths = {
         };
         get?: never;
         put?: never;
-        /** Список юнитов с фильтрацией */
+        /**
+         * Список юнитов с фильтрацией, поиском и сортировкой
+         * @description Фильтр `filter` поддерживает `search` — подстроку по имени ИЛИ ветке, `statuses` — массив статусов (`running`, `busy`, `prepared`, `stopped`, `error`), а также `name`, `branch`, `projectId`, `onlyMine`, `unitId`, `unitIds`. Сортировка `filter.sort`: `created_desc` (по умолчанию), `updated_desc`, `name_asc`, `status_priority`. Неизвестные статусы и сортировки игнорируются.
+         */
         post: operations["post_app_unitman_infra_unit_list"];
         delete?: never;
         options?: never;
@@ -2190,6 +2295,15 @@ export type components = {
             /** Format: uuid */
             sessionId: string;
         };
+        ArhivirovatWorkspace: {
+            /**
+             * @description Пропустить проверку незакоммиченных изменений
+             * @default false
+             */
+            force?: boolean;
+            /** Format: uuid */
+            workspaceId: string;
+        };
         BlockByAdmin: {
             /** Format: uuid */
             accountId: string;
@@ -2434,6 +2548,24 @@ export type components = {
             onlyMine?: boolean;
             /** @default null */
             projectId?: string | null;
+            /**
+             * Подстрока по имени ИЛИ ветке (регистронезависимый поиск). Пустая строка — без фильтра.
+             * @default null
+             */
+            search?: string | null;
+            /**
+             * Сортировка: `created_desc`, `updated_desc`, `name_asc`, `status_priority`. По умолчанию `created_desc`.
+             * @default created_desc
+             */
+            sort?: string;
+            /**
+             * Статусы юнитов для фильтрации: `running`, `busy`, `prepared`, `stopped`, `error`.
+             * @description Неизвестные значения игнорируются; пустой массив — без фильтра.
+             * @default []
+             */
+            statuses?: string[] | {
+                [key: string]: string;
+            };
             /** @default null */
             unitId?: string | null;
             /** @default [] */
@@ -2661,8 +2793,15 @@ export type components = {
             externalSessionId?: string | null;
             /** Format: uuid */
             id: string;
+            /** @description Ссылка на редактор workspace; null для unit-сессий и если proxy host первого проекта пуст */
+            ideLink?: string | null;
             /** @example Рефакторинг модуля биллинга */
             title: string;
+            /**
+             * @description Тип сессии: `unit` — диалог по юнитам, `workspace` — workspace-сессия
+             * @enum {string}
+             */
+            type: "unit" | "workspace";
             /**
              * Format: uuid
              * @description Первый юнит сессии (cwd), дубль `units[0].unitId`; `null` — свободная сессия
@@ -2680,6 +2819,8 @@ export type components = {
              * @example 1762000000
              */
             updatedAt: number;
+            /** @description Данные workspace для type = workspace */
+            workspace?: components["schemas"]["Workspace"] & null;
         };
         /** @description Юнит сессии (PrivyazkaKUnituReadModel) */
         OpenCodeSessionUnit: {
@@ -2867,6 +3008,10 @@ export type components = {
         PoluchitSostoyanieSessii: {
             /** Format: uuid */
             sessionId: string;
+        };
+        PoluchitSostoyanieWorkspace: {
+            /** Format: uuid */
+            workspaceId: string;
         };
         PoluchitSpisokPeremenihProekta: {
             id: string;
@@ -3077,6 +3222,17 @@ export type components = {
             /** @example GitLab */
             name: string;
         };
+        RezultatArhivaciiWorkspace: {
+            dirtyProjects: {
+                files: string[];
+                name: string;
+                /** Format: uuid */
+                projectId: string;
+            }[];
+            requiresConfirmation: boolean;
+            /** @enum {string} */
+            status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+        };
         /** @description Статистика контейнера раннера (DockerContainerStats) */
         RunnerContainerStats: {
             containerId: string;
@@ -3207,6 +3363,26 @@ export type components = {
              */
             unitStateCode?: string | null;
         };
+        /** @description Состояние workspace (SostoyanieWorkspaceReadModel) */
+        SostoyanieWorkspace: {
+            archived: boolean;
+            archiveReason?: string | null;
+            branch: string;
+            /** @description status = RUNNING И сессия не в архиве И последний ход не RUNNING */
+            canAcceptMessages: boolean;
+            errorKey?: string | null;
+            /** Format: uuid */
+            id: string;
+            ideLink?: string | null;
+            lastTurnId?: string | null;
+            /** @enum {string|null} */
+            lastTurnStatus?: "RUNNING" | "AWAITING_INPUT" | "ANSWERED" | "FAILED" | null;
+            name: string;
+            projects: components["schemas"]["WorkspaceProject"][];
+            readOnly: boolean;
+            /** @enum {string} */
+            status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+        };
         /** @description Реквизиты подключения к OpenCode (API-ключ шифруется на бэкенде) */
         SozdatRekvizityOpenCode: {
             /**
@@ -3295,6 +3471,22 @@ export type components = {
              */
             url: string;
         };
+        /** @description Создание workspace-сессии: имя, ветка, проекты и первый промпт */
+        SozdatWorkspace: {
+            /** @example feature/payments */
+            branch: string;
+            /** Format: uuid */
+            credentialId: string;
+            /**
+             * @description Название workspace, уникальное в рамках аккаунта
+             * @example payments-refactor
+             */
+            name: string;
+            /** @description Доступные пользователю проекты в нужном порядке; дубликат даёт `opencode.workspace.project_conflict`, недоступный проект — `opencode.workspace.project_not_found` */
+            projectIds: string[];
+            /** @description Первый промпт; запускается автоматически после успешного старта контейнера */
+            prompt: string;
+        };
         /** @description Успешный ответ (App\Utils\Model\Reponse\SuccessResponse) */
         SuccessEnvelope: {
             data: Record<string, never> | null;
@@ -3340,6 +3532,10 @@ export type components = {
         UdalitUnit: {
             /** Format: uuid */
             id: string;
+        };
+        UdalitWorkspace: {
+            /** Format: uuid */
+            workspaceId: string;
         };
         UnblockByAdmin: {
             /** Format: uuid */
@@ -3682,6 +3878,10 @@ export type components = {
              */
             projectId: string;
         };
+        VosstanovitWorkspace: {
+            /** Format: uuid */
+            workspaceId: string;
+        };
         /** @description Событие webhook (WebhookEventDlySpiska) */
         WebhookEvent: {
             id: string;
@@ -3698,6 +3898,37 @@ export type components = {
             list: components["schemas"]["WebhookEvent"][];
             /** @example 42 */
             totalRecords: number;
+        };
+        /** @description Workspace-сессия (WorkspaceReadModel) */
+        Workspace: {
+            /** @description Логический архив: выставляется после успешной остановки контейнера */
+            archived: boolean;
+            /** @enum {string|null} */
+            archiveReason?: "manual" | "unit_deleted" | null;
+            branch: string;
+            /** @example 1762000000 */
+            createdAt: number;
+            errorKey?: string | null;
+            /** Format: uuid */
+            id: string;
+            ideLink?: string | null;
+            name: string;
+            projects: components["schemas"]["WorkspaceProject"][];
+            readOnly: boolean;
+            /** @enum {string} */
+            status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+            /** @example 1762000000 */
+            updatedAt: number;
+        };
+        /** @description Проект workspace (ProektWorkspaceReadModel). Токен клонирования наружу не отдаётся */
+        WorkspaceProject: {
+            /** @description false — workspace работает в режиме только-чтение */
+            canPush: boolean;
+            positionIndex: number;
+            projectCode: string;
+            /** Format: uuid */
+            projectId: string;
+            projectName: string;
         };
         ZapolnitPeremenieUnita: {
             /** Format: uuid */
@@ -5451,6 +5682,8 @@ export interface operations {
                 onlyActive?: boolean;
                 /** @description Подстрока названия сессии (поиск через LIKE) */
                 search?: string | null;
+                /** @description Тип сессии: unit или workspace (по умолчанию — все) */
+                type?: "unit" | "workspace" | null;
             };
             header?: never;
             path?: never;
@@ -5578,6 +5811,11 @@ export interface operations {
                                 /** @example Рефакторинг модуля биллинга */
                                 sessionTitle: string;
                                 /**
+                                 * @example unit
+                                 * @enum {string}
+                                 */
+                                sessionType: "unit" | "workspace";
+                                /**
                                  * @example ANSWERED
                                  * @enum {string}
                                  */
@@ -5585,6 +5823,292 @@ export interface operations {
                                 /** Format: uuid */
                                 turnId: string;
                             }[];
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_arhivirovat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArhivirovatWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Результат попытки архивации */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RezultatArhivaciiWorkspace"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_sostoyanie: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitSostoyanieWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Состояние workspace для интерфейса */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SostoyanieWorkspace"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_sozdat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SozdatWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Идентификатор и статус созданного workspace */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** Format: uuid */
+                            id: string;
+                            /**
+                             * @example CREATING
+                             * @enum {string}
+                             */
+                            status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_opencode_infra_workspace_spisok: {
+        parameters: {
+            query?: {
+                /** @description Только неархивные workspace (по умолчанию показываются все) */
+                onlyActive?: boolean;
+                /** @description Подстрока названия workspace (поиск через LIKE) */
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Workspace текущего пользователя */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Workspace"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_udalit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UdalitWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: удаление запущено */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: удаление запущено */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_vosstanovit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VosstanovitWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Новый статус workspace */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /**
+                             * @example STARTING
+                             * @enum {string}
+                             */
+                            status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
                         };
                         /**
                          * @example success
@@ -7706,13 +8230,14 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
+        /** @description Параметры фильтрации, поиска и сортировки списка юнитов */
         requestBody: {
             content: {
                 "application/json": components["schemas"]["GetUnitList"];
             };
         };
         responses: {
-            /** @description Массив юнитов, ограниченный параметрами filter, limit и offset */
+            /** @description Массив юнитов, ограниченный фильтром, поиском, сортировкой, limit и offset */
             200: {
                 headers: {
                     [name: string]: unknown;

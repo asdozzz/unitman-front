@@ -3,6 +3,7 @@ import InitializationService from '../services/InitializationService';
 import {Notify} from "quasar";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import type {Schema} from "@/api/types";
+import i18n from '@/bootstrap/translator';
 
 /** Параметр инициализации из сгенерированной схемы (`InitializationRecord`). */
 type PropModel = Schema<"InitializationRecord">;
@@ -82,7 +83,7 @@ export const storeInizializii = defineStore('init', {
             } else if (response.status === "error") {
                 this.formaProxyHost.oshibkaOtBeka = response.message;
             } else {
-                Notify.create({ message: 'Success', type: 'positive', timeout: 100 });
+                Notify.create({ message: i18n.global.t('common.notifications.success'), type: 'positive', timeout: 100 });
             }
 
             this.formaProxyHost.loader = false;

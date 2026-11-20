@@ -37,7 +37,6 @@ async function skopirovatId() {
           <q-btn
               flat
               dense
-              round
               size="sm"
               icon="content_copy"
               :aria-label="$t('unit.spisok_unitov.card.buttons.copy_id')"

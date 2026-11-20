@@ -1,5 +1,28 @@
 {
   "world": "Мир",
+  "common": {
+    "buttons": {
+      "ok": "OK",
+      "close": "Закрыть",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "add": "Добавить",
+      "delete": "Удалить",
+      "block": "Заблокировать",
+      "unblock": "Разблокировать"
+    },
+    "states": {
+      "available": "Доступен",
+      "unavailable": "Недоступен"
+    },
+    "no_results": "Ничего не найдено",
+    "notifications": {
+      "success": "Успех операции"
+    },
+    "units": {
+      "seconds": "с"
+    }
+  },
   "runner": {
     "non_active": "Раннер не активен, пожалуйста обратитесь к администратору"
   },
@@ -45,6 +68,9 @@
     },
     "form_proxy_host": {
       "caption": "Укажите дефолтный Proxy Host",
+      "fields": {
+        "label": "Default Proxy Host"
+      },
       "buttons": {
         "ok": "Сохранить",
         "check": "Проверить соединение"
@@ -54,6 +80,16 @@
   "account": {
     "form_projects": {
       "projects": "Проекты"
+    },
+    "settings": {
+      "password": {
+        "title": "Новый пароль",
+        "label": "Новый пароль"
+      },
+      "nickname": {
+        "title": "Новый никнейм",
+        "label": "Новый никнейм"
+      }
     },
     "login_form": {
       "caption": "Вход",
@@ -67,7 +103,32 @@
     },
     "spisok": {
       "filter": {
-        "query" : "Поиск"
+        "query": "Поиск",
+        "all_roles": "Все роли",
+        "refresh": "Обновить",
+        "sort": {
+          "label": "Сортировка",
+          "email_asc": "По email",
+          "nickname_asc": "По никнейму"
+        },
+        "status_label": "Статус",
+        "status_all": "Все",
+        "reset": "Сбросить фильтры",
+        "reset_all": "Сбросить всё",
+        "filters_button": "Фильтры",
+        "accounts_count": {
+          "one": "{count} аккаунт",
+          "few": "{count} аккаунта",
+          "many": "{count} аккаунтов",
+          "other": "{count} аккаунта"
+        },
+        "truncated": "Показаны первые {limit} аккаунтов — уточните фильтр",
+        "updated_at": "обновлено {time}",
+        "chip": {
+          "search": "Поиск",
+          "role": "Роль",
+          "statuses": "Статус"
+        }
       },
       "buttons": {
         "add": "Добавить",
@@ -83,11 +144,27 @@
       "card": {
         "labels": {
           "email": "Email",
-          "id":"Ид",
+          "id": "Ид",
           "role": "Роли",
-          "blocked":"Заблокирован",
-          "nickname":"Никнейм"
+          "blocked": "Заблокирован",
+          "nickname": "Никнейм"
+        },
+        "status": {
+          "active": "Активен",
+          "blocked": "Заблокирован"
+        },
+        "buttons": {
+          "more": "Ещё",
+          "edit": "Редактировать",
+          "block": "Заблокировать",
+          "unblock": "Разблокировать"
         }
+      },
+      "list": {
+        "empty_result": "Пока нет ни одного аккаунта",
+        "empty_filtered": "Ничего не найдено по фильтрам",
+        "error_title": "Не удалось загрузить список аккаунтов",
+        "retry": "Повторить"
       }
     },
     "form_change_email": {
@@ -165,6 +242,18 @@
         "repo_event_handler": "Обработка событий репозитория",
         "webhooks": "Вебхуки",
         "volume_types": "Типы томов"
+      },
+      "hook_settings": {
+        "hint": "Для работы настроек ниже, нужно настроить вебхук в своих системах хранения репозиториев (gitlab, github).",
+        "chip_label": "обработчик событий репозитория"
+      },
+      "webhooks": {
+        "fields": {
+          "url": "Url"
+        }
+      },
+      "webhook_events": {
+        "not_sent": "Не отправлено"
       }
     },
     "form_variables": {
@@ -182,6 +271,24 @@
       "buttons": {
         "add": "Добавить"
       }
+    },
+    "form_add_unit": {
+      "caption": "Добавить юнит",
+      "fields": {
+        "labels": {
+          "project": "Проект",
+          "branch": "Ветка",
+          "unitName": "Имя юнита",
+          "unitContainerMemory": "Лимит памяти на контейнер юнита, MB"
+        }
+      },
+      "messages": {
+        "duplicates": "Найденные юниты с такой же веткой:",
+        "no_variables": "В конфиге отсутствуют переменные"
+      }
+    },
+    "form_fill_variables": {
+      "caption": "Заполнить переменные конфига"
     },
     "form_volume": {
       "title": "Тома и файлы",
@@ -233,6 +340,9 @@
       },
       "hints": {
         "insert_link": "Подставить ссылку на сервис другого юнита"
+      },
+      "errors": {
+        "helper_not_filled": "Помощник ссылки заполнен не полностью"
       }
     },
     "form_project_settings": {
@@ -284,6 +394,59 @@
         "delete": "Удалить",
         "edit": "Редактировать",
         "confirm": "Верифицировать"
+      },
+      "filter": {
+        "search": "Название или URL репозитория",
+        "all_types": "Все типы",
+        "type_label": "Тип репозитория",
+        "refresh": "Обновить список",
+        "sort": {
+          "label": "Сортировка",
+          "name_asc": "По названию",
+          "type_asc": "По типу"
+        },
+        "status_label": "Статус",
+        "status_all": "Все",
+        "reset": "Сбросить фильтры",
+        "reset_all": "Сбросить всё",
+        "filters_button": "Фильтры",
+        "repos_count": {
+          "one": "{count} репозиторий",
+          "few": "{count} репозитория",
+          "many": "{count} репозиториев",
+          "other": "{count} репозитория"
+        },
+        "truncated": "Показаны первые {limit} репозиториев — уточните фильтр",
+        "updated_at": "обновлено {time}",
+        "chip": {
+          "search": "Поиск",
+          "type": "Тип",
+          "statuses": "Статус"
+        }
+      },
+      "card": {
+        "status": {
+          "confirmed": "Подтверждён",
+          "unconfirmed": "Не подтверждён"
+        },
+        "buttons": {
+          "more": "Ещё",
+          "edit": "Редактировать",
+          "confirm": "Верифицировать",
+          "delete": "Удалить"
+        },
+        "delete_confirm": {
+          "title": "Удалить репозиторий?",
+          "message": "Репозиторий «{name}» будет удалён. Действие необратимо.",
+          "yes": "Удалить",
+          "no": "Нет"
+        }
+      },
+      "list": {
+        "empty_result": "Репозиториев пока нет",
+        "empty_filtered": "Ничего не найдено по фильтрам",
+        "error_title": "Не удалось загрузить список репозиториев",
+        "retry": "Повторить"
       }
     },
     "form_add_rep": {
@@ -336,6 +499,75 @@
         "main_branch": "Master ветка",
         "state": "Статус",
         "proxy_host": "Proxy Host"
+      },
+      "filter": {
+        "search": "Название или код проекта",
+        "only_active": "Только активные",
+        "refresh": "Обновить список",
+        "sort": {
+          "label": "Сортировка",
+          "name_asc": "По названию",
+          "code_asc": "По коду",
+          "state_priority": "Сначала активные процессы"
+        },
+        "status_label": "Состояние",
+        "status_all": "Все",
+        "reset": "Сбросить фильтры",
+        "reset_all": "Сбросить всё",
+        "filters_button": "Фильтры",
+        "projects_count": {
+          "one": "{count} проект",
+          "few": "{count} проекта",
+          "many": "{count} проектов",
+          "other": "{count} проекта"
+        },
+        "truncated": "Показаны первые {limit} проектов — уточните фильтр",
+        "updated_at": "обновлено {time}",
+        "chip": {
+          "search": "Поиск",
+          "only_active": "Только активные",
+          "states": "Состояние"
+        }
+      },
+      "card": {
+        "status": {
+          "busy": "Выполняется",
+          "success": "Собран",
+          "new": "Новый",
+          "error": "Ошибка",
+          "process_in_progress": "Выполняется процесс",
+          "build_pending": "Собирается",
+          "build_success": "Собран",
+          "build_error": "Ошибка сборки",
+          "remove_pending": "Удаляется",
+          "remove_error": "Ошибка удаления"
+        },
+        "header": {
+          "updated_at": "обновлён"
+        },
+        "buttons": {
+          "more": "Ещё",
+          "jobs": "Выполненные задачи",
+          "edit": "Редактировать",
+          "build": "Собрать",
+          "activate": "Активировать",
+          "deactivate": "Деактивировать",
+          "delete": "Удалить",
+          "delete_manually": "Удалить вручную",
+          "copy_hook": "Скопировать URL хука"
+        },
+        "delete_confirm": {
+          "title": "Удалить проект?",
+          "message": "Проект «{name}» будет удалён. Действие необратимо.",
+          "yes": "Удалить",
+          "no": "Нет"
+        }
+      },
+      "list": {
+        "empty_result": "Проектов пока нет",
+        "empty_filtered": "Ничего не найдено по фильтрам",
+        "error_title": "Не удалось загрузить список проектов",
+        "retry": "Повторить"
       }
     },
     "spisok_unitov": {
@@ -349,10 +581,47 @@
         "branch": "Ветка",
         "project": "Проект",
         "svyazi": "Связанные юниты",
-        "clear_svyazi": "Сбросить фильтр связей"
+        "clear_svyazi": "Сбросить фильтр связей",
+        "search": "Название или ветка",
+        "all_projects": "Все проекты",
+        "status_label": "Статус",
+        "status_all": "Все",
+        "active": "Активные фильтры",
+        "reset_all": "Сбросить всё",
+        "reset": "Сбросить фильтры",
+        "filters_button": "Фильтры",
+        "found": "Показано: {count}",
+        "units_count": {
+          "one": "{count} юнит",
+          "few": "{count} юнита",
+          "many": "{count} юнитов",
+          "other": "{count} юнитов"
+        },
+        "truncated": "Показаны первые {limit} юнитов — уточните фильтр",
+        "updated_at": "обновлено {time}",
+        "sort": {
+          "label": "Сортировка",
+          "created_desc": "Сначала новые",
+          "updated_desc": "Сначала недавно обновлённые",
+          "name_asc": "По имени",
+          "status_priority": "Сначала с ошибками"
+        },
+        "chip": {
+          "search": "Поиск",
+          "name": "Имя",
+          "branch": "Ветка",
+          "project": "Проект",
+          "only_mine": "Только мои",
+          "statuses": "Статус",
+          "unit_id": "Юнит",
+          "svyazi": "Связи"
+        }
       },
       "list": {
-        "empty_result": "У вас пока нету юнитов"
+        "empty_result": "У вас пока нету юнитов",
+        "empty_filtered": "Ничего не найдено по фильтрам",
+        "error_title": "Не удалось загрузить список юнитов",
+        "retry": "Повторить"
       },
       "view": {
         "cards": "Карточки",
@@ -365,13 +634,20 @@
           "by": "автор ",
           "updated_at": "обновлен"
         },
+        "menu": {
+          "lifecycle": "Жизненный цикл",
+          "more": "Ещё",
+          "admin": "Администрирование"
+        },
         "status": {
           "running": "Запущен",
           "busy": "Выполняется",
           "prepared": "Подготовлен",
           "stopped": "Остановлен",
           "error": "Ошибка",
-          "broken": "Сломан"
+          "broken": "Сломан",
+          "process_in_progress": "Выполняется процесс",
+          "process_progress": "Выполнено {done} из {total} задач"
         },
         "fields": {
           "id": "Ид",
@@ -413,19 +689,21 @@
         },
         "buttons": {
           "jobs": "Логи",
+          "open_jobs": "Открыть задачи",
+          "session": "Сессия",
           "create_session": "Создать сессию OpenCode с этим юнитом",
           "update": "обновить",
           "delete": "удалить",
           "sync": "запросить результат задачи вручную",
           "build": "Собрать",
-          "fetch_changes" : "Обновить код",
+          "fetch_changes": "Обновить код",
           "preparing": "Подготовить",
           "remove_preparing": "Сбросить подготовку",
           "up": "Запустить",
           "down": "Остановить",
           "change_branch": "изменить ветку юнита",
-          "set_config" : "установить конфиг",
-          "actions" : "Действия",
+          "set_config": "установить конфиг",
+          "actions": "Действия",
           "check_container": "проверка контейнера юнита",
           "more": "Ещё",
           "rebuild": "Пересобрать",
@@ -439,23 +717,23 @@
       }
     },
     "tipi_zadach": {
-      "SBORKA":  "Сборка",
-      "OBNOVLENIE":  "Обновление",
-      "PODGOTOVKA":  "Подготовка",
-      "ZAPUSK": "Запуск" ,
-      "OSTANOVKA" : "Остановка",
-      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
-      "UDALENIE": "Удаление" ,
+      "SBORKA": "Сборка",
+      "OBNOVLENIE": "Обновление",
+      "PODGOTOVKA": "Подготовка",
+      "ZAPUSK": "Запуск",
+      "OSTANOVKA": "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка",
+      "UDALENIE": "Удаление",
       "DEISTVIE": "Выполнение действия"
     },
     "tipi_prozesa": {
-      "SBORKA":  "Сборка",
-      "OBNOVLENIE":  "Обновление",
-      "PODGOTOVKA":  "Подготовка",
-      "ZAPUSK": "Запуск" ,
-      "OSTANOVKA" : "Остановка",
-      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
-      "UDALENIE": "Удаление" ,
+      "SBORKA": "Сборка",
+      "OBNOVLENIE": "Обновление",
+      "PODGOTOVKA": "Подготовка",
+      "ZAPUSK": "Запуск",
+      "OSTANOVKA": "Остановка",
+      "SBROS_PODGOTOVKI": "Сброс подготовка",
+      "UDALENIE": "Удаление",
       "DEISTVIE": "Выполнение действия"
     },
     "okno_zadach_runnera": {
@@ -484,6 +762,9 @@
       "new_error": "Ошибка выполнения в сессии «{title}»",
       "open_new_tab": "Открыть в новой вкладке",
       "close": "Закрыть"
+    },
+    "errors": {
+      "invalid_notifications_response": "Некорректный ответ сервера уведомлений"
     },
     "rekvizity": {
       "caption": "Реквизиты доступа",

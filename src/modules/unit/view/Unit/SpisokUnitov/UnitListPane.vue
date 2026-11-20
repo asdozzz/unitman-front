@@ -7,20 +7,25 @@ import {deriveUnitUiState, type UnitUiState} from "@/modules/unit/utils/unitStat
 import {convertDate} from "@/utils/dates";
 import UnitStatusBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitStatusBadge.vue";
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   items: Unit[];
   selectedId: string | null;
-}>();
+  emptyFiltered?: boolean;
+}>(), {
+  emptyFiltered: false,
+});
 
 const emit = defineEmits<{
   select: [unitId: string];
+  reset: [];
 }>();
 
 const unitiStore = useSpisokUnitovStore();
 const {
   esliZapushen,
-  esliJdemRunner,
+  esliEstAktivniyProzes,
   nazvanieTekusheiZadachi,
+  progressProzesaUnita,
 } = storeToRefs(unitiStore);
 
 /**
@@ -34,8 +39,10 @@ const sostoyaniya = computed<Record<string, UnitUiState>>(() => {
     result[item.id] = deriveUnitUiState({
       zapushen: esliZapushen.value(item),
       error: item.error,
-      zanyat: esliJdemRunner.value(item),
+      zanyat: item.zanyat === true,
+      prozesAktiven: esliEstAktivniyProzes.value(item),
       tekushayaZadacha: nazvanieTekusheiZadachi.value(item),
+      progress: progressProzesaUnita.value(item),
       commands: item.commands,
     });
   });
@@ -123,8 +130,29 @@ function fokusNaKray(kray: "nachalo" | "konec") {
       </span>
     </button>
 
-    <div v-if="items.length === 0" class="unit-list__empty text-caption-muted">
-      {{ $t('unit.spisok_unitov.list.empty_result') }}
+    <div
+        v-if="items.length === 0"
+        class="unit-list__empty text-caption-muted"
+        role="status"
+        aria-live="polite"
+    >
+      <span class="unit-list__empty-title">
+        {{ emptyFiltered
+          ? $t('unit.spisok_unitov.list.empty_filtered')
+          : $t('unit.spisok_unitov.list.empty_result') }}
+      </span>
+
+      <q-btn
+          v-if="emptyFiltered"
+          class="unit-list__empty-action"
+          flat
+          dense
+          no-caps
+          color="primary"
+          icon="filter_alt_off"
+          :label="$t('unit.spisok_unitov.filter.reset')"
+          @click="emit('reset')"
+      />
     </div>
   </div>
 </template>
@@ -207,5 +235,13 @@ function fokusNaKray(kray: "nachalo" | "konec") {
 .unit-list__empty {
   padding: var(--app-space-4);
   text-align: center;
+}
+
+.unit-list__empty-title {
+  display: block;
+}
+
+.unit-list__empty-action {
+  margin-top: var(--app-space-2);
 }
 </style>

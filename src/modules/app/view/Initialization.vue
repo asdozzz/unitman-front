@@ -13,10 +13,10 @@ const { formaProxyHost: form, proverkaProxyHost } = storeToRefs(store);
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <q-input v-model="form.value" label="Default Proxy Host" />
+      <q-input v-model="form.value" :label="$t('app.form_proxy_host.fields.label')" />
       <div class="text-negative" v-if="form.oshibkaOtBeka" v-html="form.oshibkaOtBeka"></div>
       <div class="text-negative" v-if="proverkaProxyHost.oshibkaOtBeka" v-html="proverkaProxyHost.oshibkaOtBeka"></div>
-      <span v-if="proverkaProxyHost.result === true" class="text-light-green">Доступен</span>
+      <span v-if="proverkaProxyHost.result === true" class="text-light-green">{{ $t('common.states.available') }}</span>
     </q-card-section>
 
     <q-card-actions align="right">

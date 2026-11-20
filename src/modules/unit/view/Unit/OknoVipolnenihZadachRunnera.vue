@@ -259,7 +259,7 @@ async function obnovitVruchnuyu(): Promise<void> {
                           {{convertDateTime(step.unixtime)}}
                         </div>
                         <div v-if="dlitelnost !== null">
-                          {{dlitelnost + ' s'}}
+                          {{dlitelnost + ' ' + $t('common.units.seconds')}}
                         </div>
                       </div>
                     </div>

@@ -20,22 +20,22 @@ onMounted(async () => {
 <template>
   <q-card style="width: 500px; max-width: 80vw;">
     <q-card-section>
-      <q-input standou square dense outlined v-model="form.url" label="Url" clearable/>
-      <q-btn color="primary" class="q-mt-sm" label="add" @click="storeWebhookov.dobavit" :loading="loaderDobavleniya">
-        <q-tooltip>add</q-tooltip>
+      <q-input standou square dense outlined v-model="form.url" :label="$t('unit.proekt.webhooks.fields.url')" clearable/>
+      <q-btn color="primary" class="q-mt-sm" :label="$t('common.buttons.add')" @click="storeWebhookov.dobavit" :loading="loaderDobavleniya">
+        <q-tooltip>{{ $t('common.buttons.add') }}</q-tooltip>
       </q-btn>
     </q-card-section>
   </q-card>
   <q-card class="q-mt-sm" style="width: 500px" v-for="webhook in spisok" :key="webhook.id">
     <q-card-section>
       <q-btn padding="5px 6px" class="q-mr-sm" size="sm"  color="primary" icon="delete" @click="storeWebhookov.udalit(webhook.id)" :loading="loaderIzmeneniya">
-        <q-tooltip>delete</q-tooltip>
+        <q-tooltip>{{ $t('common.buttons.delete') }}</q-tooltip>
       </q-btn>
       <q-btn padding="5px 6px" square size="sm" color="primary" v-if="webhook.isActive" icon="remove_done" @click="storeWebhookov.otkluchit(webhook.id)" :loading="loaderIzmeneniya">
-        <q-tooltip>block</q-tooltip>
+        <q-tooltip>{{ $t('common.buttons.block') }}</q-tooltip>
       </q-btn>
       <q-btn padding="5px 6px" square size="sm" color="primary" v-if="!webhook.isActive" icon="done_all" @click="storeWebhookov.vkluchit(webhook.id)" :loading="loaderIzmeneniya">
-        <q-tooltip>unblock</q-tooltip>
+        <q-tooltip>{{ $t('common.buttons.unblock') }}</q-tooltip>
       </q-btn>
       <span>
         <a

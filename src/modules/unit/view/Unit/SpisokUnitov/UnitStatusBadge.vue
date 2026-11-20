@@ -42,6 +42,16 @@ const ikonka = computed<string>(() => {
     <span v-if="state.busyText && !compact" class="unit-status__detail">
       {{ $t('unit.tipi_zadach.' + state.busyText) }}
     </span>
+
+    <q-tooltip v-if="state.prozesAktiven">
+      <div v-if="state.busyText">{{ $t('unit.tipi_zadach.' + state.busyText) }}</div>
+      <div v-if="state.progress">
+        {{ $t('unit.spisok_unitov.card.status.process_progress', {
+          done: state.progress.zaversheno,
+          total: state.progress.vsego,
+        }) }}
+      </div>
+    </q-tooltip>
   </span>
 </template>
 
@@ -73,14 +83,16 @@ const ikonka = computed<string>(() => {
   background: color-mix(in srgb, var(--app-positive) 12%, transparent);
 }
 
+/* «В работе» — единственный синий статус: активный процесс окрашивается брендом. */
 .unit-status--busy {
-  color: var(--app-info);
-  background: color-mix(in srgb, var(--app-info) 12%, transparent);
-}
-
-.unit-status--prepared {
   color: var(--app-primary);
   background: color-mix(in srgb, var(--app-primary) 12%, transparent);
+}
+
+/* «Готов» — нейтральное ожидание: цвет не конкурирует с «в работе». */
+.unit-status--prepared {
+  color: var(--app-text-secondary);
+  background: var(--app-surface-muted);
 }
 
 .unit-status--stopped {

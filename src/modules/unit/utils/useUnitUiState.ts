@@ -14,8 +14,9 @@ export function useUnitUiState(unit: () => Unit): ComputedRef<UnitUiState> {
     const unitiStore = useSpisokUnitovStore();
     const {
         esliZapushen,
-        esliJdemRunner,
+        esliEstAktivniyProzes,
         nazvanieTekusheiZadachi,
+        progressProzesaUnita,
     } = storeToRefs(unitiStore);
 
     return computed<UnitUiState>(() => {
@@ -24,8 +25,10 @@ export function useUnitUiState(unit: () => Unit): ComputedRef<UnitUiState> {
         return deriveUnitUiState({
             zapushen: esliZapushen.value(tekushiiUnit),
             error: tekushiiUnit.error,
-            zanyat: esliJdemRunner.value(tekushiiUnit),
+            zanyat: tekushiiUnit.zanyat === true,
+            prozesAktiven: esliEstAktivniyProzes.value(tekushiiUnit),
             tekushayaZadacha: nazvanieTekusheiZadachi.value(tekushiiUnit),
+            progress: progressProzesaUnita.value(tekushiiUnit),
             commands: tekushiiUnit.commands,
         });
     });

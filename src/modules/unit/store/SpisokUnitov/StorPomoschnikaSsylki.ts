@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import UnitiService from "@/modules/unit/services/UnitiService";
 import type {PomoschnikSsylki, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import i18n from '@/bootstrap/translator';
 
 /**
  * Помощник с гарантированно заполненными обязательными полями — только такой
@@ -113,7 +114,7 @@ export const useStorPomoschnikaSsylki = defineStore('StorPomoschnikaSsylki', {
          */
         async poluchitSsylku(helper: PomoschnikSsylki, targetUnitId: string): Promise<string | null> {
             if (!pomoschnikZapolnen(helper)) {
-                this.oshibka = "helper is not filled";
+                this.oshibka = i18n.global.t('unit.pomoschnik_ssylki.errors.helper_not_filled');
                 return null;
             }
 

@@ -35,9 +35,9 @@ function changePage(newPage: number) {
     <div class="col-auto">
       <q-card style="width: 500px; max-width: 80vw;" v-if="form.id">
         <q-card-section>
-          <q-input standou square dense outlined v-model="form.newUrl" label="Url" clearable/>
-          <q-btn color="primary" class="q-mt-sm" label="save" @click="storeWebhookov.obnovit" :loading="loaderIzmeneniya">
-            <q-tooltip>save</q-tooltip>
+          <q-input standou square dense outlined v-model="form.newUrl" :label="$t('unit.proekt.webhooks.fields.url')" clearable/>
+          <q-btn color="primary" class="q-mt-sm" :label="$t('common.buttons.save')" @click="storeWebhookov.obnovit" :loading="loaderIzmeneniya">
+            <q-tooltip>{{ $t('common.buttons.save') }}</q-tooltip>
           </q-btn>
         </q-card-section>
       </q-card>
@@ -80,7 +80,7 @@ function changePage(newPage: number) {
       </q-card>
       <q-card class="q-mt-sm">
         <q-card-section v-if="!sobitiya.select.sent">
-          Not sent
+          {{ $t('unit.proekt.webhook_events.not_sent') }}
         </q-card-section>
         <q-card-section v-else>
           <pre class="bash-output">{{sobitiya.select.response}}</pre>

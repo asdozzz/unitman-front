@@ -1,0 +1,139 @@
+<script setup lang="ts">
+import {useI18n} from "vue-i18n";
+import type {
+  PolzovatelFilterChip,
+  PolzovatelFilterKey,
+} from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelFiltri";
+
+/**
+ * Презентационный фрагмент: чипы встраиваются в строку 2 PolzovatelFilterBar,
+ * собственной строки-обёртки (padding/фон) у компонента нет.
+ */
+defineProps<{
+  chips: PolzovatelFilterChip[];
+}>();
+
+const emit = defineEmits<{
+  remove: [chip: {key: PolzovatelFilterKey; value?: string}];
+  clear: [];
+}>();
+
+const {t} = useI18n();
+
+/** Ключ фильтра совпадает с суффиксом перевода `filter.chip.*`. */
+const KLYUCHI_PEREVODA: Record<PolzovatelFilterKey, string> = {
+  search: "search",
+  statuses: "statuses",
+  role: "role",
+};
+
+/** Подпись чипа: готовый label, иначе перевод по ключу плюс значение. */
+function podpisChipa(chip: PolzovatelFilterChip): string {
+  if (chip.label) {
+    return chip.label;
+  }
+
+  const bazovaya = t("account.spisok.filter.chip." + KLYUCHI_PEREVODA[chip.key]);
+
+  if (chip.key === "statuses" && chip.value) {
+    return `${bazovaya}: ${t("account.spisok.card.status." + chip.value)}`;
+  }
+
+  if (chip.value) {
+    return `${bazovaya}: ${chip.value}`;
+  }
+
+  return bazovaya;
+}
+
+/** Стабильный ключ для v-for: один фильтр может дать несколько чипов. */
+function klyuchChipa(chip: PolzovatelFilterChip): string {
+  return `${chip.key}:${chip.value ?? ""}`;
+}
+</script>
+
+<template>
+  <template v-if="chips.length > 0">
+    <q-chip
+        v-for="chip in chips"
+        :key="klyuchChipa(chip)"
+        class="filter-chip"
+        dense
+        removable
+        delete-icon="close"
+        :aria-label="podpisChipa(chip)"
+        @remove="emit('remove', {key: chip.key, value: chip.value})"
+    >
+      {{ podpisChipa(chip) }}
+    </q-chip>
+
+    <button
+        type="button"
+        class="filter-chips__reset"
+        @click="emit('clear')"
+    >
+      {{ $t('account.spisok.filter.reset_all') }}
+    </button>
+  </template>
+</template>
+
+<style scoped>
+/* Neutral-чипы: бордер + secondary-текст + крестик, без primary-заливки.
+   Геометрия совпадает со статус-чипами строки (32px, квадратные углы). */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  margin: 0;
+  padding: 0 var(--app-space-2) 0 var(--app-space-3);
+  border: 1px solid var(--app-border);
+  border-radius: 0;
+  background: var(--app-surface);
+  color: var(--app-text-secondary);
+  font-size: var(--app-font-size-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.filter-chip :deep(.q-chip__content) {
+  padding: 0;
+}
+
+.filter-chip :deep(.q-chip__icon--remove) {
+  width: 18px;
+  height: 18px;
+  margin: 0 0 0 var(--app-space-1);
+  color: var(--app-text-secondary);
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+.filter-chip :deep(.q-chip__icon--remove:hover) {
+  color: var(--app-text);
+  opacity: 1;
+}
+
+.filter-chips__reset {
+  border: none;
+  background: none;
+  padding: 0 var(--app-space-1);
+  color: var(--app-text-secondary);
+  font-family: inherit;
+  font-size: var(--app-font-size-caption);
+  font-weight: 600;
+  line-height: var(--app-line-height-tight);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--app-duration-fast) var(--app-easing);
+}
+
+.filter-chips__reset:hover {
+  color: var(--app-primary);
+  text-decoration: underline;
+}
+
+.filter-chips__reset:focus-visible {
+  outline: 2px solid var(--app-focus-ring);
+  outline-offset: 2px;
+}
+</style>

@@ -5,15 +5,13 @@ import type {SvyazUnita, Unit} from "@/modules/unit/store/SpisokUnitov/model/Uni
 import {useAuthStore} from "@/modules/account/store/auth";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {useUnitUiState} from "@/modules/unit/utils/useUnitUiState";
-import UnitStatusBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitStatusBadge.vue";
 import UnitCardMenu from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardMenu.vue";
 import UnitCardHeader from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardHeader.vue";
+import UnitCardAlert from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardAlert.vue";
 import UnitCardLinks from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardLinks.vue";
 import UnitCardRelated from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardRelated.vue";
 import UnitCardStats from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardStats.vue";
 import UnitCardDetails from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardDetails.vue";
-import UnitCardContainerState from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardContainerState.vue";
-import UnitCardEditor from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardEditor.vue";
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
 
 const props = withDefaults(defineProps<{
@@ -107,28 +105,32 @@ async function pometitKakSlomanii() {
       class="unit-card"
       :class="[`unit-card--${variant}`, {'unit-card--error': item.error}]"
   >
-    <div class="unit-card__status-row">
-      <UnitStatusBadge :state="state" />
-      <UnitCardMenu
-          :is-admin="isAdmin"
-          :can-remove="isShowRemoveBtn"
-          @mark-broken="pometitKakSlomanii"
-          @rebuild="rebuildModel"
-          @remove="showRemovePrompt"
-      />
-    </div>
+    <q-linear-progress
+        v-if="state.prozesAktiven"
+        indeterminate
+        color="primary"
+        size="3px"
+        class="unit-card__process-loader"
+        :aria-label="$t('unit.spisok_unitov.card.status.process_in_progress')"
+    />
+
+    <UnitCardHeader :item="item" :state="state">
+      <!-- Единственный кебаб карточки живёт в шапке-тулбаре. -->
+      <template #actions>
+        <UnitCardMenu
+            :item="item"
+            :state="state"
+            :is-admin="isAdmin"
+            :can-remove="isShowRemoveBtn"
+            @mark-broken="pometitKakSlomanii"
+            @rebuild="rebuildModel"
+            @remove="showRemovePrompt"
+        />
+      </template>
+    </UnitCardHeader>
 
     <div class="unit-card__body">
-      <UnitCardHeader :item="item" />
-
-      <div v-if="item.error" class="unit-card__error text-caption-muted" role="alert">
-        <q-icon name="error_outline" size="14px" />
-        {{ $t('unit.spisok_unitov.card.messages.error_hint') }}
-      </div>
-
-      <UnitCardContainerState :unit="item" />
-
-      <UnitCardEditor :item="item" />
+      <UnitCardAlert :unit="item" :error="item.error" />
 
       <UnitActions :item="item" :state="state" />
 
@@ -144,8 +146,9 @@ async function pometitKakSlomanii() {
       <UnitCardStats :stats="item.statistikaKonteinera ?? null" />
     </div>
 
-    <q-separator />
-    <UnitCardDetails :item="item" />
+    <div class="unit-card__details">
+      <UnitCardDetails :item="item" />
+    </div>
   </article>
 </template>
 
@@ -159,16 +162,22 @@ async function pometitKakSlomanii() {
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-lg);
   background: var(--app-surface);
-  box-shadow: var(--app-shadow-sm);
   transition: box-shadow var(--app-duration-base) var(--app-easing);
 }
 
+.unit-card__process-loader {
+  flex: 0 0 auto;
+  border-radius: var(--app-radius-lg) var(--app-radius-lg) 0 0;
+}
+
+/* Border-first: тень появляется только на hover. */
 .unit-card:hover {
   box-shadow: var(--app-shadow-md);
 }
 
+/* Ошибка читается левым акцентом, а не красной рамкой по всему периметру. */
 .unit-card--error {
-  border-color: var(--app-negative);
+  border-left: 3px solid var(--app-negative);
 }
 
 .unit-card--detail,
@@ -176,29 +185,19 @@ async function pometitKakSlomanii() {
   box-shadow: none;
 }
 
-.unit-card--detail .unit-card__body {
-  gap: var(--app-space-4);
-}
-
-.unit-card__status-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--app-space-2);
-  padding: var(--app-space-2) var(--app-space-3) 0;
-}
-
 .unit-card__body {
   display: flex;
   flex-direction: column;
   gap: var(--app-space-3);
-  padding: var(--app-space-2) var(--app-space-3) var(--app-space-3);
+  padding: var(--app-space-3) var(--app-space-4);
 }
 
-.unit-card__error {
-  display: flex;
-  align-items: center;
-  gap: var(--app-space-1);
-  color: var(--app-negative);
+.unit-card--detail .unit-card__body {
+  gap: var(--app-space-4);
+}
+
+.unit-card__details {
+  padding: 0 var(--app-space-4) var(--app-space-2);
+  border-top: 1px solid var(--app-border);
 }
 </style>

@@ -97,14 +97,40 @@ body.body--dark {
   font-variant-numeric: tabular-nums;
 }
 
+// Цифры в счётчиках и процентах не должны «дёргаться» при обновлении по WebSocket.
+.text-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
 // Заголовок секции внутри карточки юнита: ссылки, связи, переменные.
 .unit-card__section-title {
   color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  font-size: var(--app-font-size-micro);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   line-height: var(--app-line-height-tight);
   text-transform: uppercase;
+}
+
+// Кнопки Quasar по умолчанию «пилюли»: на карточках с радиусом 12px это лишняя
+// «резиновость». Круглые и FAB-кнопки сохраняют свою геометрию.
+.q-btn:not(.q-btn--round):not(.q-btn--fab) {
+  border-radius: var(--app-radius-md);
+}
+
+// Скругления выключены во всём интерфейсе: карточки, меню, чипсы, бейджи,
+// поля и всплывающие подсказки используют квадратные углы.
+.q-card:not(.square),
+.q-menu,
+.q-chip,
+.q-badge,
+.q-tooltip,
+.q-notification,
+.q-field--outlined .q-field__control,
+.q-field--standout .q-field__control,
+.q-dialog__inner > .q-card,
+.rounded-borders {
+  border-radius: 0;
 }
 
 // Карточки без явного `square` получают общий радиус. Класс `square`

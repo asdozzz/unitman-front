@@ -8,7 +8,16 @@ const badPost: PostPaths = "/unit/moi-not-exists";
 
 // 2. Тело запроса берётся из components.schemas.
 const listBody: ApiRequestBody<"/unit/list", "post"> = {
-    filter: { branch: null, name: null, onlyMine: false, projectId: null, unitId: null },
+    filter: {
+        branch: null,
+        name: null,
+        onlyMine: false,
+        projectId: null,
+        unitId: null,
+        search: "feature",
+        statuses: ["running", "busy"],
+        sort: "updated_desc",
+    },
 };
 // @ts-expect-error — обязательное поле unitName отсутствует
 const badCreate: ApiRequestBody<"/unit/sozdat", "post"> = { branch: "x", projectId: "y" };

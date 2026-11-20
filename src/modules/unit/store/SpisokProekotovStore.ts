@@ -1,6 +1,15 @@
 import { defineStore } from 'pinia';
 import ProektiService from "@/modules/unit/services/ProektiService";
 import type {Proekt} from "@/modules/unit/store/SpisokProektov/model/Proekt";
+import {
+    DEFAULT_PROEKT_FILTERS,
+    normalizovatProektFiltri,
+    type ProektFilterChip,
+    type ProektFilterStatus,
+    type ProektFiltri,
+} from "@/modules/unit/store/SpisokProektov/model/ProektFiltri";
+import {deriveProektUiStatus, type ProektUiStatus} from "@/modules/unit/utils/proektStatus";
+import {safeJsonParse} from "@/utils/json";
 
 import {Notify} from "quasar";
 
@@ -13,10 +22,21 @@ import {Notify} from "quasar";
  */
 const ZADERZHKA_OBRABOTKI_SOBITIY_PROEKTA = 300;
 
+/** Ключ localStorage с сохранёнными фильтрами и лимитом списка. */
+const FILTER_PROEKTOV_STORAGE_KEY = 'FILTER_PROEKTOV_STORAGE_KEY';
+
 /** Таймеры отложенного перезапроса проекта по его ид. */
 const tajmeriObnovleniyaProektov = new Map<string, ReturnType<typeof setTimeout>>();
 
+/** Настройки списка: фильтр и клиентская пагинация. */
+type NastroikiSpiska = {
+    filter: ProektFiltri;
+    limit: number;
+    offset: number;
+};
+
 export type SpisokProektovState = {
+    nastroikiSpiska: NastroikiSpiska;
     spisok: Proekt[];
     loaderSpiskaProektov: boolean;
     oshibkaZagruzkiSpiska: string | null;
@@ -24,13 +44,106 @@ export type SpisokProektovState = {
     projectLoaders: Record<string, boolean>;
 }
 
+/** Есть ли в фильтре хотя бы одно условие (сортировка условием не считается). */
+function estAktivnieUsloviya(filter: ProektFiltri): boolean {
+    return filter.search !== null
+        || filter.states.length > 0
+        || filter.onlyActive;
+}
+
+/** Приоритет состояния для сортировки `state_priority`: busy → error → new → success. */
+function prioritetSostoyaniya(proekt: Proekt): number {
+    const status: ProektUiStatus = deriveProektUiStatus(proekt).status;
+
+    switch (status) {
+        case "busy":
+            return 0;
+        case "error":
+            return 1;
+        case "new":
+            return 2;
+        case "success":
+            return 3;
+    }
+}
+
+/** Сравнение строк без учёта регистра с устойчивым порядком. */
+function sravnitStroki(a: string, b: string): number {
+    return a.localeCompare(b, "ru", {sensitivity: "base"});
+}
+
+/**
+ * Фильтрует и сортирует список проектов на клиенте.
+ *
+ * Серверных фильтров у `/project/list` нет, поэтому всё считается здесь.
+ */
+function otfiltrovatProekti(spisok: Proekt[], filter: ProektFiltri): Proekt[] {
+    const poisk = filter.search === null ? null : filter.search.trim().toLowerCase();
+    const vidannieStatusi = new Set<ProektFilterStatus>(filter.states);
+
+    const rezultat = spisok.filter((proekt: Proekt) => {
+        if (poisk !== null && poisk !== "") {
+            const sovpadenie = proekt.name.toLowerCase().includes(poisk)
+                || proekt.code.toLowerCase().includes(poisk);
+
+            if (!sovpadenie) {
+                return false;
+            }
+        }
+
+        if (vidannieStatusi.size > 0 && !vidannieStatusi.has(proekt.state)) {
+            return false;
+        }
+
+        if (filter.onlyActive && !proekt.isActive) {
+            return false;
+        }
+
+        return true;
+    });
+
+    return rezultat.sort((a: Proekt, b: Proekt) => {
+        switch (filter.sort) {
+            case "code_asc":
+                return sravnitStroki(a.code, b.code) || sravnitStroki(a.name, b.name);
+            case "state_priority": {
+                const raznica = prioritetSostoyaniya(a) - prioritetSostoyaniya(b);
+
+                return raznica !== 0 ? raznica : sravnitStroki(a.name, b.name);
+            }
+            case "name_asc":
+            default:
+                return sravnitStroki(a.name, b.name);
+        }
+    });
+}
+
 export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
     state: (): SpisokProektovState => {
+        const nastroikiIzLocalStorageAsJson = localStorage.getItem(FILTER_PROEKTOV_STORAGE_KEY);
+
+        // Сохранённые настройки могли быть записаны старой версией приложения:
+        // битый JSON и произвольная форма фильтра не должны ронять приложение.
+        const sohranennieNastroiki = nastroikiIzLocalStorageAsJson
+            ? safeJsonParse<Partial<NastroikiSpiska>>(nastroikiIzLocalStorageAsJson)
+            : undefined;
+
+        const nastroiki: NastroikiSpiska = {
+            filter: normalizovatProektFiltri(sohranennieNastroiki?.filter),
+            limit: typeof sohranennieNastroiki?.limit === "number"
+                ? sohranennieNastroiki.limit
+                : 100,
+            offset: typeof sohranennieNastroiki?.offset === "number"
+                ? sohranennieNastroiki.offset
+                : 0,
+        };
+
         return {
-            spisok:[],
-            loaderSpiskaProektov:false,
+            nastroikiSpiska: nastroiki,
+            spisok: [],
+            loaderSpiskaProektov: false,
             oshibkaZagruzkiSpiska: null,
-            loaderObnovleniyaProekta:false,
+            loaderObnovleniyaProekta: false,
             projectLoaders: {}
         }
     },
@@ -101,8 +214,84 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
                 return state === 'NEW' || state === 'BUILD_ERROR';
             }
         },
+        /** Отфильтрованный и отсортированный список для сетки карточек. */
+        vidimieProekti(): Proekt[] {
+            return otfiltrovatProekti(this.spisok, this.nastroikiSpiska.filter);
+        },
+        /** Есть ли активные условия фильтра (сортировка не считается). */
+        estAktivnieFiltri(): boolean {
+            return estAktivnieUsloviya(this.nastroikiSpiska.filter);
+        },
+        /** Чипы активных фильтров для полосы над списком. */
+        aktivnieFiltri(): ProektFilterChip[] {
+            const filter = this.nastroikiSpiska.filter;
+            const chipi: ProektFilterChip[] = [];
+
+            if (filter.search !== null) {
+                chipi.push({key: "search"});
+            }
+            if (filter.onlyActive) {
+                chipi.push({key: "onlyActive"});
+            }
+            filter.states.forEach((status: ProektFilterStatus) => {
+                chipi.push({key: "states", value: status});
+            });
+
+            return chipi;
+        },
+        /** Счётчики состояний по текущей выборке (без учёта активных фильтров). */
+        statusiSoSchetchikami(): Record<ProektFilterStatus, number> {
+            const schetchiki: Record<ProektFilterStatus, number> = {
+                NEW: 0,
+                BUILD_PENDING: 0,
+                BUILD_SUCCESS: 0,
+                BUILD_ERROR: 0,
+                REMOVE_PENDING: 0,
+                REMOVE_ERROR: 0,
+            };
+
+            this.spisok.forEach((proekt: Proekt) => {
+                schetchiki[proekt.state] += 1;
+            });
+
+            return schetchiki;
+        },
+        /** Список мог быть обрезан лимитом — нужен предупреждающий текст. */
+        obrezanSpisok(): boolean {
+            return this.spisok.length >= this.nastroikiSpiska.limit;
+        }
     },
     actions: {
+        /** Сохраняет настройки списка в localStorage. */
+        sohranitNastroiki(): void {
+            try {
+                localStorage.setItem(FILTER_PROEKTOV_STORAGE_KEY, JSON.stringify(this.nastroikiSpiska));
+            } catch {
+                // Приватный режим или переполненное хранилище не должны
+                // ломать работу со списком — фильтр просто не запомнится.
+            }
+        },
+        /**
+         * Применяет частичное изменение фильтра.
+         *
+         * Фильтрация клиентская, поэтому перезапрашивать список не нужно:
+         * достаточно перезаписать фильтр и сохранить настройки.
+         */
+        async primenitFiltri(patch: Partial<ProektFiltri>): Promise<void> {
+            this.nastroikiSpiska.filter = normalizovatProektFiltri({
+                ...this.nastroikiSpiska.filter,
+                ...patch,
+            });
+            this.sohranitNastroiki();
+        },
+        /** Сбрасывает фильтр к значениям по умолчанию. */
+        async sbrozitFiltri(): Promise<void> {
+            this.nastroikiSpiska.filter = {
+                ...DEFAULT_PROEKT_FILTERS,
+                states: [],
+            };
+            this.sohranitNastroiki();
+        },
         startProjectLoader(id: string) {
             this.projectLoaders[id] = true;
         },
@@ -196,7 +385,10 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
         },
         async poluchitSpisokProektov() {
             this.loaderSpiskaProektov = true;
-            const response = await ProektiService.list();
+            const response = await ProektiService.list({
+                limit: this.nastroikiSpiska.limit,
+                offset: this.nastroikiSpiska.offset,
+            });
             if (response.status === "success") {
                 this.spisok = response.data;
             } else if (response.status === "fail") {

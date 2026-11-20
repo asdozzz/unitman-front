@@ -19,6 +19,8 @@
   --app-positive: #3e9e5b;
   --app-negative: #c4485a;
   --app-warning: #d89020;
+  // Резерв для общих компонентов Quasar. В статусах экрана юнитов не используется:
+  // «в работе» — primary, «готов» — нейтральный, чтобы не плодить оттенки синего.
   --app-info: #3f8fbf;
 
   // Поверхности и текст
@@ -34,6 +36,7 @@
   // Типографика
   --app-font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
   --app-font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --app-font-size-micro: 11px;
   --app-font-size-caption: 12px;
   --app-font-size-body: 14px;
   --app-font-size-subtitle: 16px;
@@ -52,11 +55,11 @@
   --app-space-6: 32px;
   --app-space-7: 48px;
 
-  // Радиусы
-  --app-radius-sm: 4px;
-  --app-radius-md: 8px;
-  --app-radius-lg: 12px;
-  --app-radius-pill: 999px;
+  // Радиусы: интерфейс без скруглений (square corners) — 0 во всех токенах.
+  --app-radius-sm: 0;
+  --app-radius-md: 0;
+  --app-radius-lg: 0;
+  --app-radius-pill: 0;
 
   // Тени
   --app-shadow-sm: 0 1px 2px rgb(16 24 40 / 6%), 0 1px 3px rgb(16 24 40 / 8%);
@@ -85,6 +88,7 @@ body.body--dark {
   --app-positive: #3e9e5b;
   --app-negative: #c4485a;
   --app-warning: #d89020;
+  // Резерв для общих компонентов Quasar. См. комментарий в light-теме.
   --app-info: #3f8fbf;
 
   --app-bg: #11151a;

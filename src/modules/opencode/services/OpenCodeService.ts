@@ -1,5 +1,6 @@
 import apiClient from "@/bootstrap/apiClient";
-import type { Schema } from "@/api/types";
+import type { ApiResponse } from "@/bootstrap/apiClient/ApiResponse";
+import type { ApiQuery, Schema } from "@/api/types";
 import type {
     UvedomleniyaOpenCodeResponse,
     ZahvatUvedomleniyResponse,
@@ -14,13 +15,13 @@ import type {
  * Тела запросов и типы ответов выводятся из сгенерированной OpenAPI-схемы
  * (`yarn gen:api`).
  */
-/** Query-параметры списка сессий (совпадают с `parameters.query` в спецификации). */
-export type FiltrSessiyOpenCode = {
-    /** Только неархивные сессии; по умолчанию бэкенд отдаёт все. */
-    onlyActive?: boolean;
-    /** Подстрока названия сессии. */
-    search?: string | null;
-};
+/**
+ * Query-параметры списка сессий.
+ *
+ * Тип выводится из сгенерированной схемы, чтобы фильтр не расходился
+ * с контрактом при добавлении новых параметров.
+ */
+export type FiltrSessiyOpenCode = ApiQuery<"/opencode/spisokSessiy", "get">;
 
 class OpenCodeService {
     /**
@@ -29,8 +30,8 @@ class OpenCodeService {
      * Архивные сессии тоже приходят: у них `archived: true`. Чтобы получить
      * только активные, передайте `{onlyActive: true}`.
      */
-    spisokSessiy(params?: FiltrSessiyOpenCode) {
-        return apiClient.get('/opencode/spisokSessiy', params);
+    spisokSessiy(params?: FiltrSessiyOpenCode): Promise<ApiResponse<Schema<"OpenCodeSession">[]>> {
+        return apiClient.get<'/opencode/spisokSessiy'>('/opencode/spisokSessiy', params);
     }
 
     /**

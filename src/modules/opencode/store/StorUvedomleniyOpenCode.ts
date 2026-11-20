@@ -7,6 +7,7 @@ import {
     pohozheNaZahvatUvedomleniy,
     type UvedomlenieOpenCode,
 } from "@/modules/opencode/model/UvedomlenieOpenCode";
+import i18n from '@/bootstrap/translator';
 
 /** Обработчик, которому стор отдаёт уведомление для показа. */
 export type NovoeUvedomlenieHandler = (u: UvedomlenieOpenCode) => void;
@@ -143,7 +144,7 @@ async function vypolnitPodklyuchenie(stor: StorUvedomleniy, nomer: number): Prom
         }
 
         if (!pohozheNaOtvetUvedomleniy(response.data)) {
-            stor.oshibka = "Некорректный ответ сервера уведомлений";
+            stor.oshibka = i18n.global.t('opencode.errors.invalid_notifications_response');
             return;
         }
 

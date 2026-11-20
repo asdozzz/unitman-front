@@ -38,14 +38,14 @@ async function udalitPeremenuyu(code: string) {
         </div>
         <div class="col-auto q-pr-sm">
           <q-btn color="primary" :label="$t('unit.form_variables.buttons.add')" @click="dobavitPeremnuyu" :loading="loaderDobavleniya">
-            <q-tooltip>add</q-tooltip>
+            <q-tooltip>{{ $t('unit.form_variables.buttons.add') }}</q-tooltip>
           </q-btn>
         </div>
       </div>
       <div v-for="variable in spisok" :key="variable.code" class="row q-mb-sm">
         <div class="col-12">
           <q-btn size="sm" padding="5px 6px" color="primary" icon="delete" @click="udalitPeremenuyu(variable.code)" :loading="loaderUdaleniya">
-            <q-tooltip>delete</q-tooltip>
+            <q-tooltip>{{ $t('common.buttons.delete') }}</q-tooltip>
           </q-btn>
           <span class="q-pl-sm">
             <span v-if="variable.tip !== 'hidden'">

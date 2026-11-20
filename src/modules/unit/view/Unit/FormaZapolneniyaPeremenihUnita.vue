@@ -32,7 +32,7 @@ async function otpravitFormu() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Set Config Variables</div>
+      <div class="text-h6">{{ $t('unit.form_fill_variables.caption') }}</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
@@ -62,8 +62,8 @@ async function otpravitFormu() {
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn label="Close" color="dark" @click="formStore.zakritFormu()" :loading="loader"/>
+      <q-btn :label="$t('common.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
+      <q-btn :label="$t('common.buttons.close')" color="dark" @click="formStore.zakritFormu()" :loading="loader"/>
     </q-card-actions>
   </q-card>
 </template>

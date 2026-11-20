@@ -58,13 +58,13 @@ function projectChanged() {
 <template>
   <q-card  style="width: 700px; max-width: 80vw;">
     <q-card-section>
-      <div class="text-h6">Добавить юнит</div>
+      <div class="text-h6">{{ $t('unit.form_add_unit.caption') }}</div>
     </q-card-section>
 
     <q-card-section class="q-pt-none">
       <q-select v-model="form.projectId"
                 :options="proekti.spisok"
-                label="Project"
+                :label="$t('unit.form_add_unit.fields.labels.project')"
                 emit-value
                 map-options
                 @update:model-value="projectChanged"/>
@@ -74,7 +74,7 @@ function projectChanged() {
           :options="vetki.spisok"
           @filter="filterSpiskaVetok"
           @update:model-value="vetkaVibrana"
-          label="Branch"
+          :label="$t('unit.form_add_unit.fields.labels.branch')"
           fill-input
           clearable
           use-input
@@ -84,13 +84,13 @@ function projectChanged() {
         <template v-slot:no-option>
           <q-item>
             <q-item-section class="text-grey">
-              No results
+              {{ $t('common.no_results') }}
             </q-item-section>
           </q-item>
         </template>
       </q-select>
       <div v-if="dubli.spisok.length > 0">
-        <span class="text-negative">Найденные юниты с такой же веткой: </span>
+        <span class="text-negative">{{ $t('unit.form_add_unit.messages.duplicates') }} </span>
         <q-chip
             v-for="duble in dubli.spisok"
             size="12px"
@@ -102,8 +102,8 @@ function projectChanged() {
             @click="otkritStranizuSDublem(duble)"
         />
       </div>
-      <q-input v-model="form.unitName" label="Unit Name" />
-      <q-input type="number" v-model.number="form.memoryLimit" label="Unit container memory limit, MB" />
+      <q-input v-model="form.unitName" :label="$t('unit.form_add_unit.fields.labels.unitName')" />
+      <q-input type="number" v-model.number="form.memoryLimit" :label="$t('unit.form_add_unit.fields.labels.unitContainerMemory')" />
       <template v-if="form.peremenieKonfiga.length > 0">
         <template v-for="peremenaya in form.peremenieKonfiga" :key="peremenaya.konfig.id">
           <PeremenayaKonfiga :peremenaya="peremenaya"/>
@@ -122,14 +122,14 @@ function projectChanged() {
         </template>
       </template>
       <template v-if="initPeremenie && form.peremenieKonfiga.length == 0 && form.volumes.length == 0">
-        В конфиге отсутствуют переменные
+        {{ $t('unit.form_add_unit.messages.no_variables') }}
       </template>
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>
 
     <q-card-actions align="right">
-      <q-btn label="OK" color="primary" @click="otpravitFormu" :loading="loader || dubli.loader"/>
-      <q-btn label="Close" color="dark" @click="addFormStore.zakritFormu()" :loading="loader || dubli.loader"/>
+      <q-btn :label="$t('common.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader || dubli.loader"/>
+      <q-btn :label="$t('common.buttons.close')" color="dark" @click="addFormStore.zakritFormu()" :loading="loader || dubli.loader"/>
     </q-card-actions>
   </q-card>
 </template>

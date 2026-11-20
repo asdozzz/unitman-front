@@ -82,7 +82,7 @@ function filterSpiskaProektov(val: string | null, update: any): void {
         <template v-slot:no-option>
           <q-item>
             <q-item-section class="text-grey">
-              No results
+              {{ $t('common.no_results') }}
             </q-item-section>
           </q-item>
         </template>
@@ -101,8 +101,8 @@ function filterSpiskaProektov(val: string | null, update: any): void {
           :label="$t('unit.form_add_project.buttons.check_proxy_host')"
           @click="addFormStore.proveritProxyHost"
       />
-      <span v-if="proverkaProxyHost.result === true" class="text-light-green">Доступен</span>
-      <span v-if="proverkaProxyHost.result === false" class="text-negative">Недоступен</span>
+      <span v-if="proverkaProxyHost.result === true" class="text-light-green">{{ $t('common.states.available') }}</span>
+      <span v-if="proverkaProxyHost.result === false" class="text-negative">{{ $t('common.states.unavailable') }}</span>
       <q-input type="number" v-model.number="form.memoryLimit" :label="$t('unit.form_add_project.fields.labels.unitContainerMemory')" />
       <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
     </q-card-section>

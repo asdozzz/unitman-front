@@ -1,5 +1,28 @@
 {
   "world": "world",
+  "common": {
+    "buttons": {
+      "ok": "OK",
+      "close": "Close",
+      "save": "Save",
+      "cancel": "Cancel",
+      "add": "Add",
+      "delete": "Delete",
+      "block": "Block",
+      "unblock": "Unblock"
+    },
+    "states": {
+      "available": "Available",
+      "unavailable": "Unavailable"
+    },
+    "no_results": "No results",
+    "notifications": {
+      "success": "Operation succeeded"
+    },
+    "units": {
+      "seconds": "s"
+    }
+  },
   "runner": {
     "non_active": "the runner is non active, please notify the administrator"
   },
@@ -45,6 +68,9 @@
     },
     "form_proxy_host": {
       "caption": "Proxy Host Form",
+      "fields": {
+        "label": "Default Proxy Host"
+      },
       "buttons": {
         "ok": "Ok",
         "check": "Test connection"
@@ -54,6 +80,16 @@
   "account": {
     "form_projects": {
       "projects": "Projects"
+    },
+    "settings": {
+      "password": {
+        "title": "New password",
+        "label": "New password"
+      },
+      "nickname": {
+        "title": "New nickname",
+        "label": "New nickname"
+      }
     },
     "login_form": {
       "caption": "Sign in",
@@ -67,7 +103,32 @@
     },
     "spisok": {
       "filter": {
-        "query" : "Search"
+        "query": "Search",
+        "all_roles": "All roles",
+        "refresh": "Refresh",
+        "sort": {
+          "label": "Sorting",
+          "email_asc": "By email",
+          "nickname_asc": "By nickname"
+        },
+        "status_label": "Status",
+        "status_all": "All",
+        "reset": "Reset filters",
+        "reset_all": "Reset all",
+        "filters_button": "Filters",
+        "accounts_count": {
+          "one": "{count} account",
+          "few": "{count} accounts",
+          "many": "{count} accounts",
+          "other": "{count} accounts"
+        },
+        "truncated": "Showing the first {limit} accounts — refine the filter",
+        "updated_at": "updated {time}",
+        "chip": {
+          "search": "Search",
+          "role": "Role",
+          "statuses": "Status"
+        }
       },
       "buttons": {
         "add": "add",
@@ -83,11 +144,27 @@
       "card": {
         "labels": {
           "email": "Email",
-          "id":"Id",
+          "id": "Id",
           "role": "Role",
-          "blocked":"Blocked",
-          "nickname":"Nickname"
+          "blocked": "Blocked",
+          "nickname": "Nickname"
+        },
+        "status": {
+          "active": "Active",
+          "blocked": "Blocked"
+        },
+        "buttons": {
+          "more": "More",
+          "edit": "Edit",
+          "block": "Block",
+          "unblock": "Unblock"
         }
+      },
+      "list": {
+        "empty_result": "There are no accounts yet",
+        "empty_filtered": "Nothing matches the filters",
+        "error_title": "Failed to load the account list",
+        "retry": "Retry"
       }
     },
     "form_change_email": {
@@ -165,6 +242,18 @@
         "repo_event_handler": "Repository Events Handler",
         "webhooks": "Webhooks",
         "volume_types": "Volume types"
+      },
+      "hook_settings": {
+        "hint": "To make the settings below work, configure a webhook in your repository hosting systems (gitlab, github).",
+        "chip_label": "repository event handler"
+      },
+      "webhooks": {
+        "fields": {
+          "url": "Url"
+        }
+      },
+      "webhook_events": {
+        "not_sent": "Not sent"
       }
     },
     "spisok_rep": {
@@ -173,6 +262,59 @@
         "delete": "delete",
         "edit": "edit",
         "confirm": "confirm"
+      },
+      "filter": {
+        "search": "Repository name or URL",
+        "all_types": "All types",
+        "type_label": "Repository type",
+        "refresh": "Refresh list",
+        "sort": {
+          "label": "Sorting",
+          "name_asc": "By name",
+          "type_asc": "By type"
+        },
+        "status_label": "Status",
+        "status_all": "All",
+        "reset": "Reset filters",
+        "reset_all": "Reset all",
+        "filters_button": "Filters",
+        "repos_count": {
+          "one": "{count} repository",
+          "few": "{count} repositories",
+          "many": "{count} repositories",
+          "other": "{count} repositories"
+        },
+        "truncated": "Showing the first {limit} repositories — refine the filter",
+        "updated_at": "updated {time}",
+        "chip": {
+          "search": "Search",
+          "type": "Type",
+          "statuses": "Status"
+        }
+      },
+      "card": {
+        "status": {
+          "confirmed": "Confirmed",
+          "unconfirmed": "Unconfirmed"
+        },
+        "buttons": {
+          "more": "More",
+          "edit": "Edit",
+          "confirm": "Verify",
+          "delete": "Delete"
+        },
+        "delete_confirm": {
+          "title": "Delete repository?",
+          "message": "Repository “{name}” will be deleted. This action cannot be undone.",
+          "yes": "Delete",
+          "no": "No"
+        }
+      },
+      "list": {
+        "empty_result": "There are no repositories yet",
+        "empty_filtered": "Nothing matches the filters",
+        "error_title": "Failed to load the repository list",
+        "retry": "Retry"
       }
     },
     "form_volume": {
@@ -225,6 +367,9 @@
       },
       "hints": {
         "insert_link": "Insert link to service of another unit"
+      },
+      "errors": {
+        "helper_not_filled": "helper is not filled"
       }
     },
     "form_variables": {
@@ -242,6 +387,24 @@
       "buttons": {
         "add": "ADD"
       }
+    },
+    "form_add_unit": {
+      "caption": "Add unit",
+      "fields": {
+        "labels": {
+          "project": "Project",
+          "branch": "Branch",
+          "unitName": "Unit name",
+          "unitContainerMemory": "Unit container memory limit, MB"
+        }
+      },
+      "messages": {
+        "duplicates": "Units with the same branch:",
+        "no_variables": "No variables in the config"
+      }
+    },
+    "form_fill_variables": {
+      "caption": "Set Config Variables"
     },
     "form_project_settings": {
       "fields": {
@@ -315,16 +478,16 @@
     },
     "spisok_proektov": {
       "buttons": {
-        "jobs": "jobs",
-        "layers_clear": "layers_clear",
+        "jobs": "Completed jobs",
+        "layers_clear": "Clear images",
         "add": "add project",
-        "manage_accounts": "manage_accounts",
+        "manage_accounts": "Project users",
         "delete": "delete",
-        "delete_manually": "delete_manually",
+        "delete_manually": "Delete manually",
         "activate": "activate",
         "deactivate": "deactivate",
         "edit": "edit",
-        "hook_settings": "hook_settings",
+        "hook_settings": "Repository hook settings",
         "build": "build",
         "variables": "variables"
       },
@@ -336,6 +499,75 @@
         "main_branch": "Main branch",
         "state": "State",
         "proxy_host": "Proxy Host"
+      },
+      "filter": {
+        "search": "Project name or code",
+        "only_active": "Only active",
+        "refresh": "Refresh list",
+        "sort": {
+          "label": "Sorting",
+          "name_asc": "By name",
+          "code_asc": "By code",
+          "state_priority": "Active processes first"
+        },
+        "status_label": "State",
+        "status_all": "All",
+        "reset": "Reset filters",
+        "reset_all": "Reset all",
+        "filters_button": "Filters",
+        "projects_count": {
+          "one": "{count} project",
+          "few": "{count} projects",
+          "many": "{count} projects",
+          "other": "{count} projects"
+        },
+        "truncated": "Showing the first {limit} projects — refine the filter",
+        "updated_at": "updated {time}",
+        "chip": {
+          "search": "Search",
+          "only_active": "Only active",
+          "states": "State"
+        }
+      },
+      "card": {
+        "status": {
+          "busy": "In progress",
+          "success": "Built",
+          "new": "New",
+          "error": "Error",
+          "process_in_progress": "Process is running",
+          "build_pending": "Building",
+          "build_success": "Built",
+          "build_error": "Build error",
+          "remove_pending": "Removing",
+          "remove_error": "Remove error"
+        },
+        "header": {
+          "updated_at": "updated"
+        },
+        "buttons": {
+          "more": "More",
+          "jobs": "Completed jobs",
+          "edit": "Edit",
+          "build": "Build",
+          "activate": "Activate",
+          "deactivate": "Deactivate",
+          "delete": "Delete",
+          "delete_manually": "Delete manually",
+          "copy_hook": "Copy hook URL"
+        },
+        "delete_confirm": {
+          "title": "Delete project?",
+          "message": "Project “{name}” will be deleted. This action cannot be undone.",
+          "yes": "Delete",
+          "no": "No"
+        }
+      },
+      "list": {
+        "empty_result": "There are no projects yet",
+        "empty_filtered": "Nothing matches the filters",
+        "error_title": "Failed to load the project list",
+        "retry": "Retry"
       }
     },
     "spisok_unitov": {
@@ -349,10 +581,47 @@
         "branch": "Branch",
         "project": "Project",
         "svyazi": "Related units",
-        "clear_svyazi": "Clear related units filter"
+        "clear_svyazi": "Clear related units filter",
+        "search": "Name or branch",
+        "all_projects": "All projects",
+        "status_label": "Status",
+        "status_all": "All",
+        "active": "Active filters",
+        "reset_all": "Reset all",
+        "reset": "Reset filters",
+        "filters_button": "Filters",
+        "found": "Showing: {count}",
+        "units_count": {
+          "one": "{count} unit",
+          "few": "{count} units",
+          "many": "{count} units",
+          "other": "{count} units"
+        },
+        "truncated": "Showing first {limit} units — narrow the filter",
+        "updated_at": "updated {time}",
+        "sort": {
+          "label": "Sort",
+          "created_desc": "Newest first",
+          "updated_desc": "Recently updated first",
+          "name_asc": "By name",
+          "status_priority": "Problems first"
+        },
+        "chip": {
+          "search": "Search",
+          "name": "Name",
+          "branch": "Branch",
+          "project": "Project",
+          "only_mine": "Only mine",
+          "statuses": "Status",
+          "unit_id": "Unit",
+          "svyazi": "Links"
+        }
       },
       "list": {
-        "empty_result": "Empty list"
+        "empty_result": "Empty list",
+        "empty_filtered": "Nothing matches the filters",
+        "error_title": "Failed to load units",
+        "retry": "Retry"
       },
       "view": {
         "cards": "Cards",
@@ -365,13 +634,20 @@
           "by": "by",
           "updated_at": "updated at"
         },
+        "menu": {
+          "lifecycle": "Lifecycle",
+          "more": "More",
+          "admin": "Administration"
+        },
         "status": {
           "running": "Running",
           "busy": "Busy",
           "prepared": "Prepared",
           "stopped": "Stopped",
           "error": "Error",
-          "broken": "Broken"
+          "broken": "Broken",
+          "process_in_progress": "Process in progress",
+          "process_progress": "{done} of {total} tasks done"
         },
         "fields": {
           "id": "Id",
@@ -413,19 +689,21 @@
         },
         "buttons": {
           "jobs": "jobs",
+          "open_jobs": "Open jobs",
+          "session": "Session",
           "create_session": "Create an OpenCode session with this unit",
           "update": "update",
           "delete": "delete",
           "sync": "sync",
           "build": "Build",
-          "fetch_changes" : "Fetch changes",
+          "fetch_changes": "Fetch changes",
           "preparing": "Prepare",
           "remove_preparing": "Reset preparation",
           "up": "Run",
           "down": "Stop",
-          "change_branch": "change_branch",
-          "set_config" : "set config",
-          "actions" : "Actions",
+          "change_branch": "Change branch",
+          "set_config": "set config",
+          "actions": "Actions",
           "check_container": "check unit container",
           "more": "More",
           "rebuild": "Rebuild",
@@ -439,24 +717,24 @@
       }
     },
     "tipi_zadach": {
-      "SBORKA":  "Сборка",
-      "OBNOVLENIE":  "Обновление",
-      "PODGOTOVKA":  "Подготовка",
-      "ZAPUSK": "Запуск" ,
-      "OSTANOVKA" : "Остановка",
-      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
-      "UDALENIE": "Удаление" ,
-      "DEISTVIE": "Выполнение действия"
+      "SBORKA": "Build",
+      "OBNOVLENIE": "Update",
+      "PODGOTOVKA": "Prepare",
+      "ZAPUSK": "Start",
+      "OSTANOVKA": "Stop",
+      "SBROS_PODGOTOVKI": "Reset preparation",
+      "UDALENIE": "Delete",
+      "DEISTVIE": "Execute action"
     },
     "tipi_prozesa": {
-      "SBORKA":  "Сборка",
-      "OBNOVLENIE":  "Обновление",
-      "PODGOTOVKA":  "Подготовка",
-      "ZAPUSK": "Запуск" ,
-      "OSTANOVKA" : "Остановка",
-      "SBROS_PODGOTOVKI": "Сброс подготовка" ,
-      "UDALENIE": "Удаление" ,
-      "DEISTVIE": "Выполнение действия"
+      "SBORKA": "Build",
+      "OBNOVLENIE": "Update",
+      "PODGOTOVKA": "Prepare",
+      "ZAPUSK": "Start",
+      "OSTANOVKA": "Stop",
+      "SBROS_PODGOTOVKI": "Reset preparation",
+      "UDALENIE": "Delete",
+      "DEISTVIE": "Execute action"
     },
     "okno_zadach_runnera": {
       "waiting": "Waiting to start",
@@ -484,6 +762,9 @@
       "new_error": "Execution error in the session \"{title}\"",
       "open_new_tab": "Open in a new tab",
       "close": "Close"
+    },
+    "errors": {
+      "invalid_notifications_response": "Invalid notifications server response"
     },
     "rekvizity": {
       "caption": "Access credentials",

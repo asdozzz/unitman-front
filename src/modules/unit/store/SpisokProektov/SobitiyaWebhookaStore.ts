@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import ProektiService from "@/modules/unit/services/ProektiService";
 import {Notify} from "quasar";
+import i18n from '@/bootstrap/translator';
 
 class EditForm {
     id: string;
@@ -126,7 +127,7 @@ export const SobitiyaWebhookaStore = defineStore('SobitiyaWebhookaStore', {
             } else if (response.status === "error") {
                 Notify.create({ message: response.message, type: 'negative' });
             } else {
-                Notify.create({ message: 'success', type: 'positive', timeout: 100 });
+                Notify.create({ message: i18n.global.t('common.notifications.success'), type: 'positive', timeout: 100 });
             }
 
             return response;

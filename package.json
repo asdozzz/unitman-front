@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "vue-tsc --noEmit && vite build",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "dev": "vite",
     "gen:api": "node scripts/gen-api-types.mjs",
     "gen:api:check": "node scripts/gen-api-types.mjs --check",
