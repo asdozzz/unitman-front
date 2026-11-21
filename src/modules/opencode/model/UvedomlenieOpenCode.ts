@@ -19,6 +19,9 @@ export type VidUvedomleniyaOpenCode =
     | "QUESTION"
     | "ERROR";
 
+/** Тип владельца уведомления: обычная сессия или workspace. */
+export type TipSessiiUvedomleniya = "unit" | "workspace";
+
 /** Уведомление о завершении хода OpenCode. */
 export type UvedomlenieOpenCode = {
     eventType: "new_message";
@@ -29,6 +32,12 @@ export type UvedomlenieOpenCode = {
     status: StatusUvedomleniyaOpenCode;
     kind: VidUvedomleniyaOpenCode | null;
     createdAt: number;
+    /**
+     * Тип сессии-владельца.
+     *
+     * Старые бэкенды поле не присылают: отсутствие трактуется как unit-сессия.
+     */
+    sessionType?: TipSessiiUvedomleniya;
 };
 
 /**
@@ -75,6 +84,7 @@ export function pohozheNaUvedomlenie(dannie: unknown): dannie is UvedomlenieOpen
 
     const status = dannie["status"];
     const kind = dannie["kind"];
+    const sessionType = dannie["sessionType"];
 
     return dannie["eventType"] === "new_message"
         && typeof dannie["id"] === "string"
@@ -84,7 +94,11 @@ export function pohozheNaUvedomlenie(dannie: unknown): dannie is UvedomlenieOpen
         && typeof status === "string"
         && (STATUSY as readonly string[]).includes(status)
         && (kind === null || (typeof kind === "string" && (VIDY as readonly string[]).includes(kind)))
-        && typeof dannie["createdAt"] === "number";
+        && typeof dannie["createdAt"] === "number"
+        // Тип необязателен, но если пришёл — должен быть допустимым.
+        && (sessionType === undefined
+            || sessionType === "unit"
+            || sessionType === "workspace");
 }
 
 /**

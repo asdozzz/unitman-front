@@ -9,10 +9,14 @@ import {
     type VoprosOpenCode,
 } from "@/modules/opencode/model/ChatOpenCode";
 import {podpisatsyaNaProgressHoda} from "@/modules/opencode/model/websocket/PodpiskaNaProgressHoda";
+import {statusTranzitniy} from "@/modules/opencode/model/Workspace";
 import type {Schema} from "@/api/types";
 
 /** Как сейчас приходят данные о шагах: через websocket, опросом или никак. */
 export type RezhimProgressa = "live" | "polling" | "offline";
+
+/** Тип открытой сессии: обычная unit-сессия или workspace. */
+export type TipSessiiChata = "unit" | "workspace";
 
 type StorChataOpenCodeState = {
     sessiyaId: string | null;
@@ -32,6 +36,17 @@ type StorChataOpenCodeState = {
      * старого опроса перезаписал бы состояние новой сессии.
      */
     nomerZapuska: number;
+    /**
+     * Тип открытой сессии; `null` — тип ещё не определён.
+     *
+     * Workspace и unit-сессия делят маршрут чата и историю, но по-разному
+     * решают, можно ли отправлять сообщения.
+     */
+    rezhimSessii: TipSessiiChata | null;
+    /** Состояние workspace для workspace-сессии; `null` для unit-сессии. */
+    workspace: Schema<"SostoyanieWorkspace"> | null;
+    /** Ошибка загрузки состояния workspace (например, operation_failed). */
+    oshibkaSostoyaniyaWorkspace: string | null;
 };
 
 /**
@@ -55,6 +70,9 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
             otpravka: false,
             oshibkaOtpravki: null,
             nomerZapuska: 0,
+            rezhimSessii: null,
+            workspace: null,
+            oshibkaSostoyaniyaWorkspace: null,
         };
     },
 
@@ -81,19 +99,192 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
 
             return hod !== null && hodVProzesse(hod.status);
         },
+
+        /** Открыта workspace-сессия. */
+        estWorkspace(): boolean {
+            return this.rezhimSessii === "workspace";
+        },
+
+        /**
+         * Можно ли отправить новый промпт.
+         *
+         * Для unit-сессии решает только идущий ход (архив проверяет экран).
+         * Для workspace бэкенд отдаёт `canAcceptMessages`: он учитывает статус
+         * жизненного цикла, архив и последний ход.
+         */
+        mozhnoOtpravlyat(): boolean {
+            if (this.hodVipolnyaetsya) {
+                return false;
+            }
+
+            if (this.rezhimSessii !== "workspace") {
+                return true;
+            }
+
+            return this.workspace?.canAcceptMessages === true;
+        },
     },
 
     actions: {
         /**
          * Открыть сессию и восстановить наблюдение за её последним ходом.
          *
+         * @param tip тип сессии, если он уже известен (из списка или
+         *   уведомления) — тогда probe-запрос не нужен.
+         *
          * После перезагрузки страницы идентификатор хода и имя канала берутся
          * из истории: бэкенд возвращает их в каждом ходе, поэтому заново
          * запускать ничего не нужно.
          */
-        async otkritSessiyu(sessiyaId: string) {
+        async otkritSessiyu(sessiyaId: string, tip: TipSessiiChata | null = null) {
             this.sessiyaId = sessiyaId;
-            return this.perezagruzitSessiyu();
+            this.rezhimSessii = tip;
+            this.workspace = null;
+            this.oshibkaSostoyaniyaWorkspace = null;
+            this.ostanovitOprosSostoyaniyaWorkspace();
+
+            if (this.rezhimSessii === null) {
+                await this.opredelitTipSessii();
+            }
+
+            await this.perezagruzitSessiyu();
+
+            if (this.rezhimSessii === "workspace") {
+                await this.obnovitSostoyanieWorkspace();
+            }
+        },
+
+        /**
+         * Определить тип сессии probe-запросом.
+         *
+         * Workspace отвечает состоянием, unit-сессия — ошибкой
+         * `opencode.workspace.not_found`. Любая ошибка означает unit-сессию:
+         * для истории и ходов состояние unit-сессии не нужно.
+         */
+        async opredelitTipSessii() {
+            const sessiyaId = this.sessiyaId;
+
+            if (sessiyaId === null) {
+                this.rezhimSessii = "unit";
+                return;
+            }
+
+            const response = await OpenCodeService.sostoyanieWorkspace({workspaceId: sessiyaId});
+
+            if (this.sessiyaId !== sessiyaId) {
+                return;
+            }
+
+            if (response.status === "success") {
+                this.rezhimSessii = "workspace";
+                this.workspace = response.data;
+                this.zaplanirovatOprosSostoyaniyaWorkspace();
+                return;
+            }
+
+            this.rezhimSessii = "unit";
+        },
+
+        /**
+         * Перечитать состояние workspace.
+         *
+         * Пока статус транзитный (контейнер создаётся, архивируется или
+         * удаляется), опрос повторяется. Переход в `RUNNING` означает, что
+         * бэкенд запустил первый промпт — историю нужно перечитать, чтобы
+         * показать его ход.
+         */
+        async obnovitSostoyanieWorkspace() {
+            const sessiyaId = this.sessiyaId;
+
+            if (sessiyaId === null || this.rezhimSessii !== "workspace") {
+                return;
+            }
+
+            this.ostanovitOprosSostoyaniyaWorkspace();
+
+            const response = await OpenCodeService.sostoyanieWorkspace({workspaceId: sessiyaId});
+
+            if (this.sessiyaId !== sessiyaId) {
+                return;
+            }
+
+            if (response.status !== "success") {
+                this.oshibkaSostoyaniyaWorkspace = response.status === "fail" ? response.data.message : response.message;
+                return;
+            }
+
+            this.oshibkaSostoyaniyaWorkspace = null;
+
+            const bilStatus = this.workspace?.status ?? null;
+            this.workspace = response.data;
+
+            this.zaplanirovatOprosSostoyaniyaWorkspace();
+
+            if (bilStatus !== "RUNNING" && response.data.status === "RUNNING") {
+                await this.perezagruzitSessiyu();
+            }
+        },
+
+        /** Восстановить архивный workspace или workspace в ошибке. */
+        async vosstanovitWorkspace() {
+            const sessiyaId = this.sessiyaId;
+
+            if (sessiyaId === null) {
+                return;
+            }
+
+            const response = await OpenCodeService.vosstanovitWorkspace({workspaceId: sessiyaId});
+
+            if (response.status !== "success") {
+                this.oshibkaSostoyaniyaWorkspace = response.status === "fail" ? response.data.message : response.message;
+                return;
+            }
+
+            await this.obnovitSostoyanieWorkspace();
+        },
+
+        /** Удалить workspace. Возвращает `false`, если бэкенд отказал. */
+        async udalitWorkspace(): Promise<boolean> {
+            const sessiyaId = this.sessiyaId;
+
+            if (sessiyaId === null) {
+                return false;
+            }
+
+            const response = await OpenCodeService.udalitWorkspace({workspaceId: sessiyaId});
+
+            if (response.status !== "success") {
+                this.oshibkaSostoyaniyaWorkspace = response.status === "fail" ? response.data.message : response.message;
+                return false;
+            }
+
+            await this.obnovitSostoyanieWorkspace();
+
+            return true;
+        },
+
+        /** Запланировать опрос состояния, пока статус workspace транзитный. */
+        zaplanirovatOprosSostoyaniyaWorkspace() {
+            this.ostanovitOprosSostoyaniyaWorkspace();
+
+            const status = this.workspace?.status;
+
+            if (status === undefined || !statusTranzitniy(status)) {
+                return;
+            }
+
+            tajmerSostoyaniyaWorkspace = setTimeout(() => {
+                tajmerSostoyaniyaWorkspace = null;
+                void this.obnovitSostoyanieWorkspace();
+            }, PAUZA_SOSTOYANIYA_WORKSPACE);
+        },
+
+        /** Снять таймер опроса состояния workspace. */
+        ostanovitOprosSostoyaniyaWorkspace() {
+            if (tajmerSostoyaniyaWorkspace !== null) {
+                clearTimeout(tajmerSostoyaniyaWorkspace);
+                tajmerSostoyaniyaWorkspace = null;
+            }
         },
 
         /** Перечитать историю и заново поднять наблюдение за незавершённым ходом. */
@@ -279,6 +470,12 @@ type Nablyudenie = {
 
 let aktivnoeNablyudenie: Nablyudenie | null = null;
 
+/** Таймер опроса состояния workspace; не реактивен, как и остальные таймеры. */
+let tajmerSostoyaniyaWorkspace: ReturnType<typeof setTimeout> | null = null;
+
+/** Пауза между опросами состояния workspace в транзитном статусе, мс. */
+const PAUZA_SOSTOYANIYA_WORKSPACE = 4000;
+
 function ostanovitAktivnoeNablyudenie(): void {
     const nablyudenie = aktivnoeNablyudenie;
 
@@ -393,6 +590,12 @@ function oprosResultata(stor: StorChata, nablyudenie: Nablyudenie, turnId: strin
 
         if (nablyudenieAktivno(nablyudenie, stor)) {
             stor.rezhimProgressa = "offline";
+
+            // Ход завершён: у workspace мог измениться canAcceptMessages
+            // (последний ход больше не RUNNING).
+            if (stor.rezhimSessii === "workspace") {
+                void stor.obnovitSostoyanieWorkspace();
+            }
         }
     }, zaderzhkaOprosa(popitka));
 }

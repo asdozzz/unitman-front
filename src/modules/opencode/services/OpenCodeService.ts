@@ -151,6 +151,58 @@ class OpenCodeService {
     otmetitUvedomleniyaProchitannimi(params: { ids: string[] }) {
         return apiClient.post<ZahvatUvedomleniyResponse>('/opencode/otmetitUvedomleniyaProchitannimi', params);
     }
+
+    /**
+     * Список workspace-сессий текущего пользователя.
+     *
+     * `onlyActive` отбрасывает архивные, `search` ищет по названию.
+     * Промпты, история и ходы по workspace идут через обычные методы выше:
+     * ид сессии workspace — это ид сессии OpenCode.
+     */
+    spisokWorkspace(params?: { onlyActive?: boolean; search?: string | null }) {
+        return apiClient.get<'/opencode/workspace/spisok'>('/opencode/workspace/spisok', params);
+    }
+
+    /**
+     * Создание workspace-сессии.
+     *
+     * Возвращает `{id, status}`. Ошибка старта не отменяет создание:
+     * статус станет `ERROR`, а ид всё равно вернётся, чтобы UI показал причину.
+     */
+    sozdatWorkspace(params: Schema<"SozdatWorkspace">) {
+        return apiClient.post<'/opencode/workspace/sozdat'>('/opencode/workspace/sozdat', params);
+    }
+
+    /**
+     * Состояние workspace: жизненный цикл, причина блокировки, последний ход.
+     *
+     * Для unit-сессии отвечает ошибкой `opencode.workspace.not_found` — по ней
+     * чат отличает workspace от обычной сессии.
+     */
+    sostoyanieWorkspace(params: Schema<"PoluchitSostoyanieWorkspace">) {
+        return apiClient.post<'/opencode/workspace/sostoyanie'>('/opencode/workspace/sostoyanie', params);
+    }
+
+    /**
+     * Архивация workspace.
+     *
+     * При незакоммиченных файлах и `force = false` отвечает
+     * `requiresConfirmation: true` и списком `dirtyProjects` — тогда архив
+     * повторяется с `force: true`.
+     */
+    arhivirovatWorkspace(params: Schema<"ArhivirovatWorkspace">) {
+        return apiClient.post<'/opencode/workspace/arhivirovat'>('/opencode/workspace/arhivirovat', params);
+    }
+
+    /** Восстановление архивного workspace: контейнер поднимается без повторного деплоя. */
+    vosstanovitWorkspace(params: Schema<"VosstanovitWorkspace">) {
+        return apiClient.post<'/opencode/workspace/vosstanovit'>('/opencode/workspace/vosstanovit', params);
+    }
+
+    /** Финальное удаление: контейнер, тома, каталог и записи БД. Необратимо. */
+    udalitWorkspace(params: Schema<"UdalitWorkspace">) {
+        return apiClient.post<'/opencode/workspace/udalit'>('/opencode/workspace/udalit', params);
+    }
 }
 
 export default new OpenCodeService();

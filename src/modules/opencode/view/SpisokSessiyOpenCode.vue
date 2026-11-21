@@ -10,6 +10,7 @@ import { useStorFormiSozdaniyaSessii } from "@/modules/opencode/store/StorFormiS
 import { useStorFormiPrivyazkiUnitaKSessii } from "@/modules/opencode/store/StorFormiPrivyazkiUnitaKSessii";
 import FormaSozdaniyaSessii from "@/modules/opencode/view/FormaSozdaniyaSessii.vue";
 import FormaPrivyazkiUnitaKSessii from "@/modules/opencode/view/FormaPrivyazkiUnitaKSessii.vue";
+import OpenCodeRazdelToggle from "@/modules/opencode/view/OpenCodeRazdelToggle.vue";
 import { convertDate } from "@/utils/dates";
 import type { Schema } from "@/api/types";
 
@@ -60,6 +61,18 @@ function podpisPrichini(sessiya: Schema<"OpenCodeSession">): string {
 }
 
 /**
+ * Проекты workspace-сессии.
+ *
+ * В сгенерированной схеме `workspace` объявлен как `Workspace & null`, что
+ * сводится к `never`; приведение возвращает реальный тип поля.
+ */
+function proektySessii(sessiya: Schema<"OpenCodeSession">) {
+    const workspace = sessiya.workspace as Schema<"Workspace"> | null | undefined;
+
+    return workspace?.projects ?? [];
+}
+
+/**
  * Подтверждение архивации.
  *
  * Полного удаления на бэкенде нет, поэтому в диалоге честно написано, что
@@ -77,7 +90,12 @@ function podtverditArhivaciyu(sessiya: Schema<"OpenCodeSession">) {
 }
 
 function otkrit(sessiya: Schema<"OpenCodeSession">) {
-    router.push({name: "opencode_chat", params: {id: sessiya.id}});
+    // Тип передаётся в чат, чтобы он не делал probe-запрос состояния workspace.
+    void router.push({
+        name: "opencode_chat",
+        params: {id: sessiya.id},
+        query: {type: sessiya.type},
+    });
 }
 
 /** Открыть диалог привязки юнитов, исключив уже привязанные. */
@@ -89,7 +107,8 @@ function privyazatUniti(sessiya: Schema<"OpenCodeSession">) {
 }
 
 function pereytiVSessiyu(id: string) {
-    router.push({name: "opencode_chat", params: {id}});
+    // Форма создания создаёт обычную unit-сессию.
+    void router.push({name: "opencode_chat", params: {id}, query: {type: "unit"}});
 }
 
 onMounted(() => {
@@ -102,6 +121,7 @@ onMounted(() => {
   <q-card>
     <q-card-section class="bg-primary text-white row items-center">
       <div class="text-subtitle2 col">{{ $t('opencode.sessions.caption') }}</div>
+      <OpenCodeRazdelToggle />
       <q-btn
           v-if="estArhivnie"
           dense
@@ -168,6 +188,9 @@ onMounted(() => {
           <q-item-section>
             <q-item-label>
               {{ sessiya.title }}
+              <q-badge v-if="sessiya.type === 'workspace'" color="secondary" class="q-ml-sm">
+                {{ $t('opencode.workspace.list.badge') }}
+              </q-badge>
               <q-badge v-if="sessiya.archived" color="grey-6" class="q-ml-sm">
                 {{ $t('opencode.sessions.archive.badge') }}
                 <q-tooltip>{{ $t('opencode.sessions.archive.badge_hint') }}</q-tooltip>
@@ -179,7 +202,23 @@ onMounted(() => {
             <q-item-label caption>
               {{ $t('opencode.sessions.fields.credential') }}: {{ imyaRekvizitov(sessiya) }}
             </q-item-label>
-            <q-item-label caption>
+            <q-item-label v-if="sessiya.type === 'workspace'" caption>
+              {{ $t('opencode.sessions.fields.projects') }}:
+              <template v-if="proektySessii(sessiya).length > 0">
+                <q-chip
+                    v-for="project in proektySessii(sessiya)"
+                    :key="'sessiya_project_' + sessiya.id + '_' + project.projectId"
+                    dense
+                    square
+                    color="primary"
+                    text-color="white"
+                    icon="folder"
+                    :label="project.projectName"
+                />
+              </template>
+              <template v-else>{{ $t('opencode.sessions.fields.no_units') }}</template>
+            </q-item-label>
+            <q-item-label v-else caption>
               {{ $t('opencode.sessions.fields.units') }}:
               <template v-if="(sessiya.units ?? []).length > 0">
                 <q-chip
@@ -207,7 +246,7 @@ onMounted(() => {
                 <q-tooltip>{{ $t('opencode.sessions.buttons.open') }}</q-tooltip>
               </q-btn>
               <q-btn
-                  v-if="!sessiya.archived"
+                  v-if="!sessiya.archived && sessiya.type !== 'workspace'"
                   dense
                   flat
                   icon="create_new_folder"
@@ -217,7 +256,7 @@ onMounted(() => {
                 <q-tooltip>{{ $t('opencode.sessions.buttons.attach_unit') }}</q-tooltip>
               </q-btn>
               <q-btn
-                  v-if="!sessiya.archived"
+                  v-if="!sessiya.archived && sessiya.type !== 'workspace'"
                   dense
                   flat
                   icon="archive"

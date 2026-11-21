@@ -78,6 +78,8 @@ function ssilkaNaSessiyu(uvedomlenie: UvedomlenieOpenCode): string {
     const href = router.resolve({
         name: "opencode_chat",
         params: { id: uvedomlenie.sessionId },
+        // Тип не даёт чату делать probe-запрос состояния workspace.
+        query: { type: uvedomlenie.sessionType === "workspace" ? "workspace" : "unit" },
     }).href;
 
     return ekranirovatHtml(new URL(href, window.location.origin).href);
@@ -93,6 +95,11 @@ function pokazatUvedomlenie(uvedomlenie: UvedomlenieOpenCode): void {
     if (segodnyaOtkrita(uvedomlenie)) {
         if (storChata.sessiyaId === uvedomlenie.sessionId) {
             void storChata.perezagruzitSessiyu();
+
+            // У workspace после хода мог измениться canAcceptMessages.
+            if (storChata.estWorkspace) {
+                void storChata.obnovitSostoyanieWorkspace();
+            }
         }
 
         return;

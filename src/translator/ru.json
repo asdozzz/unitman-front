@@ -766,6 +766,84 @@
     "errors": {
       "invalid_notifications_response": "Некорректный ответ сервера уведомлений"
     },
+    "nav": {
+      "sessions": "Сессии",
+      "workspace": "Workspace"
+    },
+    "workspace": {
+      "status": {
+        "CREATING": "Создаётся",
+        "STARTING": "Запускается",
+        "RUNNING": "Работает",
+        "ARCHIVING": "Архивируется",
+        "ARCHIVED": "Архив",
+        "DELETING": "Удаляется",
+        "ERROR": "Ошибка"
+      },
+      "badges": {
+        "read_only": "Только чтение",
+        "read_only_hint": "У одного из проектов нет прав на push — коммиты и push запрещены",
+        "no_push_project": "Нет прав на push"
+      },
+      "buttons": {
+        "add": "Новый workspace",
+        "open_chat": "Открыть чат",
+        "open_ide": "Открыть VS Code",
+        "archive": "Архивировать",
+        "restore": "Восстановить",
+        "delete": "Удалить"
+      },
+      "fields": {
+        "branch": "Ветка",
+        "projects_count": "Проектов: {count}"
+      },
+      "list": {
+        "caption": "Workspace",
+        "badge": "workspace",
+        "search": "Поиск по названию",
+        "only_active": "Только активные",
+        "empty": "Workspace пока нет. Создайте первый, выбрав проекты и ветку."
+      },
+      "form": {
+        "caption": "Создание workspace",
+        "fields": {
+          "name": "Название",
+          "credential": "Реквизиты",
+          "branch": "Ветка",
+          "projects": "Проекты",
+          "prompt": "Первый промпт"
+        },
+        "hint_name": "Уникально в рамках аккаунта",
+        "hint_branch": "Одна ветка для всех проектов",
+        "hint_projects": "Порядок важен; не более {max}. Выбрано: {count}",
+        "hint_prompt": "Запустится автоматически после старта контейнера",
+        "push_warning": "Права push проверятся при создании: если у проекта нет прав, workspace будет только для чтения.",
+        "buttons": {
+          "ok": "Создать"
+        }
+      },
+      "archive": {
+        "dirty_caption": "Есть незакоммиченные изменения",
+        "dirty_intro": "В проектах workspace остались незакоммиченные файлы. Архивировать всё равно?",
+        "force": "Архивировать всё равно"
+      },
+      "delete": {
+        "caption": "Удалить workspace?",
+        "message": "Workspace «{name}», его контейнер, тома и история будут удалены без возможности восстановления."
+      },
+      "chat": {
+        "transient": {
+          "CREATING": "Окружение разворачивается…",
+          "STARTING": "Контейнер запускается…",
+          "ARCHIVING": "Контейнер останавливается…",
+          "DELETING": "Workspace удаляется…"
+        },
+        "waiting": "Workspace ещё не готов принимать сообщения"
+      },
+      "errors": {
+        "operation_failed": "Операция с workspace завершилась ошибкой"
+      }
+    },
     "rekvizity": {
       "caption": "Реквизиты доступа",
       "empty": "Реквизиты не добавлены. Добавьте API-ключ, URL и модель, чтобы создавать сессии.",
@@ -829,6 +907,7 @@
         "title": "Название",
         "credential": "Реквизиты",
         "units": "Юниты",
+        "projects": "Проекты",
         "no_units": "не привязаны",
         "created_at": "Создана",
         "updated_at": "Обновлена"

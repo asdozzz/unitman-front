@@ -1,5 +1,6 @@
 import OpenCodeLayout from "@/modules/opencode/view/OpenCodeLayout.vue";
 import SpisokSessiyOpenCode from "@/modules/opencode/view/SpisokSessiyOpenCode.vue";
+import SpisokWorkspace from "@/modules/opencode/view/SpisokWorkspace.vue";
 import ChatOpenCode from "@/modules/opencode/view/ChatOpenCode.vue";
 
 /**
@@ -22,6 +23,14 @@ export default [
                 path: "sessions",
                 component: SpisokSessiyOpenCode,
                 name: "opencode_sessions",
+                meta: {
+                    titleKey: "app.tabs.opencode"
+                }
+            },
+            {
+                path: "workspaces",
+                component: SpisokWorkspace,
+                name: "opencode_workspaces",
                 meta: {
                     titleKey: "app.tabs.opencode"
                 }

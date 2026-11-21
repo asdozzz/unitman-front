@@ -766,6 +766,84 @@
     "errors": {
       "invalid_notifications_response": "Invalid notifications server response"
     },
+    "nav": {
+      "sessions": "Sessions",
+      "workspace": "Workspace"
+    },
+    "workspace": {
+      "status": {
+        "CREATING": "Creating",
+        "STARTING": "Starting",
+        "RUNNING": "Running",
+        "ARCHIVING": "Archiving",
+        "ARCHIVED": "Archived",
+        "DELETING": "Deleting",
+        "ERROR": "Error"
+      },
+      "badges": {
+        "read_only": "Read-only",
+        "read_only_hint": "One of the projects has no push access — commits and pushes are blocked",
+        "no_push_project": "No push access"
+      },
+      "buttons": {
+        "add": "New workspace",
+        "open_chat": "Open chat",
+        "open_ide": "Open VS Code",
+        "archive": "Archive",
+        "restore": "Restore",
+        "delete": "Delete"
+      },
+      "fields": {
+        "branch": "Branch",
+        "projects_count": "Projects: {count}"
+      },
+      "list": {
+        "caption": "Workspace",
+        "badge": "workspace",
+        "search": "Search by name",
+        "only_active": "Active only",
+        "empty": "No workspaces yet. Create the first one by picking projects and a branch."
+      },
+      "form": {
+        "caption": "Create workspace",
+        "fields": {
+          "name": "Name",
+          "credential": "Credentials",
+          "branch": "Branch",
+          "projects": "Projects",
+          "prompt": "Initial prompt"
+        },
+        "hint_name": "Unique within the account",
+        "hint_branch": "A single branch for all projects",
+        "hint_projects": "Order matters; at most {max}. Selected: {count}",
+        "hint_prompt": "Runs automatically once the container is up",
+        "push_warning": "Push access is checked on creation: if any project lacks it, the workspace becomes read-only.",
+        "buttons": {
+          "ok": "Create"
+        }
+      },
+      "archive": {
+        "dirty_caption": "Uncommitted changes detected",
+        "dirty_intro": "Some workspace projects have uncommitted files. Archive anyway?",
+        "force": "Archive anyway"
+      },
+      "delete": {
+        "caption": "Delete the workspace?",
+        "message": "The workspace \"{name}\", its container, volumes and history will be deleted permanently."
+      },
+      "chat": {
+        "transient": {
+          "CREATING": "Environment is being provisioned…",
+          "STARTING": "Container is starting…",
+          "ARCHIVING": "Container is stopping…",
+          "DELETING": "Workspace is being deleted…"
+        },
+        "waiting": "The workspace is not ready to accept messages yet"
+      },
+      "errors": {
+        "operation_failed": "The workspace operation failed"
+      }
+    },
     "rekvizity": {
       "caption": "Access credentials",
       "empty": "No credentials yet. Add an API key, URL and model to start creating sessions.",
@@ -829,6 +907,7 @@
         "title": "Title",
         "credential": "Credentials",
         "units": "Units",
+        "projects": "Projects",
         "no_units": "none attached",
         "created_at": "Created",
         "updated_at": "Updated"
