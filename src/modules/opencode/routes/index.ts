@@ -24,7 +24,7 @@ export default [
                 component: SpisokSessiyOpenCode,
                 name: "opencode_sessions",
                 meta: {
-                    titleKey: "app.tabs.opencode"
+                    titleKey: "app.tabs.opencode_units"
                 }
             },
             {
@@ -32,7 +32,7 @@ export default [
                 component: SpisokWorkspace,
                 name: "opencode_workspaces",
                 meta: {
-                    titleKey: "app.tabs.opencode"
+                    titleKey: "app.tabs.workspaces"
                 }
             },
             {

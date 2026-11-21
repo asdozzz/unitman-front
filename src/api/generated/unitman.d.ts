@@ -355,6 +355,74 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/lichniyToken/dobavit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Добавить личный токен хранилища */
+        post: operations["post_app_unitman_infra_lichniytoken_dobavit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lichniyToken/pereproverit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Перепроверить права личного токена */
+        post: operations["post_app_unitman_infra_lichniytoken_pereproverit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lichniyToken/spisok": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Список личных токенов (админ — все) */
+        post: operations["post_app_unitman_infra_lichniytoken_spisok"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lichniyToken/udalit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить личный токен */
+        post: operations["post_app_unitman_infra_lichniytoken_udalit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/login": {
         parameters: {
             query?: never;
@@ -855,6 +923,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/opencode/workspace/ssylkaPoPortu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ссылка на произвольный порт workspace-контейнера */
+        post: operations["post_app_opencode_infra_workspace_ssylkapoportu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/opencode/workspace/udalit": {
         parameters: {
             query?: never;
@@ -1334,6 +1419,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/project/ustanovitZashishennieVetki": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Установить защищённые ветки проекта */
+        post: operations["post_app_unitman_infra_project_ustanovitzashishennievetki"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project/webhook/{id}/otkluchit": {
         parameters: {
             query?: never;
@@ -1805,6 +1907,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/unit/otkrepitRedaktora": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Открепить редактора от юнита */
+        post: operations["post_app_unitman_infra_redaktor_otkrepitredaktora"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/unit/podgotovit": {
         parameters: {
             query?: never;
@@ -1927,6 +2046,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/unit/poluchitSsylkuRedaktora": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Персональная подписанная ссылка редактора */
+        post: operations["post_app_unitman_infra_redaktor_poluchitssylkuredaktora"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/unit/poluchitVipolnenieZadachiRunnera": {
         parameters: {
             query?: never;
@@ -1961,6 +2097,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/unit/prikrepitRedaktora": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Прикрепить редактора к юниту */
+        post: operations["post_app_unitman_infra_redaktor_prikrepitredaktora"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/unit/proveritKonteinerUnita": {
         parameters: {
             query?: never;
@@ -1989,6 +2142,23 @@ export type paths = {
         put?: never;
         /** Пересобрать проекцию списка юнитов */
         post: operations["post_app_unitman_infra_unit_rebuildspisokunitov"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/unit/redaktory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Список редакторов юнита с состоянием их токенов */
+        post: operations["post_app_unitman_infra_redaktor_redaktory"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2091,6 +2261,40 @@ export type paths = {
         put?: never;
         /** Выполнить действие над юнитом */
         post: operations["post_app_unitman_infra_unit_vipolnitdeistviye"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/unit/vklyuchitRedaktirovanie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Включить редактирование файлов юнита */
+        post: operations["post_app_unitman_infra_redaktor_vklyuchitredaktirovanie"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/unit/vykluchitRedaktirovanie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Выключить редактирование файлов юнита */
+        post: operations["post_app_unitman_infra_redaktor_vykluchitredaktirovanie"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2257,6 +2461,10 @@ export type components = {
             /** @default  */
             proxyHost?: string;
             repoId: string;
+            /** @default [] */
+            zashishennieVetki?: string[] | {
+                [key: string]: string;
+            };
         };
         AddRepo: {
             repoName: string;
@@ -2409,6 +2617,11 @@ export type components = {
         };
         DisableProject: {
             id: string;
+        };
+        DobavitLichniyToken: {
+            nazvanie: string;
+            repoId: string;
+            token: string;
         };
         DobavitPeremenuyuVProekt: {
             code: string;
@@ -2619,6 +2832,24 @@ export type components = {
             code: string;
             newValue: string;
             projectId: string;
+        };
+        /** @description Публичное представление личного токена (без секрета и шифротекста) */
+        LichniyTokenPublic: {
+            /**
+             * @description Токен не даёт прав на редактирование
+             * @example false
+             */
+            bezPravNaRedaktirovanie: boolean;
+            id: string;
+            nazvanie: string;
+            /** @enum {string} */
+            obyomPrav: "vse" | "spisok";
+            proektySPushom: string[];
+            /** @example 1730000000 */
+            proverenoV: number;
+            repoId: string;
+            /** @description Подсказка токена (последние символы), открытый секрет не возвращается */
+            tokenHint: string;
         };
         /** @description Аккаунт для администрирования (AccountForManaging) */
         ManagedAccount: {
@@ -2935,6 +3166,10 @@ export type components = {
             /** @default false */
             udalitFayl?: boolean;
         };
+        OtkrepitRedaktoraOtUnita: {
+            unitId: string;
+            userId: string;
+        };
         /** @description Ответ на вопросы предыдущего хода; запускает новый ход */
         OtvetitNaVopros: {
             /** @description Ответы по каждому вопросу хода */
@@ -2944,6 +3179,9 @@ export type components = {
              * @description Ход в статусе AWAITING_INPUT
              */
             turnId: string;
+        };
+        PereproveritLichniyToken: {
+            id: string;
         };
         PeresobratModelSpisokUnitov: {
             /** Format: uuid */
@@ -3052,6 +3290,30 @@ export type components = {
              */
             type?: string | null;
         };
+        PoluchitSsylkuRedaktora: {
+            unitId: string;
+        };
+        /** @description Ссылка на произвольный порт workspace-контейнера. Владелец проверяется по текущему аккаунту, статус workspace должен быть RUNNING */
+        PoluchitSsylkuWorkspace: {
+            /**
+             * @description Порт внутри workspace-контейнера; вне 1–65535 — `opencode.workspace.invalid_port`
+             * @example 47000
+             */
+            port: number;
+            /**
+             * @description Путь, который дописывается к базовой ссылке; ведущий `/` нормализуется
+             * @example /api/v1
+             */
+            suffix?: string | null;
+            /**
+             * @description Протокол ссылки: `http` (по умолчанию), `ws`, `wss` — через proxy host; остальные — напрямую на контейнер
+             * @default http
+             * @example http
+             */
+            type?: string | null;
+            /** Format: uuid */
+            workspaceId: string;
+        };
         PoluchitTipyVolumov: {
             /** @default  */
             projectId?: string;
@@ -3073,6 +3335,10 @@ export type components = {
             fileId?: string;
             /** @default  */
             projectId?: string;
+        };
+        PrikrepitRedaktoraKUnitu: {
+            unitId: string;
+            userId: string;
         };
         /** @description Привязка сессии к существующим юнитам (дополняет уже привязанные): после привязки ходы выполняются в директории первого юнита, остальные юниты становятся дополнительными корнями workspace. В сессии может быть только один юнит на проект */
         PrivezatKUnitu: {
@@ -3115,6 +3381,14 @@ export type components = {
             users: components["schemas"]["ProjectUser"][];
             variables: components["schemas"]["ProjectVariable"][];
             waitResultRunner: boolean;
+            /**
+             * @description Список масок защищённых веток (wildcard * как в GitLab)
+             * @example [
+             *       "main",
+             *       "release/*"
+             *     ]
+             */
+            zashishennieVetki: string[];
         };
         /** @description Задание раннера по проекту без шагов (ProjectRunnerJobWithoutSteps) */
         ProjectRunnerJob: {
@@ -3172,6 +3446,12 @@ export type components = {
         /** @description Результат проверки доступности proxy host */
         ProxyHostCheckResult: {
             result: boolean;
+        };
+        /** @description Состояние одного прикреплённого редактора юнита */
+        RedaktorUnita: {
+            imeetTokenNaProekt: boolean;
+            imya: string;
+            userId: string;
         };
         RegisterAccount: {
             /**
@@ -3451,6 +3731,16 @@ export type components = {
             volumes?: components["schemas"]["SozdatUnitVolume"][];
             znacheniePeremenoi?: components["schemas"]["ZnacheniePeremenoi"][];
         };
+        /** @description Результат создания юнита */
+        SozdatUnitResult: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Ветка созданного юнита входит в защищённые ветки проекта
+             * @example false
+             */
+            vetkaZashishena: boolean;
+        };
         SozdatUnitVolume: {
             /** @example /var/www/uploads */
             dir: string;
@@ -3482,10 +3772,40 @@ export type components = {
              * @example payments-refactor
              */
             name: string;
+            /** @description Необязательные переопределения ветки для отдельных проектов. Проект должен входить в `projectIds` (иначе `opencode.workspace.project_not_found`), дубликат проекта — `opencode.workspace.project_conflict`, пустая или слишком длинная ветка — `opencode.workspace.branch_required` / `opencode.workspace.branch_too_long`, защищённая ветка — `opencode.workspace.branch_protected` (в тексте ошибки имя проекта) */
+            projectBranches?: {
+                /** @example hotfix/payments */
+                branch: string;
+                /** Format: uuid */
+                projectId: string;
+            }[];
             /** @description Доступные пользователю проекты в нужном порядке; дубликат даёт `opencode.workspace.project_conflict`, недоступный проект — `opencode.workspace.project_not_found` */
             projectIds: string[];
             /** @description Первый промпт; запускается автоматически после успешного старта контейнера */
             prompt: string;
+        };
+        SpisokLichnihTokenov: Record<string, never>;
+        /** @description Список редакторов юнита с состоянием их личных токенов */
+        SpisokRedaktorov: {
+            /** @example false */
+            redaktirovanieVklucheno: boolean;
+            redaktory: components["schemas"]["RedaktorUnita"][];
+            unitId: string;
+        };
+        SpisokRedaktorovUnita: {
+            unitId: string;
+        };
+        /** @description Персональная подписанная ссылка редактора */
+        SsylkaRedaktora: {
+            /**
+             * @description unixtime истечения подписи
+             * @example 1730000000
+             */
+            expiresAt: number;
+            /** @enum {string} */
+            redaktorMode: "view" | "edit" | "locked";
+            /** @description Полный URL редактора либо подписанный токен режима */
+            ssylka: string;
         };
         /** @description Успешный ответ (App\Utils\Model\Reponse\SuccessResponse) */
         SuccessEnvelope: {
@@ -3502,6 +3822,9 @@ export type components = {
             targetUnitId: string;
             /** @description Идентификатор переменной конфига юнита */
             variableId: string;
+        };
+        UdalitLichniyToken: {
+            id: string;
         };
         UdalitPeremenuyuIzProekta: {
             code: string;
@@ -3668,6 +3991,11 @@ export type components = {
             /** Format: uuid */
             id: string;
             links: components["schemas"]["UnitLink"][];
+            /**
+             * @description Может ли текущий пользователь править файлы юнита; `null` — не вычислено
+             * @example true
+             */
+            moguRedaktirovat?: boolean | null;
             /** @example feature-123 */
             name: string;
             peremenie: components["schemas"]["UnitVariableValue"][];
@@ -3676,15 +4004,32 @@ export type components = {
              * @example opencode_hod
              */
             prichinaZanyatosti?: ("opencode_hod" | "prozes") | null;
+            /**
+             * @description Причина запрета редактирования: `protected_branch`|`net_tokena`; `null` — запрета нет
+             * @example protected_branch
+             */
+            prichinaZapreta?: ("protected_branch" | "net_tokena") | null;
             projectId: string;
             /** @example my-app */
             projectName: string;
             prozesi: components["schemas"]["UnitProcess"][];
             /**
+             * @description Режим редактирования файлов юнита включён
+             * @example false
+             */
+            redaktirovanieVklucheno?: boolean;
+            /**
              * @description Ссылка на read-only редактор файлов юнита. Появляется после успешной подготовки, очищается при сбросе подготовки или пересборке.
              * @example https://47000.feature-123.my-app.proxy.example
              */
             redaktorLink?: string | null;
+            /**
+             * @description Вычисляемый режим редактора: `view`|`edit`|`locked`; `null` — не вычислен
+             * @example view
+             */
+            redaktorMode?: ("view" | "edit" | "locked") | null;
+            /** @description Прикреплённые редакторы (идентификаторы пользователей) */
+            redaktory?: string[];
             statistikaKonteinera?: components["schemas"]["ContainerStats"] | null;
             /** @description Связи переменных юнита с юнитами, выбранными через хелпер. Заполняется из проекции `svyazi_unitov` и реконсилируется при изменении конфига */
             svyazi?: components["schemas"]["UnitSvyaz"][];
@@ -3693,6 +4038,11 @@ export type components = {
             unixtimePoslednegoObnovleniyaUnita?: number | null;
             /** @example 1730000000 */
             unixtimePoslednegoObnovleniyaVHranilishe?: number | null;
+            /**
+             * @description Ветка юнита входит в защищённые ветки проекта
+             * @example false
+             */
+            vetkaZashishena?: boolean;
             /**
              * @description Юнит занят: либо его захватил внешний владелец (ход OpenCode), либо по нему есть незавершённый процесс. Пока юнит занят, мутирующие действия над ним блокируются, а события вебхука откладываются до освобождения.
              * @example false
@@ -3829,6 +4179,13 @@ export type components = {
             newProjectName: string;
             newProxyHost: string;
         };
+        UstanovitZashishennieVetkiProekta: {
+            id: string;
+            /** @default [] */
+            zashishennieVetki?: string[] | {
+                [key: string]: string;
+            };
+        };
         /** @description Уведомление о расхождении/изменении состояния контейнера юнита */
         UvedomlenieOSostoyaniiKonteynera: {
             /** @example stopped */
@@ -3856,6 +4213,9 @@ export type components = {
             /** @description Параметры выполняемого действия */
             values: components["schemas"]["ZnacheniePeremenoi"][];
         };
+        VklyuchitRedaktirovanieUnita: {
+            unitId: string;
+        };
         /** @description Тип тома проекта с привязанными архивами (VolumeTypeList::toArray) */
         VolumeTypeList: {
             /**
@@ -3881,6 +4241,9 @@ export type components = {
         VosstanovitWorkspace: {
             /** Format: uuid */
             workspaceId: string;
+        };
+        VykluchitRedaktirovanieUnita: {
+            unitId: string;
         };
         /** @description Событие webhook (WebhookEventDlySpiska) */
         WebhookEvent: {
@@ -3920,8 +4283,18 @@ export type components = {
             /** @example 1762000000 */
             updatedAt: number;
         };
+        /** @description Ссылка на сервис workspace */
+        WorkspaceLinkHolder: {
+            /**
+             * Format: uri
+             * @example http://47000.payments-refactor-1a2b3c4d.workspaces.example.com
+             */
+            link: string;
+        };
         /** @description Проект workspace (ProektWorkspaceReadModel). Токен клонирования наружу не отдаётся */
         WorkspaceProject: {
+            /** @description Фактическая ветка проекта в workspace (переопределение или общая ветка workspace) */
+            branch: string;
             /** @description false — workspace работает в режиме только-чтение */
             canPush: boolean;
             positionIndex: number;
@@ -4864,6 +5237,177 @@ export interface operations {
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_lichniytoken_dobavit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DobavitLichniyToken"];
+            };
+        };
+        responses: {
+            /** @description Токен добавлен; секрет не возвращается, только hint */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["LichniyTokenPublic"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_lichniytoken_pereproverit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PereproveritLichniyToken"];
+            };
+        };
+        responses: {
+            /** @description Обновлённый объём прав */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["LichniyTokenPublic"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_lichniytoken_spisok: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SpisokLichnihTokenov"];
+            };
+        };
+        responses: {
+            /** @description Список токенов без секретов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["LichniyTokenPublic"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_lichniytoken_udalit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UdalitLichniyToken"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: токен удалён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6013,6 +6557,51 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: components["schemas"]["Workspace"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_ssylkapoportu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitSsylkuWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Ссылка на сервис workspace. При перехваченной ошибке PHP тело приходит с HTTP 200 в виде ErrorEnvelope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["WorkspaceLinkHolder"];
                         /**
                          * @example success
                          * @enum {string}
@@ -7313,6 +7902,56 @@ export interface operations {
             };
         };
     };
+    post_app_unitman_infra_project_ustanovitzashishennievetki: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                    /** @description Список масок защищённых веток (wildcard * как в GitLab) */
+                    zashishennieVetki?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: защищённые ветки проекта установлены */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: защищённые ветки проекта установлены */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_unitman_infra_projectwebhook_otkluchit: {
         parameters: {
             query?: never;
@@ -8499,6 +9138,42 @@ export interface operations {
             };
         };
     };
+    post_app_unitman_infra_redaktor_otkrepitredaktora: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtkrepitRedaktoraOtUnita"];
+            };
+        };
+        responses: {
+            /** @description Редактор откреплён (идемпотентно) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_unitman_infra_unit_podgotovit: {
         parameters: {
             query?: never;
@@ -8827,6 +9502,51 @@ export interface operations {
             };
         };
     };
+    post_app_unitman_infra_redaktor_poluchitssylkuredaktora: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoluchitSsylkuRedaktora"];
+            };
+        };
+        responses: {
+            /** @description Ссылка редактора; личный токен не возвращается */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SsylkaRedaktora"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_unitman_infra_unit_poluchitvipolneniezadachirunnera: {
         parameters: {
             query?: never;
@@ -8919,6 +9639,42 @@ export interface operations {
             };
         };
     };
+    post_app_unitman_infra_redaktor_prikrepitredaktora: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrikrepitRedaktoraKUnitu"];
+            };
+        };
+        responses: {
+            /** @description Редактор прикреплён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_unitman_infra_unit_proveritkonteinerunita: {
         parameters: {
             query?: never;
@@ -9003,6 +9759,51 @@ export interface operations {
                 content?: never;
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_redaktor_redaktory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SpisokRedaktorovUnita"];
+            };
+        };
+        responses: {
+            /** @description Список редакторов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SpisokRedaktorov"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9116,15 +9917,14 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Пустой ответ: команда создания юнита принята. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
+            /** @description Юнит создан: идентификатор и признак защищённой ветки. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description Пустой ответ: команда создания юнита принята */
-                        data: null;
+                        data: components["schemas"]["SozdatUnitResult"];
                         /**
                          * @example success
                          * @enum {string}
@@ -9279,6 +10079,78 @@ export interface operations {
                 content?: never;
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_redaktor_vklyuchitredaktirovanie: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VklyuchitRedaktirovanieUnita"];
+            };
+        };
+        responses: {
+            /** @description Режим редактирования включён (идемпотентно) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_redaktor_vykluchitredaktirovanie: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VykluchitRedaktirovanieUnita"];
+            };
+        };
+        responses: {
+            /** @description Режим редактирования выключен (идемпотентно) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
             500: {
                 headers: {
                     [name: string]: unknown;

@@ -5,8 +5,17 @@ import type {UnitUiState} from "@/modules/unit/utils/unitStatus";
 const props = withDefaults(defineProps<{
   state: UnitUiState;
   compact?: boolean;
+  /**
+   * Скрыть тип активной задачи («Сборка», «Запуск») в подписи бейджа.
+   *
+   * В узкой шапке карточки деталь отнимает место у названия юнита, а
+   * tooltip бейджа всё равно показывает её. На широкой плашке деталь
+   * остаётся видимой.
+   */
+  hideDetail?: boolean;
 }>(), {
   compact: false,
+  hideDetail: false,
 });
 
 /** Иконка дублирует текст, чтобы состояние читалось и без цвета. */
@@ -39,7 +48,7 @@ const ikonka = computed<string>(() => {
 
     <span class="unit-status__label">{{ $t(state.labelKey) }}</span>
 
-    <span v-if="state.busyText && !compact" class="unit-status__detail">
+    <span v-if="state.busyText && !compact && !hideDetail" class="unit-status__detail">
       {{ $t('unit.tipi_zadach.' + state.busyText) }}
     </span>
 

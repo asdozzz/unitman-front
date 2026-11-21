@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
+import {Notify} from "quasar";
+import i18n from "@/bootstrap/translator";
 import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import PeremenayaKonfiga from "@/modules/unit/view/Unit/Konfig/PeremenayaKonfiga.vue";
@@ -7,7 +9,7 @@ import FaylVoluma from "@/modules/unit/view/Unit/Konfig/FaylVoluma.vue";
 import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
-const { form, oshibkaOtBackenda, loader, vetki, initPeremenie, dubli } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, vetki, initPeremenie, dubli, vetkaZashishenaDlyaFormi } = storeToRefs(addFormStore);
 
 const unitiStore = useSpisokUnitovStore();
 const { proekti } = storeToRefs(unitiStore);
@@ -20,6 +22,15 @@ async function otpravitFormu() {
   const response = await addFormStore.otpravitFormu();
 
   if (response.status === "success") {
+    // Юнит создан штатно, но ветка защищена: редактирование файлов
+    // в нём будет запрещено. Ничего не блокируем, только предупреждаем.
+    if (response.data.vetkaZashishena) {
+      Notify.create({
+        type: 'warning',
+        message: i18n.global.t('unit.form_add_unit.messages.vetka_zashishena_created'),
+      });
+    }
+
     emit('formaBilaOtpravlena');
     addFormStore.zakritFormu();
   }
@@ -89,6 +100,17 @@ function projectChanged() {
           </q-item>
         </template>
       </q-select>
+      <q-banner
+          v-if="vetkaZashishenaDlyaFormi"
+          class="bg-orange-1 text-warning q-mt-sm"
+          rounded
+          dense
+      >
+        <template v-slot:avatar>
+          <q-icon name="lock" color="warning"/>
+        </template>
+        {{ $t('unit.form_add_unit.messages.vetka_zashishena') }}
+      </q-banner>
       <div v-if="dubli.spisok.length > 0">
         <span class="text-negative">{{ $t('unit.form_add_unit.messages.duplicates') }} </span>
         <q-chip

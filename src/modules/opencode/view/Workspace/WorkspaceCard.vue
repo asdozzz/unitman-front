@@ -2,6 +2,8 @@
 import { computed } from "vue";
 import i18n from "@/bootstrap/translator";
 import WorkspaceStatusBadge from "@/modules/opencode/view/Workspace/WorkspaceStatusBadge.vue";
+import OknoSsylkiWorkspace from "@/modules/opencode/view/Workspace/OknoSsylkiWorkspace.vue";
+import { useStorPomoschnikaSsylkiWorkspace } from "@/modules/opencode/store/StorPomoschnikaSsylkiWorkspace";
 import { convertDate } from "@/utils/dates";
 import {
     estReadOnly,
@@ -9,6 +11,7 @@ import {
     mozhnoUdalit,
     mozhnoVosstanovit,
     statusTranzitniy,
+    type ProektWorkspace,
     type Workspace,
 } from "@/modules/opencode/model/Workspace";
 
@@ -25,6 +28,27 @@ const props = defineProps<{
     /** Текущее действие по этой карточке; `null` — карточка свободна. */
     dejstvie?: DejstvieWorkspace | null;
 }>();
+
+/**
+ * Помощник ссылки на порт. Диалог рендерится только у карточки-источника:
+ * единственный открытый workspace в сторе задаёт `workspaceId`, поэтому
+ * на списке не появляется дублирующихся диалогов.
+ */
+const storPomoschnika = useStorPomoschnikaSsylkiWorkspace();
+
+/** Кнопка помощника доступна только у работающего workspace. */
+const mozhnoOtkritPomoschnik = computed(() => props.workspace.status === "RUNNING");
+
+/** Подпись проекта: фактическая ветка проекта либо общая ветка workspace. */
+function podpisProekta(project: ProektWorkspace): string {
+    const vetka = project.branch || props.workspace.branch;
+
+    return `${project.projectName} · ${vetka}`;
+}
+
+function otkritPomoschnik(): void {
+    storPomoschnika.otkrit(props.workspace);
+}
 
 const emit = defineEmits<{
     open: [];
@@ -92,6 +116,17 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
           <q-tooltip>{{ $t('opencode.workspace.buttons.open_ide') }}</q-tooltip>
         </q-btn>
 
+        <q-btn
+            v-if="mozhnoOtkritPomoschnik"
+            dense
+            flat
+            icon="link"
+            color="primary"
+            @click="otkritPomoschnik()"
+        >
+          <q-tooltip>{{ $t('opencode.workspace.helper.open_button') }}</q-tooltip>
+        </q-btn>
+
         <q-btn dense flat icon="forum" color="primary" @click="emit('open')">
           <q-tooltip>{{ $t('opencode.workspace.buttons.open_chat') }}</q-tooltip>
         </q-btn>
@@ -156,6 +191,7 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
         {{ $t('opencode.workspace.fields.branch') }}: {{ workspace.branch }}
         · {{ $t('opencode.workspace.fields.projects_count', { count: workspace.projects.length }) }}
         · {{ $t('opencode.sessions.fields.updated_at') }}: {{ convertDate(workspace.updatedAt) }}
+        · {{ $t('opencode.sessions.fields.created_at') }}: {{ convertDate(workspace.createdAt) }}
       </div>
     </q-card-section>
 
@@ -168,7 +204,7 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
           color="primary"
           text-color="white"
           icon="folder"
-          :label="project.projectName"
+          :label="podpisProekta(project)"
       >
         <q-icon
             v-if="!project.canPush"
@@ -205,6 +241,9 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
         />
       </div>
     </q-banner>
+
+    <!-- Один экземпляр диалога на список: только у карточки-источника. -->
+    <OknoSsylkiWorkspace v-if="workspace.id === storPomoschnika.workspaceId" />
   </q-card>
 </template>
 

@@ -38,12 +38,21 @@ class Proekt {
     label: string;
     users: PolzovatelProekta[];
     memoryLimit: number;
+    /** Маски защищённых веток проекта (wildcard `*` как в GitLab). */
+    zashishennieVetki: string[];
 
-    constructor(value: string, label: string, users: PolzovatelProekta[], memoryLimit: number) {
+    constructor(
+        value: string,
+        label: string,
+        users: PolzovatelProekta[],
+        memoryLimit: number,
+        zashishennieVetki: string[] = [],
+    ) {
         this.value = value;
         this.label = label;
         this.users = users;
         this.memoryLimit = memoryLimit;
+        this.zashishennieVetki = zashishennieVetki;
     }
 }
 
@@ -542,7 +551,13 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
 
             this.proekti.loader = false;
             if (response.status === "success") {
-                this.proekti.spisok = response.data.map((item) => new Proekt(item.id, item.name, item.users, item.memoryLimit));
+                this.proekti.spisok = response.data.map((item) => new Proekt(
+                    item.id,
+                    item.name,
+                    item.users,
+                    item.memoryLimit,
+                    item.zashishennieVetki ?? [],
+                ));
             } else if (response.status === "fail") {
                 Notify.create(response.data.message);
             } else if (response.status === "error") {

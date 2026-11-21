@@ -13,6 +13,7 @@ import UnitCardRelated from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardRelat
 import UnitCardStats from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardStats.vue";
 import UnitCardDetails from "@/modules/unit/view/Unit/SpisokUnitov/UnitCardDetails.vue";
 import UnitActions from "@/modules/unit/view/Unit/SpisokUnitov/UnitActions.vue";
+import OknoRedaktorovUnita from "@/modules/unit/view/Unit/SpisokUnitov/OknoRedaktorovUnita.vue";
 
 const props = withDefaults(defineProps<{
   item: Unit;
@@ -101,19 +102,12 @@ async function pometitKakSlomanii() {
     </q-card>
   </q-dialog>
 
+  <OknoRedaktorovUnita :unit="item" />
+
   <article
       class="unit-card"
       :class="[`unit-card--${variant}`, {'unit-card--error': item.error}]"
   >
-    <q-linear-progress
-        v-if="state.prozesAktiven"
-        indeterminate
-        color="primary"
-        size="3px"
-        class="unit-card__process-loader"
-        :aria-label="$t('unit.spisok_unitov.card.status.process_in_progress')"
-    />
-
     <UnitCardHeader :item="item" :state="state">
       <!-- Единственный кебаб карточки живёт в шапке-тулбаре. -->
       <template #actions>
@@ -163,11 +157,6 @@ async function pometitKakSlomanii() {
   border-radius: var(--app-radius-lg);
   background: var(--app-surface);
   transition: box-shadow var(--app-duration-base) var(--app-easing);
-}
-
-.unit-card__process-loader {
-  flex: 0 0 auto;
-  border-radius: var(--app-radius-lg) var(--app-radius-lg) 0 0;
 }
 
 /* Border-first: тень появляется только на hover. */

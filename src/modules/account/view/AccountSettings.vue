@@ -3,6 +3,7 @@ import {storNastroekPolzovatelya} from "@/modules/account/store/StorNastroekPolz
 import {storeToRefs} from "pinia";
 import {onMounted} from "vue";
 import SpisokRekvizitovOpenCode from "@/modules/account/view/AccountSettings/SpisokRekvizitovOpenCode.vue";
+import SpisokLichnihTokenov from "@/modules/account/view/AccountSettings/SpisokLichnihTokenov.vue";
 
 const storeNastroekPolzovatelya = storNastroekPolzovatelya();
 const { formPassword, formNickname, oshibkaOtBackenda, oshibkaOtBackendaNick, loader } = storeToRefs(storeNastroekPolzovatelya);
@@ -55,6 +56,11 @@ onMounted(async () => {
 <div class="row">
   <div class="col-12">
     <SpisokRekvizitovOpenCode />
+  </div>
+</div>
+<div class="row">
+  <div class="col-12">
+    <SpisokLichnihTokenov />
   </div>
 </div>
 </template>

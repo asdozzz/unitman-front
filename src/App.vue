@@ -68,8 +68,36 @@
           >
         <q-scroll-area class="fit">
           <q-list padding class="menu-list">
-            <template v-for="menuItem in showedMenu">
-              <q-item clickable v-ripple :to="menuItem.href" :active="menuItem.href === path">
+            <template v-for="menuItem in showedMenu" :key="menuItem.label">
+              <!-- Группа с дочерними пунктами: раскрывается, если открыт один из них. -->
+              <q-expansion-item
+                  v-if="menuItem.children && menuItem.children.length > 0"
+                  :icon="menuItem.icon"
+                  :label="$t(menuItem.label)"
+                  :default-opened="menuItem.children.some((child) => child.href !== undefined && path.startsWith(child.href))"
+              >
+                <q-list>
+                  <q-item
+                      v-for="child in menuItem.children"
+                      :key="child.href ?? child.label"
+                      clickable
+                      v-ripple
+                      :to="child.href"
+                      :active="child.href === path"
+                  >
+                    <q-item-section avatar>
+                      <q-icon :name="child.icon" />
+                    </q-item-section>
+
+                    <q-item-section>
+                      <q-item-label class="text-weight-medium">{{ $t(child.label) }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-expansion-item>
+
+              <!-- Обычный пункт без детей. -->
+              <q-item v-else clickable v-ripple :to="menuItem.href" :active="menuItem.href === path">
                 <q-item-section avatar>
                   <q-icon :name="menuItem.icon" />
                 </q-item-section>
@@ -145,15 +173,31 @@ onMounted(() => {
   $q.dark.set(nastroiki.darkMode);
 })
 
-const menu = reactive([
+type PunktMenu = {
+  icon: string;
+  label: string;
+  show: unknown;
+  href?: string;
+  children?: PunktMenu[];
+};
+
+const menu = reactive<PunktMenu[]>([
   {icon: 'home', href:"/", label: 'app.tabs.home', show: isAuth },
   {icon: 'groups', href:"/account/list", label: 'app.tabs.accounts', show: isAdmin },
   {icon: 'inbox', href:"/unit/repositories", label: 'app.tabs.repos', show: isAdmin },
   {icon: 'list', href:"/unit/projects", label: 'app.tabs.projects', show: isAdmin },
   {icon: 'star', href:"/unit/list", label: 'app.tabs.units', show: isAuth },
-  // Реквизиты и сессии OpenCode привязаны к аккаунту, поэтому пункт виден
+  // Реквизиты и сессии OpenCode привязаны к аккаунту, поэтому раздел виден
   // всем авторизованным, а не только администраторам.
-  {icon: 'forum', href:"/opencode/sessions", label: 'app.tabs.opencode', show: isAuth },
+  {
+    icon: 'smart_toy',
+    label: 'app.tabs.ai_assistant',
+    show: isAuth,
+    children: [
+      {icon: 'forum', href: '/opencode/sessions', label: 'app.tabs.opencode_units', show: isAuth},
+      {icon: 'dashboard', href: '/opencode/workspaces', label: 'app.tabs.workspaces', show: isAuth},
+    ],
+  },
   {icon: 'settings', href:"/init", label: 'app.tabs.settings', show: isAuth },
 ]);
 

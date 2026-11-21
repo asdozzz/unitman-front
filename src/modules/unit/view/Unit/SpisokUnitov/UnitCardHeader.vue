@@ -3,6 +3,7 @@ import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import type {UnitUiState} from "@/modules/unit/utils/unitStatus";
 import {convertDate, convertDateTime} from "@/utils/dates";
 import UnitStatusBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitStatusBadge.vue";
+import UnitRedaktorBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitRedaktorBadge.vue";
 
 defineProps<{
   item: Unit;
@@ -11,18 +12,32 @@ defineProps<{
 </script>
 
 <template>
-  <!-- Шапка карточки: имя и единственный бейдж статуса на одной строке.
+  <!-- Шапка карточки — две строки: название с кебабом, затем бейджи.
        Кебаб рендерит UnitCard.vue через слот actions, чтобы у карточки
-       оставалось ровно одно меню. -->
+       оставалось ровно одно меню.
+       Название вынесено в отдельную строку: при активном процессе и режиме
+       «Редактирование» бейджи занимают почти всю ширину, и в одну строку
+       имя юнита обрезалось до нечитаемого состояния. -->
   <div class="unit-card__head">
-    <div class="unit-card__head-main">
+    <div class="unit-card__head-top">
       <h3 class="unit-card__name" :title="item.name">{{ item.name }}</h3>
-      <!-- «Ошибка» в тулбаре не дублируется: её показывает alert-стрип карточки. -->
-      <UnitStatusBadge v-if="state.status !== 'error'" :state="state" />
+
+      <div class="unit-card__head-actions">
+        <slot name="actions" />
+      </div>
     </div>
 
-    <div class="unit-card__head-actions">
-      <slot name="actions" />
+    <!-- «Ошибка» в тулбаре не дублируется: её показывает alert-стрип карточки.
+         Ряд бейджей не рендерим, если показывать нечего (ошибка без редактора). -->
+    <div
+        v-if="state.status !== 'error' || item.redaktorMode"
+        class="unit-card__head-badges"
+    >
+      <UnitStatusBadge v-if="state.status !== 'error'" :state="state" hide-detail />
+      <UnitRedaktorBadge
+          :mode="item.redaktorMode ?? null"
+          :prichina-zapreta="item.prichinaZapreta ?? null"
+      />
     </div>
   </div>
 
@@ -54,16 +69,35 @@ defineProps<{
 
 <style scoped>
 /* Шапка — тулбар-полоса карточки в цвет шапки сайта (bg-primary):
-   синий фон, белый текст, граница снизу отделяет её от содержимого. */
+   синий фон, белый текст, граница снизу отделяет её от содержимого.
+   Две строки: название сверху, бейджи снизу. */
 .unit-card__head {
   display: flex;
-  align-items: center;
-  gap: var(--app-space-2);
+  flex-direction: column;
+  gap: var(--app-space-1);
   min-width: 0;
   padding: var(--app-space-2) var(--app-space-4);
   border-bottom: 1px solid var(--app-primary-hover);
   background: var(--app-primary);
   color: var(--app-primary-contrast);
+}
+
+/* Верхняя строка: название получает всю ширину карточки, кроме кебаба. */
+.unit-card__head-top {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  min-width: 0;
+}
+
+/* Нижняя строка: бейджи статуса и режима редактора. flex-wrap — страховка
+   для самых узких карточек, чтобы бейджи не вылезали за границы. */
+.unit-card__head-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--app-space-2);
+  min-width: 0;
 }
 
 /* Кебаб в тулбаре — белый, как элементы шапки сайта. */
@@ -77,15 +111,14 @@ defineProps<{
   background: var(--app-primary-contrast);
 }
 
-.unit-card__head-main {
-  display: flex;
-  align-items: center;
-  gap: var(--app-space-2);
-  flex: 1 1 auto;
-  min-width: 0;
+/* Бейдж режима редактора — на такой же белой плашке, что и статус. */
+.unit-card__head :deep(.unit-redaktor) {
+  background: var(--app-primary-contrast);
 }
 
 .unit-card__name {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   color: var(--app-primary-contrast);
   font-size: var(--app-font-size-subtitle);

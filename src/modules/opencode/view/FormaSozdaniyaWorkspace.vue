@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeUnmount, watch } from "vue";
 import { storeToRefs } from "pinia";
 import {
     MAX_PROEKTOV_WORKSPACE,
@@ -28,7 +29,13 @@ const {
     oshibkaOtBackenda,
     rekvizity,
     mozhnoSohranit,
+    vetkiPereopredeleniya,
+    vetkiProektov,
+    oshibkiVetokProektov,
 } = storeToRefs(formaStore);
+
+/** Таймеры debounce для фильтра веток, по одному на проект. */
+const taimeryVetok = new Map<string, ReturnType<typeof setTimeout>>();
 
 async function sozdat() {
     const id = await formaStore.sozdatIDobavitVSpiske();
@@ -37,6 +44,74 @@ async function sozdat() {
         emit("sozdan", id);
     }
 }
+
+/** Название проекта для подписи поля ветки. */
+function imyaProekta(projectId: string): string {
+    return proekti.value.find((proekt) => proekt.id === projectId)?.name ?? projectId;
+}
+
+/** Ветки проекта из кеша стора. */
+function vetkiProekta(projectId: string): string[] {
+    return vetkiProektov.value[projectId]?.spisok ?? [];
+}
+
+/** Идёт ли загрузка веток проекта. */
+function loaderVetok(projectId: string): boolean {
+    return vetkiProektov.value[projectId]?.loader ?? false;
+}
+
+/** Ошибка загрузки веток проекта, если была. */
+function oshibkaVetok(projectId: string): string | null {
+    return oshibkiVetokProektov.value[projectId] ?? null;
+}
+
+/**
+ * Фильтр веток проекта с debounce и защитой от гонок в сторе.
+ *
+ * Пока пользователь печатает, запросы не летят на каждый символ; стор
+ * дополнительно отбрасывает устаревшие ответы по номеру запроса.
+ */
+function filterVetokProekta(
+    projectId: string,
+    val: string,
+    update: (callback: () => void) => void,
+): void {
+    update(() => {
+        // Опции приходят из реактивного стора, локально фильтровать не нужно.
+    });
+
+    const query = (val ?? "").trim();
+    const suschestvuyushiy = taimeryVetok.get(projectId);
+
+    if (suschestvuyushiy !== undefined) {
+        clearTimeout(suschestvuyushiy);
+    }
+
+    taimeryVetok.set(projectId, setTimeout(() => {
+        taimeryVetok.delete(projectId);
+        void formaStore.poluchitVetkiProekta(projectId, query);
+    }, 250));
+}
+
+/** Сохранить/очистить переопределение ветки проекта. */
+function ustanovitVetku(projectId: string, value: string | null): void {
+    formaStore.ustanovitVetkuProekta(projectId, value);
+}
+
+/**
+ * После изменения выбора проектов чистим переопределения и кеш веток
+ * для снятых проектов.
+ */
+watch(
+    projectIds,
+    () => formaStore.sbalansirovatVetkiProektov(),
+    { deep: true },
+);
+
+onBeforeUnmount(() => {
+    taimeryVetok.forEach((timer) => clearTimeout(timer));
+    taimeryVetok.clear();
+});
 </script>
 
 <template>
@@ -102,6 +177,40 @@ async function sozdat() {
             </q-item>
           </template>
         </q-select>
+
+        <div
+            v-for="projectId in projectIds"
+            :key="'vetka-' + projectId"
+            class="q-mt-sm"
+        >
+          <q-select
+              :model-value="vetkiPereopredeleniya[projectId] ?? ''"
+              :options="vetkiProekta(projectId)"
+              :loading="loaderVetok(projectId)"
+              :label="$t('opencode.workspace.form.fields.project_branch', { project: imyaProekta(projectId) })"
+              :placeholder="$t('opencode.workspace.form.placeholder_project_branch', { branch: branch })"
+              :hint="$t('opencode.workspace.form.hint_project_branch')"
+              use-input
+              fill-input
+              hide-selected
+              clearable
+              filled
+              dense
+              @filter="(val, update) => filterVetokProekta(projectId, val, update)"
+              @update:model-value="(value) => ustanovitVetku(projectId, value)"
+          >
+            <template #no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  {{ $t('opencode.workspace.form.no_project_branches') }}
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+          <div v-if="oshibkaVetok(projectId)" class="text-negative text-caption q-mt-xs">
+            {{ $t('opencode.workspace.form.error_project_branches') }}: {{ oshibkaVetok(projectId) }}
+          </div>
+        </div>
 
         <q-input
             v-model="prompt"

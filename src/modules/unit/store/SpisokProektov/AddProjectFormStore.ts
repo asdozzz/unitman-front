@@ -10,6 +10,7 @@ export class AddForm {
     mainBranch: string;
     proxyHost: string;
     memoryLimit: number;
+    zashishennieVetki: string[] = [];
     constructor(repoId: string = "", projectName: string = "", projectCode: string = "", mainBranch: string = "master", proxyHost: string = "", memoryLimit: number | null = null) {
         this.repoId = repoId;
         this.projectName = projectName;

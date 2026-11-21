@@ -4,6 +4,7 @@ import {EditProjectForm, useEditProjectFormStore} from "@/modules/unit/store/Spi
 import {onMounted} from "vue";
 import {useRoute} from "vue-router";
 import {storePolucheniyaProekta} from "@/modules/unit/store/SpisokProektov/StorPolucheniyaProekta";
+import ZashishennieVetkiProekta from "@/modules/unit/view/Proekti/ZashishennieVetkiProekta.vue";
 
 const storeProekta = storePolucheniyaProekta();
 const {loader: loaderProekta, proekt, oshibkaOtBeka } = storeToRefs(storeProekta);
@@ -43,6 +44,7 @@ async function otpravitFormu() {
       <q-btn :label="$t('unit.form_edit_project.buttons.save')" color="primary" @click="otpravitFormu" :loading="loader" class="q-mt-sm"/>
     </q-card-section>
   </q-card>
+  <ZashishennieVetkiProekta v-if="proekt" />
 </template>
 
 <style scoped>

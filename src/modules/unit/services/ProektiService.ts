@@ -25,6 +25,10 @@ class ProektiService {
         return apiClient.post('/project/add', params);
     }
 
+    ustanovitZashishennieVetki(params: Schema<"UstanovitZashishennieVetkiProekta">) {
+        return apiClient.post('/project/ustanovitZashishennieVetki', params);
+    }
+
     proveritProxyHost(params: Schema<"ProveritProxyHost">) {
         return apiClient.post('/project/proverkaProxyHost', params);
     }

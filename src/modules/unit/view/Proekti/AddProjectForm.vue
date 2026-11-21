@@ -3,8 +3,39 @@ import {storeToRefs} from "pinia";
 import {useAddProjectFormStore} from "@/modules/unit/store/SpisokProektov/AddProjectFormStore";
 import {onMounted, ref} from "vue";
 import {storeInizializii} from "@/modules/app/store/InitializationStore";
+import i18n from "@/bootstrap/translator";
+import {OshibkaMaski, proveritMaskuVetki} from "@/modules/unit/utils/zashishennieVetki";
 
 const localProjectCode = ref<{value: string, label: string} | null>(null);
+const lokalnayaOshibkaVetok = ref<string | null>(null);
+
+type NewValueDone = (value?: string, mode?: 'add' | 'add-unique' | 'toggle') => void;
+
+function tekstOshibkiMaski(kod: OshibkaMaski): string {
+  switch (kod) {
+    case 'empty':
+      return i18n.global.t('unit.proekt.zashishennie_vetki.validation.empty');
+    case 'too_long':
+      return i18n.global.t('unit.proekt.zashishennie_vetki.validation.too_long');
+    case 'duplicate':
+      return i18n.global.t('unit.proekt.zashishennie_vetki.validation.duplicate');
+    case 'too_many':
+      return i18n.global.t('unit.proekt.zashishennie_vetki.validation.too_many');
+    default:
+      return '';
+  }
+}
+
+function dobavitMasku(value: string, done: NewValueDone): void {
+  const oshibka = proveritMaskuVetki(value, form.value.zashishennieVetki);
+  if (oshibka) {
+    lokalnayaOshibkaVetok.value = tekstOshibkiMaski(oshibka);
+    return;
+  }
+
+  lokalnayaOshibkaVetok.value = null;
+  done(value.trim());
+}
 
 const addFormStore = useAddProjectFormStore();
 const { form, oshibkaOtBackenda, loader, hranilisha, proekti, proverkaProxyHost } = storeToRefs(addFormStore);
@@ -89,6 +120,18 @@ function filterSpiskaProektov(val: string | null, update: any): void {
       </q-select>
       <q-input v-model="form.projectName" :label="$t('unit.form_add_project.fields.labels.projectName')" />
       <q-input v-model="form.mainBranch" :label="$t('unit.form_add_project.fields.labels.mainBranch')" />
+      <q-select
+          v-model="form.zashishennieVetki"
+          use-input
+          use-chips
+          multiple
+          hide-selected
+          fill-input
+          :label="$t('unit.form_add_project.fields.labels.zashishennieVetki')"
+          :hint="$t('unit.form_add_project.hints.zashishennieVetki')"
+          @new-value="dobavitMasku"
+      />
+      <div v-if="lokalnayaOshibkaVetok" class="text-negative text-caption">{{ lokalnayaOshibkaVetok }}</div>
       <q-input v-model="form.proxyHost" :label="$t('unit.form_add_project.fields.labels.proxyHost')" />
       <q-chip
           v-if="form.proxyHost.length > 0"

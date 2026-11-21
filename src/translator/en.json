@@ -33,7 +33,10 @@
       "projects": "Projects",
       "repos": "Repositories",
       "accounts": "Accounts",
+      "ai_assistant": "AI Assistant",
       "opencode": "OpenCode",
+      "opencode_units": "Units",
+      "workspaces": "Workspace",
       "settings": "Settings"
     },
     "meta": {
@@ -230,6 +233,49 @@
         "ok": "Ok",
         "close": "Close"
       }
+    },
+    "lichniy_tokeni": {
+      "title": "Personal tokens",
+      "empty": "No personal tokens yet",
+      "buttons": {
+        "add": "Add token",
+        "refresh": "Refresh list",
+        "pereproverit": "Recheck permissions",
+        "delete": "Delete token"
+      },
+      "delete": {
+        "caption": "Delete token?",
+        "message": "Token \"{nazvanie}\" will be deleted permanently."
+      },
+      "fields": {
+        "repo": "Repository",
+        "token": "Token",
+        "nazvanie": "Name",
+        "token_hint": "Token hint",
+        "provereno_v": "Checked"
+      },
+      "obyom_prav": {
+        "caption": "Permission scope",
+        "vse": "all projects",
+        "spisok": "selected projects"
+      },
+      "proekti": {
+        "all": "All projects"
+      },
+      "hints": {
+        "bez_prav": "the token cannot edit projects; recheck its permissions"
+      },
+      "result": {
+        "caption": "Permissions detected",
+        "bez_prav": "The token cannot edit projects"
+      },
+      "form": {
+        "caption": "Add personal token",
+        "buttons": {
+          "close": "Cancel",
+          "ok": "Add"
+        }
+      }
     }
   },
   "unit": {
@@ -254,6 +300,20 @@
       },
       "webhook_events": {
         "not_sent": "Not sent"
+      },
+      "zashishennie_vetki": {
+        "title": "Protected branches",
+        "hint": "Branches matching the masks are protected from file editing in units.",
+        "empty": "No protected branches added",
+        "buttons": {
+          "save": "Save"
+        },
+        "validation": {
+          "empty": "A mask cannot be empty",
+          "too_long": "The mask is too long (maximum 256 characters)",
+          "duplicate": "This mask has already been added",
+          "too_many": "The mask limit is reached (maximum 50)"
+        }
       }
     },
     "spisok_rep": {
@@ -400,7 +460,9 @@
       },
       "messages": {
         "duplicates": "Units with the same branch:",
-        "no_variables": "No variables in the config"
+        "no_variables": "No variables in the config",
+        "vetka_zashishena": "The branch is protected: file editing in the unit will be unavailable",
+        "vetka_zashishena_created": "Unit created with a protected branch: file editing is unavailable"
       }
     },
     "form_fill_variables": {
@@ -428,8 +490,12 @@
           "projectName": "Project Name",
           "mainBranch": "Main Branch",
           "proxyHost": "Proxy Host",
-          "unitContainerMemory": "Unit container memory limit, MB"
+          "unitContainerMemory": "Unit container memory limit, MB",
+          "zashishennieVetki": "Protected branches"
         }
+      },
+      "hints": {
+        "zashishennieVetki": "Branch masks protected from file editing in units (for example, release/*)"
       },
       "buttons": {
         "ok": "Ok",
@@ -747,6 +813,53 @@
       "readonly": "Read only",
       "refresh_button": "Refresh",
       "refresh_failed": "Failed to update progress automatically"
+    },
+    "runner_job_not_found": "The runner job was not found",
+    "redaktor": {
+      "badge": {
+        "view": "View",
+        "edit": "Edit",
+        "locked": "Locked"
+      },
+      "prichina": {
+        "protected_branch": "The branch is protected: file editing is forbidden",
+        "net_tokena": "No personal storage token with access to the project"
+      },
+      "dialog": {
+        "title": "Unit editors"
+      },
+      "toggle": {
+        "label": "Collaborative editing"
+      },
+      "editors": {
+        "empty": "No editors attached yet",
+        "token_yes": "Has token",
+        "token_no": "No token"
+      },
+      "buttons": {
+        "attach": "Attach",
+        "detach": "Detach",
+        "my_link": "My link",
+        "copy_link": "Copy link",
+        "open_link": "Open link"
+      },
+      "fields": {
+        "user": "User"
+      },
+      "hints": {
+        "net_tokena": "You have no personal storage token with access to the project"
+      },
+      "link": {
+        "expires": "Link expires"
+      },
+      "ne_avtor": "You are not the unit author",
+      "vetka_zashishena": "The branch is protected: file editing is unavailable",
+      "net_lichnogo_tokena": "Add a personal storage token with access to the project",
+      "token_bez_prav_na_proekt": "The personal token has no access to the project",
+      "redaktor_uzhe_prikreplen": "This user is already attached as an editor",
+      "redaktor_ne_nayden": "Editor not found",
+      "redaktor_bez_tokena": "The editor has no personal storage token with access to the project",
+      "net_dostupa_k_proektu": "No access to the project"
     }
   },
   "dashboard": {
@@ -811,11 +924,16 @@
           "credential": "Credentials",
           "branch": "Branch",
           "projects": "Projects",
+          "project_branch": "Project branch: {project}",
           "prompt": "Initial prompt"
         },
         "hint_name": "Unique within the account",
-        "hint_branch": "A single branch for all projects",
+        "hint_branch": "One branch for all projects; if the branch does not exist in the repository, it will be created locally from the base branch",
         "hint_projects": "Order matters; at most {max}. Selected: {count}",
+        "placeholder_project_branch": "Shared branch: {branch}",
+        "hint_project_branch": "Leave empty to use the shared branch",
+        "no_project_branches": "No branches found",
+        "error_project_branches": "Failed to load project branches",
         "hint_prompt": "Runs automatically once the container is up",
         "push_warning": "Push access is checked on creation: if any project lacks it, the workspace becomes read-only.",
         "buttons": {
@@ -841,8 +959,32 @@
         "waiting": "The workspace is not ready to accept messages yet"
       },
       "errors": {
+        "not_found": "Workspace not found",
         "operation_failed": "The workspace operation failed"
-      }
+      },
+      "helper": {
+        "caption": "Workspace port link",
+        "open_button": "Port link",
+        "fields": {
+          "port": "Port",
+          "suffix": "Suffix (optional)"
+        },
+        "hint_port": "An integer from 1 to 65535",
+        "hint_suffix": "Path appended to the link, for example /api/v1",
+        "result_link": "Generated link",
+        "buttons": {
+          "ok": "Generate link",
+          "copy": "Copy",
+          "copied": "Copied",
+          "open": "Open"
+        },
+        "errors": {
+          "workspace_not_selected": "No workspace selected",
+          "invalid_port": "The port must be an integer from 1 to 65535",
+          "request_failed": "Failed to generate the link"
+        }
+      },
+      "branch_protected": "The branch is protected in one of the projects and cannot be used for a workspace"
     },
     "rekvizity": {
       "caption": "Access credentials",
@@ -1013,5 +1155,20 @@
       "unknown_option": "No such answer option",
       "unexpected_kind": "The runner returned an unexpected result kind"
     }
+  },
+  "project": {
+    "zashishennie_vetki": {
+      "pusta_stroka": "A mask cannot be empty",
+      "slishkom_dlinnaya": "The mask is too long (maximum 256 characters)",
+      "dublikat": "This mask has already been added",
+      "slishkom_mnogo": "The mask limit is reached (maximum 50)"
+    }
+  },
+  "lichniy_token": {
+    "ne_nayden": "Personal token not found",
+    "chuzhoy": "The personal token belongs to another user",
+    "pustoy_token": "The token cannot be empty",
+    "ne_validen": "The token is invalid",
+    "dublikat": "This token has already been added"
   }
 }

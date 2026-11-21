@@ -13,10 +13,12 @@ import {
     type ChernovikOtvetaOpenCode,
     type OtvetOpenCode,
 } from "@/modules/opencode/model/ChatOpenCode";
-import { statusTranzitniy } from "@/modules/opencode/model/Workspace";
+import { statusTranzitniy, type Workspace } from "@/modules/opencode/model/Workspace";
 import type { TipSessiiChata } from "@/modules/opencode/store/StorChataOpenCode";
+import { useStorPomoschnikaSsylkiWorkspace } from "@/modules/opencode/store/StorPomoschnikaSsylkiWorkspace";
 import PanelShagovHoda from "@/modules/opencode/view/PanelShagovHoda.vue";
 import WorkspaceStatusBadge from "@/modules/opencode/view/Workspace/WorkspaceStatusBadge.vue";
+import OknoSsylkiWorkspace from "@/modules/opencode/view/Workspace/OknoSsylkiWorkspace.vue";
 import { convertDate } from "@/utils/dates";
 import type { Schema } from "@/api/types";
 
@@ -28,6 +30,7 @@ const $q = useQuasar();
 const stor = useStorChataOpenCode();
 const storSessiy = useStorSpiskaSessiyOpenCode();
 const formaPrivyazki = useStorFormiPrivyazkiUnitaKSessii();
+const storPomoschnika = useStorPomoschnikaSsylkiWorkspace();
 
 const {
     hody,
@@ -72,6 +75,22 @@ const privyazannieUniti = computed(() => sessiya.value?.units ?? []);
 
 /** Проекты workspace: для workspace вместо юнитов показываются они. */
 const proektyWorkspace = computed(() => workspace.value?.projects ?? []);
+
+/** Кнопка помощника ссылки доступна только у работающего workspace. */
+const mozhnoOtkritPomoschnik = computed(() => estWorkspace.value && statusWorkspace.value === "RUNNING");
+
+/** Подпись проекта: ветка проекта либо общая ветка workspace (старые данные). */
+function podpisProekta(project: Workspace["projects"][number]): string {
+    const vetka = project.branch || workspace.value?.branch || "";
+
+    return `${project.projectName} · ${vetka}`;
+}
+
+function otkritPomoschnik(): void {
+    if (workspace.value !== null) {
+        storPomoschnika.otkrit(workspace.value);
+    }
+}
 
 const zagolovok = computed(() => workspace.value?.name ?? sessiya.value?.title ?? props.id);
 
@@ -367,6 +386,17 @@ watch(() => props.id, (noviyId) => {
       </q-btn>
 
       <q-btn
+          v-if="mozhnoOtkritPomoschnik"
+          dense
+          flat
+          icon="link"
+          color="white"
+          @click="otkritPomoschnik()"
+      >
+        <q-tooltip>{{ $t('opencode.workspace.helper.open_button') }}</q-tooltip>
+      </q-btn>
+
+      <q-btn
           v-if="!arhivirovana && !estWorkspace"
           dense
           flat
@@ -399,7 +429,7 @@ watch(() => props.id, (noviyId) => {
           color="primary"
           text-color="white"
           icon="folder"
-          :label="project.projectName"
+          :label="podpisProekta(project)"
       >
         <q-icon v-if="!project.canPush" name="lock" size="14px" class="q-ml-xs">
           <q-tooltip>{{ $t('opencode.workspace.badges.no_push_project') }}</q-tooltip>
@@ -627,6 +657,7 @@ watch(() => props.id, (noviyId) => {
   </q-card>
 
   <FormaPrivyazkiUnitaKSessii />
+  <OknoSsylkiWorkspace />
 </template>
 
 <style scoped>

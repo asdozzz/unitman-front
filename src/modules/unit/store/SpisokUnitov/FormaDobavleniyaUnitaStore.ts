@@ -7,6 +7,8 @@ import type {Schema} from "@/api/types";
 import type {Unit, TomKonfiga, TomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {PeremenayaKonfiga, sozdatTomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import type {FaylTipaToma, TipToma} from "@/modules/unit/store/SpisokProektov/model/TipToma";
+import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
+import {soderzhitZashishennuyuVetku} from "@/modules/unit/utils/zashishennieVetki";
 
 export class FormaDobavleniyaUnita {
     projectId: string;
@@ -94,6 +96,31 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 spisok: []
             }
         }
+    },
+    getters: {
+        /**
+         * Попадает ли выбранная в форме ветка под маски защищённых веток
+         * выбранного проекта.
+         *
+         * Геттер реактивен: пересчитывается при смене проекта, ветки или
+         * загрузке списка проектов. Используется только для информационного
+         * предупреждения — отправку формы не блокирует.
+         */
+        vetkaZashishenaDlyaFormi(state): boolean {
+            if (!state.form.projectId || !state.form.branch) {
+                return false;
+            }
+
+            const proekt = useSpisokUnitovStore().proekti.spisok.find(
+                (item) => item.value === state.form.projectId,
+            );
+
+            if (!proekt) {
+                return false;
+            }
+
+            return soderzhitZashishennuyuVetku(proekt.zashishennieVetki, state.form.branch) !== null;
+        },
     },
     actions: {
         otkritFormu() {

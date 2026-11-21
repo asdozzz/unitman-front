@@ -199,6 +199,16 @@ class OpenCodeService {
         return apiClient.post<'/opencode/workspace/vosstanovit'>('/opencode/workspace/vosstanovit', params);
     }
 
+    /**
+     * Ссылка на произвольный порт workspace-контейнера.
+     *
+     * Владелец проверяется по текущему аккаунту, статус workspace должен быть
+     * `RUNNING`. Ответ — `WorkspaceLinkHolder` (`{link}`).
+     */
+    ssylkaWorkspacePoPortu(params: Schema<"PoluchitSsylkuWorkspace">) {
+        return apiClient.post<'/opencode/workspace/ssylkaPoPortu'>('/opencode/workspace/ssylkaPoPortu', params);
+    }
+
     /** Финальное удаление: контейнер, тома, каталог и записи БД. Необратимо. */
     udalitWorkspace(params: Schema<"UdalitWorkspace">) {
         return apiClient.post<'/opencode/workspace/udalit'>('/opencode/workspace/udalit', params);

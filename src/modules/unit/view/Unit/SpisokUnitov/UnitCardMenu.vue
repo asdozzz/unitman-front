@@ -7,6 +7,7 @@ import type {UnitCommand, UnitUiState} from "@/modules/unit/utils/unitStatus";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {useFormaZapolneniyaPeremenihUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import {useAuthStore} from "@/modules/account/store/auth";
+import {useStorRedaktorovUnita} from "@/modules/unit/store/SpisokUnitov/StorRedaktorovUnita";
 import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
 import {useStorFormiSozdaniyaSessii} from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
 import {
@@ -36,6 +37,7 @@ const {getUserRoleByProjectIdAndUserId, spisokDeistvii} = storeToRefs(unitiStore
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 const storFormaDeistviy = storFormiDeistviyUnita();
 const formaSessiiStore = useStorFormiSozdaniyaSessii();
+const storRedaktorov = useStorRedaktorovUnita();
 
 const authStore = useAuthStore();
 const {userId} = storeToRefs(authStore);
@@ -45,6 +47,13 @@ const mozhetUpravlyat = computed<boolean>(() => {
   return props.item.unitSozdanSystemoi
       || userId.value === props.item.authorId
       || getUserRoleByProjectIdAndUserId.value(props.item.projectId, userId.value as string) === "ADMIN";
+});
+
+/** Пункт «Редакторы» виден автору/админу и всем, у кого вычислен режим редактора. */
+const vidniRedaktory = computed<boolean>(() => {
+  return mozhetUpravlyat.value
+      || props.isAdmin
+      || (props.item.redaktorMode ?? null) !== null;
 });
 
 /** Единый реестр команд для меню и строки действий. */
@@ -109,12 +118,18 @@ const estMeni = computed<boolean>(() => {
       || deistviyaSpiska.value.length > 0
       || mozhnoZapolnit.value
       || props.item.redaktorLink !== null
+      || vidniRedaktory.value
       || props.isAdmin
       || props.canRemove;
 });
 
 function otkritKonfig() {
   konfigFormStore.otkritFormu(props.item.id, props.item.projectId);
+}
+
+/** Открывает диалог редакторов текущего юнита. */
+function otkritRedaktorov() {
+  void storRedaktorov.otkrytDlya(props.item);
 }
 
 function otkritOknoSZadachamiRunnera() {
@@ -203,6 +218,13 @@ function pokazatFormuDeistviya(deistvie: Deistviye) {
             <q-icon name="forum" />
           </q-item-section>
           <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.create_session') }}</q-item-section>
+        </q-item>
+
+        <q-item v-if="vidniRedaktory" clickable v-close-popup @click="otkritRedaktorov">
+          <q-item-section avatar>
+            <q-icon name="edit_note" />
+          </q-item-section>
+          <q-item-section>{{ $t('unit.redaktor.dialog.title') }}</q-item-section>
         </q-item>
 
         <q-item
