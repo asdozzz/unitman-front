@@ -15,7 +15,7 @@ import UnitFilterBar from "@/modules/unit/view/Unit/SpisokUnitov/UnitFilterBar.v
 import FormaSozdaniyaUnita from "@/modules/unit/view/Unit/FormaSozdaniyaUnita.vue";
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
 import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
-import FormaSozdaniyaSessii from "@/modules/opencode/view/FormaSozdaniyaSessii.vue";
+import FormaSozdaniyaSessiiUnita from "@/modules/opencode/view/FormaSozdaniyaSessiiUnita.vue";
 import { useFormaDobavleniyaUnitaStore } from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
 import { useFormaZapolneniyaPeremenihUnitaStore } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
 import { storFormiDeistviyUnita } from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
@@ -122,9 +122,14 @@ function vybratUnit(unitId: string) {
   viewStore.vybratUnit(unitId);
 }
 
-/** После создания сессии из карточки юнита сразу открываем её чат. */
+/** После создания сессии из карточки юнита открываем её в новом окне. */
 function pereytiVSessiyu(id: string) {
-  router.push({ name: "opencode_chat", params: { id } });
+  const url = router.resolve({
+    name: "opencode_unit_session_chat",
+    params: { id },
+  }).href;
+
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function openAddForm() {
@@ -631,7 +636,7 @@ watch(effektivniyRezhim, (noviyRezhim: UnitListViewMode) => {
 
     <!-- Диалог создания сессии общий с модулем OpenCode: карточка юнита
          только открывает его с предвыбранным юнитом. -->
-    <FormaSozdaniyaSessii @sozdana="pereytiVSessiyu" />
+    <FormaSozdaniyaSessiiUnita @sozdana="pereytiVSessiyu" />
   </div>
 </template>
 

@@ -15,7 +15,10 @@ import OpenCodeRazdelToggle from "@/modules/opencode/view/OpenCodeRazdelToggle.v
 const route = useRoute();
 const { t } = useI18n();
 
-const vChate = computed<boolean>(() => route.name === "opencode_chat");
+const vChate = computed<boolean>(() => {
+  return route.name === "opencode_unit_session_chat"
+    || route.name === "opencode_workspace_chat";
+});
 </script>
 
 <template>

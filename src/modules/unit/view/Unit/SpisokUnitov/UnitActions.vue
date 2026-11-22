@@ -6,7 +6,7 @@ import type { Unit } from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import type { UnitCommand, UnitUiState } from "@/modules/unit/utils/unitStatus";
 import { useSpisokUnitovStore } from "@/modules/unit/store/SpisokUnitovStore";
 import { useAuthStore } from "@/modules/account/store/auth";
-import { useStorFormiSozdaniyaSessii } from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
+import { useStorDeistviySessiiUnita } from "@/modules/opencode/store/StorDeistviySessiiUnita";
 import { sozdatReestrKomand, type KnopkaKomandi } from "@/modules/unit/utils/unitCommands";
 import { GhButton } from "@/components/ui";
 import type { OcticonName } from "@/components/ui";
@@ -21,10 +21,18 @@ const router = useRouter();
 const unitiStore = useSpisokUnitovStore();
 const { getUnitLoader, getUserRoleByProjectIdAndUserId } = storeToRefs(unitiStore);
 
-const formaSessiiStore = useStorFormiSozdaniyaSessii();
+const storDeistviySessii = useStorDeistviySessiiUnita();
 
 const authStore = useAuthStore();
 const { userId } = storeToRefs(authStore);
+
+/** Автор и прикреплённые редакторы имеют доступ к unit-сессии. */
+const estRedaktor = computed<boolean>(() => {
+  const tekushiy = userId.value ?? "";
+
+  return tekushiy !== ""
+    && (props.item.authorId === tekushiy || (props.item.redaktory ?? []).includes(tekushiy));
+});
 
 /** Те же права, что были у действий до рефакторинга. */
 const mozhetUpravlyat = computed<boolean>(() => {
@@ -68,16 +76,20 @@ function otkritOknoSZadachamiRunnera() {
   router.push({ name: "unit_jobs", params: { id: props.item.id } });
 }
 
-/** Диалог общий с модулем OpenCode: здесь достаточно открыть его с юнитом. */
+/** Открывает существующую сессию в новом окне либо форму создания. */
 function sozdatSessiyuSUnitom() {
-  formaSessiiStore.otkrit([props.item.id]);
+  void storDeistviySessii.otkritIliSozdat({
+    unitId: props.item.id,
+    unitLabel: props.item.name,
+    unitDescription: `${props.item.projectName} · ${props.item.branch}`,
+  });
 }
 </script>
 
 <template>
-  <div v-if="mozhetUpravlyat" class="unit-actions">
+  <div v-if="mozhetUpravlyat || estRedaktor" class="unit-actions">
     <GhButton
-      v-if="osnovnayaKnopka"
+      v-if="mozhetUpravlyat && osnovnayaKnopka"
       variant="primary"
       size="sm"
       :icon="perevodIkonki(osnovnayaKnopka.icon)"
@@ -87,6 +99,7 @@ function sozdatSessiyuSUnitom() {
     />
 
     <GhButton
+      v-if="mozhetUpravlyat"
       variant="invisible"
       size="sm"
       icon="info"
@@ -95,10 +108,12 @@ function sozdatSessiyuSUnitom() {
     />
 
     <GhButton
+      v-if="estRedaktor"
       variant="invisible"
       size="sm"
       icon="comment-discussion"
       :label="$t('unit.spisok_unitov.card.buttons.session')"
+      :loading="storDeistviySessii.loaderUnitId === item.id"
       @click="sozdatSessiyuSUnitom"
     />
   </div>

@@ -1338,7 +1338,13 @@
           "ARCHIVING": "Container is stopping…",
           "DELETING": "Workspace is being deleted…"
         },
-        "waiting": "The workspace is not ready to accept messages yet"
+        "waiting": "The workspace is not ready to accept messages yet",
+        "back": "Back to workspaces",
+        "loading": "Loading workspace…",
+        "empty": "Send the first prompt",
+        "error": "OpenCode error",
+        "placeholder": "Describe the task for OpenCode",
+        "send": "Send"
       },
       "errors": {
         "not_found": "Workspace not found",
@@ -1400,6 +1406,51 @@
           "close": "Cancel",
           "ok": "Save"
         }
+      }
+    },
+    "unit_sessions": {
+      "caption": "Unit sessions",
+      "empty": {
+        "title": "No sessions yet",
+        "description": "Open a unit card and click Session."
+      },
+      "badges": {
+        "archived": "Archived",
+        "read_only": "Read-only"
+      },
+      "buttons": {
+        "archive": "Archive",
+        "refresh": "Refresh",
+        "show_archive": "Show archived",
+        "hide_archive": "Hide archived"
+      },
+      "read_only": {
+        "banner": "Read-only: file changes are blocked, diagnostics and tests are available",
+        "edit_disabled": "Editing mode is off",
+        "protected_branch": "The branch is protected",
+        "no_token": "No personal token with project access",
+        "not_editor": "No access to the session"
+      },
+      "form": {
+        "caption": "New unit session",
+        "fields": {
+          "unit": "Unit",
+          "title": "Title (optional)",
+          "credential": "Credentials"
+        },
+        "hint_title": "If left empty, the title is generated from the first prompt",
+        "buttons": {
+          "ok": "Create"
+        }
+      },
+      "chat": {
+        "back": "Back to sessions",
+        "loading": "Loading session…",
+        "empty": "Send the first prompt",
+        "waiting": "OpenCode is still running a turn",
+        "error": "OpenCode error",
+        "placeholder": "Describe the task for OpenCode",
+        "send": "Send"
       }
     },
     "sessions": {

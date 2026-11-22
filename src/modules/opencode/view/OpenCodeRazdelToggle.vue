@@ -20,7 +20,9 @@ const router = useRouter();
 const { t } = useI18n();
 
 const tekushchiy = computed<RazdelOpenCode>(() => {
-    return route.name === "opencode_workspaces" ? "workspace" : "sessions";
+    return route.name === "opencode_workspaces" || route.name === "opencode_workspace_chat"
+        ? "workspace"
+        : "sessions";
 });
 
 const punkty = computed<GhNavItem[]>(() => [
@@ -46,7 +48,7 @@ function perekluchit(razdel: string) {
     }
 
     void router.push({
-        name: razdel === "workspace" ? "opencode_workspaces" : "opencode_sessions",
+        name: razdel === "workspace" ? "opencode_workspaces" : "opencode_unit_sessions",
     });
 }
 </script>

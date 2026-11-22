@@ -79,11 +79,23 @@ export const useStorSpiskaWorkspace = defineStore("StorSpiskaWorkspace", {
          * После ответа заново планируется опрос, если остались транзитные
          * статусы. Ошибка фонового опроса не затирает уже показанный список.
          */
-        async poluchitSpisok() {
+        /**
+         * Загрузить список с учётом текущего фильтра.
+         *
+         * @param tiho фоновый опрос: не трогает `loaderSpiska`, чтобы спиннер и
+         *   блокировка кнопок не мигали каждые несколько секунд.
+         */
+        async poluchitSpisok(tiho = false) {
+            // Снимаем ранее запланированный опрос: иначе он может стартовать
+            // поверх ручной загрузки и оставить спиннер включённым.
+            this.ostanovitOpros();
+
             const nomer = ++pokolenie;
 
-            this.loaderSpiska = true;
-            this.oshibkaZagruzki = null;
+            if (!tiho) {
+                this.loaderSpiska = true;
+                this.oshibkaZagruzki = null;
+            }
 
             const response = await OpenCodeService.spisokWorkspace({
                 onlyActive: this.filtr.onlyActive,
@@ -91,10 +103,16 @@ export const useStorSpiskaWorkspace = defineStore("StorSpiskaWorkspace", {
             });
 
             if (nomer !== pokolenie) {
+                if (!tiho) {
+                    this.loaderSpiska = false;
+                }
+
                 return;
             }
 
-            this.loaderSpiska = false;
+            if (!tiho) {
+                this.loaderSpiska = false;
+            }
 
             if (response.status === "success") {
                 this.spisok = response.data;
@@ -195,7 +213,7 @@ export const useStorSpiskaWorkspace = defineStore("StorSpiskaWorkspace", {
 
             tajmerOprosa = setTimeout(() => {
                 tajmerOprosa = null;
-                void this.poluchitSpisok();
+                void this.poluchitSpisok(true);
             }, PAUZA_OPROSA);
         },
 

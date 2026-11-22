@@ -103,7 +103,7 @@ function perekluchitTolkoAktivnie(znachenie: boolean) {
 /** Переход в чат workspace: тип передаётся, чтобы чат не делал probe-запрос. */
 function otkrit(workspace: Workspace) {
     void router.push({
-        name: "opencode_chat",
+        name: "opencode_workspace_chat",
         params: { id: workspace.id },
         query: { type: "workspace" },
     });
@@ -111,7 +111,7 @@ function otkrit(workspace: Workspace) {
 
 function perejtiVWorkspace(id: string) {
     void router.push({
-        name: "opencode_chat",
+        name: "opencode_workspace_chat",
         params: { id },
         query: { type: "workspace" },
     });

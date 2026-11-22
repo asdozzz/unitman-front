@@ -10,7 +10,7 @@ import { useFormaZapolneniyaPeremenihUnitaStore } from "@/modules/unit/store/Spi
 import { useAuthStore } from "@/modules/account/store/auth";
 import { useStorRedaktorovUnita } from "@/modules/unit/store/SpisokUnitov/StorRedaktorovUnita";
 import { storFormiDeistviyUnita } from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
-import { useStorFormiSozdaniyaSessii } from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
+import { useStorDeistviySessiiUnita } from "@/modules/opencode/store/StorDeistviySessiiUnita";
 import { GhActionMenu } from "@/components/ui";
 import type { GhActionMenuItem, OcticonName } from "@/components/ui";
 import {
@@ -40,11 +40,19 @@ const { getUserRoleByProjectIdAndUserId, spisokDeistvii } = storeToRefs(unitiSto
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 const storFormaDeistviy = storFormiDeistviyUnita();
-const formaSessiiStore = useStorFormiSozdaniyaSessii();
+const storDeistviySessii = useStorDeistviySessiiUnita();
 const storRedaktorov = useStorRedaktorovUnita();
 
 const authStore = useAuthStore();
 const { userId } = storeToRefs(authStore);
+
+/** Автор и прикреплённые редакторы имеют доступ к unit-сессии. */
+const estRedaktor = computed<boolean>(() => {
+  const tekushiy = userId.value ?? "";
+
+  return tekushiy !== ""
+    && (props.item.authorId === tekushiy || (props.item.redaktory ?? []).includes(tekushiy));
+});
 
 /** Те же права, что были у действий карточки до рефакторинга. */
 const mozhetUpravlyat = computed<boolean>(() => {
@@ -133,6 +141,7 @@ const estMeni = computed<boolean>(() => {
     mozhnoZapolnit.value ||
     props.item.redaktorLink !== null ||
     vidniRedaktory.value ||
+    estRedaktor.value ||
     props.isAdmin ||
     props.canRemove
   );
@@ -213,13 +222,15 @@ const menyu = computed<Menyu>(() => {
     items.length > 0,
   );
 
-  dobavit(
-    "session",
-    t("unit.spisok_unitov.card.buttons.create_session"),
-    "comment-discussion",
-    sozdatSessiyuSUnitom,
-    false,
-  );
+  if (estRedaktor.value) {
+    dobavit(
+      "session",
+      t("unit.spisok_unitov.card.buttons.session"),
+      "comment-discussion",
+      sozdatSessiyuSUnitom,
+      false,
+    );
+  }
 
   if (vidniRedaktory.value) {
     dobavit(
@@ -293,9 +304,13 @@ function otkritOknoSZadachamiRunnera() {
   router.push({ name: "unit_jobs", params: { id: props.item.id } });
 }
 
-/** Диалог общий с модулем OpenCode: здесь достаточно открыть его с юнитом. */
+/** Открывает существующую сессию в новом окне либо форму создания. */
 function sozdatSessiyuSUnitom() {
-  formaSessiiStore.otkrit([props.item.id]);
+  void storDeistviySessii.otkritIliSozdat({
+    unitId: props.item.id,
+    unitLabel: props.item.name,
+    unitDescription: `${props.item.projectName} · ${props.item.branch}`,
+  });
 }
 
 function pokazatFormuDeistviya(deistvie: Deistviye) {
