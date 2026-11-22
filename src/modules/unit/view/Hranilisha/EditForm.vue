@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
 import {useEditFormStore} from "@/modules/unit/store/SpisokHranilish/EditFormStore";
+import {
+  GhBanner,
+  GhButton,
+  GhFormField,
+  GhInput,
+} from "@/components/ui";
 
 const editFormStore = useEditFormStore();
 const { form, oshibkaOtBackenda, loader } = storeToRefs(editFormStore);
@@ -20,23 +26,49 @@ async function otpravitFormu() {
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
-    <q-card-section>
-      <div class="text-h6">{{$t('unit.form_edit_rep.caption')}}</div>
-    </q-card-section>
+  <form class="edit-repo" @submit.prevent="otpravitFormu">
+    <GhFormField :label="$t('unit.form_edit_rep.fields.labels.token')">
+      <GhInput v-model="form.token" type="password" autocomplete="new-password" />
+    </GhFormField>
 
-    <q-card-section class="q-pt-none">
-      <q-input v-model="form.token" :label="$t('unit.form_edit_rep.fields.labels.token')" />
-      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
-    </q-card-section>
+    <GhBanner v-if="oshibkaOtBackenda" variant="danger" class="edit-repo__error">
+      {{ oshibkaOtBackenda }}
+    </GhBanner>
 
-    <q-card-actions align="right">
-      <q-btn :label="$t('unit.form_edit_rep.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('unit.form_edit_rep.buttons.close')" color="dark" @click="editFormStore.zakritFormu()" :loading="loader"/>
-    </q-card-actions>
-  </q-card>
+    <div class="edit-repo__actions">
+      <GhButton
+          variant="default"
+          :label="$t('unit.form_edit_rep.buttons.close')"
+          :disabled="loader"
+          @click="editFormStore.zakritFormu()"
+      />
+      <GhButton
+          type="submit"
+          variant="primary"
+          icon="check"
+          :label="$t('unit.form_edit_rep.buttons.ok')"
+          :loading="loader"
+      />
+    </div>
+  </form>
 </template>
 
 <style scoped>
+.edit-repo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
+.edit-repo__error {
+  margin-top: 4px;
+}
+
+.edit-repo__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borderColor-default);
+}
 </style>

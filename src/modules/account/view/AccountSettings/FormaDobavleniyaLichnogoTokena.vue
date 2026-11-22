@@ -1,84 +1,164 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
+import {
+  GhBanner,
+  GhButton,
+  GhDialog,
+  GhFormField,
+  GhInput,
+  GhSelect,
+} from "@/components/ui";
+import type { GhSelectOption } from "@/components/ui";
 import { useStorFormiLichnogoTokena } from "@/modules/account/store/StorFormiLichnogoTokena";
 import { useStorLichnihTokenov } from "@/modules/account/store/StorLichnihTokenov";
 
+const emit = defineEmits<{
+  (e: "sozdan", payload: { nazvanie: string; token: string }): void;
+}>();
+
+const { t } = useI18n();
+
 const formaStore = useStorFormiLichnogoTokena();
 const storSpiska = useStorLichnihTokenov();
+
 const {
-    otkryta,
-    repoId,
-    token,
-    nazvanie,
-    loader,
-    oshibkaOtBackenda,
-    spisokRepo,
-    loaderRepo,
-    oshibkaRepo,
-    mozhnoDobavit,
+  otkryta,
+  repoId,
+  token,
+  nazvanie,
+  loader,
+  oshibkaOtBackenda,
+  spisokRepo,
+  loaderRepo,
+  oshibkaRepo,
+  mozhnoDobavit,
 } = storeToRefs(formaStore);
 
-/** Добавление идёт через стор списка: он запоминает результат и перезапрашивает список. */
-function dobavit() {
-    storSpiska.dobavitToken();
+const opciiRepo = computed<GhSelectOption[]>(() =>
+  spisokRepo.value.map((repo) => ({ value: repo.id, label: repo.name })),
+);
+
+function obrabotatZakrytie(otkryto: boolean): void {
+  if (otkryto || loader.value) {
+    return;
+  }
+
+  formaStore.zakryt();
+}
+
+function zakryt(): void {
+  if (loader.value) {
+    return;
+  }
+
+  formaStore.zakryt();
+}
+
+/**
+ * Добавление идёт через стор списка. Секрет пользователь вводит сам,
+ * а бэкенд его не возвращает, поэтому значение запоминается до отправки
+ * и передаётся родителю для одноразового показа.
+ */
+async function dobavit(): Promise<void> {
+  if (!mozhnoDobavit.value) {
+    return;
+  }
+
+  const sohranennoeNazvanie = formaStore.nazvanie.trim();
+  const sohranenniyToken = formaStore.token.trim();
+
+  const otvet = await storSpiska.dobavitToken();
+
+  if (otvet?.status === "success") {
+    emit("sozdan", {
+      nazvanie: sohranennoeNazvanie,
+      token: sohranenniyToken,
+    });
+  }
 }
 </script>
 
 <template>
-  <q-dialog :model-value="otkryta" persistent @update:model-value="formaStore.zakryt()">
-    <q-card style="min-width: 480px">
-      <q-card-section class="bg-primary text-white">
-        <div class="text-subtitle2">{{ $t('account.lichniy_tokeni.form.caption') }}</div>
-      </q-card-section>
+  <GhDialog
+    :model-value="otkryta"
+    :title="t('account.lichniy_tokeni.form.caption')"
+    @update:model-value="obrabotatZakrytie"
+  >
+    <div class="forma-token__body">
+      <GhBanner v-if="oshibkaOtBackenda" variant="danger">
+        {{ oshibkaOtBackenda }}
+      </GhBanner>
 
-      <q-card-section class="q-gutter-sm">
-        <q-select
+      <GhBanner v-if="oshibkaRepo" variant="danger">
+        {{ oshibkaRepo }}
+      </GhBanner>
+
+      <GhFormField :label="t('account.lichniy_tokeni.fields.repo')">
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhSelect
+            :id="controlId"
             v-model="repoId"
-            :options="spisokRepo"
-            option-value="id"
-            option-label="name"
-            emit-value
-            map-options
-            :label="$t('account.lichniy_tokeni.fields.repo')"
-            :loading="loaderRepo"
-            filled
-            dense
-        />
-        <div v-if="oshibkaRepo" class="text-negative">{{ oshibkaRepo }}</div>
+            :options="opciiRepo"
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loaderRepo || loader"
+          />
+        </template>
+      </GhFormField>
 
-        <q-input
+      <GhFormField :label="t('account.lichniy_tokeni.fields.nazvanie')">
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhInput
+            :id="controlId"
             v-model="nazvanie"
-            :label="$t('account.lichniy_tokeni.fields.nazvanie')"
-            filled
-            dense
-            autofocus
-        />
-        <q-input
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loader"
+            autocomplete="off"
+          />
+        </template>
+      </GhFormField>
+
+      <GhFormField :label="t('account.lichniy_tokeni.fields.token')">
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhInput
+            :id="controlId"
             v-model="token"
-            :label="$t('account.lichniy_tokeni.fields.token')"
             type="password"
-            filled
-            dense
-        />
+            autocomplete="off"
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loader"
+          />
+        </template>
+      </GhFormField>
+    </div>
 
-        <div v-if="oshibkaOtBackenda" class="text-negative">{{ oshibkaOtBackenda }}</div>
-      </q-card-section>
-
-      <q-card-actions align="right">
-        <q-btn
-            flat
-            :label="$t('account.lichniy_tokeni.form.buttons.close')"
-            :disable="loader"
-            @click="formaStore.zakryt()"
-        />
-        <q-btn
-            color="primary"
-            :label="$t('account.lichniy_tokeni.form.buttons.ok')"
-            :loading="loader"
-            :disable="!mozhnoDobavit"
-            @click="dobavit()"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+    <template #footer>
+      <GhButton
+        variant="default"
+        :label="t('account.lichniy_tokeni.form.buttons.close')"
+        :disabled="loader"
+        @click="zakryt"
+      />
+      <GhButton
+        variant="primary"
+        icon="plus"
+        :label="t('account.lichniy_tokeni.form.buttons.ok')"
+        :loading="loader"
+        :disabled="!mozhnoDobavit"
+        @click="dobavit"
+      />
+    </template>
+  </GhDialog>
 </template>
+
+<style scoped>
+.forma-token__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+</style>

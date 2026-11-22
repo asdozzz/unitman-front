@@ -4,6 +4,17 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { useRoute, useRouter } from "vue-router";
 import i18n from "@/bootstrap/translator";
+import {
+    GhBanner,
+    GhBox,
+    GhButton,
+    GhEmptyState,
+    GhIcon,
+    GhInput,
+    GhLabel,
+    GhSkeleton,
+} from "@/components/ui";
+import type { GhLabelVariant, OcticonName } from "@/components/ui";
 import { useStorChataOpenCode } from "@/modules/opencode/store/StorChataOpenCode";
 import { useStorSpiskaSessiyOpenCode } from "@/modules/opencode/store/StorSpiskaSessiyOpenCode";
 import { useStorFormiPrivyazkiUnitaKSessii } from "@/modules/opencode/store/StorFormiPrivyazkiUnitaKSessii";
@@ -124,14 +135,21 @@ const chernoviki = ref<Record<string, ChernovikOtvetaOpenCode>>({});
 
 const oblast = ref<HTMLElement | null>(null);
 
-const indikatorProgressa = computed(() => {
+/** Показатель канала прогресса; иконки и варианты — из Primer. */
+type IndikatorProgressa = {
+    variant: GhLabelVariant;
+    ikonka: OcticonName;
+    klyuch: string;
+};
+
+const indikatorProgressa = computed<IndikatorProgressa>(() => {
     switch (rezhimProgressa.value) {
         case "live":
-            return { cvet: "positive", ikonka: "wifi", klyuch: "opencode.chat.progress.live" };
+            return { variant: "success", ikonka: "broadcast", klyuch: "opencode.chat.progress.live" };
         case "polling":
-            return { cvet: "primary", ikonka: "sync", klyuch: "opencode.chat.progress.polling" };
+            return { variant: "accent", ikonka: "sync", klyuch: "opencode.chat.progress.polling" };
         default:
-            return { cvet: "grey", ikonka: "wifi_off", klyuch: "opencode.chat.progress.reconnecting" };
+            return { variant: "neutral", ikonka: "clock", klyuch: "opencode.chat.progress.reconnecting" };
     }
 });
 
@@ -342,230 +360,277 @@ watch(() => props.id, (noviyId) => {
 </script>
 
 <template>
-  <q-card class="column" style="height: calc(100vh - 90px)">
-    <q-card-section class="bg-primary text-white row items-center q-gutter-x-sm">
-      <q-btn dense flat icon="arrow_back" color="white" @click="vernutsyaKSpisku()">
-        <q-tooltip>{{ $t('opencode.chat.buttons.back') }}</q-tooltip>
-      </q-btn>
+  <div class="opencode-chat primer column">
+    <header class="opencode-chat__header">
+      <GhButton
+          variant="invisible"
+          icon="arrow-left"
+          :aria-label="$t('opencode.chat.buttons.back')"
+          :title="$t('opencode.chat.buttons.back')"
+          @click="vernutsyaKSpisku()"
+      />
 
-      <div class="col">
-        <div class="text-subtitle2 ellipsis">
-          {{ zagolovok }}
+      <div class="opencode-chat__heading">
+        <div class="opencode-chat__title-row">
+          <span class="opencode-chat__title" :title="zagolovok">
+            {{ zagolovok }}
+            <q-tooltip>{{ zagolovok }}</q-tooltip>
+          </span>
+
           <WorkspaceStatusBadge
               v-if="estWorkspace && statusWorkspace"
               :status="statusWorkspace"
-              class="q-ml-sm"
           />
-          <q-badge v-if="arhivirovana" color="grey-6" class="q-ml-sm">
-            {{ $t('opencode.sessions.archive.badge') }}
-          </q-badge>
-        </div>
-        <div v-if="sessiya" class="text-caption">
-          {{ $t('opencode.chat.turn.seq', { seq: hody.length }) }} ·
-          {{ $t('opencode.sessions.fields.updated_at') }}: {{ convertDate(sessiya.updatedAt) }}
+
+          <GhLabel
+              v-if="arhivirovana"
+              variant="neutral"
+              icon="archive"
+              :label="$t('opencode.sessions.archive.badge')"
+          />
+
+          <span v-if="sessiya" class="opencode-chat__meta">
+            {{ $t('opencode.chat.turn.seq', { seq: hody.length }) }} ·
+            {{ $t('opencode.sessions.fields.updated_at') }}: {{ convertDate(sessiya.updatedAt) }}
+          </span>
         </div>
       </div>
 
-      <q-badge :color="indikatorProgressa.cvet" class="q-mr-sm">
-        <q-icon :name="indikatorProgressa.ikonka" size="12px" class="q-mr-xs" />
-        {{ $t(indikatorProgressa.klyuch) }}
-      </q-badge>
+      <span class="opencode-chat__spacer" />
 
-      <q-btn
+      <GhLabel
+          :variant="indikatorProgressa.variant"
+          :icon="indikatorProgressa.ikonka"
+          role="status"
+          :label="$t(indikatorProgressa.klyuch)"
+      />
+
+      <a
           v-if="estWorkspace && workspace?.ideLink"
-          dense
-          flat
-          icon="open_in_new"
-          color="white"
-          type="a"
+          class="opencode-chat__icon-link"
           :href="workspace.ideLink"
           target="_blank"
           rel="noopener noreferrer"
+          :aria-label="$t('opencode.workspace.buttons.open_ide')"
+          :title="$t('opencode.workspace.buttons.open_ide')"
       >
-        <q-tooltip>{{ $t('opencode.workspace.buttons.open_ide') }}</q-tooltip>
-      </q-btn>
+        <GhIcon name="link-external" />
+      </a>
 
-      <q-btn
+      <GhButton
           v-if="mozhnoOtkritPomoschnik"
-          dense
-          flat
+          variant="invisible"
+          size="sm"
           icon="link"
-          color="white"
+          :aria-label="$t('opencode.workspace.helper.open_button')"
+          :title="$t('opencode.workspace.helper.open_button')"
           @click="otkritPomoschnik()"
-      >
-        <q-tooltip>{{ $t('opencode.workspace.helper.open_button') }}</q-tooltip>
-      </q-btn>
+      />
 
-      <q-btn
+      <GhButton
           v-if="!arhivirovana && !estWorkspace"
-          dense
-          flat
-          icon="create_new_folder"
-          color="white"
+          variant="invisible"
+          size="sm"
+          icon="link"
+          :aria-label="$t('opencode.chat.buttons.attach_unit')"
+          :title="$t('opencode.chat.buttons.attach_unit')"
           @click="privyazatUniti()"
-      >
-        <q-tooltip>{{ $t('opencode.chat.buttons.attach_unit') }}</q-tooltip>
-      </q-btn>
+      />
 
-      <q-btn
-          dense
-          flat
-          icon="refresh"
-          color="white"
+      <GhButton
+          variant="invisible"
+          size="sm"
+          icon="sync"
+          :aria-label="$t('opencode.chat.buttons.refresh')"
+          :title="$t('opencode.chat.buttons.refresh')"
           :loading="loaderIstorii"
           @click="stor.perezagruzitSessiyu()"
-      >
-        <q-tooltip>{{ $t('opencode.chat.buttons.refresh') }}</q-tooltip>
-      </q-btn>
-    </q-card-section>
+      />
+    </header>
 
-    <q-card-section v-if="estWorkspace" class="q-py-xs row items-center q-gutter-xs">
-      <span class="text-caption text-grey-8">{{ $t('opencode.sessions.fields.projects') }}:</span>
-      <q-chip
+    <div v-if="estWorkspace" class="opencode-chat__chips">
+      <span class="opencode-chat__chips-label">{{ $t('opencode.sessions.fields.projects') }}:</span>
+      <GhLabel
           v-for="project in proektyWorkspace"
           :key="'chat_project_' + project.projectId"
-          dense
-          square
-          color="primary"
-          text-color="white"
-          icon="folder"
-          :label="podpisProekta(project)"
+          variant="neutral"
+          icon="project"
+          :title="podpisProekta(project)"
       >
-        <q-icon v-if="!project.canPush" name="lock" size="14px" class="q-ml-xs">
-          <q-tooltip>{{ $t('opencode.workspace.badges.no_push_project') }}</q-tooltip>
-        </q-icon>
-      </q-chip>
-    </q-card-section>
+        {{ podpisProekta(project) }}
+        <GhIcon
+            v-if="!project.canPush"
+            name="lock"
+            :size="12"
+            :title="$t('opencode.workspace.badges.no_push_project')"
+        />
+      </GhLabel>
+    </div>
 
-    <q-card-section v-else-if="privyazannieUniti.length > 0" class="q-py-xs row items-center q-gutter-xs">
-      <span class="text-caption text-grey-8">{{ $t('opencode.chat.units') }}:</span>
-      <q-chip
+    <div v-else-if="privyazannieUniti.length > 0" class="opencode-chat__chips">
+      <span class="opencode-chat__chips-label">{{ $t('opencode.chat.units') }}:</span>
+      <GhLabel
           v-for="unit in privyazannieUniti"
           :key="'chat_unit_' + unit.unitId"
-          dense
-          square
-          color="primary"
-          text-color="white"
-          icon="folder"
+          variant="neutral"
+          icon="project"
           :label="storSessiy.nazvanieUnitaPoId(unit.unitId)"
+          :title="storSessiy.nazvanieUnitaPoId(unit.unitId)"
       />
-    </q-card-section>
+    </div>
 
     <!-- Workspace: контейнер ещё разворачивается, архивируется или удаляется. -->
-    <q-banner v-if="estWorkspace && workspaceTranzitniy" dense class="bg-blue-1 text-primary">
-      <div class="row items-center q-gutter-sm">
-        <q-spinner size="1.2em" />
-        <span>{{ $t(`opencode.workspace.chat.transient.${statusWorkspace}`) }}</span>
-      </div>
-    </q-banner>
+    <GhBanner
+        v-if="estWorkspace && workspaceTranzitniy"
+        variant="accent"
+        icon="sync"
+        class="opencode-chat__banner"
+    >
+      {{ $t(`opencode.workspace.chat.transient.${statusWorkspace}`) }}
+    </GhBanner>
 
     <!-- Workspace: операция завершилась ошибкой; можно восстановить или удалить. -->
-    <q-banner v-if="estWorkspace && statusWorkspace === 'ERROR'" dense class="bg-red-1 text-negative">
-      <div class="row items-center q-gutter-sm">
-        <q-icon name="error_outline" />
-        <span class="col">
-          {{ perevodKlyucha(oshibkaSostoyaniyaWorkspace) ?? perevodKlyucha(workspace?.errorKey) ?? $t('opencode.workspace.errors.operation_failed') }}
-        </span>
-        <q-btn dense flat no-caps color="primary" :label="$t('opencode.workspace.buttons.restore')" @click="vosstanovitWorkspace()" />
-        <q-btn dense flat no-caps color="negative" :label="$t('opencode.workspace.buttons.delete')" @click="udalitWorkspace()" />
-      </div>
-    </q-banner>
+    <GhBanner
+        v-if="estWorkspace && statusWorkspace === 'ERROR'"
+        variant="danger"
+        class="opencode-chat__banner"
+    >
+      {{ perevodKlyucha(oshibkaSostoyaniyaWorkspace) ?? perevodKlyucha(workspace?.errorKey) ?? $t('opencode.workspace.errors.operation_failed') }}
 
-    <q-banner v-if="arhivirovana" dense class="bg-grey-3 text-grey-9">
-      <div class="row items-center q-gutter-sm">
-        <span class="col">{{ $t('opencode.chat.archived_hint') }}</span>
-        <q-btn
-            v-if="estWorkspace"
-            dense
-            flat
-            no-caps
-            color="primary"
+      <template #actions>
+        <GhButton
+            size="sm"
             :label="$t('opencode.workspace.buttons.restore')"
             @click="vosstanovitWorkspace()"
         />
-      </div>
-    </q-banner>
+        <GhButton
+            size="sm"
+            variant="danger"
+            :label="$t('opencode.workspace.buttons.delete')"
+            @click="udalitWorkspace()"
+        />
+      </template>
+    </GhBanner>
 
-    <div ref="oblast" class="col q-pa-md" style="overflow-y: auto">
-      <div v-if="oshibkaIstorii" class="text-negative q-mb-sm">
+    <GhBanner
+        v-if="arhivirovana"
+        variant="accent"
+        icon="archive"
+        class="opencode-chat__banner"
+    >
+      {{ $t('opencode.chat.archived_hint') }}
+
+      <template v-if="estWorkspace" #actions>
+        <GhButton
+            size="sm"
+            :label="$t('opencode.workspace.buttons.restore')"
+            @click="vosstanovitWorkspace()"
+        />
+      </template>
+    </GhBanner>
+
+    <div ref="oblast" class="opencode-chat__scroll">
+      <GhBanner v-if="oshibkaIstorii" variant="danger" class="opencode-chat__banner">
         {{ $t('opencode.chat.errors.load_history') }}: {{ oshibkaIstorii }}
+        <template #actions>
+          <GhButton
+              size="sm"
+              :label="$t('common.buttons.retry')"
+              @click="stor.perezagruzitSessiyu()"
+          />
+        </template>
+      </GhBanner>
+
+      <div v-if="loaderIstorii && hody.length === 0" class="opencode-chat__loading">
+        <GhSkeleton v-for="n in 3" :key="'chat-skeleton-' + n" height="64px" />
       </div>
 
-      <div v-if="loaderIstorii && hody.length === 0" class="row justify-center q-pa-lg">
-        <q-spinner color="primary" size="2em" />
-      </div>
+      <GhEmptyState
+          v-else-if="hody.length === 0 && !oshibkaIstorii"
+          icon="comment-discussion"
+          :title="$t('opencode.chat.empty')"
+          :description="$t('opencode.chat.placeholder')"
+      />
 
-      <div v-else-if="hody.length === 0 && !oshibkaIstorii" class="text-grey-7">
-        {{ $t('opencode.chat.empty') }}
-      </div>
-
-      <div v-for="hod in hody" :key="hod.id" class="q-mb-lg">
-        <div class="row items-center q-gutter-xs q-mb-xs">
-          <q-badge color="grey-7" :label="$t('opencode.chat.turn.seq', { seq: hod.seq })" />
-          <q-badge :color="hod.status === 'FAILED' ? 'negative' : 'primary'" outline :label="$t(podpisStatusa(hod.status))" />
-          <q-badge v-if="hod.result" color="secondary" outline :label="$t(podpisVida(hod.result.Kind))" />
-        </div>
-
+      <div v-for="hod in hody" :key="hod.id" class="opencode-chat__turn">
         <!-- Реплика пользователя: промпт либо сводка ответов. -->
-        <div class="row justify-end">
-          <q-card flat bordered class="col-auto" style="max-width: 80%">
-            <q-card-section class="text-caption text-grey-7 q-pb-none">
-              {{ $t('opencode.chat.roles.user') }} · {{ convertDate(hod.createdAt) }}
-            </q-card-section>
-            <q-card-section class="pre-wrap">{{ hod.requestText }}</q-card-section>
-          </q-card>
+        <div class="opencode-chat__message opencode-chat__message--user">
+          <div class="opencode-chat__bubble opencode-chat__bubble--user">
+            <div class="opencode-chat__bubble-meta">
+              {{ $t('opencode.chat.roles.user') }} · {{ $t('opencode.chat.turn.seq', { seq: hod.seq }) }} · {{ convertDate(hod.createdAt) }}
+            </div>
+            <div class="pre-wrap">{{ hod.requestText }}</div>
+          </div>
         </div>
 
         <!-- Реплика ассистента: ответ, вопросы или ошибка хода. -->
-        <div class="row q-mt-sm">
-          <q-card flat bordered class="col-auto bg-grey-1" style="max-width: 80%">
-            <q-card-section class="text-caption text-grey-7 q-pb-none">
-              {{ $t('opencode.chat.roles.assistant') }}
-            </q-card-section>
+        <div class="opencode-chat__message opencode-chat__message--assistant">
+          <div class="opencode-chat__bubble opencode-chat__bubble--assistant">
+            <div class="opencode-chat__bubble-meta">
+              {{ $t('opencode.chat.roles.assistant') }} ·
+              <span
+                  class="opencode-chat__turn-status"
+                  :class="hod.status === 'FAILED' ? 'opencode-chat__turn-status--fail' : 'opencode-chat__turn-status--ok'"
+              >{{ $t(podpisStatusa(hod.status)) }}</span>
+              <template v-if="hod.result"> · {{ $t(podpisVida(hod.result.Kind)) }}</template>
+            </div>
 
-            <q-card-section v-if="hod.result?.Kind === 'ANSWER'" class="pre-wrap">
+            <div v-if="hod.result?.Kind === 'ANSWER'" class="pre-wrap">
               {{ hod.result.Answer }}
-            </q-card-section>
+            </div>
 
-            <q-card-section v-else-if="hod.result?.Kind === 'QUESTION'">
-              <div v-for="vopros in normalizovatVoprosy(hod.result.Questions)" :key="vopros.id" class="q-mb-xs">
-                <div class="text-weight-medium">{{ vopros.text }}</div>
-                <div class="text-caption text-grey-8">
+            <div v-else-if="hod.result?.Kind === 'QUESTION'">
+              <div v-for="vopros in normalizovatVoprosy(hod.result.Questions)" :key="vopros.id" class="opencode-chat__question">
+                <div class="opencode-chat__question-title">{{ vopros.text }}</div>
+                <div class="opencode-chat__question-answer">
                   {{ otvetNaVopros(hod, vopros.id) }}
                 </div>
               </div>
-            </q-card-section>
+            </div>
 
-            <q-card-section v-else-if="hod.result?.Kind === 'ERROR'" class="text-negative">
-              {{ perevodKlyucha(hod.result.ErrorKey) ?? perevodKlyucha(hod.errorKey) }}
-            </q-card-section>
+            <div v-else-if="hod.result?.Kind === 'ERROR'" class="opencode-chat__error">
+              <div>
+                {{ perevodKlyucha(hod.result.ErrorKey) ?? perevodKlyucha(hod.errorKey) ?? $t('opencode.turn.failed') }}
+              </div>
+              <div v-if="hod.result.ErrorMessage" class="pre-wrap opencode-chat__error-detail">
+                {{ hod.result.ErrorMessage }}
+              </div>
+            </div>
 
-            <q-card-section v-else-if="hod.status === 'RUNNING'" class="row items-center q-gutter-sm">
-              <q-spinner color="primary" size="1.5em" />
-              <span class="text-grey-8">{{ $t('opencode.chat.status.RUNNING') }}</span>
-            </q-card-section>
+            <div v-else-if="hod.status === 'RUNNING'" class="opencode-chat__running">
+              <GhIcon name="sync" class="opencode-chat__spin" />
+              <span>{{ $t('opencode.chat.status.RUNNING') }}</span>
+            </div>
 
             <!--
               Ошибка без результата: ход упал до того, как бэкенд собрал
               RezultatHodaOpenCode. Ветка стоит последней в цепочке, поэтому
               ход с result.Kind = ERROR уже показал текст выше и не задвоится.
             -->
-            <q-card-section v-else-if="hod.errorKey" class="text-negative">
-              {{ perevodKlyucha(hod.errorKey) }}
-            </q-card-section>
+            <div v-else-if="hod.errorKey" class="opencode-chat__error">
+              {{ perevodKlyucha(hod.errorKey) ?? $t('opencode.turn.failed') }}
+            </div>
 
-            <q-card-section v-else-if="hod.status === 'AWAITING_INPUT'" class="text-grey-8">
+            <!--
+              Ход упал, но ни результата, ни ключа ошибки нет (например, старые
+              записи или нарушение контракта раннера). Без этой ветки карточка
+              ассистента оставалась бы пустой и пользователь не увидел бы даже
+              общего текста ошибки.
+            -->
+            <div v-else-if="hod.status === 'FAILED'" class="opencode-chat__error">
+              {{ $t('opencode.turn.failed') }}
+            </div>
+
+            <div v-else-if="hod.status === 'AWAITING_INPUT'" class="opencode-chat__muted">
               {{ $t('opencode.chat.status.AWAITING_INPUT') }}
-            </q-card-section>
+            </div>
 
-            <q-card-section class="q-pt-none">
-              <PanelShagovHoda
-                  :turn-id="hod.id"
-                  :progress="posledniyHod !== null && posledniyHod.id === hod.id ? progress : null"
-                  :deyatelniy="posledniyHod !== null && posledniyHod.id === hod.id && hodVipolnyaetsya"
-              />
-            </q-card-section>
-          </q-card>
+            <PanelShagovHoda
+                :turn-id="hod.id"
+                :progress="posledniyHod !== null && posledniyHod.id === hod.id ? progress : null"
+                :deyatelniy="posledniyHod !== null && posledniyHod.id === hod.id && hodVipolnyaetsya"
+            />
+          </div>
         </div>
       </div>
 
@@ -574,95 +639,352 @@ watch(() => props.id, (noviyId) => {
         В архиве новые ходы запрещены, поэтому карточка не показывается даже если
         ответы остались неотправленными.
       -->
-      <q-card v-if="voprosy.length > 0 && !arhivirovana" flat bordered class="bg-amber-1">
-        <q-card-section>
-          <div class="text-subtitle2 q-mb-sm">{{ $t('opencode.chat.questions.caption') }}</div>
+      <GhBox
+          v-if="voprosy.length > 0 && !arhivirovana"
+          padding="md"
+          class="opencode-chat__questions"
+      >
+        <template #header>
+          <span>{{ $t('opencode.chat.questions.caption') }}</span>
+        </template>
 
-          <div v-for="vopros in voprosy" :key="vopros.id" class="q-mb-md">
-            <div class="text-weight-medium q-mb-xs">{{ vopros.text }}</div>
+        <div v-for="vopros in voprosy" :key="vopros.id" class="opencode-chat__question">
+          <div class="opencode-chat__question-title">{{ vopros.text }}</div>
 
-            <q-option-group
-                :model-value="chernoviki[vopros.id]?.optionId ?? null"
-                :options="vopros.options.map((option) => ({
-                    value: option.id,
-                    label: option.description ? `${option.label} — ${option.description}` : option.label,
-                }))"
-                type="radio"
-                color="primary"
-                dense
-                @update:model-value="vibratVariant(vopros.id, String($event))"
-            />
-
-            <q-input
-                v-if="vopros.allowFreeText"
-                :model-value="tekstOtveta(vopros.id)"
-                :label="$t('opencode.chat.questions.free_text')"
-                filled
-                dense
-                class="q-mt-xs"
-                @update:model-value="zapisatTekstOtveta(vopros.id, String($event))"
-            />
-
-            <div v-if="vopros.options.length === 0 && !vopros.allowFreeText" class="text-caption text-grey-8">
-              {{ $t('opencode.chat.questions.select_option') }}
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn
+          <q-option-group
+              :model-value="chernoviki[vopros.id]?.optionId ?? null"
+              :options="vopros.options.map((option) => ({
+                  value: option.id,
+                  label: option.description ? `${option.label} — ${option.description}` : option.label,
+              }))"
+              type="radio"
               color="primary"
+              dense
+              @update:model-value="vibratVariant(vopros.id, String($event))"
+          />
+
+          <GhInput
+              v-if="vopros.allowFreeText"
+              :model-value="tekstOtveta(vopros.id)"
+              :placeholder="$t('opencode.chat.questions.free_text')"
+              class="opencode-chat__free-text"
+              @update:model-value="zapisatTekstOtveta(vopros.id, String($event))"
+          />
+
+          <div
+              v-if="vopros.options.length === 0 && !vopros.allowFreeText"
+              class="opencode-chat__muted"
+          >
+            {{ $t('opencode.chat.questions.select_option') }}
+          </div>
+        </div>
+
+        <template #footer>
+          <GhButton
+              variant="primary"
               :label="$t('opencode.chat.questions.submit')"
               :loading="otpravka"
-              :disable="!mozhnoOtvetit"
+              :disabled="!mozhnoOtvetit"
               @click="otvetit()"
           />
-        </q-card-actions>
-      </q-card>
+        </template>
+      </GhBox>
     </div>
 
-    <q-separator />
+    <footer class="opencode-chat__composer">
+      <GhBanner v-if="oshibkaOtpravki" variant="danger" class="opencode-chat__send-error">
+        {{ oshibkaOtpravki }}
+      </GhBanner>
 
-    <q-card-section class="q-py-sm">
-      <div v-if="oshibkaOtpravki" class="text-negative q-mb-xs">{{ oshibkaOtpravki }}</div>
+      <div class="opencode-chat__composer-row">
+        <div class="opencode-chat__composer-input">
+          <GhInput
+              v-model="prompt"
+              size="md"
+              :placeholder="arhivirovana
+                ? $t('opencode.chat.archived_placeholder')
+                : (!mozhnoOtpravlyat ? $t('opencode.workspace.chat.waiting') : $t('opencode.chat.placeholder'))"
+              :disabled="vvodZablokirovan"
+              @keydown.enter.exact.prevent="otpravitPrompt()"
+          />
+        </div>
 
-      <div class="row items-end q-gutter-sm">
-        <q-input
-            v-model="prompt"
-            class="col"
-            type="textarea"
-            autogrow
-            filled
-            dense
-            :placeholder="arhivirovana
-              ? $t('opencode.chat.archived_placeholder')
-              : (!mozhnoOtpravlyat ? $t('opencode.workspace.chat.waiting') : $t('opencode.chat.placeholder'))"
-            :disable="vvodZablokirovan"
-            @keydown.enter.exact.prevent="otpravitPrompt()"
-        />
-        <q-btn
-            color="primary"
-            icon="send"
-            :label="$t('opencode.chat.buttons.send')"
+        <GhButton
+            variant="primary"
+            size="md"
+            icon="arrow-up"
+            :aria-label="$t('opencode.chat.buttons.send')"
+            :title="$t('opencode.chat.buttons.send')"
             :loading="otpravka"
-            :disable="vvodZablokirovan || prompt.trim() === ''"
+            :disabled="vvodZablokirovan || prompt.trim() === ''"
             @click="otpravitPrompt()"
         />
       </div>
 
-      <div v-if="voprosy.length > 0 && !arhivirovana" class="text-caption text-grey-7 q-mt-xs">
+      <div v-if="voprosy.length > 0 && !arhivirovana" class="opencode-chat__hint">
         {{ $t('opencode.chat.questions.caption') }}
       </div>
-    </q-card-section>
-  </q-card>
+    </footer>
+  </div>
 
   <FormaPrivyazkiUnitaKSessii />
   <OknoSsylkiWorkspace />
 </template>
 
 <style scoped>
+.opencode-chat {
+  height: calc(100vh - 96px);
+  overflow: hidden;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-large);
+  background-color: var(--bgColor-default);
+  color: var(--fgColor-default);
+  font-family: var(--fontStack-system);
+}
+
+.opencode-chat__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--borderColor-default);
+  background-color: var(--bgColor-muted);
+}
+
+.opencode-chat__heading {
+  min-width: 0;
+  flex: 1 1 200px;
+}
+
+.opencode-chat__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.opencode-chat__title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-title);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opencode-chat__meta {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  white-space: nowrap;
+}
+
+.opencode-chat__spacer {
+  flex: 1 1 auto;
+}
+
+.opencode-chat__icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--borderRadius-medium);
+  color: var(--fgColor-default);
+}
+
+.opencode-chat__icon-link:hover {
+  background-color: var(--bgColor-neutral-muted);
+}
+
+.opencode-chat__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--borderColor-default);
+}
+
+.opencode-chat__chips-label {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-chat__banner {
+  margin: 8px 12px 0;
+}
+
+.opencode-chat__scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.opencode-chat__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.opencode-chat__turn {
+  margin-bottom: 12px;
+}
+
+.opencode-chat__message {
+  display: flex;
+}
+
+.opencode-chat__message--user {
+  justify-content: flex-end;
+}
+
+.opencode-chat__message--assistant {
+  justify-content: flex-start;
+  margin-top: 6px;
+}
+
+.opencode-chat__bubble {
+  max-width: 80%;
+  padding: 8px 12px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-large);
+  font-size: var(--fontSize-body);
+  line-height: var(--lineHeight-normal);
+  word-break: break-word;
+}
+
+.opencode-chat__bubble--user {
+  background-color: var(--bgColor-accent-muted);
+  border-color: var(--borderColor-accent-muted);
+}
+
+.opencode-chat__bubble--assistant {
+  background-color: var(--bgColor-muted);
+}
+
+.opencode-chat__bubble-meta {
+  margin-bottom: 2px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-chat__turn-status {
+  font-weight: var(--fontWeight-semibold);
+}
+
+.opencode-chat__turn-status--ok {
+  color: var(--fgColor-accent);
+}
+
+.opencode-chat__turn-status--fail {
+  color: var(--fgColor-danger);
+}
+
+.opencode-chat__muted {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-chat__error {
+  color: var(--fgColor-danger);
+}
+
+.opencode-chat__error-detail {
+  margin-top: 4px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-chat__running {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fgColor-muted);
+}
+
+.opencode-chat__spin {
+  color: var(--fgColor-accent);
+  animation: opencode-spin 1s linear infinite;
+}
+
+.opencode-chat__question {
+  margin-bottom: 8px;
+}
+
+.opencode-chat__question-title {
+  font-weight: var(--fontWeight-semibold);
+}
+
+.opencode-chat__question-answer {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-chat__questions {
+  margin-top: 8px;
+}
+
+.opencode-chat__free-text {
+  margin-top: 8px;
+}
+
+.opencode-chat__composer {
+  padding: 8px 12px;
+  border-top: 1px solid var(--borderColor-default);
+  background-color: var(--bgColor-muted);
+}
+
+.opencode-chat__send-error {
+  margin-bottom: 8px;
+}
+
+.opencode-chat__composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.opencode-chat__composer-input {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.opencode-chat__hint {
+  margin-top: 4px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
 .pre-wrap {
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+@keyframes opencode-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .opencode-chat {
+    height: calc(100vh - 80px);
+    border-radius: var(--borderRadius-medium);
+  }
+
+  .opencode-chat__bubble {
+    max-width: 100%;
+  }
+
+  .opencode-chat__scroll {
+    padding: 12px;
+  }
 }
 </style>

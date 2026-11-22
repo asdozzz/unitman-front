@@ -3,6 +3,13 @@ import {computed, ref} from "vue";
 import {storeToRefs} from "pinia";
 import {useRouter} from "vue-router";
 import {copyToClipboard} from "quasar";
+import {
+  GhBox,
+  GhButton,
+  GhDialog,
+  GhFormField,
+  GhInput,
+} from "@/components/ui";
 import type {Proekt} from "@/modules/unit/store/SpisokProektov/model/Proekt";
 import {useSpisokProektovStore} from "@/modules/unit/store/SpisokProekotovStore";
 import {deriveProektUiStatus} from "@/modules/unit/utils/proektStatus";
@@ -39,6 +46,14 @@ const sloman = computed<boolean>(() => proektiStore.proektSloman(props.item.id))
 
 const prompt = ref(false);
 
+/** Введённое имя проекта для mistake-proofing удаления. */
+const podtverzhdenieImeni = ref<string>("");
+
+/** Кнопка удаления активна только при точном совпадении имени. */
+const imyaSovpadaet = computed<boolean>(
+    () => podtverzhdenieImeni.value.trim() === props.item.name,
+);
+
 /** URL хука репозитория: копируется по клику на чип. */
 const urlHuka = computed<string>(() => {
   return `${baseUrl.value}/project/${props.item.id}/hook`;
@@ -69,10 +84,15 @@ async function deaktivirovat() {
 }
 
 function pokazatPodtverzhdenieUdaleniya() {
+  podtverzhdenieImeni.value = "";
   prompt.value = true;
 }
 
 async function podtverditUdalenie() {
+  if (!imyaSovpadaet.value) {
+    return;
+  }
+
   if (sloman.value) {
     await proektiStore.udalitSlomaniiProekt(props.item.id);
   } else {
@@ -84,40 +104,48 @@ async function podtverditUdalenie() {
 </script>
 
 <template>
-  <q-dialog v-model="prompt" persistent>
-    <q-card style="min-width: 350px">
-      <q-card-section>
-        <div class="text-h6">{{ $t('unit.spisok_proektov.card.delete_confirm.title') }}</div>
-        <div class="text-caption-muted q-mt-sm">
-          {{ $t('unit.spisok_proektov.card.delete_confirm.message', {name: item.name}) }}
-        </div>
-      </q-card-section>
-
-      <q-card-actions align="right" class="text-primary">
-        <q-btn flat :label="$t('unit.spisok_proektov.card.delete_confirm.no')" v-close-popup />
-        <q-btn
-            flat
-            color="negative"
-            :label="$t('unit.spisok_proektov.card.delete_confirm.yes')"
-            :loading="getProjectLoader(item.id)"
-            @click="podtverditUdalenie"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
-
-  <article
-      class="proekt-card"
-      :class="{'proekt-card--error': estOshibka}"
+  <GhDialog
+      v-model="prompt"
+      :title="$t('unit.spisok_proektov.card.delete_confirm.title')"
+      width="440px"
   >
-    <q-linear-progress
-        v-if="prozesAktiven"
-        indeterminate
-        color="primary"
-        size="3px"
-        class="proekt-card__process-loader"
-        :aria-label="$t('unit.spisok_proektov.card.status.process_in_progress')"
-    />
+    <p class="proekt-card__dialog-text">
+      {{ $t('unit.spisok_proektov.card.delete_confirm.message', {name: item.name}) }}
+    </p>
+
+    <GhFormField
+        :label="$t('unit.spisok_proektov.card.delete_confirm.input_label')"
+        :caption="$t('unit.spisok_proektov.card.delete_confirm.input_hint', {name: item.name})"
+    >
+      <GhInput
+          :model-value="podtverzhdenieImeni"
+          :placeholder="item.name"
+          autocomplete="off"
+          @update:model-value="podtverzhdenieImeni = $event === null ? '' : String($event)"
+      />
+    </GhFormField>
+
+    <template #footer>
+      <GhButton
+          variant="default"
+          :label="$t('unit.spisok_proektov.card.delete_confirm.no')"
+          @click="prompt = false"
+      />
+      <GhButton
+          variant="danger"
+          icon="trash"
+          :label="$t('unit.spisok_proektov.card.delete_confirm.yes')"
+          :disabled="!imyaSovpadaet"
+          :loading="getProjectLoader(item.id)"
+          @click="podtverditUdalenie"
+      />
+    </template>
+  </GhDialog>
+
+  <GhBox padding="none" class="proekt-card" :class="{'proekt-card--error': estOshibka}">
+    <div v-if="prozesAktiven" class="proekt-card__process" role="progressbar" aria-busy="true">
+      <span class="proekt-card__process-bar" />
+    </div>
 
     <ProektCardHeader :item="item" :state="state">
       <!-- Единственный кебаб карточки живёт в шапке-тулбаре. -->
@@ -138,25 +166,21 @@ async function podtverditUdalenie() {
     </ProektCardHeader>
 
     <div class="proekt-card__body">
-      <q-chip
-          class="proekt-card__hook"
-          dark
-          square
-          color="primary"
-          icon="content_copy"
-          clickable
+      <GhButton
+          variant="default"
+          size="sm"
+          icon="copy"
+          :label="$t('unit.proekt.hook_settings.chip_label')"
           :title="$t('unit.spisok_proektov.card.buttons.copy_hook')"
           @click="skopirovatHook"
-      >
-        {{ $t('unit.proekt.hook_settings.chip_label') }}
-      </q-chip>
+      />
 
       <div class="proekt-card__field">
         <span class="proekt-card__field-label">{{ $t('unit.spisok_proektov.card_fields.repo_id') }}</span>
-        <span class="proekt-card__field-value">{{ item.repoId }}</span>
+        <span class="proekt-card__field-value gh-mono">{{ item.repoId }}</span>
       </div>
     </div>
-  </article>
+  </GhBox>
 </template>
 
 <style scoped>
@@ -165,47 +189,51 @@ async function podtverditUdalenie() {
   flex-direction: column;
   width: 100%;
   min-width: 0;
+}
+
+/* Индикатор процесса: тонкая полоса сверху карточки. */
+.proekt-card__process {
+  height: 3px;
   overflow: hidden;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-surface);
-  transition: box-shadow var(--app-duration-base) var(--app-easing);
+  background: var(--bgColor-neutral-muted);
 }
 
-.proekt-card__process-loader {
-  flex: 0 0 auto;
-  border-radius: var(--app-radius-lg) var(--app-radius-lg) 0 0;
+.proekt-card__process-bar {
+  display: block;
+  width: 35%;
+  height: 100%;
+  background: var(--fgColor-accent);
+  animation: proekt-card-process 1.2s ease-in-out infinite;
 }
 
-/* Border-first: тень появляется только на hover. */
-.proekt-card:hover {
-  box-shadow: var(--app-shadow-md);
+@keyframes proekt-card-process {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
 }
 
 /* Ошибка читается левым акцентом, а не красной рамкой по всему периметру. */
 .proekt-card--error {
-  border-left: 3px solid var(--app-negative);
+  border-left: 3px solid var(--fgColor-danger);
 }
 
 .proekt-card__body {
   display: flex;
   flex-direction: column;
-  gap: var(--app-space-3);
-  padding: var(--app-space-3) var(--app-space-4);
-}
-
-.proekt-card__hook {
-  align-self: flex-start;
-  margin: 0;
+  gap: 8px;
+  padding: 12px 16px;
 }
 
 .proekt-card__field {
   display: flex;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-width: 0;
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
 }
 
 .proekt-card__field-label {
@@ -214,10 +242,16 @@ async function podtverditUdalenie() {
 
 .proekt-card__field-value {
   overflow: hidden;
-  color: var(--app-text);
-  font-family: var(--app-font-family-mono);
+  color: var(--fgColor-default);
   font-size: 0.9em;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.proekt-card__dialog-text {
+  margin: 0 0 12px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-body);
+  line-height: var(--lineHeight-normal);
 }
 </style>

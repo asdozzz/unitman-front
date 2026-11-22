@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
+import {
+    GhBanner,
+    GhButton,
+    GhDialog,
+    GhFormField,
+    GhSkeleton,
+    GhSwitch,
+} from "@/components/ui";
 import { useStorFormiPrivyazkiUnitaKSessii } from "@/modules/opencode/store/StorFormiPrivyazkiUnitaKSessii";
 
 /**
@@ -20,66 +28,106 @@ const {
     oshibkaOtBackenda,
     mozhnoSohranit,
 } = storeToRefs(formaStore);
+
+/** Множественный выбор юнитов через GhSwitch. */
+function perekluchitUnita(id: string, vklyuchen: boolean): void {
+    const nabor = new Set(unitIds.value);
+
+    if (vklyuchen) {
+        nabor.add(id);
+    } else {
+        nabor.delete(id);
+    }
+
+    unitIds.value = [...nabor];
+}
 </script>
 
 <template>
-  <q-dialog :model-value="otkrita" persistent @update:model-value="formaStore.zakrit()">
-    <q-card style="min-width: 460px">
-      <q-card-section class="bg-primary text-white">
-        <div class="text-subtitle2">{{ $t('opencode.sessions.attach.caption') }}</div>
-      </q-card-section>
-
-      <q-card-section class="q-gutter-sm">
-        <q-select
-            v-model="unitIds"
-            :options="dostupnieUniti"
-            option-value="id"
-            option-label="name"
-            emit-value
-            map-options
-            multiple
-            use-chips
-            :loading="loaderUnitov"
-            :label="$t('opencode.sessions.attach.fields.units')"
-            :hint="$t('opencode.sessions.attach.hint_units')"
-            filled
-            dense
-        >
-          <template #option="scope">
-            <q-item v-bind="scope.itemProps">
-              <q-item-section>
-                <q-item-label>{{ scope.opt.name }}</q-item-label>
-                <q-item-label caption>
-                  {{ scope.opt.projectName }} · {{ scope.opt.branch }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
+  <GhDialog
+      :model-value="otkrita"
+      :title="$t('opencode.sessions.attach.caption')"
+      width="520px"
+      persistent
+      @update:model-value="formaStore.zakrit()"
+  >
+    <div class="opencode-form">
+      <GhFormField
+          :label="$t('opencode.sessions.attach.fields.units')"
+          :caption="$t('opencode.sessions.attach.hint_units')"
+      >
+        <div class="opencode-form__switch-list">
+          <template v-if="loaderUnitov">
+            <GhSkeleton v-for="n in 3" :key="'unit-skeleton-' + n" height="28px" />
           </template>
-        </q-select>
 
-        <div v-if="dostupnieUniti.length === 0 && !loaderUnitov" class="text-grey-7">
-          {{ $t('opencode.sessions.attach.empty') }}
+          <template v-else>
+            <GhSwitch
+                v-for="unit in dostupnieUniti"
+                :key="unit.id"
+                :model-value="unitIds.includes(unit.id)"
+                :label="unit.name"
+                :description="`${unit.projectName} · ${unit.branch}`"
+                @update:model-value="perekluchitUnita(unit.id, $event)"
+            />
+          </template>
+
+          <p v-if="!loaderUnitov && dostupnieUniti.length === 0" class="opencode-form__muted">
+            {{ $t('opencode.sessions.attach.empty') }}
+          </p>
         </div>
+      </GhFormField>
 
-        <div v-if="oshibkaZagruzkiUnitov" class="text-negative">{{ oshibkaZagruzkiUnitov }}</div>
-        <div v-if="oshibkaOtBackenda" class="text-negative">{{ oshibkaOtBackenda }}</div>
-      </q-card-section>
+      <GhBanner v-if="oshibkaZagruzkiUnitov" variant="danger">
+        {{ oshibkaZagruzkiUnitov }}
+      </GhBanner>
 
-      <q-card-actions align="right">
-        <q-btn
-            flat
-            :label="$t('opencode.sessions.attach.buttons.close')"
-            :disable="loader"
-            @click="formaStore.zakrit()"
-        />
-        <q-btn
-            color="primary"
-            :label="$t('opencode.sessions.attach.buttons.ok')"
-            :loading="loader"
-            :disable="!mozhnoSohranit"
-            @click="formaStore.sohranit()"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+      <GhBanner v-if="oshibkaOtBackenda" variant="danger">
+        {{ oshibkaOtBackenda }}
+      </GhBanner>
+    </div>
+
+    <template #footer>
+      <GhButton
+          :label="$t('opencode.sessions.attach.buttons.close')"
+          :disabled="loader"
+          @click="formaStore.zakrit()"
+      />
+      <GhButton
+          variant="primary"
+          :label="$t('opencode.sessions.attach.buttons.ok')"
+          :loading="loader"
+          :disabled="!mozhnoSohranit"
+          @click="formaStore.sohranit()"
+      />
+    </template>
+  </GhDialog>
 </template>
+
+<style scoped>
+.opencode-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.opencode-form__switch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* Строки выбора юнитов — 32px, выровнены по центру (F2). */
+.opencode-form__switch-list :deep(.gh-switch) {
+  min-height: 32px;
+  align-items: center;
+}
+
+.opencode-form__muted {
+  margin: 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+</style>

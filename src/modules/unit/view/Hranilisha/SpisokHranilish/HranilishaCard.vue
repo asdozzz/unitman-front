@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {storeToRefs} from "pinia";
 import type {Hranilishe} from "@/modules/unit/store/SpisokHranilish/model/Hranilishe";
 import {useSpisokHranilishStore} from "@/modules/unit/store/SpisokHranilishStore";
 import HranilishaCardHeader from "@/modules/unit/view/Hranilisha/SpisokHranilish/HranilishaCardHeader.vue";
 import HranilishaCardMenu from "@/modules/unit/view/Hranilisha/SpisokHranilish/HranilishaCardMenu.vue";
+import {
+  GhBox,
+  GhButton,
+  GhDialog,
+  GhFormField,
+  GhIcon,
+  GhInput,
+} from "@/components/ui";
 
 const props = defineProps<{
   item: Hranilishe;
@@ -14,6 +22,12 @@ const hranilishaStore = useSpisokHranilishStore();
 const {loaderObnovleniyaHranilisha} = storeToRefs(hranilishaStore);
 
 const prompt = ref(false);
+const podtverzhdenieImeni = ref<string>("");
+
+/** Кнопка удаления активна только при точном совпадении имени. */
+const imyaSovpadaet = computed<boolean>(
+    () => podtverzhdenieImeni.value.trim() === props.item.name,
+);
 
 /** Верификация запускается из меню сразу: подтверждение не требуется. */
 async function podtverditDostup() {
@@ -21,39 +35,60 @@ async function podtverditDostup() {
 }
 
 function pokazatPodtverzhdenieUdaleniya() {
+  podtverzhdenieImeni.value = "";
   prompt.value = true;
 }
 
 async function podtverditUdalenie() {
+  if (!imyaSovpadaet.value) {
+    return;
+  }
+
   await hranilishaStore.udalitHranilishe(props.item.id);
   prompt.value = false;
 }
 </script>
 
 <template>
-  <q-dialog v-model="prompt" persistent>
-    <q-card style="min-width: 350px">
-      <q-card-section>
-        <div class="text-h6">{{ $t('unit.spisok_rep.card.delete_confirm.title') }}</div>
-        <div class="text-caption-muted q-mt-sm">
-          {{ $t('unit.spisok_rep.card.delete_confirm.message', {name: item.name}) }}
-        </div>
-      </q-card-section>
+  <GhDialog
+      v-model="prompt"
+      :title="$t('unit.spisok_rep.card.delete_confirm.title')"
+      width="440px"
+  >
+    <p class="hranilisha-card__dialog-text">
+      {{ $t('unit.spisok_rep.card.delete_confirm.message', {name: item.name}) }}
+    </p>
 
-      <q-card-actions align="right" class="text-primary">
-        <q-btn flat :label="$t('unit.spisok_rep.card.delete_confirm.no')" v-close-popup />
-        <q-btn
-            flat
-            color="negative"
-            :label="$t('unit.spisok_rep.card.delete_confirm.yes')"
-            :loading="loaderObnovleniyaHranilisha"
-            @click="podtverditUdalenie"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+    <GhFormField
+        :label="$t('unit.spisok_rep.card.delete_confirm.input_label')"
+        :caption="$t('unit.spisok_rep.card.delete_confirm.input_hint', {name: item.name})"
+    >
+      <GhInput
+          :model-value="podtverzhdenieImeni"
+          :placeholder="item.name"
+          autocomplete="off"
+          @update:model-value="podtverzhdenieImeni = $event === null ? '' : String($event)"
+      />
+    </GhFormField>
 
-  <article class="hranilisha-card">
+    <template #footer>
+      <GhButton
+          variant="default"
+          :label="$t('unit.spisok_rep.card.delete_confirm.no')"
+          @click="prompt = false"
+      />
+      <GhButton
+          variant="danger"
+          icon="trash"
+          :label="$t('unit.spisok_rep.card.delete_confirm.yes')"
+          :disabled="!imyaSovpadaet"
+          :loading="loaderObnovleniyaHranilisha"
+          @click="podtverditUdalenie"
+      />
+    </template>
+  </GhDialog>
+
+  <GhBox padding="none" class="hranilisha-card">
     <HranilishaCardHeader :item="item">
       <!-- Единственный кебаб карточки живёт в шапке-тулбаре. -->
       <template #actions>
@@ -67,12 +102,12 @@ async function podtverditUdalenie() {
 
     <div class="hranilisha-card__body">
       <div class="hranilisha-card__field">
-        <q-icon name="category" size="14px" />
+        <GhIcon name="repo" :size="14" />
         <span class="hranilisha-card__field-value">{{ item.type }}</span>
       </div>
 
       <div v-if="item.repoUrl" class="hranilisha-card__field">
-        <q-icon name="link" size="14px" />
+        <GhIcon name="link" :size="14" />
         <a
             class="hranilisha-card__field-value hranilisha-card__url"
             :href="item.repoUrl"
@@ -82,7 +117,7 @@ async function podtverditUdalenie() {
         >{{ item.repoUrl }}</a>
       </div>
     </div>
-  </article>
+  </GhBox>
 </template>
 
 <style scoped>
@@ -91,48 +126,46 @@ async function podtverditUdalenie() {
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-surface);
-  transition: box-shadow var(--app-duration-base) var(--app-easing);
-}
-
-/* Border-first: тень появляется только на hover. */
-.hranilisha-card:hover {
-  box-shadow: var(--app-shadow-md);
 }
 
 .hranilisha-card__body {
   display: flex;
   flex-direction: column;
-  gap: var(--app-space-2);
-  padding: var(--app-space-3) var(--app-space-4);
+  gap: 8px;
+  padding: 12px 16px;
 }
 
 .hranilisha-card__field {
   display: flex;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-width: 0;
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
 }
 
 .hranilisha-card__field-value {
   overflow: hidden;
-  color: var(--app-text);
+  color: var(--fgColor-default);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .hranilisha-card__url {
-  font-family: var(--app-font-family-mono);
+  color: var(--fgColor-accent);
+  font-family: var(--fontStack-monospace);
   font-size: 0.9em;
   text-decoration: none;
 }
 
 .hranilisha-card__url:hover {
   text-decoration: underline;
+}
+
+.hranilisha-card__dialog-text {
+  margin: 0 0 12px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-body);
+  line-height: var(--lineHeight-normal);
 }
 </style>

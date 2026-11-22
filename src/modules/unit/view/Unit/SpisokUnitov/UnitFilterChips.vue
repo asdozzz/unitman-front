@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import {useI18n} from "vue-i18n";
-import type {UnitFilterChip, UnitFilterKey} from "@/modules/unit/store/SpisokUnitov/model/UnitFilters";
+import { useI18n } from "vue-i18n";
+import type {
+  UnitFilterChip,
+  UnitFilterKey,
+} from "@/modules/unit/store/SpisokUnitov/model/UnitFilters";
+import { GhIcon, GhLabel } from "@/components/ui";
 
 /**
  * Презентационный фрагмент: чипсы встраиваются в строку 2 UnitFilterBar,
@@ -11,11 +15,11 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  remove: [chip: {key: UnitFilterKey; value?: string}];
+  remove: [chip: { key: UnitFilterKey; value?: string }];
   clear: [];
 }>();
 
-const {t} = useI18n();
+const { t } = useI18n();
 
 /**
  * Ключ фильтра не всегда совпадает с суффиксом перевода:
@@ -71,86 +75,87 @@ function klyuchChipa(chip: UnitFilterChip): string {
 
 <template>
   <template v-if="chips.length > 0">
-    <q-chip
-        v-for="chip in chips"
-        :key="klyuchChipa(chip)"
-        class="filter-chip"
-        dense
-        removable
-        delete-icon="close"
-        :aria-label="podpisChipa(chip)"
-        @remove="emit('remove', {key: chip.key, value: chip.value})"
+    <span
+      v-for="chip in chips"
+      :key="klyuchChipa(chip)"
+      class="filter-chip"
     >
-      {{ podpisChipa(chip) }}
-    </q-chip>
+      <GhLabel variant="neutral">{{ podpisChipa(chip) }}</GhLabel>
+
+      <button
+        type="button"
+        class="filter-chip__remove"
+        :aria-label="podpisChipa(chip)"
+        @click="emit('remove', { key: chip.key, value: chip.value })"
+      >
+        <GhIcon name="x" :size="12" />
+      </button>
+    </span>
 
     <button
-        type="button"
-        class="filter-chips__reset"
-        @click="emit('clear')"
+      type="button"
+      class="filter-chips__reset"
+      @click="emit('clear')"
     >
-      {{ $t('unit.spisok_unitov.filter.reset_all') }}
+      {{ $t("unit.spisok_unitov.filter.reset_all") }}
     </button>
   </template>
 </template>
 
 <style scoped>
-/* Neutral-чипсы: бордер + secondary-текст + крестик, без primary-заливки.
-   Геометрия совпадает со статус-чипами строки (32px, квадратные углы). */
+/* Neutral-чипсы: GhLabel + отдельная кнопка снятия, без primary-заливки. */
 .filter-chip {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  margin: 0;
-  padding: 0 var(--app-space-2) 0 var(--app-space-3);
-  border: 1px solid var(--app-border);
-  border-radius: 0;
-  background: var(--app-surface);
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
+  gap: 2px;
   white-space: nowrap;
 }
 
-.filter-chip :deep(.q-chip__content) {
+.filter-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
   padding: 0;
+  border: 0;
+  border-radius: var(--borderRadius-full);
+  background: transparent;
+  color: var(--fgColor-muted);
+  cursor: pointer;
 }
 
-.filter-chip :deep(.q-chip__icon--remove) {
-  width: 18px;
-  height: 18px;
-  margin: 0 0 0 var(--app-space-1);
-  color: var(--app-text-secondary);
-  font-size: 16px;
-  opacity: 0.85;
+.filter-chip__remove:hover {
+  background-color: var(--bgColor-neutral-muted);
+  color: var(--fgColor-default);
 }
 
-.filter-chip :deep(.q-chip__icon--remove:hover) {
-  color: var(--app-text);
-  opacity: 1;
+.filter-chip__remove:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: 1px;
 }
 
 .filter-chips__reset {
   border: none;
   background: none;
-  padding: 0 var(--app-space-1);
-  color: var(--app-text-secondary);
+  padding: 0 4px;
+  color: var(--fgColor-muted);
   font-family: inherit;
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--app-duration-fast) var(--app-easing);
+  transition: color 80ms ease-out;
 }
 
 .filter-chips__reset:hover {
-  color: var(--app-primary);
+  color: var(--fgColor-accent);
   text-decoration: underline;
 }
 
 .filter-chips__reset:focus-visible {
-  outline: 2px solid var(--app-focus-ring);
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
 }
 </style>

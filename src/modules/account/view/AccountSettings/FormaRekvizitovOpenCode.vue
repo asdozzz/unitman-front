@@ -1,102 +1,179 @@
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
 import { computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
+import {
+  GhBanner,
+  GhButton,
+  GhDialog,
+  GhFormField,
+  GhInput,
+} from "@/components/ui";
 import { useFormaRekvizitovOpenCodeStore } from "@/modules/account/store/SpisokRekvizitovOpenCode/FormaRekvizitovOpenCodeStore";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 
+const { t } = useI18n();
+
 const formaStore = useFormaRekvizitovOpenCodeStore();
 const storSpiska = useStorSpiskaRekvizitovOpenCode();
-const { forma, loader, oshibkaOtBackenda, redaktiruemiId, maskaTekushegoKlyucha, etoSozdanie } = storeToRefs(formaStore);
+const { forma, loader, oshibkaOtBackenda, redaktiruemiId, maskaTekushegoKlyucha, etoSozdanie } =
+  storeToRefs(formaStore);
 
-const zagolovok = computed(() => etoSozdanie.value ? 'opencode.rekvizity.form.caption_create' : 'opencode.rekvizity.form.caption_edit');
+const zagolovok = computed<string>(() =>
+  etoSozdanie.value
+    ? t("opencode.rekvizity.form.caption_create")
+    : t("opencode.rekvizity.form.caption_edit"),
+);
 
-/**
- * Подпись к полю ключа.
- *
- * При изменении ключ не приходит с бэкенда целиком, поэтому показывается только
- * маска, а пустое поле означает «оставить прежний».
- */
-const podskazkaKlyucha = computed(() => {
-    if (etoSozdanie.value) {
-        return null;
-    }
+/** При изменении ключ не приходит целиком — показывается только маска. */
+const podskazkaKlyucha = computed<string>(() => {
+  if (etoSozdanie.value) {
+    return t("opencode.rekvizity.form.fields.api_key_new");
+  }
 
-    return maskaTekushegoKlyucha.value;
+  return t("opencode.rekvizity.form.fields.api_key_keep", {
+    hint: maskaTekushegoKlyucha.value ?? "",
+  });
 });
 
-const mozhnoSohranit = computed(() => {
-    if (loader.value) {
-        return false;
-    }
+const mozhnoSohranit = computed<boolean>(() => {
+  if (loader.value) {
+    return false;
+  }
 
-    const estImya = forma.value.name.trim() !== "";
-    const estUrl = forma.value.url.trim() !== "";
-    const estModel = forma.value.model.trim() !== "";
-    const estKlyuch = forma.value.apiKey.trim() !== "";
+  const estImya = forma.value.name.trim() !== "";
+  const estUrl = forma.value.url.trim() !== "";
+  const estModel = forma.value.model.trim() !== "";
+  const estKlyuch = forma.value.apiKey.trim() !== "";
 
-    // Ключ обязателен только при создании: при изменении пустое поле — «не менять».
-    return estImya && estUrl && estModel && (estKlyuch || !etoSozdanie.value);
+  // Ключ обязателен только при создании: при изменении пустое поле — «не менять».
+  return estImya && estUrl && estModel && (estKlyuch || !etoSozdanie.value);
 });
+
+function obrabotatZakrytie(otkryto: boolean): void {
+  if (otkryto || loader.value) {
+    return;
+  }
+
+  formaStore.zakrit();
+}
+
+function zakrit(): void {
+  if (loader.value) {
+    return;
+  }
+
+  formaStore.zakrit();
+}
 
 /** Сохранение идёт через стор списка: он же перезапрашивает список после успеха. */
-function sohranit() {
-    storSpiska.sohranitRekvizity();
+async function sohranit(): Promise<void> {
+  if (!mozhnoSohranit.value) {
+    return;
+  }
+
+  await storSpiska.sohranitRekvizity();
 }
 </script>
 
 <template>
-  <q-dialog :model-value="redaktiruemiId !== null" persistent @update:model-value="formaStore.zakrit()">
-    <q-card style="min-width: 480px">
-      <q-card-section class="bg-primary text-white">
-        <div class="text-subtitle2">{{ $t(zagolovok) }}</div>
-      </q-card-section>
+  <GhDialog
+    :model-value="redaktiruemiId !== null"
+    :title="zagolovok"
+    @update:model-value="obrabotatZakrytie"
+  >
+    <div class="forma-opencode__body">
+      <GhBanner v-if="oshibkaOtBackenda" variant="danger">
+        {{ oshibkaOtBackenda }}
+      </GhBanner>
 
-      <q-card-section class="q-gutter-sm">
-        <q-input
+      <GhFormField :label="t('opencode.rekvizity.form.fields.name')">
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhInput
+            :id="controlId"
             v-model="forma.name"
-            :label="$t('opencode.rekvizity.form.fields.name')"
-            filled
-            dense
-            autofocus
-        />
-        <q-input
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loader"
+            autocomplete="off"
+          />
+        </template>
+      </GhFormField>
+
+      <GhFormField
+        :label="t('opencode.rekvizity.form.fields.url')"
+        caption="https://api.opencode.ai"
+      >
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhInput
+            :id="controlId"
             v-model="forma.url"
-            :label="$t('opencode.rekvizity.form.fields.url')"
-            hint="https://api.opencode.ai"
-            filled
-            dense
-        />
-        <q-input
+            type="url"
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loader"
+            autocomplete="off"
+          />
+        </template>
+      </GhFormField>
+
+      <GhFormField
+        :label="t('opencode.rekvizity.form.fields.model')"
+        caption="claude-sonnet-4"
+      >
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhInput
+            :id="controlId"
             v-model="forma.model"
-            :label="$t('opencode.rekvizity.form.fields.model')"
-            hint="claude-sonnet-4"
-            filled
-            dense
-        />
-        <q-input
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loader"
+            autocomplete="off"
+          />
+        </template>
+      </GhFormField>
+
+      <GhFormField
+        :label="t('opencode.rekvizity.form.fields.api_key')"
+        :caption="podskazkaKlyucha"
+      >
+        <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+          <GhInput
+            :id="controlId"
             v-model="forma.apiKey"
-            :label="$t('opencode.rekvizity.form.fields.api_key')"
-            :type="'password'"
-            :hint="podskazkaKlyucha
-                ? $t('opencode.rekvizity.form.fields.api_key_keep', { hint: podskazkaKlyucha })
-                : $t('opencode.rekvizity.form.fields.api_key_new')"
-            filled
-            dense
-        />
+            type="password"
+            :aria-describedby="ariaDescribedby"
+            :aria-invalid="ariaInvalid"
+            :disabled="loader"
+            autocomplete="off"
+          />
+        </template>
+      </GhFormField>
+    </div>
 
-        <div v-if="oshibkaOtBackenda" class="text-negative">{{ oshibkaOtBackenda }}</div>
-      </q-card-section>
-
-      <q-card-actions align="right">
-        <q-btn flat :label="$t('opencode.rekvizity.form.buttons.close')" :disable="loader" @click="formaStore.zakrit()" />
-        <q-btn
-            color="primary"
-            :label="$t('opencode.rekvizity.form.buttons.ok')"
-            :loading="loader"
-            :disable="!mozhnoSohranit"
-            @click="sohranit()"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+    <template #footer>
+      <GhButton
+        variant="default"
+        :label="t('opencode.rekvizity.form.buttons.close')"
+        :disabled="loader"
+        @click="zakrit"
+      />
+      <GhButton
+        variant="primary"
+        icon="check"
+        :label="t('opencode.rekvizity.form.buttons.ok')"
+        :loading="loader"
+        :disabled="!mozhnoSohranit"
+        @click="sohranit"
+      />
+    </template>
+  </GhDialog>
 </template>
+
+<style scoped>
+.forma-opencode__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+</style>

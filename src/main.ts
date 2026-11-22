@@ -10,6 +10,9 @@ import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
 // Подключается после CSS Quasar: переопределения темы должны быть позже.
 import './styles/quasar.scss'
+// Primer-токены и сброс идут после quasar.scss, чтобы слой `.primer`
+// перекрывал устаревшие правила каскадом, а не через !important.
+import './styles/primer-tokens.scss'
 import { loadAppSettings } from './utils/appSettings'
 
 const appSettings = loadAppSettings();
@@ -27,17 +30,18 @@ app.use(Quasar, {
     config: {
         // Тема применяется до монтирования, чтобы не было вспышки светлого фона.
         dark: appSettings.darkMode,
-        // Значения дублируют src/styles/_tokens.scss: brand задаёт стартовые
-        // CSS-переменные Quasar, а токены переопределяют их для обеих тем.
+        // Brand-цвета Quasar приведены к Primer-палитре (см.
+        // src/styles/primer-tokens.scss): Notify, диалоги и старые страницы
+        // должны выглядеть в одном ключе с Gh-компонентами.
         brand: {
-            primary: "#2f6fb0",
-            secondary: "#5b6773",
-            accent: "#e89a2b",
-            positive: "#3e9e5b",
-            negative: "#c4485a",
-            info: "#3f8fbf",
-            warning: "#d89020",
-            dark: "#1f2933"
+            primary: "#0969da",
+            secondary: "#57606a",
+            accent: "#bf8700",
+            positive: "#1a7f37",
+            negative: "#cf222e",
+            info: "#0969da",
+            warning: "#9a6700",
+            dark: "#0d1117"
         }
     }
 })

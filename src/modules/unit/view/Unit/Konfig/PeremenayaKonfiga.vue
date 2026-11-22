@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
-import {PeremenayaKonfiga} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import {pomoschnikZapolnen} from "@/modules/unit/store/SpisokUnitov/StorPomoschnikaSsylki";
+import { computed, ref, watch } from "vue";
+import { PeremenayaKonfiga } from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import { pomoschnikZapolnen } from "@/modules/unit/store/SpisokUnitov/StorPomoschnikaSsylki";
 import OknoViboraUnitaDlyaSsylki from "@/modules/unit/view/Unit/Konfig/OknoViboraUnitaDlyaSsylki.vue";
+import { GhButton, GhIcon, GhInput, GhLabel, GhSelect } from "@/components/ui";
 
 const props = defineProps<{
-  peremenaya: PeremenayaKonfiga
+  peremenaya: PeremenayaKonfiga;
 }>();
 
 /**
@@ -29,6 +30,22 @@ const znacheniePriFiksazii = ref<string>(props.peremenaya.value);
 const podpisSvyazi = computed<string>(() => {
   return props.peremenaya.targetUnitName || props.peremenaya.targetUnitId || "";
 });
+
+/** Опции селекта приводятся к контракту GhSelect (`value`/`label`). */
+const optiony = computed<{ value: string; label: string }[]>(() => {
+  const istochnik = (props.peremenaya.konfig.options?.options ?? []) as Array<
+    Record<string, unknown>
+  >;
+
+  return istochnik.map((option) => ({
+    value: String(option.id ?? option.value ?? ""),
+    label: String(option.name ?? option.label ?? ""),
+  }));
+});
+
+function izmenitZnachenie(znachenie: string | number | null): void {
+  props.peremenaya.value = znachenie === null ? "" : String(znachenie);
+}
 
 /**
  * Подставить ссылку и зафиксировать юнит, который её выдал.
@@ -54,51 +71,89 @@ function ochistitSvyaz() {
   znacheniePriFiksazii.value = props.peremenaya.value;
 }
 
-watch(() => props.peremenaya.value, (znachenie: string) => {
-  if (!props.peremenaya.targetUnitId || znachenie === znacheniePriFiksazii.value) {
-    return;
-  }
+watch(
+  () => props.peremenaya.value,
+  (znachenie: string) => {
+    if (!props.peremenaya.targetUnitId || znachenie === znacheniePriFiksazii.value) {
+      return;
+    }
 
-  ochistitSvyaz();
-});
+    ochistitSvyaz();
+  },
+);
 </script>
 
 <template>
-  <div class="row no-wrap items-start q-col-gutter-sm">
-    <div class="col">
-      <template v-if="props.peremenaya.konfig.type === 'collection'">
-        <q-select v-model="props.peremenaya.value" option-value="id" option-label="name"
-                  :options="props.peremenaya.konfig.options?.options ?? []" :label="props.peremenaya.konfig.label" emit-value map-options/>
-      </template>
-      <template v-else>
-        <q-input v-model="props.peremenaya.value" :label="props.peremenaya.konfig.label" />
-      </template>
+  <div class="config-var">
+    <div class="config-var__field">
+      <GhSelect
+        v-if="peremenaya.konfig.type === 'collection'"
+        :model-value="peremenaya.value"
+        :options="optiony"
+        :placeholder="peremenaya.konfig.label"
+        :label="peremenaya.konfig.label"
+        @update:model-value="izmenitZnachenie"
+      />
+
+      <GhInput
+        v-else
+        :model-value="peremenaya.value"
+        :label="peremenaya.konfig.label"
+        @update:model-value="izmenitZnachenie"
+      />
     </div>
 
-    <div class="col-auto" v-if="estPomoschnik">
-      <q-btn square color="primary" icon="link" padding="10px" @click="oknoViboraOtkrito = true">
-        <q-tooltip>{{ $t('unit.pomoschnik_ssylki.hints.insert_link') }}</q-tooltip>
-      </q-btn>
-    </div>
+    <GhButton
+      v-if="estPomoschnik"
+      variant="default"
+      icon="link"
+      :aria-label="$t('unit.pomoschnik_ssylki.hints.insert_link')"
+      @click="oknoViboraOtkrito = true"
+    >
+      <q-tooltip>{{ $t("unit.pomoschnik_ssylki.hints.insert_link") }}</q-tooltip>
+    </GhButton>
   </div>
 
-  <div class="q-mt-xs text-left" v-if="props.peremenaya.targetUnitId">
-    <q-chip dense square color="primary" text-color="white" icon="link"
-            :label="podpisSvyazi" removable @remove="ochistitSvyaz">
+  <div v-if="peremenaya.targetUnitId" class="config-var__link">
+    <GhLabel variant="accent" icon="link">{{ podpisSvyazi }}</GhLabel>
+
+    <GhButton
+      variant="invisible"
+      size="sm"
+      :aria-label="$t('unit.pomoschnik_ssylki.fiksaziya_hint', { id: peremenaya.targetUnitId })"
+      @click="ochistitSvyaz"
+    >
+      <GhIcon name="x" :size="12" />
       <q-tooltip>
-        {{ $t('unit.pomoschnik_ssylki.fiksaziya_hint', {id: props.peremenaya.targetUnitId}) }}
+        {{ $t("unit.pomoschnik_ssylki.fiksaziya_hint", { id: peremenaya.targetUnitId }) }}
       </q-tooltip>
-    </q-chip>
+    </GhButton>
   </div>
 
   <OknoViboraUnitaDlyaSsylki
-      v-if="estPomoschnik"
-      v-model="oknoViboraOtkrito"
-      :helper="props.peremenaya.konfig.helper"
-      @ssylkaPoluchena="podstavitSsylku"
+    v-if="estPomoschnik"
+    v-model="oknoViboraOtkrito"
+    :helper="peremenaya.konfig.helper"
+    @ssylkaPoluchena="podstavitSsylku"
   />
 </template>
 
 <style scoped>
+.config-var {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
 
+.config-var__field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.config-var__link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
 </style>

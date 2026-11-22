@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import i18n from "@/bootstrap/translator";
+import {
+    GhActionMenu,
+    GhBanner,
+    GhBox,
+    GhButton,
+    GhIcon,
+    GhLabel,
+} from "@/components/ui";
+import type { GhActionMenuItem } from "@/components/ui";
 import WorkspaceStatusBadge from "@/modules/opencode/view/Workspace/WorkspaceStatusBadge.vue";
 import OknoSsylkiWorkspace from "@/modules/opencode/view/Workspace/OknoSsylkiWorkspace.vue";
 import { useStorPomoschnikaSsylkiWorkspace } from "@/modules/opencode/store/StorPomoschnikaSsylkiWorkspace";
@@ -63,11 +72,60 @@ const mozhnoArhiv = computed(() => mozhnoArhivirovat(props.workspace.status));
 const mozhnoVosstan = computed(() => mozhnoVosstanovit(props.workspace.status));
 const mozhnoUdal = computed(() => mozhnoUdalit(props.workspace.status));
 
-const zagruzhaetsya = computed(() => ({
-    archive: props.dejstvie === "archive",
-    restore: props.dejstvie === "restore",
-    delete: props.dejstvie === "delete",
-}));
+const dejstvieIdet = computed(() => props.dejstvie !== null && props.dejstvie !== undefined);
+
+/** Пункты меню действий по текущему статусу workspace. */
+const punktyMenu = computed<GhActionMenuItem[]>(() => {
+    const punkty: GhActionMenuItem[] = [];
+
+    if (mozhnoArhiv.value) {
+        punkty.push({
+            id: "archive",
+            label: i18n.global.t("opencode.workspace.buttons.archive"),
+            icon: "archive",
+            disabled: dejstvieIdet.value,
+        });
+    }
+
+    if (mozhnoVosstan.value) {
+        punkty.push({
+            id: "restore",
+            label: i18n.global.t("opencode.workspace.buttons.restore"),
+            icon: "sync",
+            disabled: dejstvieIdet.value,
+        });
+    }
+
+    if (mozhnoUdal.value) {
+        punkty.push({
+            id: "delete",
+            label: i18n.global.t("opencode.workspace.buttons.delete"),
+            icon: "trash",
+            danger: true,
+            separatorBefore: mozhnoArhiv.value || mozhnoVosstan.value,
+            disabled: dejstvieIdet.value,
+        });
+    }
+
+    return punkty;
+});
+
+/** Маршрутизация выбранного пункта меню к событию карточки. */
+function vybratDejstvie(item: GhActionMenuItem): void {
+    if (item.id === "archive") {
+        emit("archive");
+        return;
+    }
+
+    if (item.id === "restore") {
+        emit("restore");
+        return;
+    }
+
+    if (item.id === "delete") {
+        emit("delete");
+    }
+}
 
 /** Ключ перевода приходит с бэкенда; неизвестный ключ показываем как есть. */
 function perevodKlyucha(klyuch: string | null | undefined): string | null {
@@ -82,173 +140,191 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
 </script>
 
 <template>
-  <q-card flat bordered class="workspace-card q-mb-sm">
-    <q-card-section class="q-pb-xs">
-      <div class="row items-center q-gutter-xs">
-        <WorkspaceStatusBadge :status="workspace.status" />
+  <GhBox padding="sm" class="workspace-card">
+    <template #header>
+      <WorkspaceStatusBadge :status="workspace.status" />
 
-        <div class="text-subtitle1 ellipsis col">
-          {{ workspace.name }}
-        </div>
+      <span class="workspace-card__name" :title="workspace.name">
+        {{ workspace.name }}
+        <q-tooltip>{{ workspace.name }}</q-tooltip>
+      </span>
 
-        <q-badge v-if="readOnly" color="orange-8">
-          {{ $t('opencode.workspace.badges.read_only') }}
-          <q-tooltip>{{ $t('opencode.workspace.badges.read_only_hint') }}</q-tooltip>
-        </q-badge>
+      <GhLabel
+          v-if="readOnly"
+          variant="attention"
+          icon="lock"
+          :label="$t('opencode.workspace.badges.read_only')"
+          :title="$t('opencode.workspace.badges.read_only_hint')"
+      />
 
-        <q-badge v-if="workspace.archived" color="grey-6">
-          {{ $t('opencode.sessions.archive.badge') }}
-        </q-badge>
+      <GhLabel
+          v-if="workspace.archived"
+          variant="neutral"
+          icon="archive"
+          :label="$t('opencode.sessions.archive.badge')"
+      />
 
-        <q-spinner v-if="tranzitniy" color="primary" size="1.3em" />
+      <GhIcon
+          v-if="tranzitniy"
+          name="sync"
+          class="workspace-card__spin"
+      />
 
-        <q-btn
-            v-if="workspace.ideLink"
-            dense
-            flat
-            icon="open_in_new"
-            color="primary"
-            type="a"
-            :href="workspace.ideLink"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-          <q-tooltip>{{ $t('opencode.workspace.buttons.open_ide') }}</q-tooltip>
-        </q-btn>
+      <span class="workspace-card__spacer" />
 
-        <q-btn
-            v-if="mozhnoOtkritPomoschnik"
-            dense
-            flat
-            icon="link"
-            color="primary"
-            @click="otkritPomoschnik()"
-        >
-          <q-tooltip>{{ $t('opencode.workspace.helper.open_button') }}</q-tooltip>
-        </q-btn>
+      <a
+          v-if="workspace.ideLink"
+          class="workspace-card__icon-link"
+          :href="workspace.ideLink"
+          target="_blank"
+          rel="noopener noreferrer"
+          :aria-label="$t('opencode.workspace.buttons.open_ide')"
+      >
+        <GhIcon name="link-external" />
+      </a>
 
-        <q-btn dense flat icon="forum" color="primary" @click="emit('open')">
-          <q-tooltip>{{ $t('opencode.workspace.buttons.open_chat') }}</q-tooltip>
-        </q-btn>
+      <GhButton
+          v-if="mozhnoOtkritPomoschnik"
+          variant="invisible"
+          size="sm"
+          icon="link"
+          :aria-label="$t('opencode.workspace.helper.open_button')"
+          @click="otkritPomoschnik()"
+      />
 
-        <q-btn dense flat icon="more_vert" color="primary">
-          <q-menu>
-            <q-list dense style="min-width: 220px">
-              <q-item
-                  v-if="mozhnoArhiv"
-                  clickable
-                  :disable="dejstvie !== null && dejstvie !== undefined"
-                  @click="emit('archive')"
-              >
-                <q-item-section avatar>
-                  <q-icon name="archive" color="warning" />
-                </q-item-section>
-                <q-item-section>{{ $t('opencode.workspace.buttons.archive') }}</q-item-section>
-                <q-item-section v-if="zagruzhaetsya.archive" side>
-                  <q-spinner size="1.2em" />
-                </q-item-section>
-              </q-item>
+      <GhButton
+          variant="invisible"
+          size="sm"
+          icon="comment-discussion"
+          :aria-label="$t('opencode.workspace.buttons.open_chat')"
+          @click="emit('open')"
+      />
 
-              <q-item
-                  v-if="mozhnoVosstan"
-                  clickable
-                  :disable="dejstvie !== null && dejstvie !== undefined"
-                  @click="emit('restore')"
-              >
-                <q-item-section avatar>
-                  <q-icon name="restore" color="primary" />
-                </q-item-section>
-                <q-item-section>{{ $t('opencode.workspace.buttons.restore') }}</q-item-section>
-                <q-item-section v-if="zagruzhaetsya.restore" side>
-                  <q-spinner size="1.2em" />
-                </q-item-section>
-              </q-item>
+      <GhActionMenu
+          :items="punktyMenu"
+          :aria-label="$t('opencode.workspace.buttons.actions')"
+          :disabled="dejstvieIdet"
+          @select="vybratDejstvie"
+      />
+    </template>
 
-              <q-separator v-if="mozhnoArhiv || mozhnoVosstan" />
+    <div class="workspace-card__meta">
+      <span>{{ $t('opencode.workspace.fields.branch') }}: <span class="gh-mono">{{ workspace.branch }}</span></span>
+      <span>{{ $t('opencode.workspace.fields.projects_count', { count: workspace.projects.length }) }}</span>
+      <span>{{ $t('opencode.sessions.fields.updated_at') }}: <span class="gh-mono">{{ convertDate(workspace.updatedAt) }}</span></span>
+      <span>{{ $t('opencode.sessions.fields.created_at') }}: <span class="gh-mono">{{ convertDate(workspace.createdAt) }}</span></span>
+    </div>
 
-              <q-item
-                  v-if="mozhnoUdal"
-                  clickable
-                  :disable="dejstvie !== null && dejstvie !== undefined"
-                  @click="emit('delete')"
-              >
-                <q-item-section avatar>
-                  <q-icon name="delete" color="negative" />
-                </q-item-section>
-                <q-item-section class="text-negative">
-                  {{ $t('opencode.workspace.buttons.delete') }}
-                </q-item-section>
-                <q-item-section v-if="zagruzhaetsya.delete" side>
-                  <q-spinner size="1.2em" />
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-      </div>
-
-      <div class="text-caption text-grey-7 q-mt-xs">
-        {{ $t('opencode.workspace.fields.branch') }}: {{ workspace.branch }}
-        · {{ $t('opencode.workspace.fields.projects_count', { count: workspace.projects.length }) }}
-        · {{ $t('opencode.sessions.fields.updated_at') }}: {{ convertDate(workspace.updatedAt) }}
-        · {{ $t('opencode.sessions.fields.created_at') }}: {{ convertDate(workspace.createdAt) }}
-      </div>
-    </q-card-section>
-
-    <q-card-section v-if="workspace.projects.length > 0" class="q-py-xs row items-center q-gutter-xs">
-      <q-chip
+    <div v-if="workspace.projects.length > 0" class="workspace-card__projects">
+      <GhLabel
           v-for="project in workspace.projects"
           :key="'ws_project_' + project.projectId"
-          dense
-          square
-          color="primary"
-          text-color="white"
-          icon="folder"
-          :label="podpisProekta(project)"
+          variant="neutral"
+          icon="project"
+          :title="!project.canPush ? $t('opencode.workspace.badges.no_push_project') : undefined"
       >
-        <q-icon
-            v-if="!project.canPush"
-            name="lock"
-            size="14px"
-            class="q-ml-xs"
-        >
-          <q-tooltip>{{ $t('opencode.workspace.badges.no_push_project') }}</q-tooltip>
-        </q-icon>
-      </q-chip>
-    </q-card-section>
+        {{ podpisProekta(project) }}
+        <GhIcon v-if="!project.canPush" name="lock" :size="12" class="workspace-card__lock" />
+      </GhLabel>
+    </div>
 
-    <q-banner v-if="workspace.status === 'ERROR'" dense class="bg-red-1 text-negative">
-      <div class="row items-center q-gutter-sm">
-        <q-icon name="error_outline" />
-        <span class="col">{{ oshibka ?? $t('opencode.workspace.errors.operation_failed') }}</span>
-        <q-btn
+    <GhBanner
+        v-if="workspace.status === 'ERROR'"
+        variant="danger"
+        class="workspace-card__error"
+    >
+      {{ oshibka ?? $t('opencode.workspace.errors.operation_failed') }}
+
+      <template #actions>
+        <GhButton
             v-if="mozhnoVosstan"
-            dense
-            flat
-            no-caps
-            color="primary"
+            size="sm"
             :label="$t('opencode.workspace.buttons.restore')"
             @click="emit('restore')"
         />
-        <q-btn
+        <GhButton
             v-if="mozhnoUdal"
-            dense
-            flat
-            no-caps
-            color="negative"
+            size="sm"
+            variant="danger"
             :label="$t('opencode.workspace.buttons.delete')"
             @click="emit('delete')"
         />
-      </div>
-    </q-banner>
+      </template>
+    </GhBanner>
 
     <!-- Один экземпляр диалога на список: только у карточки-источника. -->
     <OknoSsylkiWorkspace v-if="workspace.id === storPomoschnika.workspaceId" />
-  </q-card>
+  </GhBox>
 </template>
 
 <style scoped>
 .workspace-card {
-  transition: box-shadow 0.15s ease;
+  margin-bottom: 8px;
+}
+
+.workspace-card__name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-title);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-card__spacer {
+  flex: 1 1 auto;
+}
+
+.workspace-card__spin {
+  color: var(--fgColor-accent);
+  animation: workspace-spin 1s linear infinite;
+}
+
+.workspace-card__icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--borderRadius-medium);
+  color: var(--fgColor-default);
+}
+
+.workspace-card__icon-link:hover {
+  background-color: var(--bgColor-neutral-muted);
+}
+
+.workspace-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.workspace-card__projects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.workspace-card__lock {
+  margin-left: 2px;
+}
+
+.workspace-card__error {
+  margin-top: 8px;
+}
+
+@keyframes workspace-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

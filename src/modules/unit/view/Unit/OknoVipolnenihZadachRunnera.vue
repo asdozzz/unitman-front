@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import {storeToRefs} from "pinia";
-import {computed, nextTick, onMounted, onUnmounted, ref, watch} from "vue";
-import {useRoute} from 'vue-router'
-import {storVipolnenihZadachRunnera} from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
-import {logProgressa} from "@/modules/unit/model/websocket/LogProgressaZadachi";
-import {convertDateTime, convertTime, dlitelnostShaga} from "@/utils/dates";
+import { storeToRefs } from "pinia";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { storVipolnenihZadachRunnera } from "@/modules/unit/store/SpisokUnitov/StorVipolnenihZadachRunnera";
+import { logProgressa } from "@/modules/unit/model/websocket/LogProgressaZadachi";
+import { convertDateTime, convertTime, dlitelnostShaga } from "@/utils/dates";
+import {
+  GhBanner,
+  GhBox,
+  GhButton,
+  GhEmptyState,
+  GhIcon,
+  GhLabel,
+  GhPageHeader,
+  GhSkeleton,
+} from "@/components/ui";
+import type { GhBannerVariant, GhLabelVariant, OcticonName } from "@/components/ui";
 
 /** Порог «пользователь у нижней границы», px: в пределах него автоскролл разрешён. */
 const POROG_AVTOSKROLLA = 40;
@@ -48,42 +59,83 @@ const shagiSDlitelnostyu = computed(() => {
 
 const sostoyanie = computed(() => progressOtobrazhaemiya.value.status);
 
-const bannerSostoyaniya = computed(() => {
+type VidSostoyaniya = {
+  variant: GhBannerVariant;
+  icon: OcticonName;
+  tekst: string;
+};
+
+const bannerSostoyaniya = computed<VidSostoyaniya>(() => {
   switch (sostoyanie.value) {
-    case 'success':
-      return {klass: 'bg-positive text-white', ikonka: 'check_circle', tekst: 'finished_success'};
-    case 'error':
-      return {klass: 'bg-negative text-white', ikonka: 'error', tekst: 'finished_error'};
-    case 'running':
-      return {klass: 'bg-primary text-white', ikonka: 'autorenew', tekst: 'running'};
+    case "success":
+      return { variant: "success", icon: "check-circle", tekst: "finished_success" };
+    case "error":
+      return { variant: "danger", icon: "x-circle", tekst: "finished_error" };
+    case "running":
+      return { variant: "accent", icon: "sync", tekst: "running" };
     default:
-      return {klass: 'bg-grey-8 text-white', ikonka: 'hourglass_empty', tekst: 'waiting'};
+      return { variant: "accent", icon: "hourglass", tekst: "waiting" };
   }
 });
 
-const indikatorKanala = computed(() => {
+type VidKanala = {
+  variant: GhLabelVariant;
+  tekst: string;
+};
+
+const indikatorKanala = computed<VidKanala>(() => {
   switch (channelState.value) {
-    case 'live':
-      return {cvet: 'green', ikonka: 'circle', tekst: 'live'};
-    case 'reconnecting':
-      return {cvet: 'amber', ikonka: 'circle', tekst: 'reconnecting'};
+    case "live":
+      return { variant: "success", tekst: "live" };
+    case "reconnecting":
+      return { variant: "attention", tekst: "reconnecting" };
     default:
-      return {cvet: 'grey', ikonka: 'circle', tekst: 'readonly'};
+      return { variant: "neutral", tekst: "readonly" };
   }
 });
+
+/** Иконка состояния процесса/задачи по P5. */
+function ikonkaSostoyaniya(sostoyanieZadachi: string): OcticonName {
+  switch (sostoyanieZadachi) {
+    case "SUCCESS":
+      return "check-circle";
+    case "ERROR":
+    case "CANCLED":
+      return "x-circle";
+    case "PENDING":
+      return "clock";
+    default:
+      return "plus";
+  }
+}
+
+/** Класс-модификатор состояния для иконки процесса/задачи. */
+function klassSostoyaniya(sostoyanieZadachi: string): string {
+  switch (sostoyanieZadachi) {
+    case "SUCCESS":
+      return "jobs-state--success";
+    case "ERROR":
+    case "CANCLED":
+      return "jobs-state--danger";
+    case "PENDING":
+      return "jobs-state--accent";
+    default:
+      return "jobs-state--muted";
+  }
+}
 
 onMounted(async () => {
-  window.addEventListener('scroll', obnovitPriznakNizhnegoKraya, {passive: true});
+  window.addEventListener("scroll", obnovitPriznakNizhnegoKraya, { passive: true });
   obnovitPriznakNizhnegoKraya();
 
-  logProgressa('страница выполненных задач открыта', {
+  logProgressa("страница выполненных задач открыта", {
     unitId: route.params.id,
     kanalSostoyanie: channelState.value,
   });
 
   await store.poluchitVipolnenieZadachiRunnera(route.params.id as string);
 
-  logProgressa('страница выполненных задач загрузила список', {
+  logProgressa("страница выполненных задач загрузила список", {
     unitId: route.params.id,
     prozesov: spisok.value.length,
     vybrannayaZadacha: selectJob.value.zadachaId,
@@ -92,21 +144,21 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', obnovitPriznakNizhnegoKraya);
+  window.removeEventListener("scroll", obnovitPriznakNizhnegoKraya);
   // Уходим со страницы — снимаем подписки на канал прогресса и на события юнита.
   store.zakritOkno();
 });
 
 watch(
-    () => [progressOtobrazhaemiya.value.updatedAt, shagi.value.length] as const,
-    () => {
-      if (!polzovatelUNizhnegoKraya) {
-        return;
-      }
+  () => [progressOtobrazhaemiya.value.updatedAt, shagi.value.length] as const,
+  () => {
+    if (!polzovatelUNizhnegoKraya) {
+      return;
+    }
 
-      void nextTick(prokrutitVNiz);
-    },
-    {flush: 'post'},
+    void nextTick(prokrutitVNiz);
+  },
+  { flush: "post" },
 );
 
 /**
@@ -118,34 +170,34 @@ watch(
  * до стора вовсе (подписка, фильтр payload'а или `jobId`).
  */
 watch(
-    () => progressOtobrazhaemiya.value,
-    (novoe, staroe) => {
-      logProgressa('прогресс на странице изменился', {
-        bylo: {
-          updatedAt: staroe.updatedAt,
-          shagov: staroe.steps.length,
-          status: staroe.status,
-        },
-        stalo: {
-          updatedAt: novoe.updatedAt,
-          shagov: novoe.steps.length,
-          status: novoe.status,
-        },
-        vybrannayaZadacha: selectJob.value.zadachaId,
-      });
-    },
+  () => progressOtobrazhaemiya.value,
+  (novoe, staroe) => {
+    logProgressa("прогресс на странице изменился", {
+      bylo: {
+        updatedAt: staroe.updatedAt,
+        shagov: staroe.steps.length,
+        status: staroe.status,
+      },
+      stalo: {
+        updatedAt: novoe.updatedAt,
+        shagov: novoe.steps.length,
+        status: novoe.status,
+      },
+      vybrannayaZadacha: selectJob.value.zadachaId,
+    });
+  },
 );
 
 /** Подписка на смену выбранной задачи: видно, какая задача реально наблюдается. */
 watch(
-    () => selectJob.value.zadachaId,
-    (novaya, staraya) => {
-      logProgressa('выбранная задача изменилась', {
-        bylo: staraya,
-        stalo: novaya,
-        kanal: novaya === '' ? null : `unit_progress#${novaya}`,
-      });
-    },
+  () => selectJob.value.zadachaId,
+  (novaya, staraya) => {
+    logProgressa("выбранная задача изменилась", {
+      bylo: staraya,
+      stalo: novaya,
+      kanal: novaya === "" ? null : `unit_progress#${novaya}`,
+    });
+  },
 );
 
 /** Индикатор канала: `readonly` после `finished` — ожидаемое поведение. */
@@ -161,7 +213,7 @@ function obnovitPriznakNizhnegoKraya(): void {
 }
 
 function prokrutitVNiz(): void {
-  window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'smooth'});
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
 }
 
 async function obnovitVruchnuyu(): Promise<void> {
@@ -176,174 +228,309 @@ async function obnovitVruchnuyu(): Promise<void> {
 </script>
 
 <template>
-  <div class="full-width flex column">
-    <q-spinner
-        v-if="loader"
-        color="primary"
-        size="3em"
-    />
-    <div v-else class="flex flex-center column">
-      <div class="row" style="min-height: 400px; width: 100%;">
-        <div class="full-height full-width row inline wrap justify-start items-start content-start">
-          <div class="col-9" style="overflow: hidden;">
-            <q-card class="no-border-radius bg-grey-10">
-              <q-card-section class="q-pb-none">
-                <div class="row items-center q-gutter-sm q-pb-sm">
-                  <div class="col">
-                    <q-banner
-                        dense
-                        rounded
-                        :class="bannerSostoyaniya.klass"
-                    >
-                      <template v-slot:avatar>
-                        <q-icon :name="bannerSostoyaniya.ikonka"/>
-                      </template>
-                      {{ $t('unit.okno_zadach_runnera.' + bannerSostoyaniya.tekst) }}
-                    </q-banner>
-                  </div>
-                  <div class="col-auto row items-center q-gutter-xs">
-                    <q-icon :name="indikatorKanala.ikonka" :color="indikatorKanala.cvet" size="12px"/>
-                    <span class="text-grey-5 fs-12">
-                      {{ $t('unit.okno_zadach_runnera.' + indikatorKanala.tekst) }}
-                    </span>
-                    <q-btn
-                        v-if="channelState === 'readonly'"
-                        dense
-                        flat
-                        size="sm"
-                        color="grey-5"
-                        icon="refresh"
-                        :loading="obnovlenieVruchnuyu"
-                        :label="$t('unit.okno_zadach_runnera.refresh_button')"
-                        @click="obnovitVruchnuyu"
-                    />
-                  </div>
-                </div>
+  <div class="jobs-page primer">
+    <GhPageHeader :title="$t('app.titles.unit_jobs')">
+      <template #actions>
+        <GhLabel :variant="indikatorKanala.variant" icon="circle">
+          {{ $t("unit.okno_zadach_runnera." + indikatorKanala.tekst) }}
+        </GhLabel>
 
-                <div v-if="progressOtobrazhaemiya.updatedAt > 0" class="text-grey-5 fs-12 q-pb-sm">
-                  {{ $t('unit.okno_zadach_runnera.updated_at', {time: convertTime(progressOtobrazhaemiya.updatedAt)}) }}
-                </div>
+        <GhButton
+          v-if="channelState === 'readonly'"
+          size="sm"
+          icon="sync"
+          :loading="obnovlenieVruchnuyu"
+          :label="$t('unit.okno_zadach_runnera.refresh_button')"
+          @click="obnovitVruchnuyu"
+        />
+      </template>
+    </GhPageHeader>
 
-                <q-banner
-                    v-if="oshibkaOtBackenda !== null"
-                    dense
-                    rounded
-                    class="bg-negative text-white q-mb-sm"
-                >
-                  <template v-slot:avatar>
-                    <q-icon name="warning"/>
-                  </template>
-                  {{ oshibkaOtBackenda }}
-                </q-banner>
+    <div v-if="loader" class="jobs-page__skeleton" aria-busy="true">
+      <GhSkeleton variant="rect" width="100%" height="40" />
+      <GhSkeleton variant="rect" width="100%" height="220" />
+    </div>
 
-                <q-banner
-                    v-if="neUdalosObnovitProgress"
-                    dense
-                    rounded
-                    class="bg-grey-9 text-grey-4 q-mb-sm"
-                >
-                  <template v-slot:avatar>
-                    <q-icon name="cloud_off"/>
-                  </template>
-                  {{ $t('unit.okno_zadach_runnera.refresh_failed') }}
-                </q-banner>
-              </q-card-section>
+    <div v-else class="jobs-layout">
+      <GhBox padding="none" class="jobs-steps">
+        <div class="jobs-steps__body">
+          <GhBanner :variant="bannerSostoyaniya.variant" :icon="bannerSostoyaniya.icon">
+            {{ $t("unit.okno_zadach_runnera." + bannerSostoyaniya.tekst) }}
+          </GhBanner>
 
-              <q-card-section v-if="selectJob.zadachaId !== ''">
-                <div v-for="({step, dlitelnost}, i) in shagiSDlitelnostyu" :key="i">
-                  <div class="text-light-green-14 fs-12">
-                    <div class="row">
-                      <div class="col"><pre class="bash-output">{{step.command}}</pre></div>
-                      <div class="col-auto">
-                        <div v-if="i===0">
-                          {{convertDateTime(step.unixtime)}}
-                        </div>
-                        <div v-if="dlitelnost !== null">
-                          {{dlitelnost + ' ' + $t('common.units.seconds')}}
-                        </div>
-                      </div>
-                    </div>
+          <p v-if="progressOtobrazhaemiya.updatedAt > 0" class="jobs-page__muted">
+            {{
+              $t("unit.okno_zadach_runnera.updated_at", {
+                time: convertTime(progressOtobrazhaemiya.updatedAt),
+              })
+            }}
+          </p>
 
-                  </div>
-                  <div v-if="step.success" class="text-grey-1 fs-12">
-                    <pre class="bash-output">{{step.response}}</pre>
-                  </div>
-                  <div v-if="!step.success" class="text-negative fs-12">
-                    <pre class="bash-output">{{step.response}}</pre>
-                  </div>
+          <GhBanner v-if="oshibkaOtBackenda !== null" variant="danger">
+            {{ oshibkaOtBackenda }}
+          </GhBanner>
 
-                </div>
-              </q-card-section>
-            </q-card>
-          </div>
-          <div class="col-3 bg-grey-6" style="overflow: auto;">
-            <q-card class="no-border-radius">
-              <q-card-section class="q-pt-none">
-                <q-list bordered separator :padding="false" class="rounded-borders">
-                  <q-expansion-item
-                      expand-separator
-                      v-for="(prozess) in spisok"
-                      :model-value="prozess.id === selectJob.prozesId"
-                      :key="prozess.id" active-class="bg-primary text-white">
-                    <template v-slot:header>
-                      <q-item-section avatar>
-                        <q-icon v-if="prozess.state == 'NEW'  || prozess.state == 'ZADACHI_DOBAVLENI'" name="fiber_new"></q-icon>
-                        <q-icon v-if="prozess.state == 'PENDING'" color="primary" name="access_time"></q-icon>
-                        <q-icon v-if="prozess.state == 'ERROR' || prozess.state == 'CANCLED'"  class="text-negative" name="error"></q-icon>
-                        <q-icon v-if="prozess.state == 'SUCCESS'" class="text-positive" name="check_circle"></q-icon>
-                      </q-item-section>
+          <GhBanner v-if="neUdalosObnovitProgress" variant="attention">
+            {{ $t("unit.okno_zadach_runnera.refresh_failed") }}
+          </GhBanner>
 
-                      <q-item-section :class="{'text-primary':prozess.id === selectJob.prozesId}">
-                        <span class="text-weight-bolder">{{$t('unit.tipi_prozesa.'+prozess.type)}}</span>
-                      </q-item-section>
-                    </template>
-                    <q-list bordered separator class="rounded-borders q-pl-md">
-                      <q-item
-                          clickable
-                          v-for="zadacha in prozess.jobs"
-                          :key="zadacha.id"
-                          :active="zadacha.id === selectJob.zadachaId"
-                          @click="store.select(prozess.id, zadacha.id)">
-                        <q-item-section avatar>
-                          <q-icon size="xs" v-if="zadacha.state == 'NEW'" color="primary" name="fiber_new"></q-icon>
-                          <q-icon size="xs" v-if="zadacha.state == 'PENDING'" color="primary" name="access_time"></q-icon>
-                          <q-icon size="xs" v-if="zadacha.state == 'ERROR' || zadacha.state == 'CANCLED'"  class="text-negative" name="error"></q-icon>
-                          <q-icon size="xs" v-if="zadacha.state == 'SUCCESS'" class="text-positive" name="check_circle"></q-icon>
-                        </q-item-section>
+          <template v-if="selectJob.zadachaId !== ''">
+            <div
+              v-for="({ step, dlitelnost }, i) in shagiSDlitelnostyu"
+              :key="i"
+              class="job-step"
+            >
+              <div class="job-step__head">
+                <GhIcon
+                  :name="step.success ? 'check-circle' : 'x-circle'"
+                  :class="step.success ? 'job-step__icon--ok' : 'job-step__icon--fail'"
+                />
 
-                        <q-item-section>
-                          {{$t('unit.tipi_zadach.'+zadacha.type)}}
-                        </q-item-section>
+                <code class="gh-mono job-step__command">{{ step.command }}</code>
 
-                      </q-item>
-                    </q-list>
-                  </q-expansion-item>
-                </q-list>
+                <span class="job-step__meta">
+                  <span v-if="i === 0">{{ convertDateTime(step.unixtime) }}</span>
+                  <span v-if="dlitelnost !== null">
+                    {{ dlitelnost + " " + $t("common.units.seconds") }}
+                  </span>
+                </span>
+              </div>
 
-              </q-card-section>
-            </q-card>
+              <pre
+                class="gh-mono job-step__output"
+                :class="step.success ? 'job-step__output--ok' : 'job-step__output--fail'"
+              >{{ step.response }}</pre>
+            </div>
+          </template>
+
+          <GhEmptyState
+            v-else
+            icon="tasklist"
+            :title="$t('unit.okno_zadach_runnera.nothing_selected')"
+          />
+        </div>
+      </GhBox>
+
+      <GhBox padding="none" class="jobs-processes">
+        <div class="jobs-processes__body">
+          <div v-for="prozess in spisok" :key="prozess.id" class="jobs-process">
+            <div class="jobs-process__header">
+              <GhIcon
+                :name="ikonkaSostoyaniya(prozess.state)"
+                :class="klassSostoyaniya(prozess.state)"
+              />
+              <span class="jobs-process__title">{{ $t("unit.tipi_prozesa." + prozess.type) }}</span>
+            </div>
+
+            <div class="jobs-process__jobs">
+              <button
+                v-for="zadacha in prozess.jobs"
+                :key="zadacha.id"
+                type="button"
+                class="jobs-process__job"
+                :class="{ 'jobs-process__job--active': zadacha.id === selectJob.zadachaId }"
+                @click="store.select(prozess.id, zadacha.id)"
+              >
+                <GhIcon
+                  :name="ikonkaSostoyaniya(zadacha.state)"
+                  :size="14"
+                  :class="klassSostoyaniya(zadacha.state)"
+                />
+                <span>{{ $t("unit.tipi_zadach." + zadacha.type) }}</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </GhBox>
     </div>
-    <q-page-scroller
-        reverse
-        position="bottom-right"
-        :scroll-offset="150"
-        :offset="[18, 80]"
-    >
-      <q-btn fab icon="keyboard_arrow_down" color="accent" />
+
+    <q-page-scroller reverse position="bottom-right" :scroll-offset="150" :offset="[18, 80]">
+      <GhButton icon="arrow-down" :aria-label="$t('unit.okno_zadach_runnera.scroll_to_bottom')" />
     </q-page-scroller>
   </div>
 </template>
 
-<style>
-.fs-12 {
-  font-size: 12px;
+<style scoped>
+.jobs-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.bash-output {
+.jobs-page__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jobs-page__muted {
   margin: 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.jobs-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  align-items: start;
+  gap: 16px;
+}
+
+.jobs-steps__body,
+.jobs-processes__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.job-step {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--borderColor-muted);
+}
+
+.job-step:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.job-step__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.job-step__icon--ok {
+  color: var(--fgColor-success);
+}
+
+.job-step__icon--fail {
+  color: var(--fgColor-danger);
+}
+
+.job-step__command {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-caption);
+}
+
+.job-step__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  white-space: nowrap;
+}
+
+.job-step__output {
+  margin: 0;
+  padding: 8px 12px;
+  overflow-x: auto;
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-muted);
+  font-size: var(--fontSize-caption);
   white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.job-step__output--ok {
+  color: var(--fgColor-default);
+}
+
+.job-step__output--fail {
+  background-color: var(--bgColor-danger-muted);
+  color: var(--fgColor-danger);
+}
+
+.jobs-processes__body {
+  gap: 8px;
+}
+
+.jobs-process {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jobs-process__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-muted);
+}
+
+.jobs-process__title {
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+}
+
+.jobs-process__jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 12px;
+}
+
+.jobs-process__job {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--borderRadius-medium);
+  background: transparent;
+  color: var(--fgColor-default);
+  font-family: inherit;
+  font-size: var(--fontSize-caption);
+  text-align: left;
+  cursor: pointer;
+}
+
+.jobs-process__job:hover {
+  background-color: var(--bgColor-muted);
+}
+
+.jobs-process__job--active {
+  border-color: var(--borderColor-accent-muted);
+  background-color: var(--bgColor-accent-muted);
+  color: var(--fgColor-accent);
+}
+
+.jobs-process__job:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: -2px;
+}
+
+.jobs-state--success {
+  color: var(--fgColor-success);
+}
+
+.jobs-state--danger {
+  color: var(--fgColor-danger);
+}
+
+.jobs-state--accent {
+  color: var(--fgColor-accent);
+}
+
+.jobs-state--muted {
+  color: var(--fgColor-muted);
+}
+
+@media (max-width: 1023.98px) {
+  .jobs-layout {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

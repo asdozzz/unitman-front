@@ -3,6 +3,16 @@ import {onMounted} from "vue";
 import {storeToRefs} from "pinia";
 import {useRoute} from "vue-router";
 import {useTipiTomaProektaStore} from "@/modules/unit/store/SpisokProektov/TipiTomaProektaStore";
+import {
+  GhBanner,
+  GhBox,
+  GhButton,
+  GhEmptyState,
+  GhFormField,
+  GhIcon,
+  GhInput,
+  GhSkeleton,
+} from "@/components/ui";
 
 /**
  * Каталог типов томов проекта: добавление/удаление типов и прикрепление
@@ -52,126 +62,224 @@ function razmerFayla(size: number): string {
 </script>
 
 <template>
-  <q-card style="width: 700px; max-width: 80vw;">
-    <q-card-section>
-      <div class="text-subtitle1 q-mb-sm">{{ $t('unit.tipi_toma.title') }}</div>
-      <div class="row q-mb-sm">
-        <div class="col-4 q-pr-sm">
-          <q-input
-              v-model="form.code"
-              standout
-              dense
-              square
-              outlined
-              :label="$t('unit.tipi_toma.fields.labels.code')"
-          />
+  <div class="volume-types">
+    <form @submit.prevent="tipiTomaStore.dobavitTip()">
+      <GhBox padding="md">
+        <template #header>
+          {{ $t('unit.tipi_toma.title') }}
+        </template>
+
+        <div class="volume-types__form">
+          <GhFormField :label="$t('unit.tipi_toma.fields.labels.code')">
+            <GhInput v-model="form.code" />
+          </GhFormField>
+
+          <GhFormField :label="$t('unit.tipi_toma.fields.labels.name')">
+            <GhInput v-model="form.name" />
+          </GhFormField>
         </div>
-        <div class="col-5 q-pr-sm">
-          <q-input
-              v-model="form.name"
-              standout
-              dense
-              square
-              outlined
-              :label="$t('unit.tipi_toma.fields.labels.name')"
-          />
-        </div>
-        <div class="col-auto">
-          <q-btn
-              color="primary"
+
+        <GhBanner v-if="oshibkaFormi" variant="danger" class="volume-types__error">
+          {{ oshibkaFormi }}
+        </GhBanner>
+
+        <template #footer>
+          <GhButton
+              type="submit"
+              variant="primary"
+              icon="plus"
               :label="$t('unit.tipi_toma.buttons.add')"
               :loading="loaderDobavleniya"
-              :disable="!form.code || !form.name"
-              @click="tipiTomaStore.dobavitTip()"
+              :disabled="!form.code || !form.name"
           />
-        </div>
+        </template>
+      </GhBox>
+    </form>
+
+    <GhBanner
+        v-if="oshibkaSpiska"
+        variant="danger"
+        :title="$t('common.states.error')"
+        class="volume-types__gap"
+    >
+      {{ oshibkaSpiska }}
+      <template #actions>
+        <GhButton
+            variant="default"
+            icon="sync"
+            :label="$t('common.buttons.retry')"
+            @click="tipiTomaStore.poluchitSpisok()"
+        />
+      </template>
+    </GhBanner>
+
+    <GhBox v-else-if="loaderSpiska" padding="md" aria-busy="true" class="volume-types__gap">
+      <div class="volume-types__skeleton">
+        <GhSkeleton variant="text" width="50%" height="14" />
+        <GhSkeleton variant="text" width="70%" height="12" />
       </div>
-      <div class="text-negative" v-if="oshibkaFormi" v-html="oshibkaFormi"></div>
-    </q-card-section>
-  </q-card>
+    </GhBox>
 
-  <q-spinner-cube v-if="loaderSpiska" color="primary" size="2em"/>
-  <div class="text-negative" v-else-if="oshibkaSpiska" v-html="oshibkaSpiska"></div>
-  <template v-else>
-    <div v-if="spisok.length === 0" class="q-mt-sm">{{ $t('unit.tipi_toma.list.empty_result') }}</div>
-    <q-card v-for="tip in spisok" :key="tip.code" class="q-mt-sm" style="width: 700px; max-width: 80vw;">
-      <q-card-section>
-        <div class="row items-center no-wrap">
-          <div class="col">
-            <span class="text-subtitle2">{{ tip.name }}</span>
-            <span class="text-grey-7 q-pl-sm">({{ tip.code }})</span>
-          </div>
-          <div class="col-auto">
-            <q-btn
-                square
-                flat
-                color="negative"
-                icon="delete"
-                padding="5px 6px"
-                :loading="loaderUdaleniya"
-                :disable="tip.files.length > 0"
-                @click="tipiTomaStore.udalitTip(tip.code)"
-            >
-              <q-tooltip>
-                {{ tip.files.length > 0
-                    ? $t('unit.tipi_toma.hints.delete_type_forbidden')
-                    : $t('unit.tipi_toma.hints.delete_type') }}
-              </q-tooltip>
-            </q-btn>
-          </div>
-        </div>
+    <GhBox v-else-if="spisok.length === 0" padding="none" class="volume-types__gap">
+      <GhEmptyState icon="database" :title="$t('unit.tipi_toma.list.empty_result')" />
+    </GhBox>
 
-        <div class="row q-mt-sm">
-          <div class="col">
-            <q-file
-                :model-value="null"
-                multiple
-                :label="$t('unit.tipi_toma.fields.labels.files')"
-                :loading="zagruzkaFaylaDlya === tip.code"
-                accept=".zip,application/zip"
-                outlined
-                dense
-                clearable
-                @update:model-value="(files) => faylyVibrani(tip.code, files as File[] | null)"
-            >
-              <template v-slot:prepend>
-                <q-icon name="attach_file"/>
-              </template>
-            </q-file>
-          </div>
-        </div>
+    <template v-else>
+      <GhBox v-for="tip in spisok" :key="tip.code" padding="md" class="volume-types__gap">
+        <template #header>
+          <GhIcon name="database" :size="14" />
+          <span class="volume-types__name">{{ tip.name }}</span>
+          <span class="volume-types__code gh-mono">({{ tip.code }})</span>
+          <span class="volume-types__spacer" />
+          <GhButton
+              v-if="tip.files.length === 0"
+              variant="invisible"
+              icon="trash"
+              :aria-label="$t('unit.tipi_toma.hints.delete_type')"
+              :title="$t('unit.tipi_toma.hints.delete_type')"
+              :loading="loaderUdaleniya"
+              @click="tipiTomaStore.udalitTip(tip.code)"
+          />
+          <GhButton
+              v-else
+              variant="invisible"
+              icon="trash"
+              :aria-label="$t('unit.tipi_toma.hints.delete_type_forbidden')"
+              :title="$t('unit.tipi_toma.hints.delete_type_forbidden')"
+              disabled
+          />
+        </template>
 
-        <div v-if="tip.files.length > 0" class="q-mt-sm">
-          <div
-              v-for="file in tip.files"
-              :key="file.fileId"
-              class="row items-center no-wrap q-mb-xs"
+        <div class="volume-types__upload">
+          <q-file
+              :model-value="null"
+              class="volume-types__file"
+              multiple
+              :label="$t('unit.tipi_toma.fields.labels.files')"
+              :loading="zagruzkaFaylaDlya === tip.code"
+              accept=".zip,application/zip"
+              outlined
+              dense
+              clearable
+              @update:model-value="(files) => faylyVibrani(tip.code, files as File[] | null)"
           >
-            <div class="col">
-              <q-icon name="archive" class="q-mr-xs"/>
-              <span>{{ file.name }}</span>
-              <span class="text-grey-7 q-pl-sm">{{ razmerFayla(file.size) }}</span>
-            </div>
-            <div class="col-auto">
-              <q-btn
-                  square
-                  flat
-                  color="negative"
-                  icon="close"
-                  padding="5px 6px"
-                  :loading="udalenieFaylaDlya === tip.code"
-                  @click="tipiTomaStore.udalitFayl(tip.code, file.fileId)"
-              >
-                <q-tooltip>{{ $t('unit.tipi_toma.hints.delete_file') }}</q-tooltip>
-              </q-btn>
-            </div>
-          </div>
+            <template #prepend>
+              <GhIcon name="paperclip" />
+            </template>
+          </q-file>
         </div>
-        <div v-else class="text-caption text-grey-7 q-mt-sm">{{ $t('unit.tipi_toma.list.no_files') }}</div>
-      </q-card-section>
-    </q-card>
-  </template>
+
+        <ul v-if="tip.files.length > 0" class="volume-types__files">
+          <li v-for="file in tip.files" :key="file.fileId" class="volume-types__file-row">
+            <GhIcon name="file-zip" :size="14" class="volume-types__file-icon" />
+            <span class="volume-types__file-name">{{ file.name }}</span>
+            <span class="volume-types__file-size gh-mono">{{ razmerFayla(file.size) }}</span>
+            <GhButton
+                variant="invisible"
+                size="sm"
+                icon="x"
+                :aria-label="$t('unit.tipi_toma.hints.delete_file')"
+                :title="$t('unit.tipi_toma.hints.delete_file')"
+                :loading="udalenieFaylaDlya === tip.code"
+                @click="tipiTomaStore.udalitFayl(tip.code, file.fileId)"
+            />
+          </li>
+        </ul>
+
+        <p v-else class="volume-types__no-files">{{ $t('unit.tipi_toma.list.no_files') }}</p>
+      </GhBox>
+    </template>
+  </div>
 </template>
 
 <style scoped>
+.volume-types {
+  display: flex;
+  flex-direction: column;
+  max-width: 820px;
+}
+
+.volume-types__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+@media (max-width: 767.98px) {
+  .volume-types__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.volume-types__gap {
+  margin-top: 16px;
+}
+
+.volume-types__error {
+  margin-top: 12px;
+}
+
+.volume-types__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.volume-types__name {
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-body);
+  font-weight: var(--fontWeight-semibold);
+}
+
+.volume-types__code {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.volume-types__spacer {
+  flex: 1 1 auto;
+}
+
+.volume-types__upload {
+  margin-bottom: 12px;
+}
+
+.volume-types__files {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.volume-types__file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-caption);
+}
+
+.volume-types__file-icon {
+  color: var(--fgColor-muted);
+}
+
+.volume-types__file-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.volume-types__file-size {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  white-space: nowrap;
+}
+
+.volume-types__no-files {
+  margin: 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
 </style>

@@ -1,21 +1,31 @@
 <script setup lang="ts">
-import {computed, ref, watch} from "vue";
-import {storeToRefs} from "pinia";
-import {copyToClipboard} from "quasar";
+import { computed, ref, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { copyToClipboard } from "quasar";
 import i18n from "@/bootstrap/translator";
-import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import type {Schema} from "@/api/types";
-import {useAuthStore} from "@/modules/account/store/auth";
-import {useSpisokVsehPolzovateleiStore} from "@/modules/account/store/SpisokVsehPolzovateleiStore";
-import {useStorRedaktorovUnita} from "@/modules/unit/store/SpisokUnitov/StorRedaktorovUnita";
-import {convertDateTime} from "@/utils/dates";
+import type { Unit } from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type { Schema } from "@/api/types";
+import { useAuthStore } from "@/modules/account/store/auth";
+import { useSpisokVsehPolzovateleiStore } from "@/modules/account/store/SpisokVsehPolzovateleiStore";
+import { useStorRedaktorovUnita } from "@/modules/unit/store/SpisokUnitov/StorRedaktorovUnita";
+import { convertDateTime } from "@/utils/dates";
+import {
+  GhBanner,
+  GhButton,
+  GhDialog,
+  GhFormField,
+  GhLabel,
+  GhSelect,
+  GhSkeleton,
+  GhSwitch,
+} from "@/components/ui";
 
 const props = defineProps<{
   unit: Unit;
 }>();
 
 const authStore = useAuthStore();
-const {userId, isAdmin} = storeToRefs(authStore);
+const { userId, isAdmin } = storeToRefs(authStore);
 
 const stor = useStorRedaktorovUnita();
 const {
@@ -30,7 +40,7 @@ const {
 } = storeToRefs(stor);
 
 const storPolzovatelei = useSpisokVsehPolzovateleiStore();
-const {spisok: vsePolzovateli, loaderSpiska: loaderPolzovatelei} = storeToRefs(storPolzovatelei);
+const { spisok: vsePolzovateli } = storeToRefs(storPolzovatelei);
 
 /** Автор юнита или администратор — только они управляют редакторами. */
 const mozhetUpravlyat = computed<boolean>(() => {
@@ -53,19 +63,21 @@ const mozhnoPrikrepit = computed<boolean>(() => {
 
 /** Ссылка редактора доступна автору и пользователям с правом редактирования. */
 const mozhnoPoluchitSsylku = computed<boolean>(() => {
-  return mozhetUpravlyat.value
-      || props.unit.moguRedaktirovat === true
-      || props.unit.redaktorMode === "edit";
+  return (
+    mozhetUpravlyat.value ||
+    props.unit.moguRedaktirovat === true ||
+    props.unit.redaktorMode === "edit"
+  );
 });
 
 /** Подпись причины запрета из поля `prichinaZapreta`. */
 const podpisPrichini = computed<string | null>(() => {
   if (props.unit.prichinaZapreta === "protected_branch") {
-    return i18n.global.t('unit.redaktor.prichina.protected_branch');
+    return i18n.global.t("unit.redaktor.prichina.protected_branch");
   }
 
   if (props.unit.prichinaZapreta === "net_tokena") {
-    return i18n.global.t('unit.redaktor.prichina.net_tokena');
+    return i18n.global.t("unit.redaktor.prichina.net_tokena");
   }
 
   return null;
@@ -75,15 +87,17 @@ const podpisPrichini = computed<string | null>(() => {
 const vibraniyUserId = ref<string | null>(null);
 
 /** Варианты для селектора: все пользователи, кроме уже прикреплённых. */
-const variantyPolzovatelei = computed<{label: string, value: string}[]>(() => {
-  const zanyatie = new Set(redaktory.value.map((redaktor: Schema<"RedaktorUnita">) => redaktor.userId));
+const variantyPolzovatelei = computed<{ label: string; value: string }[]>(() => {
+  const zanyatie = new Set(
+    redaktory.value.map((redaktor: Schema<"RedaktorUnita">) => redaktor.userId),
+  );
 
   return vsePolzovateli.value
-      .filter((polzovatel) => !zanyatie.has(polzovatel.id))
-      .map((polzovatel) => ({
-        label: polzovatel.nickname || polzovatel.email,
-        value: polzovatel.id,
-      }));
+    .filter((polzovatel) => !zanyatie.has(polzovatel.id))
+    .map((polzovatel) => ({
+      label: polzovatel.nickname || polzovatel.email,
+      value: polzovatel.id,
+    }));
 });
 
 /**
@@ -160,172 +174,253 @@ async function skopirovatSsylku(): Promise<void> {
 
   await copyToClipboard(ssylka.value.ssylka);
 }
+
+/** Открывает полученную ссылку редактора в новой вкладке. */
+function otkritSsylku(): void {
+  if (!ssylka.value) {
+    return;
+  }
+
+  window.open(ssylka.value.ssylka, "_blank", "noopener,noreferrer");
+}
 </script>
 
 <template>
-  <q-dialog v-model="vidno">
-    <q-card class="okno-redaktorov">
-      <q-card-section class="row items-center no-wrap">
-        <div class="text-h6">{{ $t('unit.redaktor.dialog.title') }}</div>
-        <q-space />
-        <q-btn flat round dense icon="close" v-close-popup />
-      </q-card-section>
+  <GhDialog v-model="vidno" width="560px" :title="$t('unit.redaktor.dialog.title')">
+    <div v-if="loader" class="okno-redaktorov__skeleton" aria-busy="true">
+      <GhSkeleton variant="text" width="40%" height="12" />
+      <GhSkeleton variant="rect" width="100%" height="32" />
+      <GhSkeleton variant="text" width="70%" height="12" />
+    </div>
 
-      <q-separator />
-
-      <q-card-section v-if="loader" class="row justify-center q-pa-lg">
-        <q-spinner color="primary" size="32px" />
-      </q-card-section>
-
-      <q-card-section v-else class="q-gutter-y-md">
-        <div class="row items-center no-wrap q-gutter-sm">
-          <div class="col">
-            <div class="text-subtitle2">{{ $t('unit.redaktor.toggle.label') }}</div>
-            <div v-if="rezhimZablokirovan && podpisPrichini" class="text-caption text-warning">
-              {{ podpisPrichini }}
-            </div>
-            <div v-else-if="netLichnogoTokena" class="text-caption text-warning">
-              {{ $t('unit.redaktor.hints.net_tokena') }}
-            </div>
+    <div v-else class="okno-redaktorov">
+      <div class="okno-redaktorov__row">
+        <div class="okno-redaktorov__grow">
+          <div class="okno-redaktorov__label">{{ $t("unit.redaktor.toggle.label") }}</div>
+          <div v-if="rezhimZablokirovan && podpisPrichini" class="okno-redaktorov__hint">
+            {{ podpisPrichini }}
           </div>
+          <div v-else-if="netLichnogoTokena" class="okno-redaktorov__hint">
+            {{ $t("unit.redaktor.hints.net_tokena") }}
+          </div>
+        </div>
 
-          <q-toggle
-              :model-value="redaktirovanieVklucheno"
-              :disable="!mozhetUpravlyat || rezhimZablokirovan"
-              color="positive"
-              @update:model-value="perekluchitRedaktirovanie"
+        <GhSwitch
+          :model-value="redaktirovanieVklucheno"
+          :disabled="!mozhetUpravlyat || rezhimZablokirovan"
+          :aria-label="$t('unit.redaktor.toggle.label')"
+          @update:model-value="perekluchitRedaktirovanie"
+        />
+      </div>
+
+      <hr class="okno-redaktorov__divider" />
+
+      <div>
+        <div v-if="redaktory.length === 0" class="okno-redaktorov__muted">
+          {{ $t("unit.redaktor.editors.empty") }}
+        </div>
+
+        <ul v-else class="okno-redaktorov__list">
+          <li
+            v-for="redaktor in redaktory"
+            :key="redaktor.userId"
+            class="okno-redaktorov__list-item"
+          >
+            <span class="okno-redaktorov__grow">{{ redaktor.imya }}</span>
+
+            <GhLabel
+              :variant="redaktor.imeetTokenNaProekt ? 'success' : 'neutral'"
+              :icon="redaktor.imeetTokenNaProekt ? 'check' : 'x'"
+            >
+              {{
+                redaktor.imeetTokenNaProekt
+                  ? $t("unit.redaktor.editors.token_yes")
+                  : $t("unit.redaktor.editors.token_no")
+              }}
+            </GhLabel>
+
+            <GhButton
+              variant="danger"
+              size="sm"
+              icon="x"
+              :label="$t('unit.redaktor.buttons.detach')"
+              :disabled="!mozhnoOtkrepit(redaktor)"
+              :loading="dejstvieUserId === redaktor.userId"
+              @click="otkrepit(redaktor)"
+            />
+          </li>
+        </ul>
+      </div>
+
+      <div class="okno-redaktorov__row okno-redaktorov__row--field">
+        <GhFormField
+          class="okno-redaktorov__grow"
+          :label="$t('unit.redaktor.fields.user')"
+        >
+          <template #default="{ controlId, ariaDescribedby, ariaInvalid }">
+            <GhSelect
+              v-model="vibraniyUserId"
+              :id="controlId"
+              :aria-describedby="ariaDescribedby"
+              :aria-invalid="ariaInvalid"
+              :options="variantyPolzovatelei"
+              :placeholder="$t('unit.redaktor.fields.user')"
+              :disabled="!mozhnoPrikrepit"
+            />
+          </template>
+        </GhFormField>
+
+        <GhButton
+          variant="primary"
+          icon="plus"
+          :label="$t('unit.redaktor.buttons.attach')"
+          :disabled="!vibraniyUserId || !mozhnoPrikrepit"
+          @click="prikrepit"
+        />
+      </div>
+
+      <template v-if="mozhnoPoluchitSsylku">
+        <hr class="okno-redaktorov__divider" />
+
+        <div>
+          <GhButton
+            variant="default"
+            icon="link"
+            :label="$t('unit.redaktor.buttons.my_link')"
+            :loading="loaderSsylki"
+            @click="poluchitSsylku"
           />
-        </div>
 
-        <q-separator />
+          <div v-if="ssylka" class="okno-redaktorov__link">
+            <code class="okno-redaktorov__link-value gh-mono">{{ ssylka.ssylka }}</code>
 
-        <div>
-          <div v-if="redaktory.length === 0" class="text-caption text-grey">
-            {{ $t('unit.redaktor.editors.empty') }}
-          </div>
+            <div class="okno-redaktorov__link-actions">
+              <GhButton
+                variant="invisible"
+                size="sm"
+                icon="copy"
+                :label="$t('unit.redaktor.buttons.copy_link')"
+                @click="skopirovatSsylku"
+              />
 
-          <q-list v-else dense separator>
-            <q-item v-for="redaktor in redaktory" :key="redaktor.userId">
-              <q-item-section>
-                <q-item__label no-caption>{{ redaktor.imya }}</q-item__label>
-              </q-item-section>
-
-              <q-item-section side>
-                <q-chip
-                    dense
-                    square
-                    text-color="white"
-                    :color="redaktor.imeetTokenNaProekt ? 'positive' : 'grey'"
-                >
-                  {{ redaktor.imeetTokenNaProekt
-                    ? $t('unit.redaktor.editors.token_yes')
-                    : $t('unit.redaktor.editors.token_no') }}
-                </q-chip>
-              </q-item-section>
-
-              <q-item-section side>
-                <q-btn
-                    flat
-                    dense
-                    color="negative"
-                    :label="$t('unit.redaktor.buttons.detach')"
-                    :disable="!mozhnoOtkrepit(redaktor)"
-                    :loading="dejstvieUserId === redaktor.userId"
-                    @click="otkrepit(redaktor)"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-
-        <div>
-          <div class="text-subtitle2 q-mb-sm">{{ $t('unit.redaktor.fields.user') }}</div>
-
-          <div class="row items-center no-wrap q-gutter-sm">
-            <q-select
-                v-model="vibraniyUserId"
-                class="col"
-                outlined
-                dense
-                use-input
-                fill-input
-                hide-selected
-                input-debounce="0"
-                emit-value
-                map-options
-                :label="$t('unit.redaktor.fields.user')"
-                :options="variantyPolzovatelei"
-                :loading="loaderPolzovatelei"
-            />
-
-            <q-btn
-                color="primary"
-                :label="$t('unit.redaktor.buttons.attach')"
-                :disable="!vibraniyUserId || !mozhnoPrikrepit"
-                @click="prikrepit"
-            />
-          </div>
-        </div>
-
-        <template v-if="mozhnoPoluchitSsylku">
-          <q-separator />
-
-          <div>
-            <q-btn
-                outline
-                color="primary"
+              <GhButton
+                variant="invisible"
+                size="sm"
                 icon="link"
-                :label="$t('unit.redaktor.buttons.my_link')"
-                :loading="loaderSsylki"
-                @click="poluchitSsylku"
-            />
+                :label="$t('unit.redaktor.buttons.open_link')"
+                @click="otkritSsylku"
+              />
 
-            <div v-if="ssylka" class="q-mt-sm">
-              <q-field dense outlined readonly :model-value="ssylka.ssylka">
-                <template #control>
-                  <div class="ellipsis">{{ ssylka.ssylka }}</div>
-                </template>
-              </q-field>
-
-              <div class="row items-center q-gutter-sm q-mt-sm">
-                <q-btn
-                    flat
-                    dense
-                    icon="content_copy"
-                    :label="$t('unit.redaktor.buttons.copy_link')"
-                    @click="skopirovatSsylku"
-                />
-
-                <q-btn
-                    flat
-                    dense
-                    icon="open_in_new"
-                    :label="$t('unit.redaktor.buttons.open_link')"
-                    tag="a"
-                    :href="ssylka.ssylka"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                />
-
-                <span class="text-caption text-grey">
-                  {{ $t('unit.redaktor.link.expires') }}: {{ convertDateTime(ssylka.expiresAt) }}
-                </span>
-              </div>
+              <span class="okno-redaktorov__muted">
+                {{ $t("unit.redaktor.link.expires") }}: {{ convertDateTime(ssylka.expiresAt) }}
+              </span>
             </div>
           </div>
-        </template>
+        </div>
+      </template>
 
-        <q-banner v-if="oshibka" dense rounded class="bg-negative text-white">
-          {{ perevodKlyucha(oshibka) }}
-        </q-banner>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+      <GhBanner v-if="oshibka" variant="danger">
+        {{ perevodKlyucha(oshibka) }}
+      </GhBanner>
+    </div>
+
+    <template #footer>
+      <GhButton
+        variant="default"
+        :label="$t('common.buttons.close')"
+        @click="vidno = false"
+      />
+    </template>
+  </GhDialog>
 </template>
 
 <style scoped>
 .okno-redaktorov {
-  width: 560px;
-  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.okno-redaktorov__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.okno-redaktorov__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/*
+ * Строка «поле + кнопка»: кнопка выравнивается по нижней границе инпута,
+ * а не по центру блока «подпись + инпут» — иначе «Прикрепить» уезжает вверх.
+ */
+.okno-redaktorov__row--field {
+  align-items: flex-end;
+}
+
+.okno-redaktorov__grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.okno-redaktorov__label {
+  font-weight: var(--fontWeight-semibold);
+}
+
+.okno-redaktorov__hint {
+  color: var(--fgColor-attention);
+  font-size: var(--fontSize-caption);
+}
+
+.okno-redaktorov__muted {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.okno-redaktorov__divider {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--borderColor-default);
+}
+
+.okno-redaktorov__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.okno-redaktorov__list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.okno-redaktorov__link {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-muted);
+}
+
+.okno-redaktorov__link-value {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.okno-redaktorov__link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
 }
 </style>

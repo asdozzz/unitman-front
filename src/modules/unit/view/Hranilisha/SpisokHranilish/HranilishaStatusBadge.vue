@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {computed} from "vue";
+import {GhLabel} from "@/components/ui";
+import type {GhLabelVariant, OcticonName} from "@/components/ui";
 
 const props = withDefaults(defineProps<{
   /** Подтверждён ли доступ к репозиторию. */
@@ -9,13 +11,13 @@ const props = withDefaults(defineProps<{
   compact: false,
 });
 
-/** Подтверждение — зелёная галочка, ожидание — нейтральные песочные часы. */
-const ikonka = computed<string>(() => {
-  return props.confirmed ? "check_circle" : "hourglass_empty";
+/** Подтверждение — зелёная галочка, ожидание — нейтральный статус. */
+const ikonka = computed<OcticonName>(() => {
+  return props.confirmed ? "check-circle" : "circle";
 });
 
-const modifikator = computed<string>(() => {
-  return props.confirmed ? "confirmed" : "unconfirmed";
+const variant = computed<GhLabelVariant>(() => {
+  return props.confirmed ? "success" : "neutral";
 });
 
 const labelKey = computed<string>(() => {
@@ -26,14 +28,8 @@ const labelKey = computed<string>(() => {
 </script>
 
 <template>
-  <span
-      class="hranilisha-status"
-      :class="[`hranilisha-status--${modifikator}`, {'hranilisha-status--compact': compact}]"
-      role="status"
-  >
-    <q-icon :name="ikonka" size="16px" />
-
-    <span class="hranilisha-status__label">{{ $t(labelKey) }}</span>
+  <span class="hranilisha-status" :class="{'hranilisha-status--compact': compact}" role="status">
+    <GhLabel :variant="variant" :icon="ikonka" :label="$t(labelKey)" />
   </span>
 </template>
 
@@ -41,34 +37,10 @@ const labelKey = computed<string>(() => {
 .hranilisha-status {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
-  min-height: 28px;
-  padding: var(--app-space-1) var(--app-space-2);
-  border-radius: var(--app-radius-pill);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
-  white-space: nowrap;
 }
 
-.hranilisha-status__label {
-  letter-spacing: 0.02em;
-}
-
-.hranilisha-status--confirmed {
-  color: var(--app-positive);
-  background: color-mix(in srgb, var(--app-positive) 12%, transparent);
-}
-
-.hranilisha-status--unconfirmed {
-  color: var(--app-text-secondary);
-  background: var(--app-surface-muted);
-}
-
-/* В компактной строке фон не нужен: состояние читается по иконке и тексту. */
 .hranilisha-status--compact {
-  min-height: 20px;
-  padding: 0;
-  background: transparent;
+  transform: scale(0.95);
+  transform-origin: left center;
 }
 </style>

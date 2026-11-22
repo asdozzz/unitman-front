@@ -1,10 +1,9 @@
-<template></template>
-
 <script setup lang="ts">
-import { onUnmounted, watch } from "vue";
+import { onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { Notify } from "quasar";
 import { useRoute, useRouter } from "vue-router";
+import { GhBanner, GhButton } from "@/components/ui";
+import type { GhBannerVariant } from "@/components/ui";
 import i18n from "@/bootstrap/translator";
 import { useAuthStore } from "@/modules/account/store/auth";
 import {
@@ -15,12 +14,24 @@ import { useStorChataOpenCode } from "@/modules/opencode/store/StorChataOpenCode
 import type { UvedomlenieOpenCode } from "@/modules/opencode/model/UvedomlenieOpenCode";
 
 /**
- * Невидимый компонент показа уведомлений OpenCode.
+ * Показ уведомлений OpenCode.
  *
- * Рендерит пустой шаблон: вся его работа — зарегистрировать обработчик у стора
- * уведомлений и вовремя показывать Quasar `Notify`. Подключением к транспорту,
- * захватом и дедупликацией занимается стор (задача C1), здесь только UI.
+ * Компонент регистрирует обработчик у стора уведомлений и рендерит стек
+ * Primer-баннеров. Подключением к транспорту, захватом и дедупликацией
+ * занимается стор (задача C1), здесь только UI. Глобальный Notify больше не
+ * используется: баннеры живут в DOM и доступны скринридерам.
  */
+
+/** Один баннер уведомления. */
+type BankUvedomleniya = {
+    id: string;
+    variant: GhBannerVariant;
+    text: string;
+    href: string;
+};
+
+/** Больше баннеров одновременно держать на экране не нужно. */
+const MAKSIMUM_BANKOV = 4;
 
 const router = useRouter();
 const route = useRoute();
@@ -29,30 +40,11 @@ const { isAuth } = storeToRefs(authStore);
 const stor = useStorUvedomleniyOpenCode();
 const storChata = useStorChataOpenCode();
 
+/** Стек видимых уведомлений. */
+const banki = ref<BankUvedomleniya[]>([]);
+
 /** Отписка от набора обработчиков показа; `null` — обработчик не зарегистрирован. */
 let otpiska: (() => void) | null = null;
-
-/**
- * Экранирование строки для вставки в HTML.
- *
- * Используется и для текста ссылки, и для значения `href`: `Notify` создаётся
- * с `html: true`, поэтому данные из сети без экранирования стали бы вектором
- * XSS. Заголовок сессии приходит от пользователя и не является доверенным.
- */
-const PRAVILA_EKRANIROVANIYA: ReadonlyArray<readonly [RegExp, string]> = [
-    [/&/g, "\u0026amp;"],
-    [/</g, "\u0026lt;"],
-    [/>/g, "\u0026gt;"],
-    [/\x22/g, "\u0026quot;"],
-    [/'/g, "\u0026#39;"],
-];
-
-function ekranirovatHtml(znachenie: string): string {
-    return PRAVILA_EKRANIROVANIYA.reduce(
-        (rezultat: string, [shablon, zamena]: readonly [RegExp, string]) => rezultat.replace(shablon, zamena),
-        znachenie,
-    );
-}
 
 /** Ключ i18n выбирается по виду и статусу завершения хода (раздел 8.5). */
 function klyuchTeksta(uvedomlenie: UvedomlenieOpenCode): string {
@@ -67,22 +59,42 @@ function klyuchTeksta(uvedomlenie: UvedomlenieOpenCode): string {
     return "opencode.notifications.new_answer";
 }
 
+/** Вариант баннера по типу уведомления. */
+function variantUvedomleniya(uvedomlenie: UvedomlenieOpenCode): GhBannerVariant {
+    if (uvedomlenie.kind === "QUESTION" || uvedomlenie.status === "AWAITING_INPUT") {
+        return "attention";
+    }
+
+    if (uvedomlenie.kind === "ERROR" || uvedomlenie.status === "FAILED") {
+        return "danger";
+    }
+
+    return "success";
+}
+
 /** Открыт ли сейчас интерфейс именно этой сессии. */
 function segodnyaOtkrita(uvedomlenie: UvedomlenieOpenCode): boolean {
     return router.currentRoute.value.name === "opencode_chat"
         && String(route.params.id) === uvedomlenie.sessionId;
 }
 
-/** Абсолютная ссылка на сессию в новой вкладке, экранированная для атрибута. */
+/** Ссылка на сессию; тип не даёт чату делать probe-запрос состояния workspace. */
 function ssilkaNaSessiyu(uvedomlenie: UvedomlenieOpenCode): string {
-    const href = router.resolve({
+    return router.resolve({
         name: "opencode_chat",
         params: { id: uvedomlenie.sessionId },
-        // Тип не даёт чату делать probe-запрос состояния workspace.
         query: { type: uvedomlenie.sessionType === "workspace" ? "workspace" : "unit" },
     }).href;
+}
 
-    return ekranirovatHtml(new URL(href, window.location.origin).href);
+/** Убрать баннер по идентификатору уведомления. */
+function zakrytBank(id: string): void {
+    banki.value = banki.value.filter((bank) => bank.id !== id);
+}
+
+/** Открыть сессию уведомления в новой вкладке. */
+function otkrytBank(bank: BankUvedomleniya): void {
+    window.open(bank.href, "_blank", "noopener,noreferrer");
 }
 
 /**
@@ -105,23 +117,22 @@ function pokazatUvedomlenie(uvedomlenie: UvedomlenieOpenCode): void {
         return;
     }
 
+    if (banki.value.some((bank) => bank.id === uvedomlenie.id)) {
+        return;
+    }
+
     const zagolovok = uvedomlenie.sessionTitle.trim() === ""
         ? uvedomlenie.sessionId
         : uvedomlenie.sessionTitle;
 
-    const tekst = i18n.global.t(klyuchTeksta(uvedomlenie), {
-        title: ekranirovatHtml(zagolovok),
-    });
+    const noviy: BankUvedomleniya = {
+        id: uvedomlenie.id,
+        variant: variantUvedomleniya(uvedomlenie),
+        text: i18n.global.t(klyuchTeksta(uvedomlenie), { title: zagolovok }),
+        href: ssilkaNaSessiyu(uvedomlenie),
+    };
 
-    Notify.create({
-        html: true,
-        message: `<a href="${ssilkaNaSessiyu(uvedomlenie)}" target="_blank" rel="noopener noreferrer">${tekst}</a>`,
-        caption: i18n.global.t("opencode.notifications.open_new_tab"),
-        icon: "forum",
-        color: "primary",
-        timeout: 0,
-        actions: [{ icon: "close", color: "white" }],
-    });
+    banki.value = [...banki.value, noviy].slice(-MAKSIMUM_BANKOV);
 }
 
 const obrabotchikPokaza: NovoeUvedomlenieHandler = pokazatUvedomlenie;
@@ -163,3 +174,54 @@ onUnmounted(() => {
     stor.otklyuchit();
 });
 </script>
+
+<template>
+  <Teleport to="body">
+    <div class="uvedomleniya-opencode primer" aria-live="polite">
+      <GhBanner
+          v-for="bank in banki"
+          :key="bank.id"
+          :variant="bank.variant"
+          dismissible
+          class="uvedomleniya-opencode__banner"
+          @dismiss="zakrytBank(bank.id)"
+      >
+        {{ bank.text }}
+
+        <template #actions>
+          <GhButton size="sm" @click="otkrytBank(bank)">
+            {{ $t('opencode.notifications.open_new_tab') }}
+          </GhButton>
+        </template>
+      </GhBanner>
+    </div>
+  </Teleport>
+</template>
+
+<style scoped>
+.uvedomleniya-opencode {
+  position: fixed;
+  top: 56px;
+  right: 16px;
+  z-index: 6000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.uvedomleniya-opencode__banner {
+  pointer-events: auto;
+  box-shadow: var(--shadow-floating-small);
+}
+
+@media (max-width: 480px) {
+  .uvedomleniya-opencode {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+}
+</style>

@@ -4,6 +4,15 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { useRoute, useRouter } from "vue-router";
 import i18n from "@/bootstrap/translator";
+import {
+    GhBanner,
+    GhBox,
+    GhButton,
+    GhCheckbox,
+    GhEmptyState,
+    GhInput,
+    GhSkeleton,
+} from "@/components/ui";
 import { useStorSpiskaWorkspace } from "@/modules/opencode/store/StorSpiskaWorkspace";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import { useStorFormiSozdaniyaWorkspace } from "@/modules/opencode/store/StorFormiSozdaniyaWorkspace";
@@ -11,10 +20,10 @@ import {
     prochitatFiltriWorkspaceIzQuery,
     serializovatFiltriWorkspaceVQuery,
 } from "@/modules/opencode/utils/workspaceFiltersUrl";
+import { ozhidaetsyaVtorayaKlavishaPosledovatelnosti } from "@/utils/useHotkeys";
 import type { FiltriWorkspace } from "@/modules/opencode/model/WorkspaceFiltri";
 import type { Workspace } from "@/modules/opencode/model/Workspace";
 import type { Schema } from "@/api/types";
-import OpenCodeRazdelToggle from "@/modules/opencode/view/OpenCodeRazdelToggle.vue";
 import WorkspaceCard from "@/modules/opencode/view/Workspace/WorkspaceCard.vue";
 import FormaSozdaniyaWorkspace from "@/modules/opencode/view/FormaSozdaniyaWorkspace.vue";
 
@@ -49,6 +58,9 @@ const netRekvizitov = computed(() => storRekvizitov.spisok.length === 0);
 /** Текущий фильтр: инициализируется из URL, чтобы ссылка была воспроизводимой. */
 const filtr = ref<FiltriWorkspace>(prochitatFiltriWorkspaceIzQuery(route.query as Record<string, unknown>));
 const poisk = ref(filtr.value.search ?? "");
+
+/** Обёртка поля поиска — нужна для фокуса по `/`. */
+const polePoiska = ref<HTMLElement | null>(null);
 
 let tajmerPoiska: ReturnType<typeof setTimeout> | null = null;
 
@@ -186,6 +198,60 @@ function udalit(workspace: Workspace) {
     });
 }
 
+/** Селекторы, внутри которых страничные хоткеи не перехватываются. */
+function ignorirovatVvod(event: KeyboardEvent): boolean {
+    const cel = event.target;
+
+    if (!(cel instanceof HTMLElement)) {
+        return false;
+    }
+
+    if (cel.isContentEditable) {
+        return true;
+    }
+
+    return cel.closest(
+        'input, textarea, select, [contenteditable], [role="textbox"], [role="dialog"], .q-dialog, .q-menu',
+    ) !== null;
+}
+
+/** Хоткеи страницы: `/` — поиск, `R` — обновить, `c` — создать. */
+function obrabotatKlavishu(event: KeyboardEvent): void {
+    if (
+        event.defaultPrevented
+        || event.isComposing
+        || event.ctrlKey
+        || event.metaKey
+        || event.altKey
+        || ozhidaetsyaVtorayaKlavishaPosledovatelnosti()
+        || ignorirovatVvod(event)
+    ) {
+        return;
+    }
+
+    if (event.key === "/") {
+        event.preventDefault();
+
+        const pole = polePoiska.value?.querySelector<HTMLInputElement>("input");
+        pole?.focus();
+        pole?.select();
+
+        return;
+    }
+
+    if (event.key === "R") {
+        event.preventDefault();
+        void stor.poluchitSpisok();
+
+        return;
+    }
+
+    if (event.key === "c" && !netRekvizitov.value && !loaderSpiska.value) {
+        event.preventDefault();
+        formaStore.otkrit();
+    }
+}
+
 // Навигация «назад/вперёд» меняет query: синхронизируем фильтр со ссылкой.
 watch(() => route.query, (query) => {
     if (route.name !== "opencode_workspaces") {
@@ -206,10 +272,12 @@ watch(() => route.query, (query) => {
 onMounted(() => {
     storRekvizitov.poluchitSpisok();
     void stor.primenitFiltr(filtr.value);
+    window.addEventListener("keydown", obrabotatKlavishu);
 });
 
 onUnmounted(() => {
     stor.ostanovitOpros();
+    window.removeEventListener("keydown", obrabotatKlavishu);
 
     if (tajmerPoiska !== null) {
         clearTimeout(tajmerPoiska);
@@ -219,83 +287,95 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <q-card>
-    <q-card-section class="bg-primary text-white row items-center q-gutter-sm">
-      <div class="text-subtitle2 col">{{ $t('opencode.workspace.list.caption') }}</div>
+  <GhBox class="opencode-list primer" padding="none">
+    <template #header>
+      <span class="opencode-list__title">{{ $t('opencode.workspace.list.caption') }}</span>
+      <span class="opencode-list__spacer" />
 
-      <OpenCodeRazdelToggle />
-
-      <q-btn
-          dense
-          flat
-          icon="add"
-          color="white"
-          :disable="loaderSpiska || netRekvizitov"
+      <GhButton
+          variant="primary"
+          size="sm"
+          icon="plus"
+          :label="$t('opencode.workspace.buttons.add')"
+          :disabled="loaderSpiska || netRekvizitov"
           @click="formaStore.otkrit()"
-      >
-        <q-tooltip>
-          {{ netRekvizitov ? $t('opencode.sessions.no_credentials') : $t('opencode.workspace.buttons.add') }}
-        </q-tooltip>
-      </q-btn>
-
-      <q-btn
-          dense
-          flat
-          icon="refresh"
-          color="white"
+      />
+      <GhButton
+          size="sm"
+          icon="sync"
+          :aria-label="$t('opencode.sessions.buttons.refresh')"
           :loading="loaderSpiska"
           @click="stor.poluchitSpisok()"
-      >
-        <q-tooltip>{{ $t('opencode.sessions.buttons.refresh') }}</q-tooltip>
-      </q-btn>
-    </q-card-section>
+      />
+    </template>
 
-    <q-card-section class="q-pb-xs row items-center q-gutter-sm">
-      <q-input
-          v-model="poisk"
-          class="col"
-          :placeholder="$t('opencode.workspace.list.search')"
-          :debounce="0"
-          filled
-          dense
-          clearable
-          @update:model-value="izmenitPoisk()"
-      >
-        <template #prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
+    <div class="opencode-list__filters">
+      <div ref="polePoiska" class="opencode-list__search">
+        <GhInput
+            v-model="poisk"
+            size="sm"
+            icon="search"
+            clearable
+            :placeholder="$t('opencode.workspace.list.search')"
+            @update:model-value="izmenitPoisk()"
+        />
+      </div>
 
-      <q-toggle
+      <GhCheckbox
           :model-value="filtr.onlyActive"
           :label="$t('opencode.workspace.list.only_active')"
-          dense
-          @update:model-value="perekluchitTolkoAktivnie(Boolean($event))"
+          @update:model-value="perekluchitTolkoAktivnie($event)"
       />
-    </q-card-section>
+    </div>
 
-    <q-card-section class="q-pt-none">
-      <div v-if="netRekvizitov" class="text-warning q-mb-sm">
+    <div class="opencode-list__body">
+      <GhBanner v-if="netRekvizitov" variant="attention" class="opencode-list__banner">
         <i18n-t keypath="opencode.sessions.no_credentials_hint" tag="span">
           <template #link>
-            <router-link :to="{ name: 'account_settings' }" class="text-primary">
+            <router-link :to="{ name: 'account_settings' }" class="opencode-list__link">
               {{ $t('opencode.sessions.no_credentials_link') }}
             </router-link>
           </template>
         </i18n-t>
+      </GhBanner>
+
+      <GhBanner v-if="oshibkaRekvizitov" variant="danger" class="opencode-list__banner">
+        {{ oshibkaRekvizitov }}
+        <template #actions>
+          <GhButton size="sm" :label="$t('common.buttons.retry')" @click="storRekvizitov.poluchitSpisok()" />
+        </template>
+      </GhBanner>
+
+      <GhBanner v-if="oshibkaZagruzki" variant="danger" class="opencode-list__banner">
+        {{ oshibkaZagruzki }}
+        <template #actions>
+          <GhButton size="sm" :label="$t('common.buttons.retry')" @click="stor.poluchitSpisok()" />
+        </template>
+      </GhBanner>
+
+      <GhBanner v-if="oshibkaDejstviya" variant="danger" class="opencode-list__banner">
+        {{ oshibkaDejstviya }}
+      </GhBanner>
+
+      <div v-if="loaderSpiska && spisok.length === 0" class="opencode-list__skeletons">
+        <GhSkeleton v-for="n in 3" :key="'workspace-skeleton-' + n" height="96px" />
       </div>
 
-      <div v-if="oshibkaRekvizitov" class="text-negative q-mb-sm">{{ oshibkaRekvizitov }}</div>
-      <div v-if="oshibkaZagruzki" class="text-negative q-mb-sm">{{ oshibkaZagruzki }}</div>
-      <div v-if="oshibkaDejstviya" class="text-negative q-mb-sm">{{ oshibkaDejstviya }}</div>
-
-      <div v-if="loaderSpiska && spisok.length === 0" class="row justify-center q-pa-md">
-        <q-spinner color="primary" size="2em" />
-      </div>
-
-      <div v-else-if="spisok.length === 0" class="text-grey-7">
-        {{ $t('opencode.workspace.list.empty') }}
-      </div>
+      <GhEmptyState
+          v-else-if="spisok.length === 0"
+          icon="rows"
+          :title="$t('opencode.workspace.list.empty')"
+      >
+        <template #actions>
+          <GhButton
+              variant="primary"
+              icon="plus"
+              :label="$t('opencode.workspace.buttons.add')"
+              :disabled="netRekvizitov"
+              @click="formaStore.otkrit()"
+          />
+        </template>
+      </GhEmptyState>
 
       <div v-else>
         <WorkspaceCard
@@ -309,8 +389,74 @@ onUnmounted(() => {
             @delete="udalit(workspace)"
         />
       </div>
-    </q-card-section>
+    </div>
 
     <FormaSozdaniyaWorkspace @sozdan="perejtiVWorkspace" />
-  </q-card>
+  </GhBox>
 </template>
+
+<style scoped>
+.opencode-list__title {
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-title);
+  font-weight: var(--fontWeight-semibold);
+}
+
+.opencode-list__spacer {
+  flex: 1 1 auto;
+}
+
+.opencode-list__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borderColor-default);
+}
+
+.opencode-list__search {
+  min-width: 160px;
+  flex: 1 1 220px;
+}
+
+/*
+ * F4: строка GhCheckbox в kit — 32px. В строке фильтров все контролы size="sm"
+ * (28px), поэтому локально выравниваем чекбокс по высоте строки, не меняя kit.
+ */
+.opencode-list__filters :deep(.gh-checkbox) {
+  min-height: var(--control-height-sm);
+}
+
+.opencode-list__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.opencode-list__banner {
+  margin: 0;
+}
+
+.opencode-list__link {
+  color: var(--fgColor-accent);
+}
+
+.opencode-list__link:hover {
+  text-decoration: underline;
+}
+
+.opencode-list__skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .opencode-list__filters,
+  .opencode-list__body {
+    padding: 12px;
+  }
+}
+</style>

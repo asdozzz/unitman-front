@@ -1,69 +1,96 @@
 <script setup lang="ts">
-import {Notify, copyToClipboard} from "quasar";
-import {useI18n} from "vue-i18n";
-import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import { computed, onBeforeUnmount, ref } from "vue";
+import { copyToClipboard } from "quasar";
+import type { Unit } from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import { GhButton, type OcticonName } from "@/components/ui";
 
 const props = defineProps<{
   item: Unit;
 }>();
 
-const {t} = useI18n();
+// Локальный фидбек копирования: иконка на время меняется на галочку.
+const skopirovan = ref(false);
+let tajmer: ReturnType<typeof setTimeout> | null = null;
+
+const ikonkaKopirovaniya = computed<OcticonName>(() =>
+  skopirovan.value ? "check" : "copy",
+);
 
 /** Копирует идентификатор: он нужен для фильтра и обращений в поддержку. */
 async function skopirovatId() {
   await copyToClipboard(props.item.id);
 
-  Notify.create({
-    message: t('unit.spisok_unitov.card.messages.id_copied'),
-    color: 'positive',
-    timeout: 1200,
-  });
+  skopirovan.value = true;
+
+  if (tajmer !== null) {
+    clearTimeout(tajmer);
+  }
+
+  tajmer = setTimeout(() => {
+    skopirovan.value = false;
+    tajmer = null;
+  }, 1200);
 }
+
+onBeforeUnmount(() => {
+  if (tajmer !== null) {
+    clearTimeout(tajmer);
+    tajmer = null;
+  }
+});
 </script>
 
 <template>
   <q-expansion-item
-      class="unit-details"
-      icon="tune"
-      :label="$t('unit.spisok_unitov.card.buttons.details')"
-      dense
-      expand-separator
+    class="unit-details"
+    :label="$t('unit.spisok_unitov.card.buttons.details')"
+    dense
+    expand-separator
   >
     <q-card flat>
       <q-card-section class="q-py-sm">
         <div class="unit-details__row">
-          <span class="unit-details__label">{{ $t('unit.spisok_unitov.card.fields.id') }}</span>
-          <span class="text-mono unit-details__id">{{ item.id }}</span>
-          <q-btn
-              flat
-              dense
-              size="sm"
-              icon="content_copy"
-              :aria-label="$t('unit.spisok_unitov.card.buttons.copy_id')"
-              @click="skopirovatId"
+          <span class="unit-details__label">{{ $t("unit.spisok_unitov.card.fields.id") }}</span>
+          <span class="gh-mono unit-details__id">{{ item.id }}</span>
+          <GhButton
+            variant="invisible"
+            size="sm"
+            :icon="ikonkaKopirovaniya"
+            :aria-label="
+              skopirovan
+                ? $t('unit.spisok_unitov.card.messages.id_copied')
+                : $t('unit.spisok_unitov.card.buttons.copy_id')
+            "
+            @click="skopirovatId"
           >
-            <q-tooltip>{{ $t('unit.spisok_unitov.card.buttons.copy_id') }}</q-tooltip>
-          </q-btn>
+            <q-tooltip>
+              {{
+                skopirovan
+                  ? $t("unit.spisok_unitov.card.messages.id_copied")
+                  : $t("unit.spisok_unitov.card.buttons.copy_id")
+              }}
+            </q-tooltip>
+          </GhButton>
         </div>
 
         <q-separator spaced />
 
-        <div class="unit-card__section-title q-mb-xs">
-          {{ $t('unit.spisok_unitov.card.fields.variables') }}
+        <div class="unit-details__section-title">
+          {{ $t("unit.spisok_unitov.card.fields.variables") }}
         </div>
 
-        <div v-if="item.peremenie.length === 0" class="text-caption-muted">
-          {{ $t('unit.spisok_unitov.card.messages.no_variables') }}
+        <div v-if="item.peremenie.length === 0" class="unit-details__muted">
+          {{ $t("unit.spisok_unitov.card.messages.no_variables") }}
         </div>
 
         <div
-            v-for="peremenaya in item.peremenie"
-            :key="peremenaya.id"
-            class="unit-details__variable"
+          v-for="peremenaya in item.peremenie"
+          :key="peremenaya.id"
+          class="unit-details__variable"
         >
-          <span class="text-mono">{{ peremenaya.id }}</span>
+          <span class="gh-mono">{{ peremenaya.id }}</span>
           <span class="unit-details__equals">=</span>
-          <span class="text-mono unit-details__value">{{ peremenaya.value }}</span>
+          <span class="gh-mono unit-details__value">{{ peremenaya.value }}</span>
         </div>
       </q-card-section>
     </q-card>
@@ -74,13 +101,25 @@ async function skopirovatId() {
 .unit-details__row {
   display: flex;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-width: 0;
 }
 
 .unit-details__label {
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.unit-details__section-title {
+  margin-bottom: 4px;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+}
+
+.unit-details__muted {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
 }
 
 .unit-details__id {
@@ -94,17 +133,17 @@ async function skopirovatId() {
 .unit-details__variable {
   display: flex;
   align-items: baseline;
-  gap: var(--app-space-1);
-  font-size: var(--app-font-size-caption);
-  line-height: var(--app-line-height-base);
+  gap: 4px;
+  font-size: var(--fontSize-caption);
+  line-height: var(--lineHeight-normal);
   word-break: break-all;
 }
 
 .unit-details__equals {
-  color: var(--app-text-disabled);
+  color: var(--fgColor-muted);
 }
 
 .unit-details__value {
-  color: var(--app-text-secondary);
+  color: var(--fgColor-muted);
 }
 </style>

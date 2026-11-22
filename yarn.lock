@@ -345,6 +345,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@primer/octicons@npm:^19.42.0":
+  version: 19.42.0
+  resolution: "@primer/octicons@npm:19.42.0"
+  dependencies:
+    object-assign: ^4.1.1
+  checksum: dbf87a6dfa45096136a9cb0a28c912b1aee52596f5878e69dce31cd15abff90dc90ca28f272b0a5f2c1f1ad821c84811897cf9cdc90542fa7d3a217aa22d8d1c
+  languageName: node
+  linkType: hard
+
 "@protobufjs/aspromise@npm:^1.1.1, @protobufjs/aspromise@npm:^1.1.2":
   version: 1.1.2
   resolution: "@protobufjs/aspromise@npm:1.1.2"
@@ -2148,6 +2157,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"object-assign@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "object-assign@npm:4.1.1"
+  checksum: fcc6e4ea8c7fe48abfbb552578b1c53e0d194086e2e6bbbf59e0a536381a292f39943c6e9628af05b5528aa5e3318bb30d6b2e53cadaf5b8fe9e12c4b69af23f
+  languageName: node
+  linkType: hard
+
 "openapi-typescript@npm:7":
   version: 7.13.0
   resolution: "openapi-typescript@npm:7.13.0"
@@ -2712,6 +2728,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "unitman-front@workspace:."
   dependencies:
+    "@primer/octicons": ^19.42.0
     "@quasar/extras": ^1.16.12
     "@quasar/vite-plugin": ^1.7.0
     "@types/node": ^20.4.4

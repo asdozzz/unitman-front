@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import {nextTick, onMounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
+import {useI18n} from "vue-i18n";
 import {useRoute, useRouter} from "vue-router";
+import {
+  GhBanner,
+  GhBox,
+  GhButton,
+  GhDialog,
+  GhEmptyState,
+  GhPageHeader,
+  GhSkeleton,
+} from "@/components/ui";
 import EditForm from "@/modules/unit/view/Hranilisha/EditForm.vue";
 import AddForm from "@/modules/unit/view/Hranilisha/AddForm.vue";
 import {useSpisokHranilishStore} from "@/modules/unit/store/SpisokHranilishStore";
@@ -18,6 +28,7 @@ import {
   prochitatFiltriIzQuery,
   serializovatFiltriVQuery,
 } from "@/modules/unit/utils/hranilishaFiltersUrl";
+import {ozhidaetsyaVtorayaKlavishaPosledovatelnosti} from "@/utils/useHotkeys";
 
 const hranilishaStore = useSpisokHranilishStore();
 const {
@@ -36,6 +47,7 @@ const {enable: enableAddForm} = storeToRefs(addFormStore);
 
 const route = useRoute();
 const router = useRouter();
+const {t} = useI18n();
 
 /** Время последней успешной загрузки списка (unix-секунды, как в `convertDate`). */
 const posledneeObnovlenie = ref<number | null>(null);
@@ -45,6 +57,14 @@ const posledneeObnovlenie = ref<number | null>(null);
  * его изменение не должно снова писать URL.
  */
 const propuskatZapisVUrl = ref(false);
+
+/** Скелетоны показываем только на первичной загрузке — CLS остаётся нулевым. */
+const pokazatSkeletony = computed<boolean>(
+    () => loaderSpiskaHranilish.value && spisok.value.length === 0,
+);
+
+/** Есть ли активные фильтры — от этого зависит пустое состояние. */
+const estAktivnieFiltri = computed<boolean>(() => hranilishaStore.estAktivnieFiltri);
 
 const KLYUCHI_FILTRA = [
   "search",
@@ -195,10 +215,113 @@ onMounted(async () => {
 function openAddForm() {
   addFormStore.otkritFormu();
 }
+
+/** Переводит фокус в поле поиска. `false`, если поля нет. */
+function fokusNaPoisk(): boolean {
+  const pole = document.getElementById("hranilisha-filter-search") as HTMLInputElement | null;
+
+  if (!pole) {
+    return false;
+  }
+
+  pole.focus();
+  pole.select();
+
+  return true;
+}
+
+/** Селекторы, внутри которых страничные хоткеи не перехватываются. */
+function ignorirovatVvod(event: KeyboardEvent): boolean {
+  const cel = event.target;
+
+  if (!(cel instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (cel.isContentEditable) {
+    return true;
+  }
+
+  return (
+      cel.closest(
+          'input, textarea, select, [contenteditable], [role="textbox"], [role="dialog"], .q-dialog, .q-menu',
+      ) !== null
+  );
+}
+
+/**
+ * Страничные хоткеи: `R` — обновить, `/` — поиск, `c` — добавить репозиторий.
+ * Уступаем `g`-последовательностям глобального обработчика.
+ */
+function obrabotatKlavishu(event: KeyboardEvent): void {
+  if (
+      event.defaultPrevented
+      || event.isComposing
+      || event.ctrlKey
+      || event.metaKey
+      || event.altKey
+      || ignorirovatVvod(event)
+      || ozhidaetsyaVtorayaKlavishaPosledovatelnosti()
+  ) {
+    return;
+  }
+
+  const klavisha = event.key.toLowerCase();
+
+  if (klavisha === "r" && !event.shiftKey) {
+    event.preventDefault();
+    if (!loaderSpiskaHranilish.value) {
+      void hranilishaStore.poluchitSpisokHranilish();
+    }
+    return;
+  }
+
+  if (event.key === "/") {
+    if (fokusNaPoisk()) {
+      event.preventDefault();
+    }
+    return;
+  }
+
+  if (klavisha === "c" && !event.shiftKey) {
+    event.preventDefault();
+    openAddForm();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", obrabotatKlavishu);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", obrabotatKlavishu);
+});
 </script>
 
 <template>
-  <div class="full-width flex column">
+  <div class="hranilisha-page">
+    <GhPageHeader
+        :title="t('unit.spisok_rep.page.title')"
+        :description="t('unit.spisok_rep.page.description')"
+        :counter="spisok.length"
+    >
+      <template #actions>
+        <GhButton
+            variant="default"
+            icon="sync"
+            :label="t('unit.spisok_rep.filter.refresh')"
+            :loading="loaderSpiskaHranilish"
+            @click="hranilishaStore.poluchitSpisokHranilish()"
+        />
+        <GhButton
+            variant="primary"
+            icon="plus"
+            :label="t('unit.spisok_rep.list.create')"
+            @click="openAddForm"
+        />
+      </template>
+    </GhPageHeader>
+
     <HranilishaFilterBar
         :filters="nastroikiSpiska.filter"
         :types="hranilishaStore.tipiHranilish"
@@ -216,47 +339,62 @@ function openAddForm() {
         @clear-filters="hranilishaStore.sbrozitFiltri()"
     />
 
-    <q-linear-progress
-        v-if="loaderSpiskaHranilish"
-        indeterminate
-        color="primary"
-        class="q-mb-md"
-    />
-
-    <div v-if="oshibkaZagruzkiSpiska" class="hranilisha-list__error" role="alert">
-      <q-icon name="error_outline" size="20px" />
-      <span class="hranilisha-list__error-text">{{ $t('unit.spisok_rep.list.error_title') }}</span>
-      <q-btn
-          flat
-          dense
-          no-caps
-          color="primary"
-          :label="$t('unit.spisok_rep.list.retry')"
-          @click="hranilishaStore.poluchitSpisokHranilish()"
-      />
-    </div>
+    <GhBanner
+        v-if="oshibkaZagruzkiSpiska"
+        variant="danger"
+        :title="t('unit.spisok_rep.list.error_title')"
+        class="hranilisha-page__gap"
+    >
+      {{ t('unit.spisok_rep.page.error_description') }}
+      <template #actions>
+        <GhButton
+            variant="default"
+            icon="sync"
+            :label="t('unit.spisok_rep.list.retry')"
+            :loading="loaderSpiskaHranilish"
+            @click="hranilishaStore.poluchitSpisokHranilish()"
+        />
+      </template>
+    </GhBanner>
 
     <template v-else>
-      <div v-if="vidimieHranilisha.length === 0" class="hranilisha-cards-grid__empty">
-        <template v-if="hranilishaStore.estAktivnieFiltri">
-          <span class="hranilisha-cards-grid__empty-title">
-            {{ $t('unit.spisok_rep.list.empty_filtered') }}
-          </span>
-          <q-btn
-              class="hranilisha-cards-grid__empty-action"
-              flat
-              dense
-              no-caps
-              color="primary"
-              icon="filter_alt_off"
-              :label="$t('unit.spisok_rep.filter.reset')"
+      <div v-if="pokazatSkeletony" class="hranilisha-cards-grid" aria-busy="true">
+        <GhBox v-for="n in 6" :key="`hranilisha-skeleton-${n}`" padding="md">
+          <div class="hranilisha-page__skeleton-lines">
+            <GhSkeleton variant="text" width="60%" height="16" />
+            <GhSkeleton variant="text" width="85%" height="12" />
+            <GhSkeleton variant="text" width="40%" height="12" />
+          </div>
+        </GhBox>
+      </div>
+
+      <GhEmptyState
+          v-else-if="vidimieHranilisha.length === 0"
+          :icon="estAktivnieFiltri ? 'search' : 'database'"
+          :title="estAktivnieFiltri
+            ? t('unit.spisok_rep.list.empty_search')
+            : t('unit.spisok_rep.list.empty_title')"
+          :description="estAktivnieFiltri
+            ? t('unit.spisok_rep.list.empty_filtered')
+            : t('unit.spisok_rep.list.empty_description')"
+      >
+        <template #actions>
+          <GhButton
+              v-if="estAktivnieFiltri"
+              variant="default"
+              icon="filter"
+              :label="t('unit.spisok_rep.filter.reset')"
               @click="hranilishaStore.sbrozitFiltri()"
           />
+          <GhButton
+              v-else
+              variant="primary"
+              icon="plus"
+              :label="t('unit.spisok_rep.list.create')"
+              @click="openAddForm"
+          />
         </template>
-        <template v-else>
-          {{ $t('unit.spisok_rep.list.empty_result') }}
-        </template>
-      </div>
+      </GhEmptyState>
 
       <div v-else class="hranilisha-cards-grid">
         <HranilishaCard
@@ -267,51 +405,44 @@ function openAddForm() {
       </div>
     </template>
 
-    <q-dialog v-model="enableEditForm" persistent transition-show="scale" transition-hide="scale">
+    <GhDialog
+        v-model="enableEditForm"
+        :title="t('unit.form_edit_rep.caption')"
+        width="700px"
+    >
       <EditForm @formaBilaOtpravlena="hranilishaStore.poluchitSpisokHranilish()" />
-    </q-dialog>
-    <q-dialog v-model="enableAddForm" persistent transition-show="scale" transition-hide="scale">
+    </GhDialog>
+
+    <GhDialog
+        v-model="enableAddForm"
+        :title="t('unit.form_add_rep.caption')"
+        width="700px"
+    >
       <AddForm @formaBilaOtpravlena="hranilishaStore.poluchitSpisokHranilish()" />
-    </q-dialog>
+    </GhDialog>
   </div>
 </template>
 
 <style scoped>
+.hranilisha-page {
+  color: var(--fgColor-default);
+  font-family: var(--fontStack-system);
+}
+
+.hranilisha-page__gap {
+  margin-bottom: 16px;
+}
+
 .hranilisha-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   align-items: start;
-  gap: var(--app-space-4);
+  gap: 16px;
 }
 
-.hranilisha-cards-grid__empty {
-  padding: var(--app-space-4);
-  color: var(--app-text-secondary);
-}
-
-.hranilisha-cards-grid__empty-title {
-  display: block;
-}
-
-.hranilisha-cards-grid__empty-action {
-  margin-top: var(--app-space-2);
-}
-
-.hranilisha-list__error {
+.hranilisha-page__skeleton-lines {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--app-space-2);
-  padding: var(--app-space-3);
-  border: 1px solid color-mix(in srgb, var(--app-negative) 35%, transparent);
-  border-radius: var(--app-radius-md);
-  background: color-mix(in srgb, var(--app-negative) 8%, transparent);
-  color: var(--app-negative);
-}
-
-.hranilisha-list__error-text {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--app-font-size-body);
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

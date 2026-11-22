@@ -1,21 +1,24 @@
 <script setup lang="ts">
-import type {UnitFilterStatus} from "@/modules/unit/store/SpisokUnitov/model/UnitFilters";
+import type { UnitFilterStatus } from "@/modules/unit/store/SpisokUnitov/model/UnitFilters";
+import type { OcticonName } from "@/components/ui";
+import { GhIcon } from "@/components/ui";
 
-/** Описание одного статуса: цветная точка задаётся модификатором `status-chip--<status>`. */
+/** Описание одного статуса: иконка дублирует цвет, чтобы состояние читалось без цвета. */
 type OpisanieStatusa = {
   status: UnitFilterStatus;
+  icon: OcticonName;
 };
 
 /**
  * Порядок чипов заморожен контрактом: сначала самые «живые» состояния.
- * Цвета совпадают с `UnitStatusBadge`: busy — primary, prepared — нейтральный.
+ * Иконки совпадают с `UnitStatusBadge` (P5).
  */
 const STATUSI: OpisanieStatusa[] = [
-  {status: "running"},
-  {status: "prepared"},
-  {status: "busy"},
-  {status: "stopped"},
-  {status: "error"},
+  { status: "running", icon: "play" },
+  { status: "prepared", icon: "check" },
+  { status: "busy", icon: "sync" },
+  { status: "stopped", icon: "pause" },
+  { status: "error", icon: "x-circle" },
 ];
 
 const props = defineProps<{
@@ -53,29 +56,38 @@ function schetchik(status: UnitFilterStatus): number {
 </script>
 
 <template>
-  <div class="status-filter" role="group" :aria-label="$t('unit.spisok_unitov.filter.status_label')">
+  <div
+    class="status-filter"
+    role="group"
+    :aria-label="$t('unit.spisok_unitov.filter.status_label')"
+  >
     <button
-        type="button"
-        class="status-chip status-chip--all"
-        :class="{'status-chip--active': modelValue.length === 0}"
-        :aria-pressed="modelValue.length === 0 ? 'true' : 'false'"
-        @click="vybratVse"
+      type="button"
+      class="status-chip status-chip--all"
+      :class="{ 'status-chip--active': modelValue.length === 0 }"
+      :aria-pressed="modelValue.length === 0 ? 'true' : 'false'"
+      @click="vybratVse"
     >
-      <span class="status-chip__label">{{ $t('unit.spisok_unitov.filter.status_all') }}</span>
+      <span class="status-chip__label">{{ $t("unit.spisok_unitov.filter.status_all") }}</span>
       <span class="status-chip__count text-tabular">{{ total }}</span>
     </button>
 
     <button
-        v-for="item in STATUSI"
-        :key="item.status"
-        type="button"
-        class="status-chip"
-        :class="[`status-chip--${item.status}`, {'status-chip--active': modelValue.includes(item.status)}]"
-        :aria-pressed="modelValue.includes(item.status) ? 'true' : 'false'"
-        @click="pereklyuchit(item.status)"
+      v-for="item in STATUSI"
+      :key="item.status"
+      type="button"
+      class="status-chip"
+      :class="[
+        `status-chip--${item.status}`,
+        { 'status-chip--active': modelValue.includes(item.status) },
+      ]"
+      :aria-pressed="modelValue.includes(item.status) ? 'true' : 'false'"
+      @click="pereklyuchit(item.status)"
     >
-      <span class="status-chip__dot" aria-hidden="true" />
-      <span class="status-chip__label">{{ $t('unit.spisok_unitov.card.status.' + item.status) }}</span>
+      <GhIcon :name="item.icon" :size="14" class="status-chip__icon" />
+      <span class="status-chip__label">{{
+        $t("unit.spisok_unitov.card.status." + item.status)
+      }}</span>
       <span class="status-chip__count text-tabular">{{ schetchik(item.status) }}</span>
     </button>
   </div>
@@ -86,111 +98,109 @@ function schetchik(status: UnitFilterStatus): number {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-width: 0;
 }
 
 .status-chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-height: 32px;
-  padding: var(--app-space-1) var(--app-space-3);
+  padding: 4px 12px;
   border: 1px solid transparent;
-  border-radius: var(--app-radius-pill);
-  background: transparent;
-  color: var(--app-text-secondary);
+  border-radius: var(--borderRadius-full);
+  background-color: transparent;
+  color: var(--fgColor-muted);
   font-family: inherit;
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
   white-space: nowrap;
   cursor: pointer;
   transition:
-      background-color var(--app-duration-fast) var(--app-easing),
-      border-color var(--app-duration-fast) var(--app-easing),
-      color var(--app-duration-fast) var(--app-easing);
+    background-color 80ms ease-out,
+    border-color 80ms ease-out,
+    color 80ms ease-out;
 }
 
 .status-chip:hover {
-  border-color: var(--app-border);
-  background: var(--app-surface-muted);
+  border-color: var(--borderColor-default);
+  background-color: var(--bgColor-muted);
 }
 
 .status-chip:focus-visible {
-  outline: 2px solid var(--app-focus-ring);
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
 }
 
-.status-chip__dot {
+.status-chip__icon {
   flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--app-text-disabled);
+  color: var(--fgColor-muted);
 }
 
 .status-chip__count {
-  color: var(--app-text-secondary);
-  font-weight: 400;
+  color: inherit;
+  font-weight: var(--fontWeight-normal);
 }
 
-/* Цветные точки статусов; счётчик остаётся muted. */
-.status-chip--running .status-chip__dot {
-  background: var(--app-positive);
+.status-chip--running .status-chip__icon {
+  color: var(--fgColor-success);
 }
 
-.status-chip--prepared .status-chip__dot {
-  background: var(--app-text-secondary);
+.status-chip--prepared .status-chip__icon {
+  color: var(--fgColor-muted);
 }
 
-.status-chip--busy .status-chip__dot {
-  background: var(--app-primary);
+.status-chip--busy .status-chip__icon {
+  color: var(--fgColor-accent);
 }
 
-.status-chip--stopped .status-chip__dot {
-  background: var(--app-text-disabled);
+.status-chip--stopped .status-chip__icon {
+  color: var(--fgColor-muted);
 }
 
-.status-chip--error .status-chip__dot {
-  background: var(--app-negative);
+.status-chip--error .status-chip__icon {
+  color: var(--fgColor-danger);
 }
 
 /*
- * Активный чип: цветная точка + цветной текст + тонкий бордер.
- * Заливки 12% нет — меньше цвета, чётче скан.
+ * Активный чип: цветная иконка + цветной текст + тонкий бордер.
+ * Заливки нет — меньше цвета, чётче скан.
  */
 .status-chip--all.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-primary) 45%, transparent);
-  color: var(--app-primary);
+  border-color: var(--borderColor-accent-muted);
+  background-color: var(--bgColor-accent-muted);
+  color: var(--fgColor-accent);
 }
 
 .status-chip--running.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-positive) 45%, transparent);
-  color: var(--app-positive);
+  border-color: var(--borderColor-success-muted);
+  background-color: var(--bgColor-success-muted);
+  color: var(--fgColor-success);
 }
 
-/* busy — в работе: используем primary, как в UnitStatusBadge. */
 .status-chip--busy.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-primary) 45%, transparent);
-  color: var(--app-primary);
+  border-color: var(--borderColor-accent-muted);
+  background-color: var(--bgColor-accent-muted);
+  color: var(--fgColor-accent);
 }
 
-/* prepared — нейтральный, как в UnitStatusBadge. */
 .status-chip--prepared.status-chip--active {
-  border-color: var(--app-border);
-  background: var(--app-surface-muted);
-  color: var(--app-text-secondary);
+  border-color: var(--borderColor-default);
+  background-color: var(--bgColor-neutral-muted);
+  color: var(--fgColor-default);
 }
 
 .status-chip--stopped.status-chip--active {
-  border-color: var(--app-border);
-  background: var(--app-surface-muted);
-  color: var(--app-text-secondary);
+  border-color: var(--borderColor-default);
+  background-color: var(--bgColor-neutral-muted);
+  color: var(--fgColor-default);
 }
 
 .status-chip--error.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-negative) 45%, transparent);
-  color: var(--app-negative);
+  border-color: var(--borderColor-danger-muted);
+  background-color: var(--bgColor-danger-muted);
+  color: var(--fgColor-danger);
 }
 </style>

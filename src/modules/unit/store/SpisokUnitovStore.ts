@@ -36,6 +36,8 @@ type PolzovatelProekta  = {
 class Proekt {
     value: string;
     label: string;
+    /** Идентификатор репозитория проекта (repoId из ProjectListItem). */
+    repoId: string;
     users: PolzovatelProekta[];
     memoryLimit: number;
     /** Маски защищённых веток проекта (wildcard `*` как в GitLab). */
@@ -44,12 +46,14 @@ class Proekt {
     constructor(
         value: string,
         label: string,
+        repoId: string,
         users: PolzovatelProekta[],
         memoryLimit: number,
         zashishennieVetki: string[] = [],
     ) {
         this.value = value;
         this.label = label;
+        this.repoId = repoId;
         this.users = users;
         this.memoryLimit = memoryLimit;
         this.zashishennieVetki = zashishennieVetki;
@@ -554,6 +558,7 @@ export const useSpisokUnitovStore = defineStore('SpisokUnitovStore', {
                 this.proekti.spisok = response.data.map((item) => new Proekt(
                     item.id,
                     item.name,
+                    item.repoId,
                     item.users,
                     item.memoryLimit,
                     item.zashishennieVetki ?? [],

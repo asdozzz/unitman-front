@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useI18n} from "vue-i18n";
+import {GhIcon} from "@/components/ui";
 import type {
   HranilishaFilterChip,
   HranilishaFilterKey,
@@ -63,18 +64,17 @@ function klyuchChipa(chip: HranilishaFilterChip): string {
 
 <template>
   <template v-if="chips.length > 0">
-    <q-chip
+    <button
         v-for="chip in chips"
         :key="klyuchChipa(chip)"
+        type="button"
         class="filter-chip"
-        dense
-        removable
-        delete-icon="close"
-        :aria-label="podpisChipa(chip)"
-        @remove="emit('remove', {key: chip.key, value: chip.value})"
+        :aria-label="$t('unit.spisok_rep.filter.chip.remove', {label: podpisChipa(chip)})"
+        @click="emit('remove', {key: chip.key, value: chip.value})"
     >
-      {{ podpisChipa(chip) }}
-    </q-chip>
+      <span class="filter-chip__label">{{ podpisChipa(chip) }}</span>
+      <GhIcon name="x" :size="12" class="filter-chip__icon" />
+    </button>
 
     <button
         type="button"
@@ -87,61 +87,63 @@ function klyuchChipa(chip: HranilishaFilterChip): string {
 </template>
 
 <style scoped>
-/* Neutral-чипы: бордер + secondary-текст + крестик, без primary-заливки. */
 .filter-chip {
   display: inline-flex;
   align-items: center;
-  height: 32px;
+  gap: 4px;
+  height: 28px;
   margin: 0;
-  padding: 0 var(--app-space-2) 0 var(--app-space-3);
-  border: 1px solid var(--app-border);
-  border-radius: 0;
-  background: var(--app-surface);
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-full);
+  background: var(--bgColor-default);
+  color: var(--fgColor-muted);
+  font-family: var(--fontStack-system);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-medium);
+  line-height: var(--lineHeight-tight);
   white-space: nowrap;
+  cursor: pointer;
+  transition:
+      background-color 80ms ease-out,
+      color 80ms ease-out;
 }
 
-.filter-chip :deep(.q-chip__content) {
-  padding: 0;
+.filter-chip:hover {
+  background: var(--bgColor-neutral-muted);
+  color: var(--fgColor-default);
 }
 
-.filter-chip :deep(.q-chip__icon--remove) {
-  width: 18px;
-  height: 18px;
-  margin: 0 0 0 var(--app-space-1);
-  color: var(--app-text-secondary);
-  font-size: 16px;
-  opacity: 0.85;
+.filter-chip:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: 2px;
 }
 
-.filter-chip :deep(.q-chip__icon--remove:hover) {
-  color: var(--app-text);
-  opacity: 1;
+.filter-chip__icon {
+  color: var(--fgColor-muted);
 }
 
 .filter-chips__reset {
   border: none;
   background: none;
-  padding: 0 var(--app-space-1);
-  color: var(--app-text-secondary);
-  font-family: inherit;
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
+  padding: 0 4px;
+  color: var(--fgColor-muted);
+  font-family: var(--fontStack-system);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--app-duration-fast) var(--app-easing);
+  transition: color 80ms ease-out;
 }
 
 .filter-chips__reset:hover {
-  color: var(--app-primary);
+  color: var(--fgColor-accent);
   text-decoration: underline;
 }
 
 .filter-chips__reset:focus-visible {
-  outline: 2px solid var(--app-focus-ring);
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
 }
 </style>

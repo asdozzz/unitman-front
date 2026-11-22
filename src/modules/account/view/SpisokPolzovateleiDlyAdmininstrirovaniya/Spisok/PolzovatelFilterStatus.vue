@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import type {PolzovatelFilterStatus} from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelFiltri";
+import { useI18n } from "vue-i18n";
+import { GhLabel } from "@/components/ui";
+import type { GhLabelVariant, OcticonName } from "@/components/ui";
+import type { PolzovatelFilterStatus } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelFiltri";
 
-/** Описание одного статуса: цветная точка задаётся модификатором `status-chip--<status>`. */
+/** Описание одного статуса: порядок чипов фиксирован. */
 type OpisanieStatusa = {
   status: PolzovatelFilterStatus;
+  icon: OcticonName;
 };
 
-/** Порядок чипов фиксирован: сначала активные, затем заблокированные. */
+const { t } = useI18n();
+
 const STATUSI: OpisanieStatusa[] = [
-  {status: "active"},
-  {status: "blocked"},
+  { status: "active", icon: "check-circle" },
+  { status: "blocked", icon: "x-circle" },
 ];
 
 const props = defineProps<{
@@ -23,12 +28,12 @@ const emit = defineEmits<{
 }>();
 
 /** Клик по «Все» сбрасывает выбор статусов. */
-function vybratVse() {
+function vybratVse(): void {
   emit("update:modelValue", []);
 }
 
 /** Мультивыбор: статус добавляется или убирается без потери остальных. */
-function pereklyuchit(status: PolzovatelFilterStatus) {
+function pereklyuchit(status: PolzovatelFilterStatus): void {
   const vibrali = new Set<PolzovatelFilterStatus>(props.modelValue);
 
   if (vibrali.has(status)) {
@@ -40,6 +45,15 @@ function pereklyuchit(status: PolzovatelFilterStatus) {
   emit("update:modelValue", Array.from(vibrali));
 }
 
+/** Вариант бейджа: невыбранный статус нейтрален, выбранный окрашен. */
+function variant(status: PolzovatelFilterStatus, aktiven: boolean): GhLabelVariant {
+  if (!aktiven) {
+    return "neutral";
+  }
+
+  return status === "active" ? "success" : "danger";
+}
+
 /** Счётчик может прийти неполным — отсутствующее значение показывает 0. */
 function schetchik(status: PolzovatelFilterStatus): number {
   return props.counts[status] ?? 0;
@@ -47,30 +61,38 @@ function schetchik(status: PolzovatelFilterStatus): number {
 </script>
 
 <template>
-  <div class="status-filter" role="group" :aria-label="$t('account.spisok.filter.status_label')">
+  <div
+    class="status-filter primer"
+    role="group"
+    :aria-label="t('account.spisok.filter.status_label')"
+  >
     <button
-        type="button"
-        class="status-chip status-chip--all"
-        :class="{'status-chip--active': modelValue.length === 0}"
-        :aria-pressed="modelValue.length === 0 ? 'true' : 'false'"
-        @click="vybratVse"
+      type="button"
+      class="status-filter__chip"
+      :aria-pressed="modelValue.length === 0 ? 'true' : 'false'"
+      @click="vybratVse"
     >
-      <span class="status-chip__label">{{ $t('account.spisok.filter.status_all') }}</span>
-      <span class="status-chip__count text-tabular">{{ total }}</span>
+      <GhLabel
+        :variant="modelValue.length === 0 ? 'accent' : 'neutral'"
+        :label="t('account.spisok.filter.status_all')"
+      />
+      <span class="status-filter__count">{{ total }}</span>
     </button>
 
     <button
-        v-for="item in STATUSI"
-        :key="item.status"
-        type="button"
-        class="status-chip"
-        :class="[`status-chip--status-${item.status}`, {'status-chip--active': modelValue.includes(item.status)}]"
-        :aria-pressed="modelValue.includes(item.status) ? 'true' : 'false'"
-        @click="pereklyuchit(item.status)"
+      v-for="item in STATUSI"
+      :key="item.status"
+      type="button"
+      class="status-filter__chip"
+      :aria-pressed="modelValue.includes(item.status) ? 'true' : 'false'"
+      @click="pereklyuchit(item.status)"
     >
-      <span class="status-chip__dot" aria-hidden="true" />
-      <span class="status-chip__label">{{ $t('account.spisok.card.status.' + item.status) }}</span>
-      <span class="status-chip__count text-tabular">{{ schetchik(item.status) }}</span>
+      <GhLabel
+        :variant="variant(item.status, modelValue.includes(item.status))"
+        :icon="item.icon"
+        :label="t('account.spisok.card.status.' + item.status)"
+      />
+      <span class="status-filter__count">{{ schetchik(item.status) }}</span>
     </button>
   </div>
 </template>
@@ -80,81 +102,31 @@ function schetchik(status: PolzovatelFilterStatus): number {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 8px;
   min-width: 0;
 }
 
-.status-chip {
+.status-filter__chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
-  min-height: 32px;
-  padding: var(--app-space-1) var(--app-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--app-radius-pill);
+  gap: 4px;
+  padding: 0;
+  border: none;
+  border-radius: var(--borderRadius-full);
   background: transparent;
-  color: var(--app-text-secondary);
-  font-family: inherit;
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
-  white-space: nowrap;
+  color: var(--fgColor-default);
+  font-family: var(--fontStack-system);
   cursor: pointer;
-  transition:
-      background-color var(--app-duration-fast) var(--app-easing),
-      border-color var(--app-duration-fast) var(--app-easing),
-      color var(--app-duration-fast) var(--app-easing);
 }
 
-.status-chip:hover {
-  border-color: var(--app-border);
-  background: var(--app-surface-muted);
-}
-
-.status-chip:focus-visible {
-  outline: 2px solid var(--app-focus-ring);
+.status-filter__chip:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
 }
 
-.status-chip__dot {
-  flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--app-text-disabled);
-}
-
-.status-chip__count {
-  color: var(--app-text-secondary);
-  font-weight: 400;
-}
-
-/* Цветные точки статусов; счётчик остаётся muted.
-   Модификатор статуса отделён от модификатора выбора (`--active`). */
-.status-chip--status-active .status-chip__dot {
-  background: var(--app-positive);
-}
-
-.status-chip--status-blocked .status-chip__dot {
-  background: var(--app-negative);
-}
-
-/*
- * Активный чип: цветная точка + цветной текст + тонкий бордер.
- * Заливки 12% нет — меньше цвета, чётче скан.
- */
-.status-chip--all.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-primary) 45%, transparent);
-  color: var(--app-primary);
-}
-
-.status-chip--status-active.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-positive) 45%, transparent);
-  color: var(--app-positive);
-}
-
-.status-chip--status-blocked.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-negative) 45%, transparent);
-  color: var(--app-negative);
+.status-filter__count {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  font-variant-numeric: tabular-nums;
 }
 </style>

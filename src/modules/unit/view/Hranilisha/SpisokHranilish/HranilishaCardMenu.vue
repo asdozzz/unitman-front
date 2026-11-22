@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {computed} from "vue";
+import {useI18n} from "vue-i18n";
+import {GhActionMenu} from "@/components/ui";
+import type {GhActionMenuItem} from "@/components/ui";
 import type {Hranilishe} from "@/modules/unit/store/SpisokHranilish/model/Hranilishe";
 import {useEditFormStore, EditForm} from "@/modules/unit/store/SpisokHranilish/EditFormStore";
 
@@ -12,55 +16,52 @@ const emit = defineEmits<{
 }>();
 
 const editFormStore = useEditFormStore();
+const {t} = useI18n();
 
 /** «Редактировать» открывает общий диалог формы редактирования. */
 function otkritRedaktirovanie() {
   editFormStore.otkritFormu(new EditForm(props.item.id, props.item.token));
 }
+
+const punktyMenu = computed<GhActionMenuItem[]>(() => {
+  const punkty: GhActionMenuItem[] = [
+    {id: "edit", label: t("unit.spisok_rep.card.buttons.edit"), icon: "pencil"},
+  ];
+
+  if (!props.item.confirmed) {
+    punkty.push({id: "confirm", label: t("unit.spisok_rep.card.buttons.confirm"), icon: "verified"});
+  }
+
+  punkty.push({
+    id: "remove",
+    label: t("unit.spisok_rep.card.buttons.delete"),
+    icon: "trash",
+    danger: true,
+    separatorBefore: true,
+  });
+
+  return punkty;
+});
+
+function vybratDeistvie(item: GhActionMenuItem): void {
+  switch (item.id) {
+    case "edit":
+      otkritRedaktirovanie();
+      return;
+    case "confirm":
+      emit("confirm");
+      return;
+    case "remove":
+      emit("remove");
+      return;
+  }
+}
 </script>
 
 <template>
-  <q-btn
-      flat
-      dense
-      size="sm"
-      icon="more_vert"
+  <GhActionMenu
+      :items="punktyMenu"
       :aria-label="$t('unit.spisok_rep.card.buttons.more')"
-  >
-    <q-menu>
-      <q-list dense style="min-width: 240px">
-        <q-item clickable v-close-popup @click="otkritRedaktirovanie">
-          <q-item-section avatar>
-            <q-icon name="edit" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_rep.card.buttons.edit') }}</q-item-section>
-        </q-item>
-
-        <q-item
-            v-if="!item.confirmed"
-            clickable
-            v-close-popup
-            @click="emit('confirm')"
-        >
-          <q-item-section avatar>
-            <q-icon name="verified" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_rep.card.buttons.confirm') }}</q-item-section>
-        </q-item>
-
-        <q-separator />
-
-        <q-item clickable v-close-popup @click="emit('remove')">
-          <q-item-section avatar>
-            <q-icon name="delete_forever" color="negative" />
-          </q-item-section>
-          <q-item-section class="text-negative">
-            {{ $t('unit.spisok_rep.card.buttons.delete') }}
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-menu>
-
-    <q-tooltip>{{ $t('unit.spisok_rep.card.buttons.more') }}</q-tooltip>
-  </q-btn>
+      @select="vybratDeistvie"
+  />
 </template>

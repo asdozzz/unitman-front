@@ -1,235 +1,284 @@
 <template>
-  <div id="app">
-    <q-layout view="hHh Lpr lff">
-      <q-header elevated class="bg-primary text-white">
-        <q-toolbar>
-          <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" v-if="showedMenu.length > 0"/>
-          <q-toolbar-title>
-            Unitman
-          </q-toolbar-title>
-          <q-btn
-              dense
-              flat
-              round
-              :icon="darkMode ? 'light_mode' : 'dark_mode'"
-              :aria-label="$t('app.header.toggle_theme')"
-              @click="toggleDarkMode"
-          >
-            <q-tooltip>{{ $t('app.header.toggle_theme') }}</q-tooltip>
-          </q-btn>
-          <div class="q-gutter-sm text-white" v-if="!loaderIzmemeniyaYazika">
-            <q-radio color="warning" dark left-label :model-value="getLocale" @update:model-value="changeLocal" val="ru" label="ru" />
-            <q-radio color="warning" dark left-label :model-value="getLocale" @update:model-value="changeLocal" val="en" label="en" />
-          </div>
-          <div class="q-mr-sm" v-else>
-            <q-spinner
-                color="warning"
-                size="2em"
-            />
-          </div>
+    <div
+        id="app"
+        class="primer-theme app-shell"
+        :data-color-mode="$q.dark.isActive ? 'dark' : 'light'"
+    >
+        <a
+            href="#main-content"
+            class="gh-visually-hidden app-shell__skip-link"
+            @click.prevent="pereytiKKontentu"
+        >
+            {{ t("app.skip_to_content") }}
+        </a>
 
-          <q-btn dense flat no-wrap v-if="isAuth">
-            <q-avatar color="dark" text-color="white">U</q-avatar>
-            <q-icon name="arrow_drop_down" size="16px" />
-            <q-menu auto-close>
-              <q-list dense>
-                <q-item>
-                  <q-item-section>
-                    <div><strong>{{ email }}</strong></div>
-                  </q-item-section>
-                </q-item>
-                <q-separator />
-                <q-item clickable>
-                  <q-item-section>{{$t('app.header.profile')}}</q-item-section>
-                </q-item>
-                <q-separator />
-                <q-item clickable>
-                  <q-item-section>{{$t('app.header.help')}}</q-item-section>
-                </q-item>
-                <q-item clickable @click="accountSettings">
-                  <q-item-section>{{$t('app.header.settings')}}</q-item-section>
-                </q-item>
-                <q-item clickable @click="logout">
-                  <q-item-section>{{$t('app.header.sign_out')}}</q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
-        </q-toolbar>
-      </q-header>
+        <q-layout view="hHh Lpr lff" class="app-shell__layout">
+            <template v-if="pokazatKarkas">
+                <q-header class="app-shell__header">
+                    <AppHeader
+                        @toggle-sidebar="otkrytSaidbar"
+                        @open-help="otkrytShpargalku"
+                    />
+                </q-header>
 
-      <q-drawer
-          elevated
-          v-if="showedMenu.length > 0"
-          v-model="leftDrawerOpen"
-          side="left"
-          :width="200"
-          :breakpoint="500"
-          >
-        <q-scroll-area class="fit">
-          <q-list padding class="menu-list">
-            <template v-for="menuItem in showedMenu" :key="menuItem.label">
-              <!-- Группа с дочерними пунктами: раскрывается, если открыт один из них. -->
-              <q-expansion-item
-                  v-if="menuItem.children && menuItem.children.length > 0"
-                  :icon="menuItem.icon"
-                  :label="$t(menuItem.label)"
-                  :default-opened="menuItem.children.some((child) => child.href !== undefined && path.startsWith(child.href))"
-              >
-                <q-list>
-                  <q-item
-                      v-for="child in menuItem.children"
-                      :key="child.href ?? child.label"
-                      clickable
-                      v-ripple
-                      :to="child.href"
-                      :active="child.href === path"
-                  >
-                    <q-item-section avatar>
-                      <q-icon :name="child.icon" />
-                    </q-item-section>
-
-                    <q-item-section>
-                      <q-item-label class="text-weight-medium">{{ $t(child.label) }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-expansion-item>
-
-              <!-- Обычный пункт без детей. -->
-              <q-item v-else clickable v-ripple :to="menuItem.href" :active="menuItem.href === path">
-                <q-item-section avatar>
-                  <q-icon :name="menuItem.icon" />
-                </q-item-section>
-
-                <q-item-section>
-                  <q-item-label class="text-weight-medium">{{ $t(menuItem.label) }}</q-item-label>
-                </q-item-section>
-              </q-item>
+                <q-drawer
+                    v-model="leftDrawerOpen"
+                    side="left"
+                    :width="shirinaSaidbara"
+                    :breakpoint="767"
+                    :show-if-above="true"
+                    :bordered="false"
+                    class="app-shell__drawer"
+                >
+                    <AppSidebar
+                        :collapsed="svernutSaidbar && !$q.screen.lt.md"
+                        @toggle-collapse="pereklyuchitSaidbar"
+                        @navigate="zakritSaidbarNaMobilnom"
+                    />
+                </q-drawer>
             </template>
-          </q-list>
-        </q-scroll-area>
-      </q-drawer>
 
-      <q-page-container>
-        <q-page>
-          <router-view />
-          <UvedomleniyaOpenCode />
-          <q-page-scroller position="bottom-right" :scroll-offset="150" :offset="[18, 18]">
-            <q-btn fab icon="keyboard_arrow_up" color="accent" />
-          </q-page-scroller>
-        </q-page>
+            <q-page-container class="app-shell__page">
+                <main
+                    id="main-content"
+                    ref="konteynerKontenta"
+                    tabindex="-1"
+                    class="gh-page app-shell__main"
+                >
+                    <router-view />
+                </main>
 
-      </q-page-container>
+                <UvedomleniyaOpenCode />
 
-<!--      <q-footer elevated class="bg-grey-8 text-white">
-        <q-toolbar>
-          <q-toolbar-title>
-            <div>@unitman</div>
-          </q-toolbar-title>
-        </q-toolbar>
-      </q-footer>-->
-    </q-layout>
-  </div>
+                <div v-if="pokazatNaverh" class="app-shell__back-to-top">
+                    <GhButton
+                        variant="default"
+                        size="sm"
+                        icon="arrow-up"
+                        :aria-label="t('app.back_to_top')"
+                        @click="naverh"
+                    />
+                </div>
+
+                <HotkeysDialog v-model="shpargalkaOtkryta" />
+            </q-page-container>
+        </q-layout>
+    </div>
 </template>
 
 <script setup lang="ts">
-import {useAuthStore} from "@/modules/account/store/auth";
-import {storeToRefs} from "pinia";
-import { useRouter, useRoute } from "vue-router";
-import {computed, onMounted, reactive, ref} from "vue";
-import {useQuasar} from "quasar";
-import 'dayjs/locale/ru'
-import 'dayjs/locale/en'
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
+import { useRoute, useRouter } from "vue-router";
+import "dayjs/locale/ru";
+import "dayjs/locale/en";
 import dayjs from "dayjs";
-import {loadAppSettings, saveAppSettings} from "@/utils/appSettings";
+import { GhButton } from "@/components/ui";
+import AppHeader from "@/modules/app/view/AppHeader.vue";
+import AppSidebar from "@/modules/app/view/AppSidebar.vue";
+import HotkeysDialog from "@/modules/app/view/HotkeysDialog.vue";
 import UvedomleniyaOpenCode from "@/modules/opencode/view/UvedomleniyaOpenCode.vue";
+import { useAuthStore } from "@/modules/account/store/auth";
+import { useHotkeys } from "@/utils/useHotkeys";
+import { loadAppSettings, saveAppSettings } from "@/utils/appSettings";
 
+const { t } = useI18n();
 const $q = useQuasar();
-
-// Настройки интерфейса общие для приложения: тема применяется в main.ts,
-// состояние меню — здесь.
-const nastroiki = loadAppSettings();
-
 const router = useRouter();
 const route = useRoute();
-const path = computed(() => route.path)
+
+const nastroiki = loadAppSettings();
 
 const authStore = useAuthStore();
-const { isAuth, email, isAdmin, loaderIzmemeniyaYazika, getLocale } = storeToRefs(authStore);
+const { isAuth, isAdmin, getLocale } = storeToRefs(authStore);
 
-let currentLocale = ref("");
-const leftDrawerOpen = ref(nastroiki.leftDrawerOpen);
-const darkMode = ref(nastroiki.darkMode);
-//const miniState = ref(false);
+const svernutSaidbar = ref<boolean>(nastroiki.sidebarCollapsed);
+const leftDrawerOpen = ref<boolean>(nastroiki.leftDrawerOpen);
+const shpargalkaOtkryta = ref<boolean>(false);
+const pokazatNaverh = ref<boolean>(false);
+
+const konteynerKontenta = ref<HTMLElement | null>(null);
+
+/**
+ * Ширина сайдбара: 232px в развёрнутом виде, 48px в свёрнутом.
+ * На мобильной ширине drawer всегда полноразмерный — свёрнутые иконки
+ * внутри 48px нечитаемы.
+ */
+const shirinaSaidbara = computed<number>(() =>
+    $q.screen.lt.md ? 232 : svernutSaidbar.value ? 48 : 232,
+);
+
+/**
+ * Каркас (хедер и сайдбар) показывается авторизованным пользователям и на
+ * странице первичной инициализации, которая доступна без входа.
+ */
+const pokazatKarkas = computed<boolean>(
+    () => isAuth.value || route.path === "/init",
+);
 
 onMounted(() => {
-  currentLocale.value = getLocale.value;
-  authStore.updateLocale(getLocale.value);
-  dayjs.locale(getLocale.value);
-  document.documentElement.lang = getLocale.value;
-  // Повторно применяем тему на случай, если main.ts не успел выставить её
-  // до монтирования (например, значение изменили в другой вкладке).
-  $q.dark.set(nastroiki.darkMode);
-})
+    authStore.updateLocale(getLocale.value);
+    dayjs.locale(getLocale.value);
+    document.documentElement.lang = getLocale.value;
 
-type PunktMenu = {
-  icon: string;
-  label: string;
-  show: unknown;
-  href?: string;
-  children?: PunktMenu[];
-};
+    // Повторно применяем тему на случай, если main.ts не успел выставить её
+    // до монтирования (например, значение изменили в другой вкладке).
+    $q.dark.set(nastroiki.darkMode);
 
-const menu = reactive<PunktMenu[]>([
-  {icon: 'home', href:"/", label: 'app.tabs.home', show: isAuth },
-  {icon: 'groups', href:"/account/list", label: 'app.tabs.accounts', show: isAdmin },
-  {icon: 'inbox', href:"/unit/repositories", label: 'app.tabs.repos', show: isAdmin },
-  {icon: 'list', href:"/unit/projects", label: 'app.tabs.projects', show: isAdmin },
-  {icon: 'star', href:"/unit/list", label: 'app.tabs.units', show: isAuth },
-  // Реквизиты и сессии OpenCode привязаны к аккаунту, поэтому раздел виден
-  // всем авторизованным, а не только администраторам.
-  {
-    icon: 'smart_toy',
-    label: 'app.tabs.ai_assistant',
-    show: isAuth,
-    children: [
-      {icon: 'forum', href: '/opencode/sessions', label: 'app.tabs.opencode_units', show: isAuth},
-      {icon: 'dashboard', href: '/opencode/workspaces', label: 'app.tabs.workspaces', show: isAuth},
-    ],
-  },
-  {icon: 'settings', href:"/init", label: 'app.tabs.settings', show: isAuth },
-]);
+    window.addEventListener("scroll", obrabotatProkrutku, { passive: true });
+});
 
-const showedMenu = computed(() => {
-  return menu.filter((item) => item.show);
-})
+onUnmounted(() => {
+    window.removeEventListener("scroll", obrabotatProkrutku);
+});
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-  saveAppSettings({
-    leftDrawerOpen: leftDrawerOpen.value
-  })
+/** Сворачивает/разворачивает сайдбар и сохраняет выбор устройства. */
+function pereklyuchitSaidbar(): void {
+    svernutSaidbar.value = !svernutSaidbar.value;
+    saveAppSettings({ sidebarCollapsed: svernutSaidbar.value });
 }
 
-function toggleDarkMode() {
-  darkMode.value = !darkMode.value;
-  $q.dark.set(darkMode.value);
-  saveAppSettings({ darkMode: darkMode.value });
+/** Открывает сайдбар на мобильной ширине (бургер в хедере). */
+function otkrytSaidbar(): void {
+    leftDrawerOpen.value = true;
+    saveAppSettings({ leftDrawerOpen: leftDrawerOpen.value });
 }
 
-async function changeLocal(newLocale: "en" | "ru") {
-  document.documentElement.lang = newLocale;
-  authStore.izmeniyYazik(newLocale);
+/** Закрывает мобильный drawer после перехода по пункту меню. */
+function zakritSaidbarNaMobilnom(): void {
+    if ($q.screen.lt.md) {
+        leftDrawerOpen.value = false;
+    }
 }
 
-function logout() {
-  authStore.logout();
-  router.push('/login');
+/** Открывает диалог-шпаргалку горячих клавиш. */
+function otkrytShpargalku(): void {
+    shpargalkaOtkryta.value = true;
 }
 
-function accountSettings() {
-  router.push('/account/settings');
+/** Переводит фокус в поле глобального поиска в хедере. */
+function fokusNaPoisk(): void {
+    const pole = document.getElementById(
+        "app-header-search",
+    ) as HTMLInputElement | null;
+
+    pole?.focus();
+    pole?.select();
 }
+
+/** Переход к содержимому по skip-link с установкой фокуса. */
+function pereytiKKontentu(): void {
+    konteynerKontenta.value?.focus();
+    konteynerKontenta.value?.scrollIntoView({ block: "start" });
+}
+
+/** Возврат наверх страницы. */
+function naverh(): void {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/** Показывает кнопку «Наверх» после прокрутки содержимого. */
+function obrabotatProkrutku(): void {
+    const prokrutka =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+    pokazatNaverh.value = prokrutka > 150;
+}
+
+useHotkeys(
+    {
+        poisk: fokusNaPoisk,
+        pereytiNaGlavnuyu: () => {
+            void router.push("/");
+        },
+        pereytiKUnitam: () => {
+            void router.push("/unit/list");
+        },
+        pereytiKProektam: () => {
+            if (isAdmin.value) {
+                void router.push("/unit/projects");
+            }
+        },
+        pereytiKAkkauntam: () => {
+            if (isAdmin.value) {
+                void router.push("/account/list");
+            }
+        },
+        pereytiKRepozitoriyam: () => {
+            if (isAdmin.value) {
+                void router.push("/unit/repositories");
+            }
+        },
+        pereytiKNastroikam: () => {
+            void router.push("/account/settings");
+        },
+        pereklyuchitSaidbar,
+        otkrytShpargalku,
+    },
+    {
+        kogdaAktivno: () => pokazatKarkas.value,
+    },
+);
 </script>
 
+<style scoped>
+.app-shell {
+    min-height: 100vh;
+    background-color: var(--bgColor-default);
+    color: var(--fgColor-default);
+}
+
+.app-shell__skip-link {
+    top: 8px;
+    left: 8px;
+    z-index: 3000;
+    border-radius: var(--borderRadius-medium);
+    background-color: var(--bgColor-default);
+    color: var(--fgColor-accent);
+    font-family: var(--fontStack-system);
+    font-size: var(--fontSize-body);
+    text-decoration: none;
+}
+
+.app-shell__skip-link:focus,
+.app-shell__skip-link:focus-visible {
+    border: 1px solid var(--borderColor-default);
+}
+
+.app-shell__header {
+    height: 48px;
+    background-color: var(--bgColor-default);
+    border-bottom: 1px solid var(--borderColor-muted);
+    box-shadow: none;
+    color: var(--fgColor-default);
+}
+
+.app-shell__drawer {
+    background-color: var(--bgColor-default);
+}
+
+.app-shell__page {
+    background-color: var(--bgColor-default);
+}
+
+.app-shell__main {
+    min-height: calc(100vh - 48px);
+    outline: none;
+}
+
+.app-shell__main:focus,
+.app-shell__main:focus-visible {
+    outline: none;
+}
+
+.app-shell__back-to-top {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1000;
+}
+</style>

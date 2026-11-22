@@ -1317,6 +1317,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/project/sozdatVetku": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Создать ветку проекта */
+        post: operations["post_app_unitman_infra_project_sozdatvetku"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/project/spisokPeremenihProekta": {
         parameters: {
             query?: never;
@@ -3142,6 +3159,8 @@ export type components = {
             Answer?: string | null;
             /** @description Ключ перевода ошибки при Kind=ERROR */
             ErrorKey?: string | null;
+            /** @description Фактический текст ошибки раннера/OpenCode; не переводится */
+            ErrorMessage?: string | null;
             /** @description Идентификатор сессии на стороне OpenCode */
             ExternalSessionId?: string | null;
             /**
@@ -3751,6 +3770,11 @@ export type components = {
             fileId?: string | null;
             /** @example uploads */
             name: string;
+        };
+        SozdatVetkuProekta: {
+            nazvanie: string;
+            otVetki: string;
+            projectId: string;
         };
         SozdatWebhookProekta: {
             /** Format: uuid */
@@ -7608,6 +7632,52 @@ export interface operations {
                     "application/json": {
                         /** @description Пустой ответ: пользователь удалён из проекта */
                         data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_unitman_infra_project_sozdatvetku: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SozdatVetkuProekta"];
+            };
+        };
+        responses: {
+            /** @description Созданная ветка проекта */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Созданная ветка проекта */
+                        data: components["schemas"]["ProjectBranch"];
                         /**
                          * @example success
                          * @enum {string}

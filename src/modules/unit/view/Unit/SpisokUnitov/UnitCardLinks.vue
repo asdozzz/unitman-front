@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import {computed, onBeforeUnmount, ref} from "vue";
-import {copyToClipboard} from "quasar";
-import type {Link} from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import { computed, onBeforeUnmount, ref } from "vue";
+import { copyToClipboard } from "quasar";
+import type { Link } from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import { GhButton, GhIcon } from "@/components/ui";
 
 const props = defineProps<{
   links: Link[];
@@ -46,9 +47,9 @@ function razobrat(path: string): ChastiSsylki {
     const url = new URL(path);
     const put = `${url.pathname}${url.search}${url.hash}`;
 
-    return {label: url.host, tail: put !== "" && put !== "/" ? put : ""};
+    return { label: url.host, tail: put !== "" && put !== "/" ? put : "" };
   } catch {
-    return {label: path, tail: ""};
+    return { label: path, tail: "" };
   }
 }
 
@@ -75,7 +76,7 @@ function sobratStroku(link: Link): StrockaSsylki {
 
   const razobrano = razobrat(link.path);
 
-  return {link, label: razobrano.label, tail: razobrano.tail, badge, canNavigate};
+  return { link, label: razobrano.label, tail: razobrano.tail, badge, canNavigate };
 }
 
 /** Строки для рендера: ссылка и заранее собранные части компактной строки. */
@@ -112,67 +113,65 @@ onBeforeUnmount(() => {
 <template>
   <div v-if="links.length > 0" class="unit-links">
     <!-- Заголовок секции заменён линией-разделителем: смысл блока очевиден. -->
-    <div v-if="!canOpen" class="unit-links__hint text-caption-muted">
-      <q-icon name="lock" size="12px" />
-      {{ $t('unit.spisok_unitov.card.hints.links_stopped') }}
+    <div v-if="!canOpen" class="unit-links__hint">
+      <GhIcon name="lock" :size="12" />
+      {{ $t("unit.spisok_unitov.card.hints.links_stopped") }}
     </div>
 
     <div
-        v-for="strocka in stroki"
-        :key="strocka.link.path"
-        class="unit-links__row"
+      v-for="strocka in stroki"
+      :key="strocka.link.path"
+      class="unit-links__row"
     >
       <!-- http/https открываются в новой вкладке; ws/tcp и прочие — только текст с title. -->
       <a
-          v-if="strocka.canNavigate"
-          :href="strocka.link.path"
-          class="unit-links__link"
-          :title="strocka.link.path"
-          :aria-label="$t('unit.spisok_unitov.card.buttons.open_link')"
-          target="_blank"
-          rel="noopener noreferrer"
+        v-if="strocka.canNavigate"
+        :href="strocka.link.path"
+        class="unit-links__link"
+        :title="strocka.link.path"
+        :aria-label="$t('unit.spisok_unitov.card.buttons.open_link')"
+        target="_blank"
+        rel="noopener noreferrer"
       >
-        <q-icon name="link" size="14px" class="unit-links__icon" />
+        <GhIcon name="link" :size="14" class="unit-links__icon" />
 
         <span class="unit-links__label">{{ strocka.label }}</span>
 
         <span v-if="strocka.badge !== null" class="unit-links__badge">{{ strocka.badge }}</span>
 
         <!-- Хвост startUri: обрезка слева через bidi-трюк сохраняет конец пути. -->
-        <span v-if="strocka.tail !== ''" class="unit-links__path text-mono">
+        <span v-if="strocka.tail !== ''" class="unit-links__path gh-mono">
           {{ strocka.tail }}
         </span>
       </a>
 
       <span
-          v-else
-          class="unit-links__link unit-links__link--static"
-          :class="{'unit-links__link--disabled': !canOpen}"
-          :title="strocka.link.path"
+        v-else
+        class="unit-links__link unit-links__link--static"
+        :class="{ 'unit-links__link--disabled': !canOpen }"
+        :title="strocka.link.path"
       >
-        <q-icon name="link" size="14px" class="unit-links__icon" />
+        <GhIcon name="link" :size="14" class="unit-links__icon" />
 
         <span class="unit-links__label">{{ strocka.label }}</span>
 
         <span v-if="strocka.badge !== null" class="unit-links__badge">{{ strocka.badge }}</span>
 
-        <span v-if="strocka.tail !== ''" class="unit-links__path text-mono">
+        <span v-if="strocka.tail !== ''" class="unit-links__path gh-mono">
           {{ strocka.tail }}
         </span>
       </span>
 
-      <q-btn
-          class="unit-links__copy"
-          flat
-          dense
-          size="sm"
-          :icon="skopirovannaya === strocka.link.path ? 'check' : 'content_copy'"
-          :color="skopirovannaya === strocka.link.path ? 'positive' : undefined"
-          :aria-label="$t('unit.spisok_unitov.card.buttons.copy_link')"
-          @click="skopirovat(strocka.link)"
+      <GhButton
+        class="unit-links__copy"
+        variant="invisible"
+        size="sm"
+        :icon="skopirovannaya === strocka.link.path ? 'check' : 'copy'"
+        :aria-label="$t('unit.spisok_unitov.card.buttons.copy_link')"
+        @click="skopirovat(strocka.link)"
       >
-        <q-tooltip>{{ $t('unit.spisok_unitov.card.buttons.copy_link') }}</q-tooltip>
-      </q-btn>
+        <q-tooltip>{{ $t("unit.spisok_unitov.card.buttons.copy_link") }}</q-tooltip>
+      </GhButton>
     </div>
   </div>
 </template>
@@ -183,15 +182,16 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 6px;
   min-width: 0;
-  /* Вместо заголовка «Ссылки» — тонкая линия-разделитель. */
-  padding-top: var(--app-space-2);
-  border-top: 1px solid var(--app-border);
+  padding-top: 8px;
+  border-top: 1px solid var(--borderColor-default);
 }
 
 .unit-links__hint {
   display: flex;
   align-items: center;
   gap: 6px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
 }
 
 .unit-links__row {
@@ -208,11 +208,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 6px;
   min-width: 0;
-  color: var(--app-primary);
-  text-decoration: none;
-}
-
-.unit-links__link:hover {
+  color: var(--fgColor-accent);
   text-decoration: none;
 }
 
@@ -223,12 +219,12 @@ onBeforeUnmount(() => {
 
 /* ws/tcp и прочие: некликабельный текст, но с полным URL в title. */
 .unit-links__link--static {
-  color: var(--app-text);
+  color: var(--fgColor-default);
   cursor: default;
 }
 
 .unit-links__link--disabled {
-  color: var(--app-text-disabled);
+  color: var(--fgColor-muted);
   cursor: default;
   opacity: 0.55;
 }
@@ -242,7 +238,7 @@ onBeforeUnmount(() => {
   flex: 0 0 auto;
   max-width: 100%;
   overflow: hidden;
-  font-weight: 500;
+  font-weight: var(--fontWeight-medium);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -250,13 +246,13 @@ onBeforeUnmount(() => {
 /* Компактный pill протокола: ws, wss, tcp и т.п. */
 .unit-links__badge {
   flex: 0 0 auto;
-  padding: 0 var(--app-space-1);
-  border-radius: var(--app-radius-pill);
-  background: var(--app-surface-muted);
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
+  padding: 0 4px;
+  border-radius: var(--borderRadius-full);
+  background-color: var(--bgColor-neutral-muted);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
   text-transform: lowercase;
 }
 
@@ -264,10 +260,9 @@ onBeforeUnmount(() => {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  color: var(--app-text-secondary);
+  color: var(--fgColor-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* Обрезка с сохранением хвоста: логический порядок LTR, обрезка слева. */
   direction: rtl;
   text-align: left;
   unicode-bidi: plaintext;

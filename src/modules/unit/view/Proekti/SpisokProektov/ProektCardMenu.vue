@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import {computed} from "vue";
+import {useI18n} from "vue-i18n";
+import {GhActionMenu} from "@/components/ui";
+import type {GhActionMenuItem} from "@/components/ui";
 import type {Proekt} from "@/modules/unit/store/SpisokProektov/model/Proekt";
 
-defineProps<{
+const props = defineProps<{
   item: Proekt;
   /** Состояние NEW/BUILD_ERROR — проект ещё ни разу не собирали. */
   neSobirali: boolean;
@@ -18,75 +22,77 @@ const emit = defineEmits<{
   remove: [];
   removeManually: [];
 }>();
+
+const {t} = useI18n();
+
+const punktyMenu = computed<GhActionMenuItem[]>(() => {
+  const punkty: GhActionMenuItem[] = [
+    {id: "jobs", label: t("unit.spisok_proektov.card.buttons.jobs"), icon: "tasklist"},
+    {id: "edit", label: t("unit.spisok_proektov.card.buttons.edit"), icon: "pencil"},
+  ];
+
+  if (props.neSobirali) {
+    punkty.push({id: "build", label: t("unit.spisok_proektov.card.buttons.build"), icon: "tools"});
+  }
+
+  if (!props.item.isActive) {
+    punkty.push({id: "activate", label: t("unit.spisok_proektov.card.buttons.activate"), icon: "check"});
+  } else {
+    punkty.push({id: "deactivate", label: t("unit.spisok_proektov.card.buttons.deactivate"), icon: "x"});
+  }
+
+  if (props.sloman) {
+    punkty.push({
+      id: "remove-manually",
+      label: t("unit.spisok_proektov.card.buttons.delete_manually"),
+      icon: "trash",
+      danger: true,
+      separatorBefore: true,
+    });
+  } else {
+    punkty.push({
+      id: "remove",
+      label: t("unit.spisok_proektov.card.buttons.delete"),
+      icon: "trash",
+      danger: true,
+      separatorBefore: true,
+    });
+  }
+
+  return punkty;
+});
+
+function vybratDeistvie(item: GhActionMenuItem): void {
+  switch (item.id) {
+    case "jobs":
+      emit("jobs");
+      return;
+    case "edit":
+      emit("edit");
+      return;
+    case "build":
+      emit("build");
+      return;
+    case "activate":
+      emit("activate");
+      return;
+    case "deactivate":
+      emit("deactivate");
+      return;
+    case "remove-manually":
+      emit("removeManually");
+      return;
+    case "remove":
+      emit("remove");
+      return;
+  }
+}
 </script>
 
 <template>
-  <q-btn
-      flat
-      dense
-      size="sm"
-      icon="more_vert"
+  <GhActionMenu
+      :items="punktyMenu"
       :aria-label="$t('unit.spisok_proektov.card.buttons.more')"
-  >
-    <q-menu>
-      <q-list dense style="min-width: 240px">
-        <q-item clickable v-close-popup @click="emit('jobs')">
-          <q-item-section avatar>
-            <q-icon name="task_alt" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_proektov.card.buttons.jobs') }}</q-item-section>
-        </q-item>
-
-        <q-item clickable v-close-popup @click="emit('edit')">
-          <q-item-section avatar>
-            <q-icon name="edit" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_proektov.card.buttons.edit') }}</q-item-section>
-        </q-item>
-
-        <q-item v-if="neSobirali" clickable v-close-popup @click="emit('build')">
-          <q-item-section avatar>
-            <q-icon name="build" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_proektov.card.buttons.build') }}</q-item-section>
-        </q-item>
-
-        <q-item v-if="!item.isActive" clickable v-close-popup @click="emit('activate')">
-          <q-item-section avatar>
-            <q-icon name="done" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_proektov.card.buttons.activate') }}</q-item-section>
-        </q-item>
-
-        <q-item v-else clickable v-close-popup @click="emit('deactivate')">
-          <q-item-section avatar>
-            <q-icon name="remove_done" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_proektov.card.buttons.deactivate') }}</q-item-section>
-        </q-item>
-
-        <q-separator />
-
-        <q-item v-if="sloman" clickable v-close-popup @click="emit('removeManually')">
-          <q-item-section avatar>
-            <q-icon name="delete_forever" color="negative" />
-          </q-item-section>
-          <q-item-section class="text-negative">
-            {{ $t('unit.spisok_proektov.card.buttons.delete_manually') }}
-          </q-item-section>
-        </q-item>
-
-        <q-item v-else clickable v-close-popup @click="emit('remove')">
-          <q-item-section avatar>
-            <q-icon name="delete_forever" color="negative" />
-          </q-item-section>
-          <q-item-section class="text-negative">
-            {{ $t('unit.spisok_proektov.card.buttons.delete') }}
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-menu>
-
-    <q-tooltip>{{ $t('unit.spisok_proektov.card.buttons.more') }}</q-tooltip>
-  </q-btn>
+      @select="vybratDeistvie"
+  />
 </template>

@@ -1,20 +1,34 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import i18n from "@/bootstrap/translator";
+import {
+    GhBanner,
+    GhBox,
+    GhButton,
+    GhDialog,
+    GhEmptyState,
+    GhLabel,
+    GhSkeleton,
+} from "@/components/ui";
 import { useStorSpiskaSessiyOpenCode } from "@/modules/opencode/store/StorSpiskaSessiyOpenCode";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import { useStorFormiSozdaniyaSessii } from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
 import { useStorFormiPrivyazkiUnitaKSessii } from "@/modules/opencode/store/StorFormiPrivyazkiUnitaKSessii";
 import FormaSozdaniyaSessii from "@/modules/opencode/view/FormaSozdaniyaSessii.vue";
 import FormaPrivyazkiUnitaKSessii from "@/modules/opencode/view/FormaPrivyazkiUnitaKSessii.vue";
-import OpenCodeRazdelToggle from "@/modules/opencode/view/OpenCodeRazdelToggle.vue";
 import { convertDate } from "@/utils/dates";
+import { ozhidaetsyaVtorayaKlavishaPosledovatelnosti } from "@/utils/useHotkeys";
 import type { Schema } from "@/api/types";
 
-const $q = useQuasar();
+/**
+ * Список сессий OpenCode.
+ *
+ * Архивные сессии скрыты по умолчанию и показываются переключателем. Создание
+ * требует реквизитов, поэтому кнопка блокируется заранее, а не после отказа
+ * бэкенда.
+ */
 const router = useRouter();
 const storSpiska = useStorSpiskaSessiyOpenCode();
 const storRekvizitov = useStorSpiskaRekvizitovOpenCode();
@@ -33,6 +47,16 @@ const { oshibkaZagruzki: oshibkaRekvizitov } = storeToRefs(storRekvizitov);
  * включив переключатель.
  */
 const pokazivatArhiv = ref(false);
+
+/** Сессия, для которой открыто подтверждение архивации. */
+const sessiyaDlyaArhivacii = ref<Schema<"OpenCodeSession"> | null>(null);
+
+/** Архивация выбранной сессии выполняется прямо сейчас. */
+const arhivaciyaIdet = computed(() => {
+    const id = sessiyaDlyaArhivacii.value?.id;
+
+    return id !== undefined && arhiviruemiId.value === id;
+});
 
 const otobrazhaemie = computed(() => {
     return pokazivatArhiv.value
@@ -79,14 +103,26 @@ function proektySessii(sessiya: Schema<"OpenCodeSession">) {
  * сессия и её история сохраняются, а недоступны станут только новые ходы.
  */
 function podtverditArhivaciyu(sessiya: Schema<"OpenCodeSession">) {
-    $q.dialog({
-        title: i18n.global.t('opencode.sessions.archive.confirm_caption'),
-        message: i18n.global.t('opencode.sessions.archive.confirm_message', { title: sessiya.title }),
-        cancel: true,
-        persistent: true,
-    }).onOk(() => {
-        storSpiska.arhivirovatSessiyu(sessiya.id);
-    });
+    sessiyaDlyaArhivacii.value = sessiya;
+}
+
+/** Закрыть диалог без архивации. */
+function zakritArhivaciyu(value: boolean) {
+    if (!value) {
+        sessiyaDlyaArhivacii.value = null;
+    }
+}
+
+/** Подтверждённая архивация выбранной сессии. */
+function arhivirovatSessiyu() {
+    const sessiya = sessiyaDlyaArhivacii.value;
+
+    if (sessiya === null) {
+        return;
+    }
+
+    void storSpiska.arhivirovatSessiyu(sessiya.id);
+    sessiyaDlyaArhivacii.value = null;
 }
 
 function otkrit(sessiya: Schema<"OpenCodeSession">) {
@@ -111,168 +147,426 @@ function pereytiVSessiyu(id: string) {
     void router.push({name: "opencode_chat", params: {id}, query: {type: "unit"}});
 }
 
+/** Селекторы, внутри которых страничные хоткеи не перехватываются. */
+function ignorirovatVvod(event: KeyboardEvent): boolean {
+    const cel = event.target;
+
+    if (!(cel instanceof HTMLElement)) {
+        return false;
+    }
+
+    if (cel.isContentEditable) {
+        return true;
+    }
+
+    return cel.closest(
+        'input, textarea, select, [contenteditable], [role="textbox"], [role="dialog"], .q-dialog, .q-menu',
+    ) !== null;
+}
+
+/** Хоткеи страницы: `R` — обновить, `c` — создать. */
+function obrabotatKlavishu(event: KeyboardEvent): void {
+    if (
+        event.defaultPrevented
+        || event.isComposing
+        || event.ctrlKey
+        || event.metaKey
+        || event.altKey
+        || ozhidaetsyaVtorayaKlavishaPosledovatelnosti()
+        || ignorirovatVvod(event)
+    ) {
+        return;
+    }
+
+    if (event.key === "R") {
+        event.preventDefault();
+        storSpiska.poluchitSpisok();
+
+        return;
+    }
+
+    if (event.key === "c" && !netRekvizitov.value && !loaderSpiska.value) {
+        event.preventDefault();
+        formaStore.otkrit();
+    }
+}
+
 onMounted(() => {
     storRekvizitov.poluchitSpisok();
     storSpiska.poluchitSpisok();
+    window.addEventListener("keydown", obrabotatKlavishu);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("keydown", obrabotatKlavishu);
 });
 </script>
 
 <template>
-  <q-card>
-    <q-card-section class="bg-primary text-white row items-center">
-      <div class="text-subtitle2 col">{{ $t('opencode.sessions.caption') }}</div>
-      <OpenCodeRazdelToggle />
-      <q-btn
+  <GhBox class="opencode-list primer" padding="none">
+    <template #header>
+      <span class="opencode-list__title">{{ $t('opencode.sessions.caption') }}</span>
+      <span class="opencode-list__spacer" />
+
+      <GhButton
           v-if="estArhivnie"
-          dense
-          flat
-          :icon="pokazivatArhiv ? 'inventory_2' : 'archive'"
-          :color="pokazivatArhiv ? 'amber' : 'white'"
+          size="sm"
+          :icon="pokazivatArhiv ? 'eye-closed' : 'eye'"
+          :aria-label="pokazivatArhiv ? $t('opencode.sessions.buttons.hide_archive') : $t('opencode.sessions.buttons.show_archive')"
+          :title="pokazivatArhiv ? $t('opencode.sessions.buttons.hide_archive') : $t('opencode.sessions.buttons.show_archive')"
           @click="pokazivatArhiv = !pokazivatArhiv"
-      >
-        <q-tooltip>
-          {{ pokazivatArhiv ? $t('opencode.sessions.buttons.hide_archive') : $t('opencode.sessions.buttons.show_archive') }}
-        </q-tooltip>
-      </q-btn>
-      <q-btn
-          dense
-          flat
-          icon="add"
-          color="white"
-          :disable="loaderSpiska || netRekvizitov"
+      />
+
+      <GhButton
+          variant="primary"
+          size="sm"
+          icon="plus"
+          :label="$t('opencode.sessions.buttons.add')"
+          :disabled="loaderSpiska || netRekvizitov"
           @click="formaStore.otkrit()"
-      >
-        <q-tooltip>
-          {{ netRekvizitov ? $t('opencode.sessions.no_credentials') : $t('opencode.sessions.buttons.add') }}
-        </q-tooltip>
-      </q-btn>
-      <q-btn
-          dense
-          flat
-          icon="refresh"
-          color="white"
+      />
+
+      <GhButton
+          size="sm"
+          icon="sync"
+          :aria-label="$t('opencode.sessions.buttons.refresh')"
+          :title="$t('opencode.sessions.buttons.refresh')"
           :loading="loaderSpiska"
           @click="storSpiska.poluchitSpisok()"
-      >
-        <q-tooltip>{{ $t('opencode.sessions.buttons.refresh') }}</q-tooltip>
-      </q-btn>
-    </q-card-section>
+      />
+    </template>
 
-    <q-card-section class="q-pt-none">
-      <div v-if="netRekvizitov" class="text-warning q-mb-sm">
+    <div class="opencode-list__body">
+      <GhBanner v-if="netRekvizitov" variant="attention" class="opencode-list__banner">
         <i18n-t keypath="opencode.sessions.no_credentials_hint" tag="span">
           <template #link>
-            <router-link
-                :to="{name: 'account_settings'}"
-                class="text-primary"
-            >
+            <router-link :to="{name: 'account_settings'}" class="opencode-list__link">
               {{ $t('opencode.sessions.no_credentials_link') }}
             </router-link>
           </template>
         </i18n-t>
+      </GhBanner>
+
+      <GhBanner v-if="oshibkaRekvizitov" variant="danger" class="opencode-list__banner">
+        {{ oshibkaRekvizitov }}
+        <template #actions>
+          <GhButton size="sm" :label="$t('common.buttons.retry')" @click="storRekvizitov.poluchitSpisok()" />
+        </template>
+      </GhBanner>
+
+      <GhBanner v-if="oshibkaZagruzki" variant="danger" class="opencode-list__banner">
+        {{ oshibkaZagruzki }}
+        <template #actions>
+          <GhButton size="sm" :label="$t('common.buttons.retry')" @click="storSpiska.poluchitSpisok()" />
+        </template>
+      </GhBanner>
+
+      <div v-if="loaderSpiska && spisok.length === 0" class="opencode-list__skeletons">
+        <GhSkeleton v-for="n in 4" :key="'session-skeleton-' + n" height="76px" />
       </div>
 
-      <div v-if="oshibkaRekvizitov" class="text-negative q-mb-sm">{{ oshibkaRekvizitov }}</div>
-      <div v-if="oshibkaZagruzki" class="text-negative q-mb-sm">{{ oshibkaZagruzki }}</div>
+      <GhEmptyState
+          v-else-if="otobrazhaemie.length === 0"
+          icon="comment-discussion"
+          :title="pokazivatArhiv ? $t('opencode.sessions.empty') : $t('opencode.sessions.empty_active')"
+      >
+        <template #actions>
+          <GhButton
+              v-if="!pokazivatArhiv"
+              variant="primary"
+              icon="plus"
+              :label="$t('opencode.sessions.buttons.add')"
+              :disabled="netRekvizitov"
+              @click="formaStore.otkrit()"
+          />
+          <GhButton
+              v-else
+              :label="$t('opencode.sessions.buttons.hide_archive')"
+              @click="pokazivatArhiv = false"
+          />
+        </template>
+      </GhEmptyState>
 
-      <div v-if="loaderSpiska && spisok.length === 0" class="row justify-center q-pa-md">
-        <q-spinner color="primary" size="2em" />
-      </div>
+      <div v-else class="opencode-sessions">
+        <div
+            v-for="sessiya in otobrazhaemie"
+            :key="sessiya.id"
+            class="opencode-session"
+            role="button"
+            tabindex="0"
+            @click="otkrit(sessiya)"
+            @keydown.enter.prevent="otkrit(sessiya)"
+        >
+          <div class="opencode-session__main">
+            <div class="opencode-session__title-row">
+              <span class="opencode-session__title" :title="sessiya.title">
+                {{ sessiya.title }}
+                <q-tooltip>{{ sessiya.title }}</q-tooltip>
+              </span>
 
-      <div v-else-if="otobrazhaemie.length === 0" class="text-grey-7">
-        {{ pokazivatArhiv ? $t('opencode.sessions.empty') : $t('opencode.sessions.empty_active') }}
-      </div>
+              <GhLabel
+                  v-if="sessiya.type === 'workspace'"
+                  variant="accent"
+                  icon="rows"
+                  :label="$t('opencode.workspace.list.badge')"
+              />
 
-      <q-list v-else separator>
-        <q-item v-for="sessiya in otobrazhaemie" :key="sessiya.id" clickable @click="otkrit(sessiya)">
-          <q-item-section>
-            <q-item-label>
-              {{ sessiya.title }}
-              <q-badge v-if="sessiya.type === 'workspace'" color="secondary" class="q-ml-sm">
-                {{ $t('opencode.workspace.list.badge') }}
-              </q-badge>
-              <q-badge v-if="sessiya.archived" color="grey-6" class="q-ml-sm">
-                {{ $t('opencode.sessions.archive.badge') }}
-                <q-tooltip>{{ $t('opencode.sessions.archive.badge_hint') }}</q-tooltip>
-              </q-badge>
-            </q-item-label>
-            <q-item-label v-if="sessiya.archived" caption>
-              {{ podpisPrichini(sessiya) }}
-            </q-item-label>
-            <q-item-label caption>
-              {{ $t('opencode.sessions.fields.credential') }}: {{ imyaRekvizitov(sessiya) }}
-            </q-item-label>
-            <q-item-label v-if="sessiya.type === 'workspace'" caption>
-              {{ $t('opencode.sessions.fields.projects') }}:
-              <template v-if="proektySessii(sessiya).length > 0">
-                <q-chip
-                    v-for="project in proektySessii(sessiya)"
-                    :key="'sessiya_project_' + sessiya.id + '_' + project.projectId"
-                    dense
-                    square
-                    color="primary"
-                    text-color="white"
-                    icon="folder"
-                    :label="project.projectName"
-                />
-              </template>
-              <template v-else>{{ $t('opencode.sessions.fields.no_units') }}</template>
-            </q-item-label>
-            <q-item-label v-else caption>
-              {{ $t('opencode.sessions.fields.units') }}:
-              <template v-if="(sessiya.units ?? []).length > 0">
-                <q-chip
-                    v-for="unit in sessiya.units"
-                    :key="'sessiya_unit_' + sessiya.id + '_' + unit.unitId"
-                    dense
-                    square
-                    color="primary"
-                    text-color="white"
-                    icon="folder"
-                    :label="nazvanieUnitaPoId(unit.unitId)"
-                />
-              </template>
-              <template v-else>{{ $t('opencode.sessions.fields.no_units') }}</template>
-            </q-item-label>
-            <q-item-label caption>
-              {{ $t('opencode.sessions.fields.created_at') }}: {{ convertDate(sessiya.createdAt) }}
-              · {{ $t('opencode.sessions.fields.updated_at') }}: {{ convertDate(sessiya.updatedAt) }}
-            </q-item-label>
-          </q-item-section>
-
-          <q-item-section side>
-            <div class="row q-gutter-xs">
-              <q-btn dense flat icon="forum" color="primary" @click.stop="otkrit(sessiya)">
-                <q-tooltip>{{ $t('opencode.sessions.buttons.open') }}</q-tooltip>
-              </q-btn>
-              <q-btn
-                  v-if="!sessiya.archived && sessiya.type !== 'workspace'"
-                  dense
-                  flat
-                  icon="create_new_folder"
-                  color="primary"
-                  @click.stop="privyazatUniti(sessiya)"
-              >
-                <q-tooltip>{{ $t('opencode.sessions.buttons.attach_unit') }}</q-tooltip>
-              </q-btn>
-              <q-btn
-                  v-if="!sessiya.archived && sessiya.type !== 'workspace'"
-                  dense
-                  flat
+              <GhLabel
+                  v-if="sessiya.archived"
+                  variant="neutral"
                   icon="archive"
-                  color="warning"
-                  :loading="arhiviruemiId === sessiya.id"
-                  @click.stop="podtverditArhivaciyu(sessiya)"
-              >
-                <q-tooltip>{{ $t('opencode.sessions.buttons.archive') }}</q-tooltip>
-              </q-btn>
+                  :label="$t('opencode.sessions.archive.badge')"
+                  :title="$t('opencode.sessions.archive.badge_hint')"
+              />
             </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card-section>
+
+            <p v-if="sessiya.archived" class="opencode-session__muted">
+              {{ podpisPrichini(sessiya) }}
+            </p>
+
+            <div class="opencode-session__meta">
+              <span>
+                {{ $t('opencode.sessions.fields.credential') }}:
+                <span class="gh-mono">{{ imyaRekvizitov(sessiya) }}</span>
+              </span>
+
+              <span v-if="sessiya.type === 'workspace'" class="opencode-session__chips">
+                {{ $t('opencode.sessions.fields.projects') }}:
+                <template v-if="proektySessii(sessiya).length > 0">
+                  <GhLabel
+                      v-for="project in proektySessii(sessiya)"
+                      :key="'sessiya_project_' + sessiya.id + '_' + project.projectId"
+                      variant="neutral"
+                      icon="project"
+                      :label="project.projectName"
+                      :title="project.projectName"
+                  />
+                </template>
+                <template v-else>{{ $t('opencode.sessions.fields.no_units') }}</template>
+              </span>
+
+              <span v-else class="opencode-session__chips">
+                {{ $t('opencode.sessions.fields.units') }}:
+                <template v-if="(sessiya.units ?? []).length > 0">
+                  <GhLabel
+                      v-for="unit in sessiya.units"
+                      :key="'sessiya_unit_' + sessiya.id + '_' + unit.unitId"
+                      variant="neutral"
+                      icon="project"
+                      :label="nazvanieUnitaPoId(unit.unitId)"
+                      :title="nazvanieUnitaPoId(unit.unitId)"
+                  />
+                </template>
+                <template v-else>{{ $t('opencode.sessions.fields.no_units') }}</template>
+              </span>
+
+              <span class="opencode-session__dates">
+                {{ $t('opencode.sessions.fields.created_at') }}: <span class="gh-mono">{{ convertDate(sessiya.createdAt) }}</span>
+                · {{ $t('opencode.sessions.fields.updated_at') }}: <span class="gh-mono">{{ convertDate(sessiya.updatedAt) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="opencode-session__actions" @click.stop>
+            <GhButton
+                variant="invisible"
+                size="sm"
+                icon="comment-discussion"
+                :aria-label="$t('opencode.sessions.buttons.open')"
+                :title="$t('opencode.sessions.buttons.open')"
+                @click.stop="otkrit(sessiya)"
+            />
+            <GhButton
+                v-if="!sessiya.archived && sessiya.type !== 'workspace'"
+                variant="invisible"
+                size="sm"
+                icon="link"
+                :aria-label="$t('opencode.sessions.buttons.attach_unit')"
+                :title="$t('opencode.sessions.buttons.attach_unit')"
+                @click.stop="privyazatUniti(sessiya)"
+            />
+            <GhButton
+                v-if="!sessiya.archived && sessiya.type !== 'workspace'"
+                variant="invisible"
+                size="sm"
+                icon="archive"
+                :aria-label="$t('opencode.sessions.buttons.archive')"
+                :title="$t('opencode.sessions.buttons.archive')"
+                :loading="arhiviruemiId === sessiya.id"
+                @click.stop="podtverditArhivaciyu(sessiya)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
 
     <FormaSozdaniyaSessii @sozdana="pereytiVSessiyu" />
     <FormaPrivyazkiUnitaKSessii />
-  </q-card>
+
+    <GhDialog
+        :model-value="sessiyaDlyaArhivacii !== null"
+        :title="$t('opencode.sessions.archive.confirm_caption')"
+        :close-label="$t('common.buttons.close')"
+        persistent
+        @update:model-value="zakritArhivaciyu"
+    >
+      <p class="opencode-list__dialog-text">
+        {{ $t('opencode.sessions.archive.confirm_message', { title: sessiyaDlyaArhivacii?.title ?? '' }) }}
+      </p>
+
+      <template #footer>
+        <GhButton
+            variant="default"
+            :label="$t('common.buttons.cancel')"
+            @click="zakritArhivaciyu(false)"
+        />
+        <GhButton
+            variant="primary"
+            icon="archive"
+            :label="$t('opencode.sessions.archive.ok')"
+            :loading="arhivaciyaIdet"
+            @click="arhivirovatSessiyu"
+        />
+      </template>
+    </GhDialog>
+  </GhBox>
 </template>
+
+<style scoped>
+.opencode-list__title {
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-title);
+  font-weight: var(--fontWeight-semibold);
+}
+
+.opencode-list__spacer {
+  flex: 1 1 auto;
+}
+
+.opencode-list__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.opencode-list__banner {
+  margin: 0;
+}
+
+.opencode-list__dialog-text {
+  margin: 0;
+}
+
+.opencode-list__link {
+  color: var(--fgColor-accent);
+}
+
+.opencode-list__link:hover {
+  text-decoration: underline;
+}
+
+.opencode-list__skeletons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opencode-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.opencode-session {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-default);
+  cursor: pointer;
+  transition: background-color 80ms ease-out;
+}
+
+.opencode-session:hover {
+  background-color: var(--bgColor-muted);
+}
+
+.opencode-session:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: 2px;
+}
+
+.opencode-session__main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.opencode-session__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.opencode-session__title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-body);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opencode-session__muted {
+  margin: 4px 0 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-session__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 4px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.opencode-session__chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.opencode-session__dates {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.opencode-session__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+}
+
+@media (max-width: 480px) {
+  .opencode-list__body {
+    padding: 12px;
+  }
+
+  .opencode-session {
+    flex-direction: column;
+  }
+
+  .opencode-session__actions {
+    align-self: flex-end;
+  }
+}
+</style>

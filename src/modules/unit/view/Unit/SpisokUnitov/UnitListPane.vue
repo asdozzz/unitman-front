@@ -1,19 +1,23 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
-import {storeToRefs} from "pinia";
-import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
-import {deriveUnitUiState, type UnitUiState} from "@/modules/unit/utils/unitStatus";
-import {convertDate} from "@/utils/dates";
+import { computed, ref } from "vue";
+import { storeToRefs } from "pinia";
+import type { Unit } from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import { useSpisokUnitovStore } from "@/modules/unit/store/SpisokUnitovStore";
+import { deriveUnitUiState, type UnitUiState } from "@/modules/unit/utils/unitStatus";
+import { convertDate } from "@/utils/dates";
+import { GhButton, GhIcon } from "@/components/ui";
 import UnitStatusBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitStatusBadge.vue";
 
-const props = withDefaults(defineProps<{
-  items: Unit[];
-  selectedId: string | null;
-  emptyFiltered?: boolean;
-}>(), {
-  emptyFiltered: false,
-});
+const props = withDefaults(
+  defineProps<{
+    items: Unit[];
+    selectedId: string | null;
+    emptyFiltered?: boolean;
+  }>(),
+  {
+    emptyFiltered: false,
+  },
+);
 
 const emit = defineEmits<{
   select: [unitId: string];
@@ -21,12 +25,8 @@ const emit = defineEmits<{
 }>();
 
 const unitiStore = useSpisokUnitovStore();
-const {
-  esliZapushen,
-  esliEstAktivniyProzes,
-  nazvanieTekusheiZadachi,
-  progressProzesaUnita,
-} = storeToRefs(unitiStore);
+const { esliZapushen, esliEstAktivniyProzes, nazvanieTekusheiZadachi, progressProzesaUnita } =
+  storeToRefs(unitiStore);
 
 /**
  * Состояния считаются одним проходом по списку, чтобы строка не создавала
@@ -87,35 +87,40 @@ function fokusNaKray(kray: "nachalo" | "konec") {
 <template>
   <div class="unit-list" role="group" :aria-label="$t('unit.spisok_unitov.view.workspace_list')">
     <button
-        v-for="(item, index) in items"
-        :key="item.id"
-        :ref="(el) => zaregistrirovatRyad(el, index)"
-        type="button"
-        class="unit-list__row"
-        :class="{'unit-list__row--active': item.id === selectedId}"
-        :aria-current="item.id === selectedId ? 'true' : undefined"
-        @click="emit('select', item.id)"
-        @keydown.down.prevent="peremestitFokus(index, 1)"
-        @keydown.up.prevent="peremestitFokus(index, -1)"
-        @keydown.home.prevent="fokusNaKray('nachalo')"
-        @keydown.end.prevent="fokusNaKray('konec')"
+      v-for="(item, index) in items"
+      :key="item.id"
+      :ref="(el) => zaregistrirovatRyad(el, index)"
+      type="button"
+      class="unit-list__row"
+      :class="{ 'unit-list__row--active': item.id === selectedId }"
+      :aria-current="item.id === selectedId ? 'true' : undefined"
+      @click="emit('select', item.id)"
+      @keydown.down.prevent="peremestitFokus(index, 1)"
+      @keydown.up.prevent="peremestitFokus(index, -1)"
+      @keydown.home.prevent="fokusNaKray('nachalo')"
+      @keydown.end.prevent="fokusNaKray('konec')"
     >
       <span class="unit-list__status">
         <UnitStatusBadge :state="sostoyaniya[item.id]" compact />
-        <q-icon
-            v-if="item.containerStateMismatch"
-            name="warning"
-            size="15px"
-            color="warning"
-            class="unit-list__warning"
+        <GhIcon
+          v-if="item.containerStateMismatch"
+          name="alert"
+          :size="15"
+          class="unit-list__warning"
         >
           <q-tooltip>
-            {{ $t('unit.spisok_unitov.card.container_state.message', {
-              expected: $t(`unit.spisok_unitov.card.container_state.states.${item.containerStateMismatchExpected ?? 'unknown'}`),
-              actual: $t(`unit.spisok_unitov.card.container_state.states.${item.containerStateMismatchActual ?? 'unknown'}`),
-            }) }}
+            {{
+              $t("unit.spisok_unitov.card.container_state.message", {
+                expected: $t(
+                  `unit.spisok_unitov.card.container_state.states.${item.containerStateMismatchExpected ?? 'unknown'}`,
+                ),
+                actual: $t(
+                  `unit.spisok_unitov.card.container_state.states.${item.containerStateMismatchActual ?? 'unknown'}`,
+                ),
+              })
+            }}
           </q-tooltip>
-        </q-icon>
+        </GhIcon>
       </span>
 
       <span class="unit-list__main">
@@ -125,33 +130,33 @@ function fokusNaKray(kray: "nachalo" | "konec") {
         </span>
       </span>
 
-      <span class="unit-list__updated text-caption-muted">
+      <span class="unit-list__updated">
         {{ convertDate(item.unixtimePoslednegoObnovleniyaUnita) }}
       </span>
     </button>
 
     <div
-        v-if="items.length === 0"
-        class="unit-list__empty text-caption-muted"
-        role="status"
-        aria-live="polite"
+      v-if="items.length === 0"
+      class="unit-list__empty"
+      role="status"
+      aria-live="polite"
     >
       <span class="unit-list__empty-title">
-        {{ emptyFiltered
-          ? $t('unit.spisok_unitov.list.empty_filtered')
-          : $t('unit.spisok_unitov.list.empty_result') }}
+        {{
+          emptyFiltered
+            ? $t("unit.spisok_unitov.list.empty_filtered")
+            : $t("unit.spisok_unitov.list.empty_result")
+        }}
       </span>
 
-      <q-btn
-          v-if="emptyFiltered"
-          class="unit-list__empty-action"
-          flat
-          dense
-          no-caps
-          color="primary"
-          icon="filter_alt_off"
-          :label="$t('unit.spisok_unitov.filter.reset')"
-          @click="emit('reset')"
+      <GhButton
+        v-if="emptyFiltered"
+        class="unit-list__empty-action"
+        variant="default"
+        size="sm"
+        icon="filter"
+        :label="$t('unit.spisok_unitov.filter.reset')"
+        @click="emit('reset')"
       />
     </div>
   </div>
@@ -164,27 +169,27 @@ function fokusNaKray(kray: "nachalo" | "konec") {
   min-width: 0;
   max-height: 70vh;
   overflow-y: auto;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-surface);
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-large);
+  background-color: var(--bgColor-default);
 }
 
 .unit-list__row {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--app-space-2);
+  gap: 8px;
   width: 100%;
   min-height: 56px;
-  padding: var(--app-space-2) var(--app-space-3);
+  padding: 8px 12px;
   border: 0;
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--borderColor-default);
   border-left: 3px solid transparent;
   background: transparent;
-  color: var(--app-text);
+  color: var(--fgColor-default);
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--app-duration-fast) var(--app-easing);
+  transition: background-color 80ms ease-out;
 }
 
 .unit-list__row:last-of-type {
@@ -192,12 +197,17 @@ function fokusNaKray(kray: "nachalo" | "konec") {
 }
 
 .unit-list__row:hover {
-  background: var(--app-surface-muted);
+  background-color: var(--bgColor-muted);
 }
 
 .unit-list__row--active {
-  border-left-color: var(--app-primary);
-  background: color-mix(in srgb, var(--app-primary) 8%, transparent);
+  border-left-color: var(--fgColor-accent);
+  background-color: var(--bgColor-accent-muted);
+}
+
+.unit-list__row:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: -2px;
 }
 
 .unit-list__main {
@@ -209,15 +219,15 @@ function fokusNaKray(kray: "nachalo" | "konec") {
 
 .unit-list__name {
   overflow: hidden;
-  font-weight: 600;
+  font-weight: var(--fontWeight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .unit-list__meta {
   overflow: hidden;
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -225,15 +235,23 @@ function fokusNaKray(kray: "nachalo" | "konec") {
 .unit-list__status {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
+}
+
+.unit-list__warning {
+  color: var(--fgColor-attention);
 }
 
 .unit-list__updated {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
   white-space: nowrap;
 }
 
 .unit-list__empty {
-  padding: var(--app-space-4);
+  padding: 16px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-body);
   text-align: center;
 }
 
@@ -242,6 +260,6 @@ function fokusNaKray(kray: "nachalo" | "konec") {
 }
 
 .unit-list__empty-action {
-  margin-top: var(--app-space-2);
+  margin-top: 8px;
 }
 </style>

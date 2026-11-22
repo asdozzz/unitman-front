@@ -20,6 +20,12 @@ export default [
         }
     },
     {
+        // Песочница дизайн-системы Primer. Добавлена до catch-all, иначе
+        // адрес перехватывался бы страницей 404.
+        path: '/ui-kit',
+        component: () => import('@/pages/UiKitPreview.vue')
+    },
+    {
         path: '/unauthorized',
         component: Unauthorized,
         meta: {

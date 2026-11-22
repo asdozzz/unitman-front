@@ -1,64 +1,81 @@
 <script setup lang="ts">
-import {computed} from "vue";
-import type {UnitUiState} from "@/modules/unit/utils/unitStatus";
+import { computed } from "vue";
+import type { GhLabelVariant, OcticonName } from "@/components/ui";
+import { GhLabel } from "@/components/ui";
+import type { UnitUiState } from "@/modules/unit/utils/unitStatus";
 
-const props = withDefaults(defineProps<{
-  state: UnitUiState;
-  compact?: boolean;
-  /**
-   * Скрыть тип активной задачи («Сборка», «Запуск») в подписи бейджа.
-   *
-   * В узкой шапке карточки деталь отнимает место у названия юнита, а
-   * tooltip бейджа всё равно показывает её. На широкой плашке деталь
-   * остаётся видимой.
-   */
-  hideDetail?: boolean;
-}>(), {
-  compact: false,
-  hideDetail: false,
-});
+const props = withDefaults(
+  defineProps<{
+    state: UnitUiState;
+    compact?: boolean;
+    /**
+     * Скрыть тип активной задачи («Сборка», «Запуск») в подписи бейджа.
+     *
+     * В узкой шапке карточки деталь отнимает место у названия юнита, а
+     * tooltip бейджа всё равно показывает её. На широкой плашке деталь
+     * остаётся видимой.
+     */
+    hideDetail?: boolean;
+  }>(),
+  {
+    compact: false,
+    hideDetail: false,
+  },
+);
 
-/** Иконка дублирует текст, чтобы состояние читалось и без цвета. */
-const ikonka = computed<string>(() => {
+type VidStatusa = {
+  variant: GhLabelVariant;
+  icon: OcticonName;
+};
+
+/**
+ * Статус → вариант GhLabel и Octicon по таблице P5. Иконка дублирует текст,
+ * чтобы состояние читалось и без цвета.
+ */
+const vidStatusa = computed<VidStatusa>(() => {
   switch (props.state.status) {
     case "running":
-      return "play_arrow";
+      return { variant: "success", icon: "play" };
     case "prepared":
-      return "check_circle";
+      return { variant: "neutral", icon: "check" };
     case "stopped":
-      return "pause";
+      return { variant: "neutral", icon: "pause" };
     case "error":
     case "broken":
-      return "error";
+      return { variant: "danger", icon: "x-circle" };
     case "busy":
     default:
-      return "sync";
+      return { variant: "accent", icon: "sync" };
   }
 });
 </script>
 
 <template>
-  <span
-      class="unit-status"
-      :class="[`unit-status--${state.status}`, {'unit-status--compact': compact}]"
-      role="status"
-  >
-    <q-spinner v-if="state.status === 'busy'" size="14px" />
-    <q-icon v-else :name="ikonka" size="16px" />
+  <span class="unit-status" role="status">
+    <GhLabel
+      :variant="vidStatusa.variant"
+      :icon="vidStatusa.icon"
+      :class="{ 'unit-status--compact': compact }"
+    >
+      <span class="unit-status__label">{{ $t(state.labelKey) }}</span>
 
-    <span class="unit-status__label">{{ $t(state.labelKey) }}</span>
-
-    <span v-if="state.busyText && !compact && !hideDetail" class="unit-status__detail">
-      {{ $t('unit.tipi_zadach.' + state.busyText) }}
-    </span>
+      <span
+        v-if="state.busyText && !compact && !hideDetail"
+        class="unit-status__detail"
+      >
+        {{ $t("unit.tipi_zadach." + state.busyText) }}
+      </span>
+    </GhLabel>
 
     <q-tooltip v-if="state.prozesAktiven">
-      <div v-if="state.busyText">{{ $t('unit.tipi_zadach.' + state.busyText) }}</div>
+      <div v-if="state.busyText">{{ $t("unit.tipi_zadach." + state.busyText) }}</div>
       <div v-if="state.progress">
-        {{ $t('unit.spisok_unitov.card.status.process_progress', {
-          done: state.progress.zaversheno,
-          total: state.progress.vsego,
-        }) }}
+        {{
+          $t("unit.spisok_unitov.card.status.process_progress", {
+            done: state.progress.zaversheno,
+            total: state.progress.vsego,
+          })
+        }}
       </div>
     </q-tooltip>
   </span>
@@ -68,14 +85,7 @@ const ikonka = computed<string>(() => {
 .unit-status {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
-  min-height: 28px;
-  padding: var(--app-space-1) var(--app-space-2);
-  border-radius: var(--app-radius-pill);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
-  white-space: nowrap;
+  gap: 4px;
 }
 
 .unit-status__label {
@@ -83,42 +93,15 @@ const ikonka = computed<string>(() => {
 }
 
 .unit-status__detail {
-  font-weight: 400;
+  font-weight: var(--fontWeight-normal);
   opacity: 0.85;
 }
 
-.unit-status--running {
-  color: var(--app-positive);
-  background: color-mix(in srgb, var(--app-positive) 12%, transparent);
-}
-
-/* «В работе» — единственный синий статус: активный процесс окрашивается брендом. */
-.unit-status--busy {
-  color: var(--app-primary);
-  background: color-mix(in srgb, var(--app-primary) 12%, transparent);
-}
-
-/* «Готов» — нейтральное ожидание: цвет не конкурирует с «в работе». */
-.unit-status--prepared {
-  color: var(--app-text-secondary);
-  background: var(--app-surface-muted);
-}
-
-.unit-status--stopped {
-  color: var(--app-text-secondary);
-  background: var(--app-surface-muted);
-}
-
-.unit-status--error,
-.unit-status--broken {
-  color: var(--app-negative);
-  background: color-mix(in srgb, var(--app-negative) 12%, transparent);
-}
-
-/* В компактной строке фон не нужен: состояние читается по точке и тексту. */
-.unit-status--compact {
-  min-height: 20px;
+/* В компактной строке точка и текст уже несут цвет — плашку убираем. */
+.unit-status--compact.gh-label {
+  height: auto;
   padding: 0;
-  background: transparent;
+  border-color: transparent;
+  background-color: transparent;
 }
 </style>

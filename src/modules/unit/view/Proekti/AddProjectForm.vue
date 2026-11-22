@@ -5,8 +5,15 @@ import {onMounted, ref} from "vue";
 import {storeInizializii} from "@/modules/app/store/InitializationStore";
 import i18n from "@/bootstrap/translator";
 import {OshibkaMaski, proveritMaskuVetki} from "@/modules/unit/utils/zashishennieVetki";
+import {
+  GhBanner,
+  GhButton,
+  GhFormField,
+  GhInput,
+  GhSelect,
+} from "@/components/ui";
 
-const localProjectCode = ref<{value: string, label: string} | null>(null);
+const localProjectCode = ref<string | null>(null);
 const lokalnayaOshibkaVetok = ref<string | null>(null);
 
 type NewValueDone = (value?: string, mode?: 'add' | 'add-unique' | 'toggle') => void;
@@ -59,7 +66,9 @@ async function otpravitFormu() {
 
 }
 
-function repoSelected(value: string | null): void {
+function repoSelected(value: string | number | null): void {
+  form.value.repoId = value === null ? "" : String(value);
+
   if (!value) {
     proekti.value.spisok = [];
   } else {
@@ -67,96 +76,206 @@ function repoSelected(value: string | null): void {
   }
 }
 
-function projectCodeSelected(data: { value: string, label: string } | null): void {
-  if (data) {
-    form.value.projectCode = data.value;
-    form.value.projectName = data.label.replace(/[^a-zA-Z0-9_-]+/g, "_");
-    // getProxyHost получен через storeToRefs, то есть это ComputedRef<string>.
-    form.value.proxyHost = getProxyHost.value;
-  } else {
+function projectCodeSelected(value: string | number | null): void {
+  if (value === null || value === "") {
+    localProjectCode.value = null;
     form.value.projectCode = "";
     form.value.projectName = "";
     form.value.proxyHost = "";
+    return;
   }
+
+  const kod = String(value);
+  const nayden = proekti.value.spisok.find((item) => item.value === kod);
+
+  localProjectCode.value = kod;
+  form.value.projectCode = kod;
+  form.value.projectName = (nayden?.label ?? kod).replace(/[^a-zA-Z0-9_-]+/g, "_");
+  // getProxyHost получен через storeToRefs, то есть это ComputedRef<string>.
+  form.value.proxyHost = getProxyHost.value;
 }
 
-function filterSpiskaProektov(val: string | null, update: any): void {
+function filterSpiskaProektov(val: string | null, update: (callback: () => void) => void): void {
   proekti.value.query = val;
   update(() => addFormStore.poluchitProektiRepi());
 }
+
 </script>
 
 <template>
-  <q-card  style="width: 700px; max-width: 80vw;">
-    <q-card-section>
-      <div class="text-h6">{{$t('unit.form_add_project.caption')}}</div>
-    </q-card-section>
+  <form class="add-project" @submit.prevent="otpravitFormu">
+    <div class="add-project__fields">
+      <GhFormField :label="$t('unit.form_add_project.fields.labels.repo')">
+        <GhSelect
+            :model-value="form.repoId"
+            :options="hranilisha.spisok"
+            :disabled="hranilisha.loader"
+            @update:model-value="repoSelected"
+        />
+      </GhFormField>
 
-    <q-card-section class="q-pt-none">
-      <q-select
-          v-model="form.repoId"
-          :options="hranilisha.spisok"
-          @update:model-value="repoSelected"
-          :label="$t('unit.form_add_project.fields.labels.repo')" emit-value map-options/>
-      <q-select
-          :loading="proekti.loader"
-          :options="proekti.spisok"
-          v-model="localProjectCode"
-          @filter="filterSpiskaProektov"
-          :label="$t('unit.form_add_project.fields.labels.projectCode')"
-          fill-input
-          use-input
-          hide-selected
-          @update:model-value="projectCodeSelected"
-          clearable
-      >
-        <template v-slot:no-option>
-          <q-item>
-            <q-item-section class="text-grey">
-              {{ $t('common.no_results') }}
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select>
-      <q-input v-model="form.projectName" :label="$t('unit.form_add_project.fields.labels.projectName')" />
-      <q-input v-model="form.mainBranch" :label="$t('unit.form_add_project.fields.labels.mainBranch')" />
-      <q-select
-          v-model="form.zashishennieVetki"
-          use-input
-          use-chips
-          multiple
-          hide-selected
-          fill-input
+      <GhFormField :label="$t('unit.form_add_project.fields.labels.projectCode')">
+        <q-select
+            v-model="localProjectCode"
+            class="add-project__native add-project__native--single"
+            :loading="proekti.loader"
+            :options="proekti.spisok"
+            fill-input
+            use-input
+            hide-selected
+            outlined
+            dense
+            hide-bottom-space
+            clearable
+            emit-value
+            map-options
+            @filter="filterSpiskaProektov"
+            @update:model-value="projectCodeSelected"
+        >
+          <template #no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                {{ $t('common.no_results') }}
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+      </GhFormField>
+
+      <GhFormField :label="$t('unit.form_add_project.fields.labels.projectName')">
+        <GhInput v-model="form.projectName" />
+      </GhFormField>
+
+      <GhFormField :label="$t('unit.form_add_project.fields.labels.mainBranch')">
+        <GhInput v-model="form.mainBranch" />
+      </GhFormField>
+
+      <GhFormField
           :label="$t('unit.form_add_project.fields.labels.zashishennieVetki')"
-          :hint="$t('unit.form_add_project.hints.zashishennieVetki')"
-          @new-value="dobavitMasku"
-      />
-      <div v-if="lokalnayaOshibkaVetok" class="text-negative text-caption">{{ lokalnayaOshibkaVetok }}</div>
-      <q-input v-model="form.proxyHost" :label="$t('unit.form_add_project.fields.labels.proxyHost')" />
-      <q-chip
-          v-if="form.proxyHost.length > 0"
-          :loading="proverkaProxyHost.loader"
-          size="12px"
-          clickable
-          color="primary"
-          square
-          text-color="white"
-          :label="$t('unit.form_add_project.buttons.check_proxy_host')"
-          @click="addFormStore.proveritProxyHost"
-      />
-      <span v-if="proverkaProxyHost.result === true" class="text-light-green">{{ $t('common.states.available') }}</span>
-      <span v-if="proverkaProxyHost.result === false" class="text-negative">{{ $t('common.states.unavailable') }}</span>
-      <q-input type="number" v-model.number="form.memoryLimit" :label="$t('unit.form_add_project.fields.labels.unitContainerMemory')" />
-      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
-    </q-card-section>
+          :caption="$t('unit.form_add_project.hints.zashishennieVetki')"
+          :error="lokalnayaOshibkaVetok ?? ''"
+      >
+        <q-select
+            v-model="form.zashishennieVetki"
+            class="add-project__native"
+            use-input
+            use-chips
+            multiple
+            hide-selected
+            fill-input
+            outlined
+            dense
+            hide-bottom-space
+            @new-value="dobavitMasku"
+        />
+      </GhFormField>
 
-    <q-card-actions align="right">
-      <q-btn :label="$t('unit.form_add_project.buttons.ok')" color="primary" @click="otpravitFormu" :loading="loader"/>
-      <q-btn :label="$t('unit.form_add_project.buttons.close')" color="dark" @click="addFormStore.zakritFormu()" :loading="loader"/>
-    </q-card-actions>
-  </q-card>
+      <GhFormField :label="$t('unit.form_add_project.fields.labels.proxyHost')">
+        <GhInput v-model="form.proxyHost" />
+      </GhFormField>
+
+      <div v-if="form.proxyHost.length > 0" class="add-project__proxy">
+        <GhButton
+            variant="default"
+            size="sm"
+            icon="check"
+            :label="$t('unit.form_add_project.buttons.check_proxy_host')"
+            :loading="proverkaProxyHost.loader"
+            @click="addFormStore.proveritProxyHost"
+        />
+        <span v-if="proverkaProxyHost.result === true" class="add-project__proxy--ok">
+          {{ $t('common.states.available') }}
+        </span>
+        <span v-if="proverkaProxyHost.result === false" class="add-project__proxy--fail">
+          {{ $t('common.states.unavailable') }}
+        </span>
+      </div>
+
+      <GhFormField :label="$t('unit.form_add_project.fields.labels.unitContainerMemory')">
+        <GhInput
+            :model-value="form.memoryLimit"
+            type="number"
+            @update:model-value="form.memoryLimit = $event === null || $event === '' ? 0 : Number($event)"
+        />
+      </GhFormField>
+    </div>
+
+    <GhBanner v-if="oshibkaOtBackenda" variant="danger" class="add-project__error">
+      {{ oshibkaOtBackenda }}
+    </GhBanner>
+
+    <div class="add-project__actions">
+      <GhButton
+          variant="default"
+          :label="$t('unit.form_add_project.buttons.close')"
+          :disabled="loader"
+          @click="addFormStore.zakritFormu()"
+      />
+      <GhButton
+          type="submit"
+          variant="primary"
+          icon="check"
+          :label="$t('unit.form_add_project.buttons.ok')"
+          :loading="loader"
+      />
+    </div>
+  </form>
 </template>
 
 <style scoped>
+.add-project {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
+.add-project__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-project__native :deep(.q-field__control) {
+  border-radius: var(--borderRadius-medium);
+}
+
+/* Однострочный селект — той же высоты, что GhInput/GhSelect (F1). */
+.add-project__native--single :deep(.q-field__control) {
+  height: var(--control-height-md);
+  min-height: var(--control-height-md);
+}
+
+.add-project__native--single :deep(.q-field__inner) {
+  height: 100%;
+  min-height: 0;
+}
+
+.add-project__proxy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-project__proxy--ok {
+  color: var(--fgColor-success);
+  font-size: var(--fontSize-caption);
+}
+
+.add-project__proxy--fail {
+  color: var(--fgColor-danger);
+  font-size: var(--fontSize-caption);
+}
+
+.add-project__error {
+  margin-top: 4px;
+}
+
+.add-project__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--borderColor-default);
+}
 </style>

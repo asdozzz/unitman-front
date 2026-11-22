@@ -9,24 +9,84 @@
       "add": "Добавить",
       "delete": "Удалить",
       "block": "Заблокировать",
-      "unblock": "Разблокировать"
+      "unblock": "Разблокировать",
+      "copy": "Копировать",
+      "copied": "Скопировано",
+      "confirm": "Подтвердить",
+      "retry": "Повторить",
+      "refresh": "Обновить",
+      "edit": "Редактировать",
+      "create": "Создать",
+      "open": "Открыть",
+      "reset": "Сбросить",
+      "apply": "Применить",
+      "back": "Назад",
+      "clear": "Очистить",
+      "search": "Поиск"
     },
     "states": {
       "available": "Доступен",
-      "unavailable": "Недоступен"
+      "unavailable": "Недоступен",
+      "loading": "Загрузка",
+      "saving": "Сохранение",
+      "saved": "Сохранено",
+      "error": "Ошибка",
+      "empty": "Пусто"
     },
     "no_results": "Ничего не найдено",
     "notifications": {
-      "success": "Успех операции"
+      "success": "Успех операции",
+      "error": "Не удалось выполнить операцию"
     },
     "units": {
       "seconds": "с"
+    },
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "copy": "Копировать",
+    "copied": "Скопировано",
+    "close": "Закрыть",
+    "confirm": "Подтвердить",
+    "retry": "Повторить",
+    "refresh": "Обновить",
+    "loading": "Загрузка",
+    "error": "Ошибка",
+    "search": "Поиск",
+    "yes": "Да",
+    "no": "Нет",
+    "on": "Вкл",
+    "off": "Выкл",
+    "enabled": "Включено",
+    "disabled": "Отключено",
+    "sort": "Сортировка",
+    "actions": "Действия",
+    "table": {
+      "no_data": "Нет данных"
+    },
+    "select": {
+      "placeholder": "Выберите значение"
+    },
+    "validation": {
+      "branch_required": "Обязательное поле",
+      "branch_no_whitespace": "Название не должно содержать пробелов",
+      "branch_invalid": "Некорректное имя ветки"
     }
   },
   "runner": {
-    "non_active": "Раннер не активен, пожалуйста обратитесь к администратору"
+    "non_active": "Раннер не активен, пожалуйста обратитесь к администратору",
+    "title": "Статус раннера",
+    "subtitle": "Состояние дефолтного исполнителя сборки и запуска.",
+    "status_active": "Активен",
+    "status_non_active": "Неактивен",
+    "description_active": "Дефолтный раннер доступен и обрабатывает задачи.",
+    "error_title": "Не удалось получить статус раннера",
+    "unknown_title": "Статус неизвестен",
+    "unknown_description": "Данные о состоянии раннера ещё не получены."
   },
   "app": {
+    "skip_to_content": "Перейти к содержимому",
+    "back_to_top": "Наверх",
     "tabs": {
       "home": "Главная",
       "units": "Юниты",
@@ -55,7 +115,47 @@
       "help": "Помощь",
       "settings": "Настройки",
       "toggle_theme": "Переключить тему",
-      "sign_out": "Выход"
+      "sign_out": "Выход",
+      "logo_aria": "Unitman — на главную",
+      "open_menu": "Открыть меню",
+      "search": "Поиск",
+      "search_placeholder": "Поиск…",
+      "open_search": "Открыть поиск",
+      "theme_light": "Светлая тема",
+      "theme_dark": "Тёмная тема",
+      "language": "Язык",
+      "language_ru": "Русский",
+      "language_en": "English",
+      "notifications": "Уведомления",
+      "notifications_unread": "Непрочитанные уведомления",
+      "account_menu": "Меню аккаунта",
+      "toggle_sidebar": "Свернуть или развернуть меню",
+      "role_admin": "Администратор",
+      "role_user": "Пользователь",
+      "email": "Email"
+    },
+    "sidebar": {
+      "groups": {
+        "main": "Основная",
+        "administration": "Администрирование"
+      },
+      "items": {
+        "home": "Главная",
+        "units": "Юниты",
+        "projects": "Проекты",
+        "repositories": "Репозитории",
+        "accounts": "Аккаунты",
+        "initialization": "Инициализация",
+        "settings": "Настройки",
+        "ai_assistant": "ИИ-помощник",
+        "sessions": "Сессии",
+        "workspaces": "Workspaces"
+      },
+      "collapse": "Свернуть меню",
+      "expand": "Развернуть меню",
+      "navigation": "Основная навигация",
+      "open": "Открыть меню",
+      "close": "Закрыть меню"
     },
     "unauthorized": {
       "caption": "Недостаточно прав",
@@ -78,11 +178,44 @@
         "ok": "Сохранить",
         "check": "Проверить соединение"
       }
+    },
+    "initialization": {
+      "description": "Параметры подключения для инициализации системы."
+    }
+  },
+  "hotkeys": {
+    "title": "Горячие клавиши",
+    "description": "Клавиатурные сокращения для быстрого перехода по разделам.",
+    "groups": {
+      "navigation": "Навигация",
+      "actions": "Действия"
+    },
+    "items": {
+      "search": "Перейти к поиску",
+      "home": "Главная",
+      "units": "Юниты",
+      "projects": "Проекты",
+      "accounts": "Аккаунты",
+      "repositories": "Репозитории",
+      "settings": "Настройки",
+      "toggle_sidebar": "Свернуть или развернуть меню",
+      "help": "Показать горячие клавиши"
     }
   },
   "account": {
+    "common": {
+      "saved": "Изменения сохранены",
+      "error_title": "Ошибка"
+    },
+    "edit": {
+      "title": "Редактирование аккаунта",
+      "description": "Управление доступом и данными учётной записи",
+      "back": "К списку",
+      "account_id": "Идентификатор аккаунта"
+    },
     "form_projects": {
-      "projects": "Проекты"
+      "projects": "Проекты",
+      "empty": "Нет доступных проектов"
     },
     "settings": {
       "password": {
@@ -99,12 +232,19 @@
       "email_label": "Email",
       "password_label": "Пароль",
       "button_login": "Вход",
+      "error": "Не удалось выполнить вход",
+      "error_title": "Ошибка входа",
       "already_signin": {
         "text": "Уже авторизован",
         "button_text": "Выйти"
       }
     },
     "spisok": {
+      "header": {
+        "title": "Аккаунты",
+        "description": "Управление учётными записями пользователей",
+        "accounts_count": "Количество аккаунтов"
+      },
       "filter": {
         "query": "Поиск",
         "all_roles": "Все роли",
@@ -118,6 +258,7 @@
         "status_all": "Все",
         "reset": "Сбросить фильтры",
         "reset_all": "Сбросить всё",
+        "remove_chip": "Убрать фильтр",
         "filters_button": "Фильтры",
         "accounts_count": {
           "one": "{count} аккаунт",
@@ -165,7 +306,9 @@
       },
       "list": {
         "empty_result": "Пока нет ни одного аккаунта",
+        "empty_result_description": "Создайте учётную запись, чтобы начать работу",
         "empty_filtered": "Ничего не найдено по фильтрам",
+        "empty_filtered_description": "Измените условия фильтра или сбросьте его",
         "error_title": "Не удалось загрузить список аккаунтов",
         "retry": "Повторить"
       }
@@ -289,17 +432,56 @@
         "webhooks": "Вебхуки",
         "volume_types": "Типы томов"
       },
+      "page": {
+        "title": "Проект {id}",
+        "description": "Данные проекта, задачи и настройки интеграций",
+        "back_to_projects": "Проекты"
+      },
       "hook_settings": {
         "hint": "Для работы настроек ниже, нужно настроить вебхук в своих системах хранения репозиториев (gitlab, github).",
         "chip_label": "обработчик событий репозитория"
       },
+      "jobs": {
+        "title": "Задачи проекта",
+        "steps": "Шаги выполнения",
+        "response": "Ответ",
+        "empty": "Задачи не найдены"
+      },
+      "users": {
+        "title": "Пользователи проекта",
+        "hint": "Отметьте пользователей, которым доступен проект.",
+        "empty": "Пользователи ещё не добавлены",
+        "selected_hint": "Пользователь имеет доступ к проекту"
+      },
+      "variables": {
+        "title": "Переменные проекта",
+        "empty": "Переменные ещё не добавлены",
+        "hidden_value": "скрытое значение",
+        "delete_hint": "Удалить переменную"
+      },
       "webhooks": {
+        "title": "Вебхуки проекта",
+        "empty": "Вебхуки ещё не добавлены",
+        "active": "Активен",
+        "inactive": "Отключён",
         "fields": {
           "url": "Url"
+        },
+        "buttons": {
+          "add": "Добавить вебхук",
+          "open_events": "События",
+          "enable": "Включить",
+          "disable": "Отключить",
+          "delete": "Удалить вебхук"
         }
       },
       "webhook_events": {
-        "not_sent": "Не отправлено"
+        "title": "События вебхука",
+        "not_sent": "Не отправлено",
+        "payload": "Запрос",
+        "response": "Ответ",
+        "empty": "Событий пока нет",
+        "page": "Страница {page} из {total}"
       },
       "zashishennie_vetki": {
         "title": "Защищённые ветки",
@@ -334,23 +516,30 @@
     },
     "form_add_unit": {
       "caption": "Добавить юнит",
-      "fields": {
-        "labels": {
-          "project": "Проект",
-          "branch": "Ветка",
-          "unitName": "Имя юнита",
-          "unitContainerMemory": "Лимит памяти на контейнер юнита, MB"
-        }
-      },
+      "fields": { "labels": { "project": "Проект", "branch": "Ветка", "unitName": "Имя юнита", "unitContainerMemory": "Лимит памяти на контейнер юнита, MB" } },
       "messages": {
         "duplicates": "Найденные юниты с такой же веткой:",
         "no_variables": "В конфиге отсутствуют переменные",
         "vetka_zashishena": "Ветка защищена: редактирование файлов в юните будет недоступно",
         "vetka_zashishena_created": "Юнит создан с защищённой веткой: редактирование файлов недоступно"
+      },
+      "hints": {
+        "create_branch": "Создать ветку",
+        "create_branch_disabled": "Создание ветки недоступно: выберите проект и добавьте личный токен с доступом к репозиторию проекта"
+      },
+      "dialog": {
+        "title": "Создание ветки",
+        "fields": { "labels": { "base_branch": "Базовая ветка *", "new_branch_name": "Название новой ветки *" } },
+        "validation": { "required": "Обязательное поле", "no_whitespace": "Название не должно содержать пробелов" },
+        "buttons": { "create": "Создать" },
+        "errors": { "create_failed": "Не удалось создать ветку" }
       }
     },
     "form_fill_variables": {
       "caption": "Заполнить переменные конфига"
+    },
+    "form_actions": {
+      "caption": "Действие с юнитом"
     },
     "form_volume": {
       "title": "Тома и файлы",
@@ -455,6 +644,11 @@
       }
     },
     "spisok_rep": {
+      "page": {
+        "title": "Репозитории",
+        "description": "Хранилища GitLab и GitHub и их статус доступа",
+        "error_description": "Проверьте соединение и повторите попытку."
+      },
       "buttons": {
         "add": "Добавить",
         "delete": "Удалить",
@@ -487,7 +681,8 @@
         "chip": {
           "search": "Поиск",
           "type": "Тип",
-          "statuses": "Статус"
+          "statuses": "Статус",
+          "remove": "Снять фильтр «{label}»"
         }
       },
       "card": {
@@ -505,12 +700,18 @@
           "title": "Удалить репозиторий?",
           "message": "Репозиторий «{name}» будет удалён. Действие необратимо.",
           "yes": "Удалить",
-          "no": "Нет"
+          "no": "Нет",
+          "input_label": "Введите имя репозитория для подтверждения",
+          "input_hint": "Действие необратимо: введите «{name}»."
         }
       },
       "list": {
         "empty_result": "Репозиториев пока нет",
+        "empty_title": "Репозиториев пока нет",
+        "empty_description": "Добавьте хранилище, чтобы создавать проекты и юниты.",
         "empty_filtered": "Ничего не найдено по фильтрам",
+        "empty_search": "Ничего не найдено",
+        "create": "Добавить репозиторий",
         "error_title": "Не удалось загрузить список репозиториев",
         "retry": "Повторить"
       }
@@ -543,6 +744,11 @@
       }
     },
     "spisok_proektov": {
+      "page": {
+        "title": "Проекты",
+        "description": "Репозитории и процессы сборки их веток",
+        "error_description": "Проверьте соединение и повторите попытку."
+      },
       "buttons": {
         "jobs": "Выполненные задачи",
         "layers_clear": "Очистка образов",
@@ -592,7 +798,8 @@
         "chip": {
           "search": "Поиск",
           "only_active": "Только активные",
-          "states": "Состояние"
+          "states": "Состояние",
+          "remove": "Снять фильтр «{label}»"
         }
       },
       "card": {
@@ -626,17 +833,31 @@
           "title": "Удалить проект?",
           "message": "Проект «{name}» будет удалён. Действие необратимо.",
           "yes": "Удалить",
-          "no": "Нет"
+          "no": "Нет",
+          "input_label": "Введите имя проекта для подтверждения",
+          "input_hint": "Действие необратимо: введите «{name}»."
         }
       },
       "list": {
         "empty_result": "Проектов пока нет",
+        "empty_title": "Проектов пока нет",
+        "empty_description": "Создайте проект из репозитория, чтобы собирать юниты.",
         "empty_filtered": "Ничего не найдено по фильтрам",
+        "empty_search": "Ничего не найдено",
+        "create": "Создать проект",
         "error_title": "Не удалось загрузить список проектов",
         "retry": "Повторить"
       }
     },
     "spisok_unitov": {
+      "page": {
+        "title": "Юниты",
+        "description": "Стенды, собранные из веток проектов. Фильтруйте по проекту, статусу и связям.",
+        "refresh_hint": "Обновить список юнитов",
+        "create_hint": "Создать юнит",
+        "error_description": "Проверьте соединение и повторите попытку.",
+        "empty_description": "Создайте первый юнит из ветки проекта."
+      },
       "buttons": {
         "add": "Добавить юнит",
         "refresh": "Обновить список"
@@ -812,7 +1033,9 @@
       "reconnecting": "Переподключение",
       "readonly": "Только чтение",
       "refresh_button": "Обновить",
-      "refresh_failed": "Не удалось обновить прогресс автоматически"
+      "refresh_failed": "Не удалось обновить прогресс автоматически",
+      "nothing_selected": "Задача не выбрана",
+      "scroll_to_bottom": "Прокрутить к последним шагам"
     },
     "runner_job_not_found": "Задача runner не найдена",
     "redaktor": {
@@ -862,11 +1085,136 @@
       "net_dostupa_k_proektu": "Нет доступа к проекту"
     }
   },
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Управление учётной записью и доступами",
+    "tabs": {
+      "profile": "Профиль",
+      "security": "Безопасность",
+      "tokens": "Токены",
+      "opencode": "OpenCode",
+      "appearance": "Внешний вид"
+    },
+    "appearance": {
+      "title": "Внешний вид",
+      "theme": "Тема",
+      "theme_light": "Светлая",
+      "theme_dark": "Тёмная",
+      "theme_system": "Системная",
+      "system": "Системная",
+      "language": "Язык",
+      "language_ru": "Русский",
+      "language_en": "English",
+      "caption": "Настройки применяются к текущему браузеру.",
+      "theme_caption": "Выберите оформление интерфейса.",
+      "language_caption": "Выберите язык интерфейса."
+    },
+    "profile": {
+      "title": "Профиль",
+      "nickname": "Ник",
+      "nickname_placeholder": "Введите ник",
+      "email": "Email",
+      "email_readonly": "Только чтение",
+      "saved": "Изменения сохранены",
+      "save": "Сохранить",
+      "reset": "Отменить"
+    },
+    "security": {
+      "title": "Смена пароля",
+      "new_password": "Новый пароль",
+      "password_hint": "Минимум 8 символов. Используйте буквы, цифры и символы.",
+      "show_password": "Показать пароль",
+      "hide_password": "Скрыть пароль",
+      "saved": "Пароль изменён",
+      "use_new_password": "Используйте новый пароль при следующем входе."
+    },
+    "tokens": {
+      "title": "Личные токены доступа",
+      "new": "Новый токен",
+      "name": "Имя",
+      "created": "Создан",
+      "expires": "Истекает",
+      "copy": "Копировать",
+      "delete": "Удалить",
+      "delete_title": "Удалить токен?",
+      "delete_description": "Введите имя токена «{name}», чтобы подтвердить удаление.",
+      "delete_confirm": "Удалить токен",
+      "created_hint": "Скопируйте токен сейчас — больше он показан не будет.",
+      "empty": "Пока нет личных токенов."
+    },
+    "opencode": {
+      "title": "Реквизиты OpenCode",
+      "empty": "Пока нет реквизитов OpenCode."
+    },
+    "unsaved": {
+      "title": "Отменить изменения?",
+      "description": "В форме есть несохранённые изменения.",
+      "discard": "Отменить изменения",
+      "stay": "Остаться"
+    },
+    "loading": "Загрузка настроек",
+    "load_error": "Не удалось загрузить настройки",
+    "retry": "Повторить",
+    "save_error": "Не удалось сохранить изменения"
+  },
   "dashboard": {
     "all_projects": "Все проекты",
     "total": "Всего",
     "active": "Активные",
-    "deleted": "Удаленные"
+    "deleted": "Удалённые",
+    "title": "Главная",
+    "subtitle": "Сводка по юнитам и проектам",
+    "refresh": "Обновить",
+    "refresh_hint": "Обновить статистику",
+    "loading": "Загрузка статистики",
+    "stats": {
+      "total_units": "Всего юнитов",
+      "active_units": "Активные",
+      "deleted_units": "Удалённые",
+      "projects": "Проекты",
+      "total_units_caption": "Все юниты",
+      "active_units_caption": "Запущенные юниты",
+      "deleted_units_caption": "Архивные юниты",
+      "projects_caption": "Все проекты",
+      "total_units_hint": "Открыть список всех юнитов",
+      "active_units_hint": "Открыть активные юниты",
+      "deleted_units_hint": "Открыть удалённые юниты",
+      "projects_hint": "Открыть проекты"
+    },
+    "projects": {
+      "title": "Проекты",
+      "filter_placeholder": "Фильтр по названию",
+      "filter_aria": "Фильтр проектов по названию",
+      "columns": {
+        "project": "Проект",
+        "total": "Всего",
+        "active": "Активные",
+        "deleted": "Удалённые",
+        "activity": "Активность",
+        "actions": "Действия"
+      },
+      "empty": "Пока нет проектов",
+      "empty_description": "Создайте первый проект, чтобы увидеть статистику.",
+      "error": "Не удалось загрузить статистику",
+      "error_description": "Проверьте соединение и попробуйте ещё раз.",
+      "retry": "Повторить",
+      "create_project": "Создать проект",
+      "go_to_units": "Перейти к юнитам",
+      "sort_by": "Сортировать по столбцу «{column}»",
+      "sort_asc": "По возрастанию",
+      "sort_desc": "По убыванию",
+      "open_units": "Открыть юниты",
+      "open_project": "Открыть проект",
+      "row_aria": "Открыть юниты проекта {project}",
+      "actions_aria": "Действия с проектом {project}",
+      "updated_at": "Обновлено {time}",
+      "count": {
+        "one": "{count} проект",
+        "few": "{count} проекта",
+        "many": "{count} проектов",
+        "other": "{count} проекта"
+      }
+    }
   },
   "opencode": {
     "notifications": {
@@ -882,6 +1230,10 @@
     "nav": {
       "sessions": "Сессии",
       "workspace": "Workspace"
+    },
+    "layout": {
+      "title": "ИИ-помощник",
+      "description": "Сессии и workspace OpenCode"
     },
     "workspace": {
       "status": {
@@ -904,7 +1256,8 @@
         "open_ide": "Открыть VS Code",
         "archive": "Архивировать",
         "restore": "Восстановить",
-        "delete": "Удалить"
+        "delete": "Удалить",
+        "actions": "Действия с workspace"
       },
       "fields": {
         "branch": "Ветка",
@@ -922,20 +1275,30 @@
         "fields": {
           "name": "Название",
           "credential": "Реквизиты",
-          "branch": "Ветка",
           "projects": "Проекты",
-          "project_branch": "Ветка проекта: {project}",
-          "prompt": "Первый промпт"
+          "prompt": "Первый промпт",
+          "base_branch": "Базовая ветка",
+          "local_branch": "Локальная ветка"
+        },
+        "columns": {
+          "project": "Проект",
+          "base_branch": "Базовая ветка",
+          "local_branch": "Локальная ветка"
         },
         "hint_name": "Уникально в рамках аккаунта",
-        "hint_branch": "Одна ветка для всех проектов; если ветки нет в репозитории, она будет создана локально от основной ветки",
         "hint_projects": "Порядок важен; не более {max}. Выбрано: {count}",
-        "placeholder_project_branch": "Общая ветка: {branch}",
-        "hint_project_branch": "Оставьте пустым, чтобы использовать общую ветку",
+        "hint_branches": "Для каждого проекта локальная ветка будет создана в хранилище от базовой ветки при создании workspace",
         "no_project_branches": "Ветки не найдены",
         "error_project_branches": "Не удалось загрузить ветки проекта",
         "hint_prompt": "Запустится автоматически после старта контейнера",
-        "push_warning": "Права push проверятся при создании: если у проекта нет прав, workspace будет только для чтения.",
+        "errors": {
+          "token_required": "Создание веток недоступно: нет личного токена с правом push для проектов: {projects}. Добавьте токен в настройках аккаунта",
+          "vetka_zashishena": "Ветка защищена: выберите другое имя"
+        },
+        "messages": {
+          "creating_branches": "Создаём ветки…",
+          "creating_workspace": "Создаём workspace…"
+        },
         "buttons": {
           "ok": "Создать"
         }
@@ -1041,6 +1404,7 @@
         "badge_hint": "Сессия в архиве: история доступна только для чтения",
         "confirm_caption": "Архивировать сессию?",
         "confirm_message": "Сессия «{title}» будет перемещена в архив: история сохранится, но новые ходы для неё станут недоступны.",
+        "ok": "Архивировать",
         "reason_manual": "Архивирована пользователем",
         "reason_unit_deleted": "Архивирована: все юниты сессии удалены",
         "reason_unknown": "Причина архивации неизвестна"
@@ -1153,7 +1517,8 @@
       "request_required": "Введите запрос",
       "unknown_question": "Вопрос не относится к этому ходу",
       "unknown_option": "Такого варианта ответа нет",
-      "unexpected_kind": "Раннер вернул неожиданный тип результата"
+      "unexpected_kind": "Раннер вернул неожиданный тип результата",
+      "unit_directory_not_found": "Каталог юнита не найден на раннере"
     }
   },
   "project": {
@@ -1170,5 +1535,158 @@
     "pustoy_token": "Токен не может быть пустым",
     "ne_validen": "Токен недействителен",
     "dublikat": "Такой токен уже добавлен"
+  },
+  "ui_kit": {
+    "title": "GitHub Primer UI Kit",
+    "subtitle": "Базовые компоненты дизайн-системы поверх Quasar. Переключите тему, чтобы проверить светлые и тёмные токены.",
+    "theme": {
+      "light": "Светлая тема",
+      "dark": "Тёмная тема"
+    },
+    "sections": {
+      "palette": "Палитра токенов",
+      "icon": "GhIcon",
+      "button": "GhButton",
+      "input": "GhInput",
+      "label": "GhLabel",
+      "counter": "GhCounter",
+      "box": "GhBox",
+      "underline_nav": "GhUnderlineNav",
+      "table": "GhTable",
+      "dialog": "GhDialog",
+      "action_menu": "GhActionMenu",
+      "page_header": "GhPageHeader",
+      "avatar": "GhAvatar",
+      "side_nav": "GhSideNav",
+      "select": "GhSelect",
+      "segmented": "GhSegmentedControl",
+      "banner": "GhBanner",
+      "skeleton": "GhSkeleton",
+      "empty_state": "GhEmptyState",
+      "switch": "GhSwitch",
+      "kbd": "GhKbd",
+      "form_field": "GhFormField",
+      "checkbox": "GhCheckbox",
+      "control_heights": "Высоты контролов"
+    },
+    "labels": {
+      "variants": "Варианты",
+      "sizes": "Размеры",
+      "icon_counter_slot": "Иконка, счётчик и слот",
+      "states": "Состояния",
+      "block": "Кнопка на всю ширину",
+      "active_tab": "Активная вкладка:",
+      "dialog_hint": "Карточка диалога: радиус 12px, рамка 1px, шапка с крестиком и футер с действиями по правому краю.",
+      "append": "Поле с #append",
+      "show_password": "Показать пароль",
+      "hide_password": "Скрыть пароль",
+      "password": "Пароль",
+      "side_nav_collapsed": "Свёрнутый сайдбар"
+    },
+    "demo": {
+      "search": "Поиск",
+      "search_placeholder": "Найти репозиторий",
+      "email": "Email",
+      "error_field": "С ошибкой",
+      "error_message": "Введите корректный адрес",
+      "disabled_field": "Недоступное поле",
+      "compact": "Компактное (sm)",
+      "large": "Крупное (lg)",
+      "repo": "Репозиторий",
+      "status": "Статус",
+      "updated": "Обновлено",
+      "status_open": "Открыт",
+      "status_in_progress": "В работе",
+      "status_closed": "Закрыт",
+      "time_5m": "5 минут назад",
+      "time_20m": "20 минут назад",
+      "time_yesterday": "вчера",
+      "time_2d": "2 дня назад",
+      "tab_overview": "Обзор",
+      "tab_activity": "Активность",
+      "tab_settings": "Настройки",
+      "tab_disabled": "Недоступно",
+      "hint_active_tab": "Активная вкладка:",
+      "hint_underline": "Линия снизу —",
+      "action_edit": "Редактировать",
+      "action_copy_link": "Копировать ссылку",
+      "action_download": "Скачать архив",
+      "action_delete": "Удалить",
+      "action_locked": "Недоступно",
+      "selected": "Выбрано:",
+      "box_title": "Заголовок бокса",
+      "box_body": "Тело бокса с отступами 16px. Заголовок использует",
+      "box_and_border": "и нижнюю рамку.",
+      "flush_title": "Без внутренних отступов",
+      "flush_body": "Содержимое прижато к краям — удобно для таблиц и списков.",
+      "compact_title": "Компактные отступы",
+      "compact_body": "Компактное тело бокса.",
+      "open_dialog": "Открыть диалог",
+      "dialog_title": "Подтверждение действия",
+      "dialog_body": "Это демонстрационный диалог Primer. Тело имеет отступы 16px, разделители — 1px, кнопки в футере выровнены вправо.",
+      "cancel": "Отмена",
+      "confirm": "Подтвердить",
+      "page_title": "Главная",
+      "page_description": "Сводка по юнитам и проектам",
+      "refresh": "Обновить",
+      "avatar_name": "Octocat",
+      "avatar_label": "Аватар пользователя",
+      "side_group_main": "Основная",
+      "side_group_admin": "Администрирование",
+      "side_home": "Главная",
+      "side_units": "Юниты",
+      "side_settings": "Настройки",
+      "side_accounts": "Аккаунты",
+      "side_projects": "Проекты",
+      "side_init": "Инициализация",
+      "select_label": "Проект",
+      "select_placeholder": "Выберите проект",
+      "select_option_front": "unitman-front",
+      "select_option_front_description": "Пользовательский интерфейс",
+      "select_option_api": "unitman-api",
+      "select_option_api_description": "Backend на Symfony",
+      "segmented_language": "Язык",
+      "segmented_theme": "Тема",
+      "segmented_light": "Светлая",
+      "segmented_dark": "Тёмная",
+      "segmented_ru": "RU",
+      "segmented_en": "EN",
+      "banner_accent": "Акцентное сообщение",
+      "banner_accent_text": "Нейтральная подсказка для пользователя.",
+      "banner_success": "Успех",
+      "banner_success_text": "Изменения сохранены.",
+      "banner_attention": "Внимание",
+      "banner_attention_text": "Проверьте введённые данные перед сохранением.",
+      "banner_danger": "Ошибка",
+      "banner_danger_text": "Не удалось загрузить данные. Попробуйте ещё раз.",
+      "banner_retry": "Повторить",
+      "skeleton_note": "Скелетон фиксирует размеры контейнера, поэтому контент не смещается при загрузке.",
+      "empty_title": "Пока нет проектов",
+      "empty_description": "Создайте первый проект, чтобы увидеть статистику.",
+      "empty_create": "Создать проект",
+      "empty_units": "Перейти к юнитам",
+      "switch_label": "Уведомления",
+      "switch_description": "Показывать уведомления в реальном времени",
+      "switch_disabled": "Недоступный переключатель",
+      "kbd_hint": "Нажмите",
+      "kbd_for_search": ", чтобы открыть поиск",
+      "form_label": "Ник",
+      "form_caption": "Отображается в профиле и на страницах проекта.",
+      "form_error": "Ник должен содержать минимум 3 символа",
+      "form_placeholder": "Введите ник",
+      "form_required": "Обязательное поле",
+      "textarea_label": "Описание",
+      "textarea_placeholder": "Опишите задачу",
+      "textarea_value": "Проверить сборку юнита и приложить логи.",
+      "textarea_autogrow_label": "Описание (autogrow)",
+      "textarea_error_message": "Описание обязательно",
+      "checkbox_label": "Только активные",
+      "checkbox_description": "Скрыть юниты без запущенных контейнеров",
+      "checkbox_indeterminate": "Промежуточное состояние",
+      "checkbox_disabled": "Недоступный чекбокс",
+      "counter_page_title": "Проекты",
+      "counter_page_description": "Счётчик выровнен по центру заголовка",
+      "heights_note": "При одном size GhInput, GhSelect и GhButton совпадают по высоте: 28 / 32 / 40 px."
+    }
   }
 }

@@ -12,12 +12,15 @@ export const APP_SETTINGS_STORAGE_KEY = "AppSettings";
 export type AppSettings = {
     /** Открыто ли боковое меню на десктопе. */
     leftDrawerOpen: boolean;
+    /** Свёрнут ли сайдбар до иконок на десктопе. */
+    sidebarCollapsed: boolean;
     /** Включена ли тёмная тема. */
     darkMode: boolean;
 };
 
 export const defaultAppSettings: AppSettings = {
     leftDrawerOpen: false,
+    sidebarCollapsed: false,
     darkMode: false,
 };
 
@@ -38,6 +41,12 @@ export function loadAppSettings(): AppSettings {
 
     return {
         leftDrawerOpen: kakBoolean(sohranennie?.leftDrawerOpen, defaultAppSettings.leftDrawerOpen),
+        // Поле появилось позже: в старых записях localStorage его нет — тогда
+        // сайдбар считается развёрнутым, как и было по умолчанию.
+        sidebarCollapsed: kakBoolean(
+            sohranennie?.sidebarCollapsed,
+            defaultAppSettings.sidebarCollapsed,
+        ),
         darkMode: kakBoolean(sohranennie?.darkMode, defaultAppSettings.darkMode),
     };
 }

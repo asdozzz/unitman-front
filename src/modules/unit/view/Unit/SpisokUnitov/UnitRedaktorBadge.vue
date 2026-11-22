@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import {computed} from "vue";
+import { computed } from "vue";
+import type { GhLabelVariant, OcticonName } from "@/components/ui";
+import { GhLabel } from "@/components/ui";
 
 const props = defineProps<{
   mode: "view" | "edit" | "locked" | null;
   prichinaZapreta: string | null;
 }>();
 
-/** Иконка дублирует текст, чтобы режим читался и без цвета. */
-const ikonka = computed<string>(() => {
+type VidRezhima = {
+  variant: GhLabelVariant;
+  icon: OcticonName;
+};
+
+/** Режим редактора → вариант GhLabel и Octicon: иконка дублирует текст. */
+const vidRezhima = computed<VidRezhima>(() => {
   switch (props.mode) {
     case "edit":
-      return "edit";
+      return { variant: "success", icon: "pencil" };
     case "view":
-      return "visibility";
+      return { variant: "neutral", icon: "eye" };
     case "locked":
-      return "lock";
+      return { variant: "danger", icon: "lock" };
     default:
-      return "edit";
+      return { variant: "neutral", icon: "pencil" };
   }
 });
 
@@ -31,20 +38,15 @@ const klyuchPrichini = computed<string | null>(() => {
     return null;
   }
 
-  const klyuch = `unit.redaktor.prichina.${props.prichinaZapreta}`;
-
-  return klyuch;
+  return `unit.redaktor.prichina.${props.prichinaZapreta}`;
 });
 </script>
 
 <template>
-  <span
-      v-if="mode"
-      class="unit-redaktor"
-      :class="[`unit-redaktor--${mode}`]"
-  >
-    <q-icon :name="ikonka" size="14px" />
-    <span class="unit-redaktor__label">{{ $t(klyuchPodpisi as string) }}</span>
+  <span v-if="mode" class="unit-redaktor">
+    <GhLabel :variant="vidRezhima.variant" :icon="vidRezhima.icon">
+      {{ $t(klyuchPodpisi as string) }}
+    </GhLabel>
 
     <q-tooltip v-if="klyuchPrichini">
       {{ $t(klyuchPrichini) }}
@@ -56,32 +58,5 @@ const klyuchPrichini = computed<string | null>(() => {
 .unit-redaktor {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
-  min-height: 28px;
-  padding: var(--app-space-1) var(--app-space-2);
-  border-radius: var(--app-radius-pill);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
-  white-space: nowrap;
-}
-
-.unit-redaktor__label {
-  letter-spacing: 0.02em;
-}
-
-.unit-redaktor--edit {
-  color: var(--app-positive);
-  background: color-mix(in srgb, var(--app-positive) 12%, transparent);
-}
-
-.unit-redaktor--view {
-  color: var(--app-text-secondary);
-  background: var(--app-surface-muted);
-}
-
-.unit-redaktor--locked {
-  color: var(--app-negative);
-  background: color-mix(in srgb, var(--app-negative) 12%, transparent);
 }
 </style>

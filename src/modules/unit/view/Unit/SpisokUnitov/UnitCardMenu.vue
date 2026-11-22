@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import {computed} from "vue";
-import {useRouter} from "vue-router";
-import {storeToRefs} from "pinia";
-import type {Deistviye, Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
-import type {UnitCommand, UnitUiState} from "@/modules/unit/utils/unitStatus";
-import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
-import {useFormaZapolneniyaPeremenihUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
-import {useAuthStore} from "@/modules/account/store/auth";
-import {useStorRedaktorovUnita} from "@/modules/unit/store/SpisokUnitov/StorRedaktorovUnita";
-import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
-import {useStorFormiSozdaniyaSessii} from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
+import type { Deistviye, Unit } from "@/modules/unit/store/SpisokUnitov/model/Unit";
+import type { UnitCommand, UnitUiState } from "@/modules/unit/utils/unitStatus";
+import { useSpisokUnitovStore } from "@/modules/unit/store/SpisokUnitovStore";
+import { useFormaZapolneniyaPeremenihUnitaStore } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
+import { useAuthStore } from "@/modules/account/store/auth";
+import { useStorRedaktorovUnita } from "@/modules/unit/store/SpisokUnitov/StorRedaktorovUnita";
+import { storFormiDeistviyUnita } from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
+import { useStorFormiSozdaniyaSessii } from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
+import { GhActionMenu } from "@/components/ui";
+import type { GhActionMenuItem, OcticonName } from "@/components/ui";
 import {
   POROZHDOK_KOMAND_ZHIZNENNOGO_CIKLA,
   sozdatReestrKomand,
@@ -29,10 +32,11 @@ const emit = defineEmits<{
   remove: [];
 }>();
 
+const { t } = useI18n();
 const router = useRouter();
 
 const unitiStore = useSpisokUnitovStore();
-const {getUserRoleByProjectIdAndUserId, spisokDeistvii} = storeToRefs(unitiStore);
+const { getUserRoleByProjectIdAndUserId, spisokDeistvii } = storeToRefs(unitiStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
 const storFormaDeistviy = storFormiDeistviyUnita();
@@ -40,20 +44,27 @@ const formaSessiiStore = useStorFormiSozdaniyaSessii();
 const storRedaktorov = useStorRedaktorovUnita();
 
 const authStore = useAuthStore();
-const {userId} = storeToRefs(authStore);
+const { userId } = storeToRefs(authStore);
 
 /** Те же права, что были у действий карточки до рефакторинга. */
 const mozhetUpravlyat = computed<boolean>(() => {
-  return props.item.unitSozdanSystemoi
-      || userId.value === props.item.authorId
-      || getUserRoleByProjectIdAndUserId.value(props.item.projectId, userId.value as string) === "ADMIN";
+  return (
+    props.item.unitSozdanSystemoi ||
+    userId.value === props.item.authorId ||
+    getUserRoleByProjectIdAndUserId.value(
+      props.item.projectId,
+      userId.value as string,
+    ) === "ADMIN"
+  );
 });
 
 /** Пункт «Редакторы» виден автору/админу и всем, у кого вычислен режим редактора. */
 const vidniRedaktory = computed<boolean>(() => {
-  return mozhetUpravlyat.value
-      || props.isAdmin
-      || (props.item.redaktorMode ?? null) !== null;
+  return (
+    mozhetUpravlyat.value ||
+    props.isAdmin ||
+    (props.item.redaktorMode ?? null) !== null
+  );
 });
 
 /** Единый реестр команд для меню и строки действий. */
@@ -77,7 +88,7 @@ function zapisiKomand(commands: UnitCommand[]): ZapisKomandi[] {
     const knopka = reestrKomand.value[command];
 
     if (knopka) {
-      zapisi.push({command, knopka});
+      zapisi.push({ command, knopka });
     }
   });
 
@@ -109,19 +120,165 @@ const deistviyaSpiska = computed<Deistviye[]>(() => {
 });
 
 const mozhnoZapolnit = computed<boolean>(() => {
-  return mozhetUpravlyat.value
-      && (props.item.commands.includes("zapolnitPeremenie") || props.state.canOpenLinks);
+  return (
+    mozhetUpravlyat.value &&
+    (props.item.commands.includes("zapolnitPeremenie") || props.state.canOpenLinks)
+  );
 });
 
 const estMeni = computed<boolean>(() => {
-  return komandiZhiznennogoCikla.value.length > 0
-      || deistviyaSpiska.value.length > 0
-      || mozhnoZapolnit.value
-      || props.item.redaktorLink !== null
-      || vidniRedaktory.value
-      || props.isAdmin
-      || props.canRemove;
+  return (
+    komandiZhiznennogoCikla.value.length > 0 ||
+    deistviyaSpiska.value.length > 0 ||
+    mozhnoZapolnit.value ||
+    props.item.redaktorLink !== null ||
+    vidniRedaktory.value ||
+    props.isAdmin ||
+    props.canRemove
+  );
 });
+
+/** Material-имена из реестра команд → Octicon (P6). */
+const KARTA_IKONOK: Record<string, OcticonName> = {
+  build: "tools",
+  update: "sync",
+  done_all: "check-circle",
+  remove_done: "x-circle",
+  play_arrow: "play",
+  stop: "square",
+  sync: "sync",
+};
+
+function perevodIkonki(icon: string): OcticonName {
+  return KARTA_IKONOK[icon] ?? "gear";
+}
+
+type Menyu = {
+  items: GhActionMenuItem[];
+  deistviya: Record<string, () => void>;
+};
+
+/** Плоский список GhActionMenu: пункты + соответствующие обработчики. */
+const menyu = computed<Menyu>(() => {
+  const items: GhActionMenuItem[] = [];
+  const deistviya: Record<string, () => void> = {};
+
+  const dobavit = (
+    id: string,
+    label: string,
+    icon: OcticonName | undefined,
+    run: () => void,
+    separatorBefore = false,
+    danger = false,
+  ): void => {
+    items.push({ id, label, icon, separatorBefore, danger });
+    deistviya[id] = run;
+  };
+
+  komandiZhiznennogoCikla.value.forEach((zapis: ZapisKomandi, index: number) => {
+    dobavit(
+      `cmd:${zapis.command}`,
+      t(zapis.knopka.labelKey),
+      perevodIkonki(zapis.knopka.icon),
+      () => zapis.knopka.run(),
+      index === 0 && items.length > 0,
+    );
+  });
+
+  deistviyaSpiska.value.forEach((deistvie: Deistviye) => {
+    dobavit(
+      `action:${deistvie.id}`,
+      deistvie.name,
+      "zap",
+      () => pokazatFormuDeistviya(deistvie),
+      items.length > 0,
+    );
+  });
+
+  if (mozhnoZapolnit.value) {
+    dobavit(
+      "config",
+      t("unit.spisok_unitov.card.buttons.set_config"),
+      "gear",
+      otkritKonfig,
+      items.length > 0,
+    );
+  }
+
+  dobavit(
+    "jobs",
+    t("unit.spisok_unitov.card.buttons.jobs"),
+    "info",
+    otkritOknoSZadachamiRunnera,
+    items.length > 0,
+  );
+
+  dobavit(
+    "session",
+    t("unit.spisok_unitov.card.buttons.create_session"),
+    "comment-discussion",
+    sozdatSessiyuSUnitom,
+    false,
+  );
+
+  if (vidniRedaktory.value) {
+    dobavit(
+      "editors",
+      t("unit.redaktor.dialog.title"),
+      "pencil",
+      otkritRedaktorov,
+      false,
+    );
+  }
+
+  if (props.item.redaktorLink) {
+    dobavit(
+      "open-editor",
+      t("unit.spisok_unitov.card.buttons.open_editor"),
+      "code",
+      () =>
+        window.open(
+          props.item.redaktorLink as string,
+          "_blank",
+          "noopener,noreferrer",
+        ),
+      false,
+    );
+  }
+
+  if (props.isAdmin) {
+    dobavit(
+      "rebuild",
+      t("unit.spisok_unitov.card.buttons.rebuild"),
+      "sync",
+      () => emit("rebuild"),
+      true,
+    );
+    dobavit(
+      "mark-broken",
+      t("unit.spisok_unitov.card.buttons.mark_broken"),
+      "alert",
+      () => emit("markBroken"),
+    );
+  }
+
+  if (props.canRemove) {
+    dobavit(
+      "remove",
+      t("unit.spisok_unitov.card.buttons.delete"),
+      "trash",
+      () => emit("remove"),
+      true,
+      true,
+    );
+  }
+
+  return { items, deistviya };
+});
+
+function vybrat(item: GhActionMenuItem): void {
+  menyu.value.deistviya[item.id]?.();
+}
 
 function otkritKonfig() {
   konfigFormStore.otkritFormu(props.item.id, props.item.projectId);
@@ -133,7 +290,7 @@ function otkritRedaktorov() {
 }
 
 function otkritOknoSZadachamiRunnera() {
-  router.push({name: "unit_jobs", params: {id: props.item.id}});
+  router.push({ name: "unit_jobs", params: { id: props.item.id } });
 }
 
 /** Диалог общий с модулем OpenCode: здесь достаточно открыть его с юнитом. */
@@ -147,136 +304,10 @@ function pokazatFormuDeistviya(deistvie: Deistviye) {
 </script>
 
 <template>
-  <q-btn
-      v-if="estMeni"
-      flat
-      dense
-      size="sm"
-      icon="more_vert"
-      :aria-label="$t('unit.spisok_unitov.card.buttons.more')"
-  >
-    <q-menu>
-      <q-list dense style="min-width: 240px">
-        <template v-if="komandiZhiznennogoCikla.length > 0">
-          <q-item-label header>
-            {{ $t('unit.spisok_unitov.card.menu.lifecycle') }}
-          </q-item-label>
-
-          <q-item
-              v-for="zapis in komandiZhiznennogoCikla"
-              :key="zapis.command"
-              clickable
-              v-close-popup
-              @click="zapis.knopka.run()"
-          >
-            <q-item-section avatar>
-              <q-icon :name="zapis.knopka.icon" />
-            </q-item-section>
-            <q-item-section>{{ $t(zapis.knopka.labelKey) }}</q-item-section>
-          </q-item>
-        </template>
-
-        <template v-if="deistviyaSpiska.length > 0">
-          <q-item-label header>
-            {{ $t('unit.spisok_unitov.card.buttons.actions') }}
-          </q-item-label>
-
-          <q-item
-              v-for="deistvie in deistviyaSpiska"
-              :key="deistvie.id"
-              clickable
-              v-close-popup
-              @click="pokazatFormuDeistviya(deistvie)"
-          >
-            <q-item-section avatar>
-              <q-icon name="apps" />
-            </q-item-section>
-            <q-item-section>{{ deistvie.name }}</q-item-section>
-          </q-item>
-        </template>
-
-        <q-item-label header>
-          {{ $t('unit.spisok_unitov.card.menu.more') }}
-        </q-item-label>
-
-        <q-item v-if="mozhnoZapolnit" clickable v-close-popup @click="otkritKonfig">
-          <q-item-section avatar>
-            <q-icon name="settings" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.set_config') }}</q-item-section>
-        </q-item>
-
-        <q-item clickable v-close-popup @click="otkritOknoSZadachamiRunnera">
-          <q-item-section avatar>
-            <q-icon name="info" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.jobs') }}</q-item-section>
-        </q-item>
-
-        <q-item clickable v-close-popup @click="sozdatSessiyuSUnitom">
-          <q-item-section avatar>
-            <q-icon name="forum" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.create_session') }}</q-item-section>
-        </q-item>
-
-        <q-item v-if="vidniRedaktory" clickable v-close-popup @click="otkritRedaktorov">
-          <q-item-section avatar>
-            <q-icon name="edit_note" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.redaktor.dialog.title') }}</q-item-section>
-        </q-item>
-
-        <q-item
-            v-if="item.redaktorLink"
-            tag="a"
-            :href="item.redaktorLink"
-            target="_blank"
-            rel="noopener noreferrer"
-            clickable
-            v-close-popup
-        >
-          <q-item-section avatar>
-            <q-icon name="code" />
-          </q-item-section>
-          <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.open_editor') }}</q-item-section>
-        </q-item>
-
-        <template v-if="isAdmin">
-          <q-item-label header>
-            {{ $t('unit.spisok_unitov.card.menu.admin') }}
-          </q-item-label>
-
-          <q-item clickable v-close-popup @click="emit('rebuild')">
-            <q-item-section avatar>
-              <q-icon name="restore" />
-            </q-item-section>
-            <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.rebuild') }}</q-item-section>
-          </q-item>
-
-          <q-item clickable v-close-popup @click="emit('markBroken')">
-            <q-item-section avatar>
-              <q-icon name="report" />
-            </q-item-section>
-            <q-item-section>{{ $t('unit.spisok_unitov.card.buttons.mark_broken') }}</q-item-section>
-          </q-item>
-        </template>
-
-        <template v-if="canRemove">
-          <q-separator />
-
-          <q-item clickable v-close-popup @click="emit('remove')">
-            <q-item-section avatar>
-              <q-icon name="delete_forever" color="negative" />
-            </q-item-section>
-            <q-item-section class="text-negative">
-              {{ $t('unit.spisok_unitov.card.buttons.delete') }}
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-list>
-    </q-menu>
-
-    <q-tooltip>{{ $t('unit.spisok_unitov.card.buttons.more') }}</q-tooltip>
-  </q-btn>
+  <GhActionMenu
+    v-if="estMeni"
+    :items="menyu.items"
+    :aria-label="$t('unit.spisok_unitov.card.buttons.more')"
+    @select="vybrat"
+  />
 </template>

@@ -3,12 +3,14 @@ import ProektiService from "@/modules/unit/services/ProektiService";
 import UnitiService from "@/modules/unit/services/UnitiService";
 import MediatekaService from "@/modules/unit/services/MediatekaService";
 import VolumeTypesService from "@/modules/unit/services/VolumeTypesService";
+import LichniyTokenService from "@/modules/account/services/LichniyTokenService";
 import type {Schema} from "@/api/types";
 import type {Unit, TomKonfiga, TomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {PeremenayaKonfiga, sozdatTomUnita} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import type {FaylTipaToma, TipToma} from "@/modules/unit/store/SpisokProektov/model/TipToma";
 import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
 import {soderzhitZashishennuyuVetku} from "@/modules/unit/utils/zashishennieVetki";
+import {estTokenSPushomProekta} from "@/modules/unit/utils/lichnieTokeni";
 
 export class FormaDobavleniyaUnita {
     projectId: string;
@@ -70,7 +72,24 @@ type FormaDobavleniyaUnitaState = {
     dubli: {
         loader: boolean;
         spisok: Unit[];
-    }
+    },
+    /** Личные токены пользователя для проверки прав на создание ветки. */
+    tokeni: {
+        spisok: Schema<"LichniyTokenPublic">[];
+        loader: boolean;
+        oshibka: string | null;
+    },
+    /** Открыт ли диалог создания новой ветки. */
+    dialogOtkrit: boolean;
+    /** Данные формы диалога создания ветки. */
+    novayaVetka: {
+        nazvanie: string;
+        osnova: string;
+    };
+    /** Идёт ли создание ветки через хранилище. */
+    loaderSozdaniyaVetki: boolean;
+    /** Ошибка создания ветки для показа в диалоге. */
+    oshibkaSozdaniyaVetki: string | null;
 }
 
 
@@ -94,7 +113,19 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             dubli: {
                 loader: false,
                 spisok: []
-            }
+            },
+            tokeni: {
+                spisok: [],
+                loader: false,
+                oshibka: null,
+            },
+            dialogOtkrit: false,
+            novayaVetka: {
+                nazvanie: "",
+                osnova: "",
+            },
+            loaderSozdaniyaVetki: false,
+            oshibkaSozdaniyaVetki: null,
         }
     },
     getters: {
@@ -121,6 +152,32 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
 
             return soderzhitZashishennuyuVetku(proekt.zashishennieVetki, state.form.branch) !== null;
         },
+        /**
+         * Есть ли у пользователя личный токен, который покрывает выбранный
+         * проект и привязан к тому же репозиторию.
+         *
+         * Проект ищется в том же списке `proekti.spisok`, что и в селекте
+         * формы; этот список несёт `repoId` проекта. Без выбранного проекта
+         * или без `repoId` создавать ветку нельзя.
+         */
+        estTokenSPushomDlyaVibrannogoProekta(state): boolean {
+            if (!state.form.projectId) {
+                return false;
+            }
+
+            const proekt = useSpisokUnitovStore().proekti.spisok.find(
+                (item) => item.value === state.form.projectId,
+            );
+
+            if (!proekt || !proekt.repoId) {
+                return false;
+            }
+
+            return estTokenSPushomProekta(state.tokeni.spisok, {
+                id: proekt.value,
+                repoId: proekt.repoId,
+            });
+        },
     },
     actions: {
         otkritFormu() {
@@ -131,6 +188,41 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.initPeremenie = false;
             this.dubli.loader = false;
             this.dubli.spisok = [];
+            this.zakritDialogSozdaniyaVetki();
+            // Токены нужны для подсказки о правах на создание ветки:
+            // грузим их при открытии формы, не блокируя её.
+            void this.zagruzitTokeni();
+        },
+        /**
+         * Загрузить личные токены пользователя.
+         *
+         * Ошибка загрузки не блокирует создание юнита: она только
+         * отключает подсказку о правах на создание ветки.
+         */
+        async zagruzitTokeni(): Promise<void> {
+            this.tokeni.loader = true;
+            this.tokeni.oshibka = null;
+
+            try {
+                const response = await LichniyTokenService.spisok();
+
+                if (response.status === "success") {
+                    this.tokeni.spisok = response.data;
+                } else if (response.status === "fail") {
+                    this.tokeni.spisok = [];
+                    this.tokeni.oshibka = response.data.message;
+                } else if (response.status === "error") {
+                    this.tokeni.spisok = [];
+                    this.tokeni.oshibka = response.message;
+                }
+            } catch (error) {
+                this.tokeni.spisok = [];
+                this.tokeni.oshibka = error instanceof Error
+                    ? error.message
+                    : String(error);
+            } finally {
+                this.tokeni.loader = false;
+            }
         },
         zakritFormu() {
             this.otchistitChernoviki();
@@ -139,6 +231,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.initPeremenie = false;
             this.dubli.loader = true;
             this.dubli.spisok = [];
+            this.zakritDialogSozdaniyaVetki();
         },
         /**
          * Удалить из медиатеки все ещё не привязанные черновики.
@@ -229,6 +322,76 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 this.oshibkaOtBackenda = response.message;
             }
         },
+        /** Открыть диалог создания новой ветки. */
+        otkritDialogSozdaniyaVetki() {
+            this.novayaVetka = {
+                nazvanie: "",
+                osnova: this.form.branch,
+            };
+            this.oshibkaSozdaniyaVetki = null;
+            this.dialogOtkrit = true;
+        },
+        /** Закрыть диалог создания ветки и сбросить его состояние. */
+        zakritDialogSozdaniyaVetki() {
+            this.dialogOtkrit = false;
+            this.loaderSozdaniyaVetki = false;
+            this.oshibkaSozdaniyaVetki = null;
+        },
+        /**
+         * Создать новую ветку в хранилище и выбрать её в форме.
+         *
+         * После создания ветки список веток и переменные конфига
+         * перезапрашиваются: новая ветка появляется в селекте, а её конфиг
+         * подхватывается формой.
+         */
+        async sozdatVetku(nazvanie: string, otVetki: string) {
+            const projectId = this.form.projectId;
+
+            if (!projectId) {
+                this.oshibkaSozdaniyaVetki = "Проект не выбран.";
+                return;
+            }
+
+            if (!nazvanie.trim() || !otVetki.trim()) {
+                this.oshibkaSozdaniyaVetki = "Укажите название ветки и базовую ветку.";
+                return;
+            }
+
+            this.loaderSozdaniyaVetki = true;
+            this.oshibkaSozdaniyaVetki = null;
+
+            const response = await ProektiService.sozdatVetku({
+                projectId,
+                nazvanie,
+                otVetki,
+            });
+
+            this.loaderSozdaniyaVetki = false;
+
+            if (response.status === "fail") {
+                this.oshibkaSozdaniyaVetki = response.data.message;
+                return response;
+            }
+
+            if (response.status === "error") {
+                this.oshibkaSozdaniyaVetki = response.message;
+                return response;
+            }
+
+            this.form.branch = response.data.name;
+            this.zakritDialogSozdaniyaVetki();
+
+            await this.poluchitVetki();
+            await this.poluchitPeremenieKonfiga();
+
+            if (this.dubli.spisok.length > 0) {
+                await this.naitiDubliUnita();
+            } else {
+                this.ochistitDubliUnita();
+            }
+
+            return response;
+        },
         async naitiDubliUnita() {
             if (!this.form.projectId) {
                 throw new Error('proekt ne vibran');
@@ -236,7 +399,10 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.dubli.loader = true;
             this.dubli.spisok = [];
 
-            const response = await UnitiService.naitiDubliUnita({ projectId: this.form.projectId, branch: this.form.branch });
+            const response = await UnitiService.naitiDubliUnita({
+                projectId: this.form.projectId,
+                branch: this.form.branch.trim(),
+            });
 
             this.dubli.loader = false;
             if (response.status === "success") {
@@ -255,7 +421,9 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             // Ветка сменилась — прежние черновики томов больше не нужны.
             this.otchistitChernoviki();
 
-            if (!this.form.branch) {
+            const branch = this.form.branch.trim();
+
+            if (!branch) {
                 this.form.peremenieKonfiga = [];
                 this.form.volumes = [];
                 return;
@@ -267,7 +435,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 throw new Error('proekt ne vibran');
             }
             const response = await UnitiService.poluchitKonfigPoNazvaniyuVetki(
-                { projectId: this.form.projectId, branch: this.form.branch });
+                { projectId: this.form.projectId, branch: branch });
 
             this.polucheniePeremenih.loader = false;
             if (response.status === "success") {
@@ -374,48 +542,69 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
 
             MediatekaService.udalitFayl(fileId);
         },
+        /**
+         * Отправить форму: создать юнит в выбранной ветке.
+         *
+         * Ветка должна существовать в хранилище — новую ветку пользователь
+         * создаёт отдельным диалогом, после чего она выбирается здесь.
+         */
         async otpravitFormu() {
-            this.loader = true;
+            const projectId = this.form.projectId;
+            const branch = this.form.branch.trim();
 
-            const response = await UnitiService.sozdat({
-                projectId: this.form.projectId,
-                branch: this.form.branch,
-                unitName: this.form.unitName,
-                memoryLimit: this.form.memoryLimit,
-                // `targetUnitId` — юнит, выбранный через помощник переменной:
-                // по нему бэкенд создаёт связи юнитов в read-модели списка.
-                // Для переменных без помощника поле не передаётся.
-                znacheniePeremenoi: this.form.peremenieKonfiga.map((item) => {
-                    return {
-                        "id": item.konfig.id,
-                        "value": item.value,
-                        "type": item.konfig.type,
-                        ...(item.targetUnitId ? {"targetUnitId": item.targetUnitId} : {}),
-                    }
-                }),
-                volumes: this.form.volumes.map((volume) => ({
-                    dir: volume.volume.dir,
-                    name: volume.volume.name,
-                    fileId: volume.volume.fileId,
-                })),
-            });
-
-            this.loader = false;
-            if (response.status === "success") {
-                // Файлы уже привязаны к созданному юниту — удалять их нельзя,
-                // поэтому иды сбрасываются: закрытие формы не тронет медиатеку.
-                this.form.volumes.forEach((volume) => {
-                    volume.volume.fileId = null;
-                    volume.izProekta = false;
-                });
-                this.oshibkaOtBackenda = null;
-            } else if (response.status === "fail") {
-                this.oshibkaOtBackenda = response.data.message;
-            } else if (response.status === "error") {
-                this.oshibkaOtBackenda = response.message;
+            if (!projectId || !branch) {
+                return;
             }
 
-            return response;
+            this.loader = true;
+            this.oshibkaOtBackenda = null;
+
+            try {
+                const response = await UnitiService.sozdat({
+                    projectId,
+                    branch,
+                    unitName: this.form.unitName,
+                    memoryLimit: this.form.memoryLimit,
+                    // `targetUnitId` — юнит, выбранный через помощник переменной:
+                    // по нему бэкенд создаёт связи юнитов в read-модели списка.
+                    // Для переменных без помощника поле не передаётся.
+                    znacheniePeremenoi: this.form.peremenieKonfiga.map((item) => {
+                        return {
+                            "id": item.konfig.id,
+                            "value": item.value,
+                            "type": item.konfig.type,
+                            ...(item.targetUnitId ? {"targetUnitId": item.targetUnitId} : {}),
+                        }
+                    }),
+                    volumes: this.form.volumes.map((volume) => ({
+                        dir: volume.volume.dir,
+                        name: volume.volume.name,
+                        fileId: volume.volume.fileId,
+                    })),
+                });
+
+                if (response.status === "success") {
+                    // Файлы уже привязаны к созданному юниту — удалять их нельзя,
+                    // поэтому иды сбрасываются: закрытие формы не тронет медиатеку.
+                    this.form.volumes.forEach((volume) => {
+                        volume.volume.fileId = null;
+                        volume.izProekta = false;
+                    });
+                    this.oshibkaOtBackenda = null;
+                } else if (response.status === "fail") {
+                    this.oshibkaOtBackenda = response.data.message;
+                } else if (response.status === "error") {
+                    this.oshibkaOtBackenda = response.message;
+                }
+
+                return response;
+            } catch (error) {
+                this.oshibkaOtBackenda = error instanceof Error
+                    ? error.message
+                    : String(error);
+            } finally {
+                this.loader = false;
+            }
         },
     }
 })

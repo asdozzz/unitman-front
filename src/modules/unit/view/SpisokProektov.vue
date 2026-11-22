@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import {nextTick, onMounted, onUnmounted, ref, watch} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, ref, watch} from "vue";
 import {storeToRefs} from "pinia";
+import {useI18n} from "vue-i18n";
 import {useRoute, useRouter} from "vue-router";
+import {
+  GhBanner,
+  GhBox,
+  GhButton,
+  GhDialog,
+  GhEmptyState,
+  GhPageHeader,
+  GhSkeleton,
+} from "@/components/ui";
 import {useSpisokProektovStore} from "@/modules/unit/store/SpisokProekotovStore";
 import {useAddProjectFormStore} from "@/modules/unit/store/SpisokProektov/AddProjectFormStore";
 import AddForm from "@/modules/unit/view/Proekti/AddProjectForm.vue";
@@ -23,6 +33,7 @@ import {
   UDALENIE_PROEKTA,
 } from "@/modules/unit/model/websocket/ModelForChannelSpisokProektov";
 import {podpisatsyaNaSobitiyaProektov} from "@/modules/unit/model/websocket/PodpiskaNaSobitiyaProektov";
+import {ozhidaetsyaVtorayaKlavishaPosledovatelnosti} from "@/utils/useHotkeys";
 
 const proektiStore = useSpisokProektovStore();
 const {
@@ -38,6 +49,7 @@ const {enable: enableAddForm} = storeToRefs(addFormStore);
 
 const route = useRoute();
 const router = useRouter();
+const {t} = useI18n();
 
 /** Время последней успешной загрузки списка (unix-секунды, как в `convertDate`). */
 const posledneeObnovlenie = ref<number | null>(null);
@@ -47,6 +59,14 @@ const posledneeObnovlenie = ref<number | null>(null);
  * его изменение не должно снова писать URL.
  */
 const propuskatZapisVUrl = ref(false);
+
+/** Скелетоны показываем только на первичной загрузке — CLS остаётся нулевым. */
+const pokazatSkeletony = computed<boolean>(
+    () => loaderSpiskaProektov.value && spisok.value.length === 0,
+);
+
+/** Есть ли активные фильтры — от этого зависит пустое состояние. */
+const estAktivnieFiltri = computed<boolean>(() => proektiStore.estAktivnieFiltri);
 
 const KLYUCHI_FILTRA = [
   "search",
@@ -237,10 +257,113 @@ function obrabotatSobitiyeProekta(sobitiye: ModelForChannelSpisokProektov) {
 function openAddForm() {
   addFormStore.otkritFormu();
 }
+
+/** Переводит фокус в поле поиска. `false`, если поля нет. */
+function fokusNaPoisk(): boolean {
+  const pole = document.getElementById("proekt-filter-search") as HTMLInputElement | null;
+
+  if (!pole) {
+    return false;
+  }
+
+  pole.focus();
+  pole.select();
+
+  return true;
+}
+
+/** Селекторы, внутри которых страничные хоткеи не перехватываются. */
+function ignorirovatVvod(event: KeyboardEvent): boolean {
+  const cel = event.target;
+
+  if (!(cel instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (cel.isContentEditable) {
+    return true;
+  }
+
+  return (
+      cel.closest(
+          'input, textarea, select, [contenteditable], [role="textbox"], [role="dialog"], .q-dialog, .q-menu',
+      ) !== null
+  );
+}
+
+/**
+ * Страничные хоткеи: `R` — обновить, `/` — поиск, `c` — создать проект.
+ * Уступаем `g`-последовательностям глобального обработчика.
+ */
+function obrabotatKlavishu(event: KeyboardEvent): void {
+  if (
+      event.defaultPrevented
+      || event.isComposing
+      || event.ctrlKey
+      || event.metaKey
+      || event.altKey
+      || ignorirovatVvod(event)
+      || ozhidaetsyaVtorayaKlavishaPosledovatelnosti()
+  ) {
+    return;
+  }
+
+  const klavisha = event.key.toLowerCase();
+
+  if (klavisha === "r" && !event.shiftKey) {
+    event.preventDefault();
+    if (!loaderSpiskaProektov.value) {
+      void proektiStore.poluchitSpisokProektov();
+    }
+    return;
+  }
+
+  if (event.key === "/") {
+    if (fokusNaPoisk()) {
+      event.preventDefault();
+    }
+    return;
+  }
+
+  if (klavisha === "c" && !event.shiftKey) {
+    event.preventDefault();
+    openAddForm();
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", obrabotatKlavishu);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", obrabotatKlavishu);
+});
 </script>
 
 <template>
-  <div class="full-width flex column">
+  <div class="proekt-page">
+    <GhPageHeader
+        :title="t('unit.spisok_proektov.page.title')"
+        :description="t('unit.spisok_proektov.page.description')"
+        :counter="spisok.length"
+    >
+      <template #actions>
+        <GhButton
+            variant="default"
+            icon="sync"
+            :label="t('unit.spisok_proektov.filter.refresh')"
+            :loading="loaderSpiskaProektov"
+            @click="proektiStore.poluchitSpisokProektov()"
+        />
+        <GhButton
+            variant="primary"
+            icon="plus"
+            :label="t('unit.spisok_proektov.list.create')"
+            @click="openAddForm"
+        />
+      </template>
+    </GhPageHeader>
+
     <ProektFilterBar
         :filters="nastroikiSpiska.filter"
         :counts="proektiStore.statusiSoSchetchikami"
@@ -257,47 +380,62 @@ function openAddForm() {
         @clear-filters="proektiStore.sbrozitFiltri()"
     />
 
-    <q-linear-progress
-        v-if="loaderSpiskaProektov"
-        indeterminate
-        color="primary"
-        class="q-mb-md"
-    />
-
-    <div v-if="oshibkaZagruzkiSpiska" class="proekt-list__error" role="alert">
-      <q-icon name="error_outline" size="20px" />
-      <span class="proekt-list__error-text">{{ $t('unit.spisok_proektov.list.error_title') }}</span>
-      <q-btn
-          flat
-          dense
-          no-caps
-          color="primary"
-          :label="$t('unit.spisok_proektov.list.retry')"
-          @click="proektiStore.poluchitSpisokProektov()"
-      />
-    </div>
+    <GhBanner
+        v-if="oshibkaZagruzkiSpiska"
+        variant="danger"
+        :title="t('unit.spisok_proektov.list.error_title')"
+        class="proekt-page__gap"
+    >
+      {{ t('unit.spisok_proektov.page.error_description') }}
+      <template #actions>
+        <GhButton
+            variant="default"
+            icon="sync"
+            :label="t('unit.spisok_proektov.list.retry')"
+            :loading="loaderSpiskaProektov"
+            @click="proektiStore.poluchitSpisokProektov()"
+        />
+      </template>
+    </GhBanner>
 
     <template v-else>
-      <div v-if="vidimieProekti.length === 0" class="proekt-cards-grid__empty">
-        <template v-if="proektiStore.estAktivnieFiltri">
-          <span class="proekt-cards-grid__empty-title">
-            {{ $t('unit.spisok_proektov.list.empty_filtered') }}
-          </span>
-          <q-btn
-              class="proekt-cards-grid__empty-action"
-              flat
-              dense
-              no-caps
-              color="primary"
-              icon="filter_alt_off"
-              :label="$t('unit.spisok_proektov.filter.reset')"
+      <div v-if="pokazatSkeletony" class="proekt-cards-grid" aria-busy="true">
+        <GhBox v-for="n in 6" :key="`proekt-skeleton-${n}`" padding="md">
+          <div class="proekt-page__skeleton-lines">
+            <GhSkeleton variant="text" width="60%" height="16" />
+            <GhSkeleton variant="text" width="85%" height="12" />
+            <GhSkeleton variant="text" width="40%" height="12" />
+          </div>
+        </GhBox>
+      </div>
+
+      <GhEmptyState
+          v-else-if="vidimieProekti.length === 0"
+          :icon="estAktivnieFiltri ? 'search' : 'project'"
+          :title="estAktivnieFiltri
+            ? t('unit.spisok_proektov.list.empty_search')
+            : t('unit.spisok_proektov.list.empty_title')"
+          :description="estAktivnieFiltri
+            ? t('unit.spisok_proektov.list.empty_filtered')
+            : t('unit.spisok_proektov.list.empty_description')"
+      >
+        <template #actions>
+          <GhButton
+              v-if="estAktivnieFiltri"
+              variant="default"
+              icon="filter"
+              :label="t('unit.spisok_proektov.filter.reset')"
               @click="proektiStore.sbrozitFiltri()"
           />
+          <GhButton
+              v-else
+              variant="primary"
+              icon="plus"
+              :label="t('unit.spisok_proektov.list.create')"
+              @click="openAddForm"
+          />
         </template>
-        <template v-else>
-          {{ $t('unit.spisok_proektov.list.empty_result') }}
-        </template>
-      </div>
+      </GhEmptyState>
 
       <div v-else class="proekt-cards-grid">
         <ProektCard
@@ -308,48 +446,36 @@ function openAddForm() {
       </div>
     </template>
 
-    <q-dialog v-model="enableAddForm" persistent transition-show="scale" transition-hide="scale">
+    <GhDialog
+        v-model="enableAddForm"
+        :title="t('unit.form_add_project.caption')"
+        width="700px"
+    >
       <AddForm @formaBilaOtpravlena="proektiStore.poluchitSpisokProektov()" />
-    </q-dialog>
+    </GhDialog>
   </div>
 </template>
 
 <style scoped>
+.proekt-page {
+  color: var(--fgColor-default);
+  font-family: var(--fontStack-system);
+}
+
+.proekt-page__gap {
+  margin-bottom: 16px;
+}
+
 .proekt-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   align-items: start;
-  gap: var(--app-space-4);
+  gap: 16px;
 }
 
-.proekt-cards-grid__empty {
-  padding: var(--app-space-4);
-  color: var(--app-text-secondary);
-}
-
-.proekt-cards-grid__empty-title {
-  display: block;
-}
-
-.proekt-cards-grid__empty-action {
-  margin-top: var(--app-space-2);
-}
-
-.proekt-list__error {
+.proekt-page__skeleton-lines {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--app-space-2);
-  padding: var(--app-space-3);
-  border: 1px solid color-mix(in srgb, var(--app-negative) 35%, transparent);
-  border-radius: var(--app-radius-md);
-  background: color-mix(in srgb, var(--app-negative) 8%, transparent);
-  color: var(--app-negative);
-}
-
-.proekt-list__error-text {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--app-font-size-body);
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

@@ -93,6 +93,10 @@ class ProektiService {
         return apiClient.post('/project/branchesList', params);
     }
 
+    sozdatVetku(params: Schema<"SozdatVetkuProekta">) {
+        return apiClient.post('/project/sozdatVetku', params);
+    }
+
     obnovitNastroikiHuka(params: Schema<"ObnovitNastroikiHuka">) {
         return apiClient.post('/project/obnovitNastroikiHuka', params);
     }

@@ -1,115 +1,336 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useQuasar } from "quasar";
-import { onMounted } from "vue";
-import i18n from "@/bootstrap/translator";
+import { useI18n } from "vue-i18n";
+import type { Schema } from "@/api/types";
+import {
+  GhActionMenu,
+  GhBanner,
+  GhBox,
+  GhButton,
+  GhDialog,
+  GhEmptyState,
+  GhSkeleton,
+} from "@/components/ui";
+import type { GhActionMenuItem } from "@/components/ui";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import { useFormaRekvizitovOpenCodeStore } from "@/modules/account/store/SpisokRekvizitovOpenCode/FormaRekvizitovOpenCodeStore";
 import FormaRekvizitovOpenCode from "@/modules/account/view/AccountSettings/FormaRekvizitovOpenCode.vue";
 import { convertDate } from "@/utils/dates";
-import type { Schema } from "@/api/types";
 
-const $q = useQuasar();
+const { t } = useI18n();
+
 const storSpiska = useStorSpiskaRekvizitovOpenCode();
 const formaStore = useFormaRekvizitovOpenCodeStore();
 
 const { spisok, loaderSpiska, oshibkaZagruzki, udalyaemiId } = storeToRefs(storSpiska);
 
-/**
- * Подтверждение удаления.
- *
- * Удалённые реквизиты нельзя восстановить, а сессии, созданные под ними, больше
- * не смогут запускать ходы, поэтому удаление всегда через диалог.
- */
-function podtverditUdalenie(rekvizity: Schema<"OpenCodeCredential">) {
-    $q.dialog({
-        title: i18n.global.t('opencode.rekvizity.delete.caption'),
-        message: i18n.global.t('opencode.rekvizity.delete.message'),
-        cancel: true,
-        persistent: true,
-    }).onOk(() => {
-        storSpiska.udalitRekvizity(rekvizity.id);
-    });
+const dialogUdaleniya = ref<boolean>(false);
+const udalyaemieRekvizity = ref<Schema<"OpenCodeCredential"> | null>(null);
+
+const pokazatSkeletony = computed<boolean>(
+  () => loaderSpiska.value && spisok.value.length === 0,
+);
+
+function punktyMenu(): GhActionMenuItem[] {
+  return [
+    {
+      id: "edit",
+      label: t("opencode.rekvizity.buttons.edit"),
+      icon: "pencil",
+    },
+    {
+      id: "delete",
+      label: t("opencode.rekvizity.buttons.delete"),
+      icon: "trash",
+      danger: true,
+      separatorBefore: true,
+    },
+  ];
+}
+
+function vybratDeistvie(
+  rekvizity: Schema<"OpenCodeCredential">,
+  item: GhActionMenuItem,
+): void {
+  if (item.id === "edit") {
+    formaStore.otkritIzmenenie(rekvizity);
+    return;
+  }
+
+  if (item.id === "delete") {
+    otkrytUdalenie(rekvizity);
+  }
+}
+
+function otkrytSozdanie(): void {
+  formaStore.otkritSozdanie();
+}
+
+function otkrytUdalenie(rekvizity: Schema<"OpenCodeCredential">): void {
+  udalyaemieRekvizity.value = rekvizity;
+  dialogUdaleniya.value = true;
+}
+
+function zakrytUdalenie(): void {
+  dialogUdaleniya.value = false;
+  udalyaemieRekvizity.value = null;
+}
+
+async function udalitRekvizity(): Promise<void> {
+  if (udalyaemieRekvizity.value === null) {
+    return;
+  }
+
+  const otvet = await storSpiska.udalitRekvizity(udalyaemieRekvizity.value.id);
+
+  if (otvet?.status === "success") {
+    zakrytUdalenie();
+  }
 }
 
 onMounted(() => {
-    storSpiska.poluchitSpisok();
+  void storSpiska.poluchitSpisok();
 });
 </script>
 
 <template>
-  <q-card class="q-mb-md">
-    <q-card-section class="bg-primary text-white row items-center">
-      <div class="text-subtitle2 col">OpenCode: {{ $t('opencode.rekvizity.caption') }}</div>
-      <q-btn
-          dense
-          flat
-          icon="add"
-          color="white"
-          :disable="loaderSpiska"
-          @click="formaStore.otkritSozdanie()"
-      >
-        <q-tooltip>{{ $t('opencode.rekvizity.buttons.add') }}</q-tooltip>
-      </q-btn>
-      <q-btn
-          dense
-          flat
-          icon="refresh"
-          color="white"
-          :loading="loaderSpiska"
-          @click="storSpiska.poluchitSpisok()"
-      >
-        <q-tooltip>{{ $t('opencode.rekvizity.buttons.refresh') }}</q-tooltip>
-      </q-btn>
-    </q-card-section>
+  <GhBox padding="none">
+    <template #header>
+      <div class="rekvizity__header">
+        <span class="rekvizity__title">{{ t("settings.opencode.title") }}</span>
 
-    <q-card-section class="q-pt-none">
-      <div v-if="oshibkaZagruzki" class="text-negative q-mb-sm">{{ oshibkaZagruzki }}</div>
+        <div class="rekvizity__actions">
+          <GhButton
+            variant="default"
+            size="sm"
+            icon="sync"
+            :aria-label="t('opencode.rekvizity.buttons.refresh')"
+            :loading="loaderSpiska"
+            @click="storSpiska.poluchitSpisok()"
+          />
+          <GhButton
+            variant="primary"
+            size="sm"
+            icon="plus"
+            :label="t('opencode.rekvizity.buttons.add')"
+            :disabled="loaderSpiska"
+            @click="otkrytSozdanie"
+          />
+        </div>
+      </div>
+    </template>
 
-      <div v-if="!loaderSpiska && spisok.length === 0" class="text-grey-7">
-        {{ $t('opencode.rekvizity.empty') }}
+    <div class="rekvizity__content">
+      <GhBanner
+        v-if="oshibkaZagruzki"
+        variant="danger"
+        :title="t('settings.load_error')"
+        class="rekvizity__banner"
+      >
+        {{ oshibkaZagruzki }}
+        <template #actions>
+          <GhButton
+            variant="default"
+            size="sm"
+            icon="sync"
+            :label="t('settings.retry')"
+            :loading="loaderSpiska"
+            @click="storSpiska.poluchitSpisok()"
+          />
+        </template>
+      </GhBanner>
+
+      <div v-if="pokazatSkeletony" class="rekvizity__skeleton" aria-busy="true">
+        <div v-for="n in 3" :key="`rekvizity-skeleton-${n}`" class="rekvizity__skeleton-row">
+          <GhSkeleton variant="text" width="28%" height="12" />
+          <GhSkeleton variant="text" width="26%" height="12" />
+          <GhSkeleton variant="text" width="20%" height="12" />
+          <GhSkeleton variant="text" width="16%" height="12" />
+        </div>
       </div>
 
-      <q-list v-else separator>
-        <q-item v-for="rekvizity in spisok" :key="rekvizity.id">
-          <q-item-section>
-            <q-item-label>{{ rekvizity.name }}</q-item-label>
-            <q-item-label caption>
-              {{ rekvizity.url }} · {{ rekvizity.model }}
-            </q-item-label>
-            <q-item-label caption>
-              {{ $t('opencode.rekvizity.fields.api_key_hint') }}: <code>{{ rekvizity.apiKeyHint }}</code>
-              · {{ $t('opencode.rekvizity.fields.updated_at') }}: {{ convertDate(rekvizity.updatedAt) }}
-            </q-item-label>
-          </q-item-section>
+      <GhEmptyState
+        v-else-if="spisok.length === 0"
+        icon="cpu"
+        :title="t('settings.opencode.empty')"
+        :description="t('opencode.rekvizity.empty')"
+      >
+        <template #actions>
+          <GhButton
+            variant="primary"
+            icon="plus"
+            :label="t('opencode.rekvizity.buttons.add')"
+            @click="otkrytSozdanie"
+          />
+        </template>
+      </GhEmptyState>
 
-          <q-item-section side>
-            <div class="row q-gutter-xs">
-              <q-btn
-                  dense
-                  flat
-                  icon="edit"
-                  color="primary"
-                  @click="formaStore.otkritIzmenenie(rekvizity)"
-              >
-                <q-tooltip>{{ $t('opencode.rekvizity.buttons.edit') }}</q-tooltip>
-              </q-btn>
-              <q-btn
-                  dense
-                  flat
-                  icon="delete"
-                  color="negative"
-                  :loading="udalyaemiId === rekvizity.id"
-                  @click="podtverditUdalenie(rekvizity)"
-              >
-                <q-tooltip>{{ $t('opencode.rekvizity.buttons.delete') }}</q-tooltip>
-              </q-btn>
-            </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-card-section>
+      <div v-else class="rekvizity__scroll">
+        <table class="rekvizity__table">
+          <thead>
+            <tr>
+              <th scope="col">{{ t("opencode.rekvizity.form.fields.name") }}</th>
+              <th scope="col">{{ t("opencode.rekvizity.form.fields.url") }}</th>
+              <th scope="col">{{ t("opencode.rekvizity.form.fields.model") }}</th>
+              <th scope="col">{{ t("opencode.rekvizity.fields.api_key_hint") }}</th>
+              <th scope="col">{{ t("opencode.rekvizity.fields.updated_at") }}</th>
+              <th scope="col" class="rekvizity__th-actions">
+                <span class="gh-visually-hidden">{{ t("common.actions") }}</span>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr v-for="rekvizity in spisok" :key="rekvizity.id">
+              <td>
+                <div class="rekvizity__name">{{ rekvizity.name }}</div>
+              </td>
+              <td>
+                <span class="gh-mono rekvizity__url">{{ rekvizity.url }}</span>
+              </td>
+              <td>
+                <span class="gh-mono">{{ rekvizity.model }}</span>
+              </td>
+              <td>
+                <code class="gh-mono">{{ rekvizity.apiKeyHint }}</code>
+              </td>
+              <td class="gh-mono">{{ convertDate(rekvizity.updatedAt) }}</td>
+              <td class="rekvizity__td-actions">
+                <GhActionMenu
+                  :items="punktyMenu()"
+                  :aria-label="t('common.actions')"
+                  :disabled="udalyaemiId === rekvizity.id"
+                  @select="vybratDeistvie(rekvizity, $event)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <FormaRekvizitovOpenCode />
-  </q-card>
+
+    <GhDialog
+      v-model="dialogUdaleniya"
+      :title="t('opencode.rekvizity.delete.caption')"
+      persistent
+    >
+      <p class="rekvizity__dialog-text">
+        {{ t("opencode.rekvizity.delete.message") }}
+      </p>
+
+      <template #footer>
+        <GhButton
+          variant="default"
+          :label="t('common.buttons.cancel')"
+          @click="zakrytUdalenie"
+        />
+        <GhButton
+          variant="danger"
+          icon="trash"
+          :label="t('opencode.rekvizity.buttons.delete')"
+          :loading="udalyaemieRekvizity !== null && udalyaemiId === udalyaemieRekvizity.id"
+          @click="udalitRekvizity"
+        />
+      </template>
+    </GhDialog>
+  </GhBox>
 </template>
+
+<style scoped>
+.rekvizity__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.rekvizity__title {
+  font-weight: var(--fontWeight-semibold);
+}
+
+.rekvizity__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rekvizity__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.rekvizity__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rekvizity__skeleton-row {
+  display: flex;
+  gap: 24px;
+}
+
+.rekvizity__scroll {
+  overflow-x: auto;
+}
+
+.rekvizity__table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-body);
+}
+
+.rekvizity__table th {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--borderColor-default);
+  background-color: var(--bgColor-muted);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rekvizity__table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--borderColor-muted);
+  vertical-align: middle;
+}
+
+.rekvizity__table tbody tr:hover {
+  background-color: var(--bgColor-neutral-muted);
+}
+
+.rekvizity__name {
+  font-weight: var(--fontWeight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.rekvizity__url {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.rekvizity__th-actions,
+.rekvizity__td-actions {
+  width: 48px;
+  text-align: right;
+}
+
+.rekvizity__dialog-text {
+  margin: 0;
+  color: var(--fgColor-muted);
+}
+</style>

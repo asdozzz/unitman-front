@@ -1,0 +1,280 @@
+// Дизайн-токены GitHub Primer.
+//
+// Файл подключается в main.ts после quasar.scss, поэтому правила слоя
+// `.primer` идут позже устаревших глобальных правил и выигрывают каскад.
+//
+// Важно: переменные объявлены на уровне документа, но потребляются только
+// Gh-компонентами (корневой класс `primer`) и классом-обёрткой
+// `.primer-theme`. Старые страницы, использующие --app-*, не затрагиваются.
+
+:root {
+  color-scheme: light;
+
+  // --- Поверхности -------------------------------------------------------
+  --bgColor-default: #ffffff;
+  --bgColor-muted: #f6f8fa;
+  --bgColor-inset: #f6f8fa;
+  --bgColor-neutral-muted: rgba(175, 184, 193, 0.2);
+  --bgColor-accent-muted: rgba(9, 105, 218, 0.1);
+  --bgColor-success-muted: rgba(31, 136, 61, 0.1);
+  --bgColor-danger-muted: rgba(207, 34, 46, 0.1);
+  --bgColor-attention-muted: rgba(154, 103, 0, 0.1);
+
+  // Акцентные (сплошные) фоны кнопок.
+  --bgColor-success-emphasis: #1f883d;
+  --bgColor-success-emphasis-hover: #1a7f37;
+  --bgColor-success-emphasis-active: #187733;
+  --bgColor-danger-emphasis: #cf222e;
+  --bgColor-danger-emphasis-hover: #a40e26;
+  --bgColor-danger-emphasis-active: #8e0b1f;
+
+  // --- Границы -----------------------------------------------------------
+  --borderColor-default: #d0d7de;
+  --borderColor-muted: #d8dee4;
+  --borderColor-neutral-muted: rgba(175, 184, 193, 0.2);
+  --borderColor-accent-muted: rgba(9, 105, 218, 0.4);
+  --borderColor-success-muted: rgba(31, 136, 61, 0.4);
+  --borderColor-danger-muted: rgba(207, 34, 46, 0.4);
+  --borderColor-attention-muted: rgba(154, 103, 0, 0.4);
+
+  // --- Текст -------------------------------------------------------------
+  --fgColor-default: #1f2328;
+  --fgColor-muted: #656d76;
+  --fgColor-accent: #0969da;
+  --fgColor-success: #1a7f37;
+  --fgColor-danger: #cf222e;
+  --fgColor-attention: #9a6700;
+  --fgColor-onEmphasis: #ffffff;
+
+  // --- Акценты -----------------------------------------------------------
+  // Фирменный кораллово-оранжевый Primer: нижняя линия активной вкладки.
+  --gh-accent-coral: #fd8c73;
+  --focus-outlineColor: #0969da;
+  --focus-ring-color: rgba(9, 105, 218, 0.3);
+  --focus-ring-danger: rgba(207, 34, 46, 0.3);
+
+  // --- Типографика -------------------------------------------------------
+  --fontStack-system: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans",
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --fontStack-monospace: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --fontSize-caption: 12px;
+  --fontSize-body: 14px;
+  --fontSize-title: 16px;
+  --fontWeight-medium: 500;
+  --fontWeight-semibold: 600;
+  --lineHeight-tight: 1.25;
+  --lineHeight-normal: 1.5;
+
+  // --- Геометрия ---------------------------------------------------------
+  --borderRadius-small: 4px;
+  --borderRadius-medium: 6px;
+  --borderRadius-large: 12px;
+  --borderRadius-full: 2em;
+  --control-height-sm: 28px;
+  --control-height-md: 32px;
+  --control-height-lg: 40px;
+  --control-padding-inline: 12px;
+
+  // --- Тени --------------------------------------------------------------
+  --shadow-floating-small: 0 0 0 1px rgba(31, 35, 40, 0.04),
+    0 6px 12px -3px rgba(66, 74, 83, 0.12),
+    0 6px 18px 0 rgba(66, 74, 83, 0.12);
+  // Тень выбранного сегмента GhSegmentedControl.
+  --shadow-selected-control: 0 1px 0 rgba(31, 35, 40, 0.08);
+  // Тень бегунка GhSwitch.
+  --shadow-thumb: 0 1px 2px rgba(31, 35, 40, 0.25);
+  // Полупрозрачный фон бейджа на акцентной кнопке.
+  --bgColor-onEmphasis-muted: rgba(255, 255, 255, 0.2);
+}
+
+body.body--dark,
+[data-color-mode="dark"] {
+  color-scheme: dark;
+
+  --bgColor-default: #0d1117;
+  --bgColor-muted: #161b22;
+  --bgColor-inset: #010409;
+  --bgColor-neutral-muted: rgba(110, 118, 129, 0.4);
+  --bgColor-accent-muted: rgba(56, 139, 253, 0.1);
+  --bgColor-success-muted: rgba(46, 160, 67, 0.1);
+  --bgColor-danger-muted: rgba(248, 81, 73, 0.1);
+  --bgColor-attention-muted: rgba(187, 128, 9, 0.1);
+
+  --bgColor-success-emphasis: #238636;
+  --bgColor-success-emphasis-hover: #2ea043;
+  --bgColor-success-emphasis-active: #238636;
+  --bgColor-danger-emphasis: #da3633;
+  --bgColor-danger-emphasis-hover: #b62324;
+  --bgColor-danger-emphasis-active: #b62324;
+
+  --borderColor-default: #30363d;
+  --borderColor-muted: #21262d;
+  --borderColor-neutral-muted: rgba(110, 118, 129, 0.4);
+  --borderColor-accent-muted: rgba(56, 139, 253, 0.4);
+  --borderColor-success-muted: rgba(46, 160, 67, 0.4);
+  --borderColor-danger-muted: rgba(248, 81, 73, 0.4);
+  --borderColor-attention-muted: rgba(187, 128, 9, 0.4);
+
+  --fgColor-default: #e6edf3;
+  --fgColor-muted: #848d97;
+  --fgColor-accent: #2f81f7;
+  --fgColor-success: #3fb950;
+  --fgColor-danger: #f85149;
+  --fgColor-attention: #d29922;
+  --fgColor-onEmphasis: #ffffff;
+
+  --focus-outlineColor: #1f6feb;
+  --focus-ring-color: rgba(47, 129, 247, 0.3);
+  --focus-ring-danger: rgba(248, 81, 73, 0.3);
+
+  --shadow-floating-small: 0 0 0 1px #30363d,
+    0 6px 12px -3px rgba(1, 4, 9, 0.85),
+    0 6px 18px 0 rgba(1, 4, 9, 0.85);
+  --shadow-selected-control: 0 1px 0 rgba(1, 4, 9, 0.5);
+  --shadow-thumb: 0 1px 2px rgba(1, 4, 9, 0.6);
+  --bgColor-onEmphasis-muted: rgba(255, 255, 255, 0.2);
+}
+
+// ---------------------------------------------------------------------------
+// Страница/лейаут в стиле Primer.
+//
+// Применяется опционально (пока только на /ui-kit). Задаёт фон, шрифт и
+// палитру текста для всей страницы, не трогая остальные роуты.
+// ---------------------------------------------------------------------------
+.primer-theme {
+  color-scheme: light;
+  background-color: var(--bgColor-default);
+  color: var(--fgColor-default);
+  font-family: var(--fontStack-system);
+  font-size: var(--fontSize-body);
+  line-height: var(--lineHeight-normal);
+}
+
+body.body--dark .primer-theme,
+[data-color-mode="dark"] .primer-theme,
+.primer-theme[data-color-mode="dark"] {
+  color-scheme: dark;
+}
+
+// ---------------------------------------------------------------------------
+// Сброс эстетики Quasar внутри Primer-компонентов.
+//
+// `.primer` ставится на корень каждого Gh-компонента и непосредственно на
+// телепортируемые q-menu/q-dialog-карточки. Селекторы заведомо специфичнее
+// старых правил из quasar.scss (radius: 0), поэтому не требуют !important.
+// ---------------------------------------------------------------------------
+.primer {
+  font-family: var(--fontStack-system);
+  font-size: var(--fontSize-body);
+  color: var(--fgColor-default);
+  text-transform: none;
+}
+
+// Кнопки: плоские, с прямым текстом, без Material-теней и «пилюль».
+.primer .q-btn:not(.q-btn--round):not(.q-btn--fab),
+.primer.q-btn:not(.q-btn--round):not(.q-btn--fab) {
+  border-radius: var(--borderRadius-medium);
+  box-shadow: none;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.primer .q-btn .q-focus-helper,
+.primer.q-btn .q-focus-helper {
+  border-radius: var(--borderRadius-medium);
+}
+
+// Контейнеры: карточки, меню, бейджи, поля и всплывающие поверхности.
+.primer .q-card,
+.primer .q-menu,
+.primer .q-badge,
+.primer .q-chip,
+.primer .q-tooltip,
+.primer .q-notification,
+.primer .q-field--outlined .q-field__control,
+.primer .q-field--standout .q-field__control,
+.primer.q-card,
+.primer.q-menu {
+  border-radius: var(--borderRadius-medium);
+}
+
+// Диалоги и выпадающие меню — крупный радиус 12px.
+.primer.q-dialog__inner > .q-card,
+.primer .q-dialog__inner > .q-card,
+.primer .q-card.gh-dialog__card,
+.primer.q-card.gh-dialog__card {
+  border-radius: var(--borderRadius-large);
+}
+
+.primer.q-menu,
+.primer .q-menu.gh-action-menu {
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-large);
+  background-color: var(--bgColor-default);
+  box-shadow: var(--shadow-floating-small);
+}
+
+// Плоские поверхности без elevation.
+.primer .q-card,
+.primer.q-card {
+  box-shadow: none;
+}
+
+// Разделители Quasar — тонкие, цвет Primer.
+.primer .q-separator,
+.primer.q-separator {
+  background-color: var(--borderColor-muted);
+}
+
+// ---------------------------------------------------------------------------
+// Утилитарные классы страницы.
+//
+// .gh-page — контейнер контента, .gh-mono — моноширинные значения (счётчики,
+// email, токены), .gh-visually-hidden — skip-link и подписи для скринридеров.
+// Все значения построены на токенах выше и работают в обеих темах.
+// ---------------------------------------------------------------------------
+.gh-page {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .gh-page {
+    padding: 16px;
+  }
+}
+
+.gh-mono {
+  font-family: var(--fontStack-monospace);
+  font-variant-numeric: tabular-nums;
+}
+
+.gh-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// Skip-link, который появляется при фокусе с клавиатуры.
+.gh-visually-hidden:focus,
+.gh-visually-hidden:focus-visible {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+  white-space: normal !important;
+}

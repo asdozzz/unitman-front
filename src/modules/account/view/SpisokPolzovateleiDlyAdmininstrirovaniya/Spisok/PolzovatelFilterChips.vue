@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import {useI18n} from "vue-i18n";
+import { useI18n } from "vue-i18n";
+import { GhButton, GhIcon, GhLabel } from "@/components/ui";
 import type {
   PolzovatelFilterChip,
   PolzovatelFilterKey,
 } from "@/modules/account/store/SpisokPolzovateleiDlyAdmininstrirovaniya/model/PolzovatelFiltri";
 
 /**
- * Презентационный фрагмент: чипы встраиваются в строку 2 PolzovatelFilterBar,
- * собственной строки-обёртки (padding/фон) у компонента нет.
+ * Презентационный фрагмент: чипы встраиваются в строку фильтров
+ * PolzovatelFilterBar.
  */
 defineProps<{
   chips: PolzovatelFilterChip[];
 }>();
 
 const emit = defineEmits<{
-  remove: [chip: {key: PolzovatelFilterKey; value?: string}];
+  remove: [chip: { key: PolzovatelFilterKey; value?: string }];
   clear: [];
 }>();
 
-const {t} = useI18n();
+const { t } = useI18n();
 
 /** Ключ фильтра совпадает с суффиксом перевода `filter.chip.*`. */
 const KLYUCHI_PEREVODA: Record<PolzovatelFilterKey, string> = {
@@ -54,86 +55,58 @@ function klyuchChipa(chip: PolzovatelFilterChip): string {
 
 <template>
   <template v-if="chips.length > 0">
-    <q-chip
-        v-for="chip in chips"
-        :key="klyuchChipa(chip)"
-        class="filter-chip"
-        dense
-        removable
-        delete-icon="close"
-        :aria-label="podpisChipa(chip)"
-        @remove="emit('remove', {key: chip.key, value: chip.value})"
+    <span
+      v-for="chip in chips"
+      :key="klyuchChipa(chip)"
+      class="filter-chip primer"
     >
-      {{ podpisChipa(chip) }}
-    </q-chip>
+      <GhLabel variant="neutral" :label="podpisChipa(chip)" />
 
-    <button
+      <button
         type="button"
-        class="filter-chips__reset"
-        @click="emit('clear')"
-    >
-      {{ $t('account.spisok.filter.reset_all') }}
-    </button>
+        class="filter-chip__remove"
+        :aria-label="t('account.spisok.filter.remove_chip')"
+        @click="emit('remove', { key: chip.key, value: chip.value })"
+      >
+        <GhIcon name="x" :size="12" />
+      </button>
+    </span>
+
+    <GhButton
+      variant="invisible"
+      size="sm"
+      :label="t('account.spisok.filter.reset_all')"
+      @click="emit('clear')"
+    />
   </template>
 </template>
 
 <style scoped>
-/* Neutral-чипы: бордер + secondary-текст + крестик, без primary-заливки.
-   Геометрия совпадает со статус-чипами строки (32px, квадратные углы). */
 .filter-chip {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  margin: 0;
-  padding: 0 var(--app-space-2) 0 var(--app-space-3);
-  border: 1px solid var(--app-border);
-  border-radius: 0;
-  background: var(--app-surface);
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
+  gap: 2px;
   white-space: nowrap;
 }
 
-.filter-chip :deep(.q-chip__content) {
-  padding: 0;
-}
-
-.filter-chip :deep(.q-chip__icon--remove) {
-  width: 18px;
-  height: 18px;
-  margin: 0 0 0 var(--app-space-1);
-  color: var(--app-text-secondary);
-  font-size: 16px;
-  opacity: 0.85;
-}
-
-.filter-chip :deep(.q-chip__icon--remove:hover) {
-  color: var(--app-text);
-  opacity: 1;
-}
-
-.filter-chips__reset {
+.filter-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
   border: none;
-  background: none;
-  padding: 0 var(--app-space-1);
-  color: var(--app-text-secondary);
-  font-family: inherit;
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
-  white-space: nowrap;
+  border-radius: var(--borderRadius-small);
+  background: transparent;
+  color: var(--fgColor-muted);
   cursor: pointer;
-  transition: color var(--app-duration-fast) var(--app-easing);
 }
 
-.filter-chips__reset:hover {
-  color: var(--app-primary);
-  text-decoration: underline;
+.filter-chip__remove:hover {
+  color: var(--fgColor-default);
 }
 
-.filter-chips__reset:focus-visible {
-  outline: 2px solid var(--app-focus-ring);
+.filter-chip__remove:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
 }
 </style>

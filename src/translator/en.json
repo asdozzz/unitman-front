@@ -9,24 +9,84 @@
       "add": "Add",
       "delete": "Delete",
       "block": "Block",
-      "unblock": "Unblock"
+      "unblock": "Unblock",
+      "copy": "Copy",
+      "copied": "Copied",
+      "confirm": "Confirm",
+      "retry": "Retry",
+      "refresh": "Refresh",
+      "edit": "Edit",
+      "create": "Create",
+      "open": "Open",
+      "reset": "Reset",
+      "apply": "Apply",
+      "back": "Back",
+      "clear": "Clear",
+      "search": "Search"
     },
     "states": {
       "available": "Available",
-      "unavailable": "Unavailable"
+      "unavailable": "Unavailable",
+      "loading": "Loading",
+      "saving": "Saving",
+      "saved": "Saved",
+      "error": "Error",
+      "empty": "Empty"
     },
     "no_results": "No results",
     "notifications": {
-      "success": "Operation succeeded"
+      "success": "Operation succeeded",
+      "error": "The operation failed"
     },
     "units": {
       "seconds": "s"
+    },
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "copy": "Copy",
+    "copied": "Copied",
+    "close": "Close",
+    "confirm": "Confirm",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "loading": "Loading",
+    "error": "Error",
+    "search": "Search",
+    "yes": "Yes",
+    "no": "No",
+    "on": "On",
+    "off": "Off",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "sort": "Sort",
+    "actions": "Actions",
+    "table": {
+      "no_data": "No data"
+    },
+    "select": {
+      "placeholder": "Select a value"
+    },
+    "validation": {
+      "branch_required": "Required field",
+      "branch_no_whitespace": "The name must not contain spaces",
+      "branch_invalid": "Invalid branch name"
     }
   },
   "runner": {
-    "non_active": "the runner is non active, please notify the administrator"
+    "non_active": "the runner is non active, please notify the administrator",
+    "title": "Runner status",
+    "subtitle": "State of the default build and run executor.",
+    "status_active": "Active",
+    "status_non_active": "Inactive",
+    "description_active": "The default runner is available and processing jobs.",
+    "error_title": "Failed to get the runner status",
+    "unknown_title": "Status unknown",
+    "unknown_description": "Runner state data has not been received yet."
   },
   "app": {
+    "skip_to_content": "Skip to content",
+    "back_to_top": "Back to top",
     "tabs": {
       "home": "Home",
       "units": "Units",
@@ -55,7 +115,47 @@
       "help": "Help",
       "settings": "Settings",
       "toggle_theme": "Toggle theme",
-      "sign_out": "Sign out"
+      "sign_out": "Sign out",
+      "logo_aria": "Unitman — go to home",
+      "open_menu": "Open menu",
+      "search": "Search",
+      "search_placeholder": "Search…",
+      "open_search": "Open search",
+      "theme_light": "Light theme",
+      "theme_dark": "Dark theme",
+      "language": "Language",
+      "language_ru": "Russian",
+      "language_en": "English",
+      "notifications": "Notifications",
+      "notifications_unread": "Unread notifications",
+      "account_menu": "Account menu",
+      "toggle_sidebar": "Collapse or expand sidebar",
+      "role_admin": "Administrator",
+      "role_user": "User",
+      "email": "Email"
+    },
+    "sidebar": {
+      "groups": {
+        "main": "Main",
+        "administration": "Administration"
+      },
+      "items": {
+        "home": "Home",
+        "units": "Units",
+        "projects": "Projects",
+        "repositories": "Repositories",
+        "accounts": "Accounts",
+        "initialization": "Initialization",
+        "settings": "Settings",
+        "ai_assistant": "AI Assistant",
+        "sessions": "Sessions",
+        "workspaces": "Workspaces"
+      },
+      "collapse": "Collapse sidebar",
+      "expand": "Expand sidebar",
+      "navigation": "Main navigation",
+      "open": "Open menu",
+      "close": "Close menu"
     },
     "unauthorized": {
       "caption": "Access denied",
@@ -78,11 +178,44 @@
         "ok": "Ok",
         "check": "Test connection"
       }
+    },
+    "initialization": {
+      "description": "Connection settings for system initialization."
+    }
+  },
+  "hotkeys": {
+    "title": "Keyboard shortcuts",
+    "description": "Keyboard shortcuts for quick navigation between sections.",
+    "groups": {
+      "navigation": "Navigation",
+      "actions": "Actions"
+    },
+    "items": {
+      "search": "Focus search",
+      "home": "Home",
+      "units": "Units",
+      "projects": "Projects",
+      "accounts": "Accounts",
+      "repositories": "Repositories",
+      "settings": "Settings",
+      "toggle_sidebar": "Collapse or expand the sidebar",
+      "help": "Show keyboard shortcuts"
     }
   },
   "account": {
+    "common": {
+      "saved": "Changes saved",
+      "error_title": "Error"
+    },
+    "edit": {
+      "title": "Edit account",
+      "description": "Manage account access and data",
+      "back": "Back to list",
+      "account_id": "Account ID"
+    },
     "form_projects": {
-      "projects": "Projects"
+      "projects": "Projects",
+      "empty": "No available projects"
     },
     "settings": {
       "password": {
@@ -99,12 +232,19 @@
       "email_label": "Email Address",
       "password_label": "Password",
       "button_login": "Sign in",
+      "error": "Could not sign in",
+      "error_title": "Sign-in error",
       "already_signin": {
         "text": "Already signed",
         "button_text": "Logout"
       }
     },
     "spisok": {
+      "header": {
+        "title": "Accounts",
+        "description": "Manage user accounts",
+        "accounts_count": "Accounts count"
+      },
       "filter": {
         "query": "Search",
         "all_roles": "All roles",
@@ -118,6 +258,7 @@
         "status_all": "All",
         "reset": "Reset filters",
         "reset_all": "Reset all",
+        "remove_chip": "Remove filter",
         "filters_button": "Filters",
         "accounts_count": {
           "one": "{count} account",
@@ -165,7 +306,9 @@
       },
       "list": {
         "empty_result": "There are no accounts yet",
+        "empty_result_description": "Create an account to get started",
         "empty_filtered": "Nothing matches the filters",
+        "empty_filtered_description": "Adjust the filter conditions or reset them",
         "error_title": "Failed to load the account list",
         "retry": "Retry"
       }
@@ -289,17 +432,56 @@
         "webhooks": "Webhooks",
         "volume_types": "Volume types"
       },
+      "page": {
+        "title": "Project {id}",
+        "description": "Project data, jobs and integration settings",
+        "back_to_projects": "Projects"
+      },
       "hook_settings": {
         "hint": "To make the settings below work, configure a webhook in your repository hosting systems (gitlab, github).",
         "chip_label": "repository event handler"
       },
+      "jobs": {
+        "title": "Project jobs",
+        "steps": "Execution steps",
+        "response": "Response",
+        "empty": "No jobs found"
+      },
+      "users": {
+        "title": "Project users",
+        "hint": "Select the users who can access this project.",
+        "empty": "No users added yet",
+        "selected_hint": "The user has access to the project"
+      },
+      "variables": {
+        "title": "Project variables",
+        "empty": "No variables added yet",
+        "hidden_value": "hidden value",
+        "delete_hint": "Delete variable"
+      },
       "webhooks": {
+        "title": "Project webhooks",
+        "empty": "No webhooks added yet",
+        "active": "Active",
+        "inactive": "Disabled",
         "fields": {
           "url": "Url"
+        },
+        "buttons": {
+          "add": "Add webhook",
+          "open_events": "Events",
+          "enable": "Enable",
+          "disable": "Disable",
+          "delete": "Delete webhook"
         }
       },
       "webhook_events": {
-        "not_sent": "Not sent"
+        "title": "Webhook events",
+        "not_sent": "Not sent",
+        "payload": "Request",
+        "response": "Response",
+        "empty": "No events yet",
+        "page": "Page {page} of {total}"
       },
       "zashishennie_vetki": {
         "title": "Protected branches",
@@ -317,6 +499,11 @@
       }
     },
     "spisok_rep": {
+      "page": {
+        "title": "Repositories",
+        "description": "GitLab and GitHub storages and their access status",
+        "error_description": "Check the connection and try again."
+      },
       "buttons": {
         "add": "add",
         "delete": "delete",
@@ -349,7 +536,8 @@
         "chip": {
           "search": "Search",
           "type": "Type",
-          "statuses": "Status"
+          "statuses": "Status",
+          "remove": "Remove filter “{label}”"
         }
       },
       "card": {
@@ -367,15 +555,24 @@
           "title": "Delete repository?",
           "message": "Repository “{name}” will be deleted. This action cannot be undone.",
           "yes": "Delete",
-          "no": "No"
+          "no": "No",
+          "input_label": "Type the repository name to confirm",
+          "input_hint": "This action cannot be undone: type “{name}”."
         }
       },
       "list": {
         "empty_result": "There are no repositories yet",
+        "empty_title": "There are no repositories yet",
+        "empty_description": "Add a storage to create projects and units.",
         "empty_filtered": "Nothing matches the filters",
+        "empty_search": "Nothing found",
+        "create": "Add repository",
         "error_title": "Failed to load the repository list",
         "retry": "Retry"
       }
+    },
+    "form_actions": {
+      "caption": "Unit action"
     },
     "form_volume": {
       "title": "Volumes and files",
@@ -463,6 +660,29 @@
         "no_variables": "No variables in the config",
         "vetka_zashishena": "The branch is protected: file editing in the unit will be unavailable",
         "vetka_zashishena_created": "Unit created with a protected branch: file editing is unavailable"
+      },
+      "hints": {
+        "create_branch": "Create branch",
+        "create_branch_disabled": "Branch creation is unavailable: select a project and add a personal token with access to the project repository"
+      },
+      "dialog": {
+        "title": "Create branch",
+        "fields": {
+          "labels": {
+            "base_branch": "Base branch *",
+            "new_branch_name": "New branch name *"
+          }
+        },
+        "validation": {
+          "required": "Required field",
+          "no_whitespace": "The name must not contain spaces"
+        },
+        "buttons": {
+          "create": "Create"
+        },
+        "errors": {
+          "create_failed": "Failed to create the branch"
+        }
       }
     },
     "form_fill_variables": {
@@ -543,6 +763,11 @@
       }
     },
     "spisok_proektov": {
+      "page": {
+        "title": "Projects",
+        "description": "Repositories and build processes for their branches",
+        "error_description": "Check the connection and try again."
+      },
       "buttons": {
         "jobs": "Completed jobs",
         "layers_clear": "Clear images",
@@ -592,7 +817,8 @@
         "chip": {
           "search": "Search",
           "only_active": "Only active",
-          "states": "State"
+          "states": "State",
+          "remove": "Remove filter “{label}”"
         }
       },
       "card": {
@@ -626,17 +852,31 @@
           "title": "Delete project?",
           "message": "Project “{name}” will be deleted. This action cannot be undone.",
           "yes": "Delete",
-          "no": "No"
+          "no": "No",
+          "input_label": "Type the project name to confirm",
+          "input_hint": "This action cannot be undone: type “{name}”."
         }
       },
       "list": {
         "empty_result": "There are no projects yet",
+        "empty_title": "There are no projects yet",
+        "empty_description": "Create a project from a repository to start building units.",
         "empty_filtered": "Nothing matches the filters",
+        "empty_search": "Nothing found",
+        "create": "Create project",
         "error_title": "Failed to load the project list",
         "retry": "Retry"
       }
     },
     "spisok_unitov": {
+      "page": {
+        "title": "Units",
+        "description": "Stands built from project branches. Filter by project, status and links.",
+        "refresh_hint": "Refresh the unit list",
+        "create_hint": "Create a unit",
+        "error_description": "Check the connection and try again.",
+        "empty_description": "Create the first unit from a project branch."
+      },
       "buttons": {
         "add": "add unit",
         "refresh": "refresh"
@@ -812,7 +1052,9 @@
       "reconnecting": "Reconnecting",
       "readonly": "Read only",
       "refresh_button": "Refresh",
-      "refresh_failed": "Failed to update progress automatically"
+      "refresh_failed": "Failed to update progress automatically",
+      "nothing_selected": "No task selected",
+      "scroll_to_bottom": "Scroll to the latest steps"
     },
     "runner_job_not_found": "The runner job was not found",
     "redaktor": {
@@ -862,11 +1104,136 @@
       "net_dostupa_k_proektu": "No access to the project"
     }
   },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and access",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "tokens": "Tokens",
+      "opencode": "OpenCode",
+      "appearance": "Appearance"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "theme_light": "Light",
+      "theme_dark": "Dark",
+      "theme_system": "System",
+      "system": "System",
+      "language": "Language",
+      "language_ru": "Russian",
+      "language_en": "English",
+      "caption": "Settings apply to this browser.",
+      "theme_caption": "Choose the interface theme.",
+      "language_caption": "Choose the interface language."
+    },
+    "profile": {
+      "title": "Profile",
+      "nickname": "Nickname",
+      "nickname_placeholder": "Enter a nickname",
+      "email": "Email",
+      "email_readonly": "Read-only",
+      "saved": "Changes saved",
+      "save": "Save",
+      "reset": "Discard"
+    },
+    "security": {
+      "title": "Change password",
+      "new_password": "New password",
+      "password_hint": "At least 8 characters. Use letters, digits and symbols.",
+      "show_password": "Show password",
+      "hide_password": "Hide password",
+      "saved": "Password changed",
+      "use_new_password": "Use the new password the next time you sign in."
+    },
+    "tokens": {
+      "title": "Personal access tokens",
+      "new": "New token",
+      "name": "Name",
+      "created": "Created",
+      "expires": "Expires",
+      "copy": "Copy",
+      "delete": "Delete",
+      "delete_title": "Delete token?",
+      "delete_description": "Enter the token name \"{name}\" to confirm deletion.",
+      "delete_confirm": "Delete token",
+      "created_hint": "Copy the token now — it will not be shown again.",
+      "empty": "No personal tokens yet."
+    },
+    "opencode": {
+      "title": "OpenCode credentials",
+      "empty": "No OpenCode credentials yet."
+    },
+    "unsaved": {
+      "title": "Discard changes?",
+      "description": "The form has unsaved changes.",
+      "discard": "Discard changes",
+      "stay": "Stay"
+    },
+    "loading": "Loading settings",
+    "load_error": "Failed to load settings",
+    "retry": "Retry",
+    "save_error": "Failed to save changes"
+  },
   "dashboard": {
     "all_projects": "All projects",
     "total": "Total",
     "active": "Active",
-    "deleted": "Deleted"
+    "deleted": "Deleted",
+    "title": "Home",
+    "subtitle": "Overview of units and projects",
+    "refresh": "Refresh",
+    "refresh_hint": "Refresh statistics",
+    "loading": "Loading statistics",
+    "stats": {
+      "total_units": "Total units",
+      "active_units": "Active",
+      "deleted_units": "Deleted",
+      "projects": "Projects",
+      "total_units_caption": "All units",
+      "active_units_caption": "Running units",
+      "deleted_units_caption": "Archived units",
+      "projects_caption": "All projects",
+      "total_units_hint": "Open the list of all units",
+      "active_units_hint": "Open active units",
+      "deleted_units_hint": "Open deleted units",
+      "projects_hint": "Open projects"
+    },
+    "projects": {
+      "title": "Projects",
+      "filter_placeholder": "Filter by name",
+      "filter_aria": "Filter projects by name",
+      "columns": {
+        "project": "Project",
+        "total": "Total",
+        "active": "Active",
+        "deleted": "Deleted",
+        "activity": "Activity",
+        "actions": "Actions"
+      },
+      "empty": "No projects yet",
+      "empty_description": "Create your first project to see statistics.",
+      "error": "Failed to load statistics",
+      "error_description": "Check your connection and try again.",
+      "retry": "Retry",
+      "create_project": "Create project",
+      "go_to_units": "Go to units",
+      "sort_by": "Sort by column \"{column}\"",
+      "sort_asc": "Ascending",
+      "sort_desc": "Descending",
+      "open_units": "Open units",
+      "open_project": "Open project",
+      "row_aria": "Open units of project {project}",
+      "actions_aria": "Actions for project {project}",
+      "updated_at": "Updated {time}",
+      "count": {
+        "one": "{count} project",
+        "few": "{count} projects",
+        "many": "{count} projects",
+        "other": "{count} projects"
+      }
+    }
   },
   "opencode": {
     "notifications": {
@@ -882,6 +1249,10 @@
     "nav": {
       "sessions": "Sessions",
       "workspace": "Workspace"
+    },
+    "layout": {
+      "title": "AI assistant",
+      "description": "OpenCode sessions and workspaces"
     },
     "workspace": {
       "status": {
@@ -904,7 +1275,8 @@
         "open_ide": "Open VS Code",
         "archive": "Archive",
         "restore": "Restore",
-        "delete": "Delete"
+        "delete": "Delete",
+        "actions": "Workspace actions"
       },
       "fields": {
         "branch": "Branch",
@@ -922,20 +1294,30 @@
         "fields": {
           "name": "Name",
           "credential": "Credentials",
-          "branch": "Branch",
           "projects": "Projects",
-          "project_branch": "Project branch: {project}",
-          "prompt": "Initial prompt"
+          "prompt": "Initial prompt",
+          "base_branch": "Base branch",
+          "local_branch": "Local branch"
+        },
+        "columns": {
+          "project": "Project",
+          "base_branch": "Base branch",
+          "local_branch": "Local branch"
         },
         "hint_name": "Unique within the account",
-        "hint_branch": "One branch for all projects; if the branch does not exist in the repository, it will be created locally from the base branch",
         "hint_projects": "Order matters; at most {max}. Selected: {count}",
-        "placeholder_project_branch": "Shared branch: {branch}",
-        "hint_project_branch": "Leave empty to use the shared branch",
+        "hint_branches": "For each project, the local branch will be created in the storage from the base branch when the workspace is created",
         "no_project_branches": "No branches found",
         "error_project_branches": "Failed to load project branches",
         "hint_prompt": "Runs automatically once the container is up",
-        "push_warning": "Push access is checked on creation: if any project lacks it, the workspace becomes read-only.",
+        "errors": {
+          "token_required": "Branch creation is unavailable: no personal token with push access for projects: {projects}. Add a token in account settings",
+          "vetka_zashishena": "The branch is protected: choose another name"
+        },
+        "messages": {
+          "creating_branches": "Creating branches…",
+          "creating_workspace": "Creating workspace…"
+        },
         "buttons": {
           "ok": "Create"
         }
@@ -1041,6 +1423,7 @@
         "badge_hint": "Session is archived: history is read-only",
         "confirm_caption": "Archive the session?",
         "confirm_message": "The session \"{title}\" will be archived: its history is kept, but new turns are no longer allowed.",
+        "ok": "Archive",
         "reason_manual": "Archived by the user",
         "reason_unit_deleted": "Archived: all session units were deleted",
         "reason_unknown": "Archive reason is unknown"
@@ -1153,7 +1536,8 @@
       "request_required": "Enter a request",
       "unknown_question": "The question does not belong to this turn",
       "unknown_option": "No such answer option",
-      "unexpected_kind": "The runner returned an unexpected result kind"
+      "unexpected_kind": "The runner returned an unexpected result kind",
+      "unit_directory_not_found": "The unit directory was not found on the runner"
     }
   },
   "project": {
@@ -1170,5 +1554,158 @@
     "pustoy_token": "The token cannot be empty",
     "ne_validen": "The token is invalid",
     "dublikat": "This token has already been added"
+  },
+  "ui_kit": {
+    "title": "GitHub Primer UI Kit",
+    "subtitle": "Core design-system components built on top of Quasar. Toggle the theme to verify light and dark tokens.",
+    "theme": {
+      "light": "Light theme",
+      "dark": "Dark theme"
+    },
+    "sections": {
+      "palette": "Token palette",
+      "icon": "GhIcon",
+      "button": "GhButton",
+      "input": "GhInput",
+      "label": "GhLabel",
+      "counter": "GhCounter",
+      "box": "GhBox",
+      "underline_nav": "GhUnderlineNav",
+      "table": "GhTable",
+      "dialog": "GhDialog",
+      "action_menu": "GhActionMenu",
+      "page_header": "GhPageHeader",
+      "avatar": "GhAvatar",
+      "side_nav": "GhSideNav",
+      "select": "GhSelect",
+      "segmented": "GhSegmentedControl",
+      "banner": "GhBanner",
+      "skeleton": "GhSkeleton",
+      "empty_state": "GhEmptyState",
+      "switch": "GhSwitch",
+      "kbd": "GhKbd",
+      "form_field": "GhFormField",
+      "checkbox": "GhCheckbox",
+      "control_heights": "Control heights"
+    },
+    "labels": {
+      "variants": "Variants",
+      "sizes": "Sizes",
+      "icon_counter_slot": "Icon, counter and slot",
+      "states": "States",
+      "block": "Full-width button",
+      "active_tab": "Active tab:",
+      "dialog_hint": "Dialog card: 12px radius, 1px border, header with a close button and a footer with actions aligned to the right.",
+      "append": "Field with #append",
+      "show_password": "Show password",
+      "hide_password": "Hide password",
+      "password": "Password",
+      "side_nav_collapsed": "Collapsed sidebar"
+    },
+    "demo": {
+      "search": "Search",
+      "search_placeholder": "Find a repository",
+      "email": "Email",
+      "error_field": "With error",
+      "error_message": "Enter a valid address",
+      "disabled_field": "Disabled field",
+      "compact": "Compact (sm)",
+      "large": "Large (lg)",
+      "repo": "Repository",
+      "status": "Status",
+      "updated": "Updated",
+      "status_open": "Open",
+      "status_in_progress": "In progress",
+      "status_closed": "Closed",
+      "time_5m": "5 minutes ago",
+      "time_20m": "20 minutes ago",
+      "time_yesterday": "yesterday",
+      "time_2d": "2 days ago",
+      "tab_overview": "Overview",
+      "tab_activity": "Activity",
+      "tab_settings": "Settings",
+      "tab_disabled": "Unavailable",
+      "hint_active_tab": "Active tab:",
+      "hint_underline": "Bottom line —",
+      "action_edit": "Edit",
+      "action_copy_link": "Copy link",
+      "action_download": "Download archive",
+      "action_delete": "Delete",
+      "action_locked": "Unavailable",
+      "selected": "Selected:",
+      "box_title": "Box header",
+      "box_body": "Box body with 16px padding. The header uses",
+      "box_and_border": "and a bottom border.",
+      "flush_title": "Without inner padding",
+      "flush_body": "Content is flush with the edges — handy for tables and lists.",
+      "compact_title": "Compact padding",
+      "compact_body": "Compact box body.",
+      "open_dialog": "Open dialog",
+      "dialog_title": "Confirm action",
+      "dialog_body": "This is a demo Primer dialog. The body has 16px padding, 1px separators and right-aligned footer buttons.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "page_title": "Home",
+      "page_description": "Overview of units and projects",
+      "refresh": "Refresh",
+      "avatar_name": "Octocat",
+      "avatar_label": "User avatar",
+      "side_group_main": "Main",
+      "side_group_admin": "Administration",
+      "side_home": "Home",
+      "side_units": "Units",
+      "side_settings": "Settings",
+      "side_accounts": "Accounts",
+      "side_projects": "Projects",
+      "side_init": "Initialization",
+      "select_label": "Project",
+      "select_placeholder": "Select a project",
+      "select_option_front": "unitman-front",
+      "select_option_front_description": "User interface",
+      "select_option_api": "unitman-api",
+      "select_option_api_description": "Symfony backend",
+      "segmented_language": "Language",
+      "segmented_theme": "Theme",
+      "segmented_light": "Light",
+      "segmented_dark": "Dark",
+      "segmented_ru": "RU",
+      "segmented_en": "EN",
+      "banner_accent": "Accent message",
+      "banner_accent_text": "A neutral hint for the user.",
+      "banner_success": "Success",
+      "banner_success_text": "Changes have been saved.",
+      "banner_attention": "Attention",
+      "banner_attention_text": "Review the entered data before saving.",
+      "banner_danger": "Error",
+      "banner_danger_text": "Failed to load the data. Try again.",
+      "banner_retry": "Retry",
+      "skeleton_note": "The skeleton fixes the container size, so content does not shift while loading.",
+      "empty_title": "No projects yet",
+      "empty_description": "Create your first project to see statistics.",
+      "empty_create": "Create project",
+      "empty_units": "Go to units",
+      "switch_label": "Notifications",
+      "switch_description": "Show real-time notifications",
+      "switch_disabled": "Disabled switch",
+      "kbd_hint": "Press",
+      "kbd_for_search": "to open search",
+      "form_label": "Nickname",
+      "form_caption": "Shown in the profile and on project pages.",
+      "form_error": "The nickname must be at least 3 characters long",
+      "form_placeholder": "Enter a nickname",
+      "form_required": "Required field",
+      "textarea_label": "Description",
+      "textarea_placeholder": "Describe the task",
+      "textarea_value": "Check the unit build and attach logs.",
+      "textarea_autogrow_label": "Description (autogrow)",
+      "textarea_error_message": "Description is required",
+      "checkbox_label": "Only active",
+      "checkbox_description": "Hide units without running containers",
+      "checkbox_indeterminate": "Indeterminate state",
+      "checkbox_disabled": "Disabled checkbox",
+      "counter_page_title": "Projects",
+      "counter_page_description": "The counter is aligned to the title center",
+      "heights_note": "At the same size, GhInput, GhSelect and GhButton match in height: 28 / 32 / 40 px."
+    }
   }
 }

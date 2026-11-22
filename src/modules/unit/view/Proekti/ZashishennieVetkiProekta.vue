@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
-import {ref, watch} from "vue";
-import {Notify} from "quasar";
+import {onUnmounted, ref, watch} from "vue";
 import i18n from "@/bootstrap/translator";
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storePolucheniyaProekta} from "@/modules/unit/store/SpisokProektov/StorPolucheniyaProekta";
 import {useStorZashishennyhVetok} from "@/modules/unit/store/SpisokProektov/StorZashishennyhVetok";
 import {OshibkaMaski, proveritMaskuVetki} from "@/modules/unit/utils/zashishennieVetki";
+import {
+  GhBanner,
+  GhBox,
+  GhButton,
+} from "@/components/ui";
 
 const authStore = useAuthStore();
 const {isAdmin} = storeToRefs(authStore);
@@ -18,6 +22,10 @@ const stor = useStorZashishennyhVetok();
 const {loader, oshibkaOtBackenda, spisok} = storeToRefs(stor);
 
 const lokalnayaOshibka = ref<string | null>(null);
+const uspeh = ref<boolean>(false);
+
+/** Таймер автоскрытия успешного баннера. */
+let tajmerUspeha: ReturnType<typeof setTimeout> | null = null;
 
 type NewValueDone = (value?: string, mode?: 'add' | 'add-unique' | 'toggle') => void;
 
@@ -63,43 +71,105 @@ async function sohranit(): Promise<void> {
   const response = await stor.sohranit(id);
 
   if (response.status === "success") {
-    Notify.create({message: i18n.global.t('common.notifications.success'), type: 'positive', timeout: 100});
+    uspeh.value = true;
+
+    if (tajmerUspeha !== null) {
+      clearTimeout(tajmerUspeha);
+    }
+
+    tajmerUspeha = setTimeout(() => {
+      uspeh.value = false;
+      tajmerUspeha = null;
+    }, 4000);
+
     await storeProekta.poluchitProekt(id);
   }
 }
+
+onUnmounted(() => {
+  if (tajmerUspeha !== null) {
+    clearTimeout(tajmerUspeha);
+    tajmerUspeha = null;
+  }
+});
 </script>
 
 <template>
-  <q-card v-if="isAdmin" class="q-mt-md" style="width: 500px; max-width: 80vw;">
-    <q-card-section>
-      <div class="text-h6">{{ $t('unit.proekt.zashishennie_vetki.title') }}</div>
-      <div class="text-caption text-grey q-mb-sm">{{ $t('unit.proekt.zashishennie_vetki.hint') }}</div>
+  <GhBox v-if="isAdmin" padding="md" class="protected-branches">
+    <template #header>
+      {{ $t('unit.proekt.zashishennie_vetki.title') }}
+    </template>
 
-      <q-select
-          v-model="spisok"
-          use-input
-          use-chips
-          multiple
-          hide-selected
-          fill-input
-          @new-value="dobavitMasku"
-      />
+    <p class="protected-branches__hint">{{ $t('unit.proekt.zashishennie_vetki.hint') }}</p>
 
-      <div v-if="lokalnayaOshibka" class="text-negative text-caption">{{ lokalnayaOshibka }}</div>
-      <div v-if="spisok.length === 0" class="text-grey text-caption">{{ $t('unit.proekt.zashishennie_vetki.empty') }}</div>
-      <div class="text-negative" v-if="oshibkaOtBackenda" v-html="oshibkaOtBackenda"></div>
+    <GhBanner v-if="uspeh" variant="success" dismissible @dismiss="uspeh = false" class="protected-branches__message">
+      {{ $t('common.notifications.success') }}
+    </GhBanner>
 
-      <q-btn
+    <q-select
+        v-model="spisok"
+        class="protected-branches__select"
+        use-input
+        use-chips
+        multiple
+        hide-selected
+        fill-input
+        outlined
+        dense
+        @new-value="dobavitMasku"
+    />
+
+    <p v-if="lokalnayaOshibka" class="protected-branches__error">{{ lokalnayaOshibka }}</p>
+    <p v-if="spisok.length === 0" class="protected-branches__empty">
+      {{ $t('unit.proekt.zashishennie_vetki.empty') }}
+    </p>
+
+    <GhBanner v-if="oshibkaOtBackenda" variant="danger" class="protected-branches__message">
+      {{ oshibkaOtBackenda }}
+    </GhBanner>
+
+    <template #footer>
+      <GhButton
+          variant="primary"
+          icon="check"
           :label="$t('unit.proekt.zashishennie_vetki.buttons.save')"
-          color="primary"
-          class="q-mt-sm"
           :loading="loader"
           @click="sohranit"
       />
-    </q-card-section>
-  </q-card>
+    </template>
+  </GhBox>
 </template>
 
 <style scoped>
+.protected-branches {
+  max-width: 560px;
+}
+
+.protected-branches__hint {
+  margin: 0 0 12px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  line-height: var(--lineHeight-normal);
+}
+
+.protected-branches__select {
+  width: 100%;
+}
+
+.protected-branches__message {
+  margin-top: 12px;
+}
+
+.protected-branches__error {
+  margin: 6px 0 0;
+  color: var(--fgColor-danger);
+  font-size: var(--fontSize-caption);
+}
+
+.protected-branches__empty {
+  margin: 6px 0 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
 
 </style>

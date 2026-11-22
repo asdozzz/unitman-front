@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {computed} from "vue";
+import {GhIcon} from "@/components/ui";
 import type {Hranilishe} from "@/modules/unit/store/SpisokHranilish/model/Hranilishe";
 import HranilishaStatusBadge from "@/modules/unit/view/Hranilisha/SpisokHranilish/HranilishaStatusBadge.vue";
 
@@ -22,7 +23,11 @@ const pokazatUrl = computed<boolean>(() => {
        оставалось ровно одно меню. -->
   <div class="hranilisha-card__head">
     <div class="hranilisha-card__head-main">
-      <h3 class="hranilisha-card__name" :title="item.name">{{ item.name }}</h3>
+      <GhIcon name="database" :size="16" class="hranilisha-card__head-icon" />
+      <h3 class="hranilisha-card__name" :title="item.name">
+        {{ item.name }}
+        <q-tooltip>{{ item.name }}</q-tooltip>
+      </h3>
       <HranilishaStatusBadge :confirmed="item.confirmed" />
     </div>
 
@@ -33,7 +38,7 @@ const pokazatUrl = computed<boolean>(() => {
 
   <div class="hranilisha-card__meta">
     <span class="hranilisha-card__meta-item">
-      <q-icon name="category" size="14px" />
+      <GhIcon name="repo" :size="14" />
       <span class="hranilisha-card__meta-text" :title="item.type">{{ item.type }}</span>
     </span>
 
@@ -41,7 +46,7 @@ const pokazatUrl = computed<boolean>(() => {
       <span class="hranilisha-card__separator">·</span>
 
       <span class="hranilisha-card__meta-item">
-        <q-icon name="link" size="14px" />
+        <GhIcon name="link" :size="14" />
         <a
             class="hranilisha-card__meta-text hranilisha-card__url"
             :href="item.repoUrl"
@@ -55,72 +60,63 @@ const pokazatUrl = computed<boolean>(() => {
 </template>
 
 <style scoped>
-/* Шапка — тулбар-полоса карточки в цвет шапки сайта (bg-primary). */
 .hranilisha-card__head {
   display: flex;
   align-items: center;
-  gap: var(--app-space-2);
+  gap: 8px;
   min-width: 0;
-  padding: var(--app-space-2) var(--app-space-4);
-  border-bottom: 1px solid var(--app-primary-hover);
-  background: var(--app-primary);
-  color: var(--app-primary-contrast);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--borderColor-default);
+  background: var(--bgColor-muted);
 }
 
-/* Кебаб в тулбаре — белый, как элементы шапки сайта. */
-.hranilisha-card__head :deep(.q-btn) {
-  color: var(--app-primary-contrast);
-}
-
-/* Бейдж статуса на синем фоне: белая плашка, цвет статуса остаётся
-   в иконке и тексте — контраст не страдает. */
-.hranilisha-card__head :deep(.hranilisha-status) {
-  background: var(--app-primary-contrast);
+.hranilisha-card__head-icon {
+  color: var(--fgColor-muted);
 }
 
 .hranilisha-card__head-main {
   display: flex;
   align-items: center;
-  gap: var(--app-space-2);
+  gap: 8px;
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .hranilisha-card__name {
   margin: 0;
-  color: var(--app-primary-contrast);
-  font-size: var(--app-font-size-subtitle);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
   overflow: hidden;
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-body);
+  font-weight: var(--fontWeight-semibold);
+  line-height: var(--lineHeight-tight);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .hranilisha-card__head-actions {
   display: flex;
-  align-items: center;
   flex: 0 0 auto;
+  align-items: center;
 }
 
-/* Мета-строка живёт под тулбаром и получает собственные отступы карточки. */
+/* Мета-строка живёт под шапкой и получает собственные отступы карточки. */
 .hranilisha-card__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   row-gap: 2px;
   min-width: 0;
-  padding: var(--app-space-2) var(--app-space-4) 0;
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
-  line-height: var(--app-line-height-tight);
+  padding: 8px 16px 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  line-height: var(--lineHeight-tight);
 }
 
 .hranilisha-card__meta-item {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-width: 0;
 }
 
@@ -131,8 +127,8 @@ const pokazatUrl = computed<boolean>(() => {
 }
 
 .hranilisha-card__url {
-  color: inherit;
-  font-family: var(--app-font-family-mono);
+  color: var(--fgColor-accent);
+  font-family: var(--fontStack-monospace);
   font-size: 0.9em;
   text-decoration: none;
 }

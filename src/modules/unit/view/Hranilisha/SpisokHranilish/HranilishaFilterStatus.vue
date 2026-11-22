@@ -58,7 +58,7 @@ function schetchik(status: HranilishaFilterStatus): number {
         @click="vybratVse"
     >
       <span class="status-chip__label">{{ $t('unit.spisok_rep.filter.status_all') }}</span>
-      <span class="status-chip__count text-tabular">{{ total }}</span>
+      <span class="status-chip__count">{{ total }}</span>
     </button>
 
     <button
@@ -72,7 +72,7 @@ function schetchik(status: HranilishaFilterStatus): number {
     >
       <span class="status-chip__dot" aria-hidden="true" />
       <span class="status-chip__label">{{ $t('unit.spisok_rep.card.status.' + item.status) }}</span>
-      <span class="status-chip__count text-tabular">{{ schetchik(item.status) }}</span>
+      <span class="status-chip__count">{{ schetchik(item.status) }}</span>
     </button>
   </div>
 </template>
@@ -82,39 +82,39 @@ function schetchik(status: HranilishaFilterStatus): number {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--app-space-1);
+  gap: 4px;
   min-width: 0;
 }
 
 .status-chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--app-space-1);
-  min-height: 32px;
-  padding: var(--app-space-1) var(--app-space-3);
+  gap: 6px;
+  min-height: 28px;
+  padding: 2px 10px;
   border: 1px solid transparent;
-  border-radius: var(--app-radius-pill);
+  border-radius: var(--borderRadius-full);
   background: transparent;
-  color: var(--app-text-secondary);
-  font-family: inherit;
-  font-size: var(--app-font-size-caption);
-  font-weight: 600;
-  line-height: var(--app-line-height-tight);
+  color: var(--fgColor-muted);
+  font-family: var(--fontStack-system);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-medium);
+  line-height: var(--lineHeight-tight);
   white-space: nowrap;
   cursor: pointer;
   transition:
-      background-color var(--app-duration-fast) var(--app-easing),
-      border-color var(--app-duration-fast) var(--app-easing),
-      color var(--app-duration-fast) var(--app-easing);
+      background-color 80ms ease-out,
+      border-color 80ms ease-out,
+      color 80ms ease-out;
 }
 
 .status-chip:hover {
-  border-color: var(--app-border);
-  background: var(--app-surface-muted);
+  border-color: var(--borderColor-default);
+  background: var(--bgColor-muted);
 }
 
 .status-chip:focus-visible {
-  outline: 2px solid var(--app-focus-ring);
+  outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
 }
 
@@ -122,39 +122,41 @@ function schetchik(status: HranilishaFilterStatus): number {
   flex: 0 0 auto;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background: var(--app-text-disabled);
+  border-radius: var(--borderRadius-full);
+  background: var(--fgColor-muted);
 }
 
 .status-chip__count {
-  color: var(--app-text-secondary);
-  font-weight: 400;
+  color: var(--fgColor-muted);
+  font-weight: var(--fontWeight-normal);
 }
 
 /* Цветные точки статусов; счётчик остаётся muted. */
 .status-chip--confirmed .status-chip__dot {
-  background: var(--app-positive);
+  background: var(--fgColor-success);
 }
 
 .status-chip--unconfirmed .status-chip__dot {
-  background: var(--app-text-disabled);
+  background: var(--fgColor-muted);
 }
 
 /* Активный чип: цветная точка + цветной текст + тонкий бордер. */
 .status-chip--all.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-primary) 45%, transparent);
-  color: var(--app-primary);
+  border-color: var(--borderColor-accent-muted);
+  background: var(--bgColor-accent-muted);
+  color: var(--fgColor-accent);
 }
 
 .status-chip--confirmed.status-chip--active {
-  border-color: color-mix(in srgb, var(--app-positive) 45%, transparent);
-  color: var(--app-positive);
+  border-color: var(--borderColor-success-muted);
+  background: var(--bgColor-success-muted);
+  color: var(--fgColor-success);
 }
 
 /* unconfirmed — нейтральный, как в HranilishaStatusBadge. */
 .status-chip--unconfirmed.status-chip--active {
-  border-color: var(--app-border);
-  background: var(--app-surface-muted);
-  color: var(--app-text-secondary);
+  border-color: var(--borderColor-default);
+  background: var(--bgColor-neutral-muted);
+  color: var(--fgColor-default);
 }
 </style>

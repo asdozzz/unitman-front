@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {computed, nextTick, onMounted, onUnmounted, ref, watch} from "vue";
-import {storeToRefs} from "pinia";
-import {useQuasar} from "quasar";
-import {useRoute, useRouter} from "vue-router";
-import {useSpisokUnitovStore} from "@/modules/unit/store/SpisokUnitovStore";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { useQuasar } from "quasar";
+import { useRoute, useRouter } from "vue-router";
+import { useSpisokUnitovStore } from "@/modules/unit/store/SpisokUnitovStore";
 import {
   useSpisokUnitovViewStore,
   type UnitListViewMode,
@@ -16,12 +16,12 @@ import FormaSozdaniyaUnita from "@/modules/unit/view/Unit/FormaSozdaniyaUnita.vu
 import FormaZapolneniyaPeremenihUnita from "@/modules/unit/view/Unit/FormaZapolneniyaPeremenihUnita.vue";
 import FormaDeistviyUnita from "@/modules/unit/view/Unit/FormaDeistviyUnita.vue";
 import FormaSozdaniyaSessii from "@/modules/opencode/view/FormaSozdaniyaSessii.vue";
-import {useFormaDobavleniyaUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
-import {useFormaZapolneniyaPeremenihUnitaStore} from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
-import {storFormiDeistviyUnita} from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
-import {ModelForChannelSpisokUnitov} from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
-import {podpisatsyaNaSobitiyaUnitov} from "@/modules/unit/model/websocket/PodpiskaNaSobitiyaUnitov";
-import {useStorSpiskaRekvizitovOpenCode} from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
+import { useFormaDobavleniyaUnitaStore } from "@/modules/unit/store/SpisokUnitov/FormaDobavleniyaUnitaStore";
+import { useFormaZapolneniyaPeremenihUnitaStore } from "@/modules/unit/store/SpisokUnitov/FormaZapolneniyaPeremenihUnitStore";
+import { storFormiDeistviyUnita } from "@/modules/unit/store/SpisokUnitov/StorFormiDeistviy";
+import { ModelForChannelSpisokUnitov } from "@/modules/unit/model/websocket/ModelForChannelSpisokUnitov";
+import { podpisatsyaNaSobitiyaUnitov } from "@/modules/unit/model/websocket/PodpiskaNaSobitiyaUnitov";
+import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import {
   DEFAULT_UNIT_FILTERS,
   type UnitFilterKey,
@@ -31,6 +31,17 @@ import {
   prochitatFiltriIzQuery,
   serializovatFiltriVQuery,
 } from "@/modules/unit/utils/unitFiltersUrl";
+import {
+  GhBanner,
+  GhBox,
+  GhButton,
+  GhDialog,
+  GhEmptyState,
+  GhKbd,
+  GhPageHeader,
+  GhSkeleton,
+} from "@/components/ui";
+import { ozhidaetsyaVtorayaKlavishaPosledovatelnosti } from "@/utils/useHotkeys";
 
 const unitiStore = useSpisokUnitovStore();
 const {
@@ -42,21 +53,24 @@ const {
 } = storeToRefs(unitiStore);
 
 const viewStore = useSpisokUnitovViewStore();
-const {rezhim, selectedUnitId} = storeToRefs(viewStore);
+const { rezhim, selectedUnitId } = storeToRefs(viewStore);
 
 const addFormStore = useFormaDobavleniyaUnitaStore();
-const {enable: enableAddForm} = storeToRefs(addFormStore);
+const { enable: enableAddForm } = storeToRefs(addFormStore);
 
 const konfigFormStore = useFormaZapolneniyaPeremenihUnitaStore();
-const {enable: enableKonfigForm} = storeToRefs(konfigFormStore);
+const { enable: enableKonfigForm } = storeToRefs(konfigFormStore);
 
 const storFormiDeistviy = storFormiDeistviyUnita();
-const {enable: enableFormiDeistviya} = storeToRefs(storFormiDeistviy);
+const { enable: enableFormiDeistviya } = storeToRefs(storFormiDeistviy);
 
 const route = useRoute();
 const router = useRouter();
 const storRekvizitov = useStorSpiskaRekvizitovOpenCode();
 const quasar = useQuasar();
+
+/** Ссылка на тулбар: нужна для хоткея `/` и фокуса в поиск. */
+const filterBar = ref<InstanceType<typeof UnitFilterBar> | null>(null);
 
 /** Время последней успешной загрузки списка (unix-секунды, как в `convertDate`). */
 const posledneeObnovlenie = ref<number | null>(null);
@@ -91,6 +105,11 @@ const vibraniyUnit = computed(() => {
   return spisok.value.find((unit) => unit.id === selectedUnitId.value) ?? null;
 });
 
+/** Показываем скелетоны только на первичной загрузке, без мигания при обновлении. */
+const pokazatSkeletony = computed<boolean>(
+  () => loaderSpiskaUnitov.value && spisok.value.length === 0,
+);
+
 function izmenitRezhim(noviyRezhim: UnitListViewMode) {
   viewStore.setRezhim(noviyRezhim);
 
@@ -105,23 +124,32 @@ function vybratUnit(unitId: string) {
 
 /** После создания сессии из карточки юнита сразу открываем её чат. */
 function pereytiVSessiyu(id: string) {
-  router.push({name: "opencode_chat", params: {id}});
+  router.push({ name: "opencode_chat", params: { id } });
 }
 
 function openAddForm() {
   addFormStore.otkritFormu();
 }
 
+/** Обновление списка: не дёргаем стор, пока идёт загрузка. */
+function obnovitSpisok() {
+  if (loaderSpiskaUnitov.value) {
+    return;
+  }
+
+  void unitiStore.poluchitSpisokUnitov();
+}
+
 /**
  * Обработчик `change` от тулбара: фильтр уже собран компонентом, страница лишь
  * записывает его и решает, нужен ли debounce (он живёт в сторе).
  */
-function obrabotatIzmenenieFiltrov(payload: {filters: UnitFilters; immediate: boolean}) {
+function obrabotatIzmenenieFiltrov(payload: { filters: UnitFilters; immediate: boolean }) {
   nastroikiSpiska.value.filter = payload.filters;
   unitiStore.sohranitNastroiki();
 
   if (payload.immediate) {
-    void unitiStore.poluchitSpisokUnitov();
+    unitiStore.zaprositSpisokUnitov();
   } else {
     unitiStore.zaprositSpisokUnitov();
   }
@@ -133,7 +161,7 @@ function obrabotatIzmenenieFiltrov(payload: {filters: UnitFilters; immediate: bo
  * Для `statuses`/`unitIds` убирается конкретное значение, для `unitId` —
  * обнуляется, для остальных ключей возвращается значение по умолчанию.
  */
-function udalitChip(chip: {key: UnitFilterKey; value?: string}) {
+function udalitChip(chip: { key: UnitFilterKey; value?: string }) {
   const filter = nastroikiSpiska.value.filter;
 
   switch (chip.key) {
@@ -148,22 +176,22 @@ function udalitChip(chip: {key: UnitFilterKey; value?: string}) {
       });
       return;
     case "unitId":
-      void unitiStore.primenitFiltri({unitId: null});
+      void unitiStore.primenitFiltri({ unitId: null });
       return;
     case "search":
-      void unitiStore.primenitFiltri({search: DEFAULT_UNIT_FILTERS.search});
+      void unitiStore.primenitFiltri({ search: DEFAULT_UNIT_FILTERS.search });
       return;
     case "name":
-      void unitiStore.primenitFiltri({name: DEFAULT_UNIT_FILTERS.name});
+      void unitiStore.primenitFiltri({ name: DEFAULT_UNIT_FILTERS.name });
       return;
     case "branch":
-      void unitiStore.primenitFiltri({branch: DEFAULT_UNIT_FILTERS.branch});
+      void unitiStore.primenitFiltri({ branch: DEFAULT_UNIT_FILTERS.branch });
       return;
     case "projectId":
-      void unitiStore.primenitFiltri({projectId: DEFAULT_UNIT_FILTERS.projectId});
+      void unitiStore.primenitFiltri({ projectId: DEFAULT_UNIT_FILTERS.projectId });
       return;
     case "onlyMine":
-      void unitiStore.primenitFiltri({onlyMine: DEFAULT_UNIT_FILTERS.onlyMine});
+      void unitiStore.primenitFiltri({ onlyMine: DEFAULT_UNIT_FILTERS.onlyMine });
       return;
   }
 }
@@ -259,30 +287,30 @@ if (estFiltriVQuery(route.query)) {
 // Изменение фильтра (тулбар, чипы, сброс) синхронизирует query через replace.
 // Пишем только если сериализованное представление отличается от текущего URL.
 watch(
-    () => nastroikiSpiska.value.filter,
-    () => {
-      if (propuskatZapisVUrl.value) {
-        return;
-      }
+  () => nastroikiSpiska.value.filter,
+  () => {
+    if (propuskatZapisVUrl.value) {
+      return;
+    }
 
-      const serializovannie = serializovatFiltriVQuery(nastroikiSpiska.value.filter);
+    const serializovannie = serializovatFiltriVQuery(nastroikiSpiska.value.filter);
 
-      if (ekvivalentni(serializovannie, tekushieFiltriQuery(route.query))) {
-        return;
-      }
+    if (ekvivalentni(serializovannie, tekushieFiltriQuery(route.query))) {
+      return;
+    }
 
-      void router.replace({query: serializovannie});
-    },
-    {deep: true},
+    void router.replace({ query: serializovannie });
+  },
+  { deep: true },
 );
 
 // Обратная навигация (back/forward): фильтр восстанавливается из URL без
 // повторной записи query.
 watch(
-    () => route.query,
-    (noviyQuery) => {
-      primenitFiltriIzUrl(noviyQuery, true);
-    },
+  () => route.query,
+  (noviyQuery) => {
+    primenitFiltriIzUrl(noviyQuery, true);
+  },
 );
 
 // Фиксируем момент окончания загрузки, чтобы тулбар показал «обновлено …».
@@ -307,29 +335,89 @@ onMounted(async () => {
   storRekvizitov.poluchitSpisok();
 
   otpisatsyaOtSobitiy = podpisatsyaNaSobitiyaUnitov(handleWebsocketEvent);
+  window.addEventListener("keydown", obrabotatKlavishu);
 });
 
 onUnmounted(() => {
   otpisatsyaOtSobitiy?.();
   otpisatsyaOtSobitiy = null;
   unitiStore.stopProzesPolling();
+  window.removeEventListener("keydown", obrabotatKlavishu);
 });
 
 function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
   console.log(event.eventType, event);
   switch (event.eventType) {
-    case 'OBNOVLEN':
-    case 'OBNOVLENA_STATA':
+    case "OBNOVLEN":
+    case "OBNOVLENA_STATA":
       if (unitiStore.issetUnit(event.id)) {
         unitiStore.obnovitUnit(event.id);
       }
       break;
-    case 'UDALEN':
+    case "UDALEN":
       unitiStore.udalitUnitIzSpiska(event.id);
       break;
-    case 'SOZDAN':
+    case "SOZDAN":
       unitiStore.poluchitSpisokUnitov();
       break;
+  }
+}
+
+/** Селекторы, внутри которых страничные хоткеи не перехватываются. */
+function ignorirovatVvod(event: KeyboardEvent): boolean {
+  const cel = event.target;
+
+  if (!(cel instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (cel.isContentEditable) {
+    return true;
+  }
+
+  return (
+    cel.closest(
+      'input, textarea, select, [contenteditable], [role="textbox"], [role="dialog"], .q-dialog, .q-menu',
+    ) !== null
+  );
+}
+
+/**
+ * Страничные хоткеи: `/` — поиск, `c` — создать, `R` — обновить.
+ * Регистрируется раньше глобального `useHotkeys`, поэтому `/` переводит
+ * фокус в фильтр страницы, а не в поиск хедера.
+ */
+function obrabotatKlavishu(event: KeyboardEvent): void {
+  if (
+    event.defaultPrevented ||
+    event.isComposing ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.altKey ||
+    ignorirovatVvod(event)
+  ) {
+    return;
+  }
+
+  // `g` уже нажата и глобальный `useHotkeys` ожидает вторую клавишу.
+  if (ozhidaetsyaVtorayaKlavishaPosledovatelnosti()) {
+    return;
+  }
+
+  if (event.key === "r" || event.key === "R") {
+    event.preventDefault();
+    obnovitSpisok();
+    return;
+  }
+
+  if (event.key === "/" && filterBar.value?.focusPoisk()) {
+    event.preventDefault();
+    return;
+  }
+
+  if ((event.key === "c" || event.key === "C") && !enableAddForm.value) {
+    event.preventDefault();
+    openAddForm();
   }
 }
 
@@ -338,26 +426,26 @@ function handleWebsocketEvent(event: ModelForChannelSpisokUnitov) {
  * WebSocket-событие может потеряться, и лоадер «зависнет» на карточке.
  */
 watch(
-    () => spisok.value.some((unit) => unitiStore.esliEstAktivniyProzes(unit)),
-    (estAktivnie: boolean) => {
-      if (estAktivnie) {
-        unitiStore.startProzesPolling();
-      } else {
-        unitiStore.stopProzesPolling();
-      }
-    },
-    {immediate: true},
+  () => spisok.value.some((unit) => unitiStore.esliEstAktivniyProzes(unit)),
+  (estAktivnie: boolean) => {
+    if (estAktivnie) {
+      unitiStore.startProzesPolling();
+    } else {
+      unitiStore.stopProzesPolling();
+    }
+  },
+  { immediate: true },
 );
 
 // Список перезапрашивается после действий и по WebSocket-событиям: выбор
 // должен пережить обновление, а исчезнувший юнит — замениться первым.
 watch(
-    () => spisok.value.map((unit) => unit.id),
-    (ids: string[]) => {
-      if (effektivniyRezhim.value === "workspace") {
-        viewStore.sinhronizovatVibor(ids);
-      }
-    },
+  () => spisok.value.map((unit) => unit.id),
+  (ids: string[]) => {
+    if (effektivniyRezhim.value === "workspace") {
+      viewStore.sinhronizovatVibor(ids);
+    }
+  },
 );
 
 watch(effektivniyRezhim, (noviyRezhim: UnitListViewMode) => {
@@ -368,101 +456,178 @@ watch(effektivniyRezhim, (noviyRezhim: UnitListViewMode) => {
 </script>
 
 <template>
-  <div class="full-width flex column">
+  <div class="unit-page primer">
+    <GhPageHeader
+      :title="$t('unit.spisok_unitov.page.title')"
+      :description="$t('unit.spisok_unitov.page.description')"
+      :counter="spisok.length"
+    >
+      <template #actions>
+        <GhButton
+          icon="sync"
+          :loading="loaderSpiskaUnitov"
+          :disabled="loaderSpiskaUnitov"
+          :label="$t('unit.spisok_unitov.buttons.refresh')"
+          @click="obnovitSpisok"
+        >
+          <q-tooltip>
+            {{ $t("unit.spisok_unitov.page.refresh_hint") }}
+            <GhKbd>R</GhKbd>
+          </q-tooltip>
+        </GhButton>
+
+        <GhButton
+          variant="primary"
+          icon="plus"
+          :label="$t('unit.spisok_unitov.buttons.add')"
+          @click="openAddForm"
+        >
+          <q-tooltip>
+            {{ $t("unit.spisok_unitov.page.create_hint") }}
+            <GhKbd>c</GhKbd>
+          </q-tooltip>
+        </GhButton>
+      </template>
+    </GhPageHeader>
+
     <UnitFilterBar
-        :filters="nastroikiSpiska.filter"
-        :projects="proekti.spisok"
-        :counts="unitiStore.statusiSoSchetchikami"
-        :total="spisok.length"
-        :loading="loaderSpiskaUnitov"
-        :last-updated-at="posledneeObnovlenie"
-        :view-mode="rezhim"
-        :show-view-mode="quasar.screen.gt.sm"
-        :chips="unitiStore.aktivnieFiltri"
-        :truncated-limit="unitiStore.obrezanSpisok ? nastroikiSpiska.limit : null"
-        @change="obrabotatIzmenenieFiltrov"
-        @submit="unitiStore.poluchitSpisokUnitov()"
-        @remove-chip="udalitChip"
-        @clear-filters="unitiStore.sbrozitFiltri()"
-        @create="openAddForm"
-        @update:view-mode="izmenitRezhim"
+      ref="filterBar"
+      :filters="nastroikiSpiska.filter"
+      :projects="proekti.spisok"
+      :counts="unitiStore.statusiSoSchetchikami"
+      :total="spisok.length"
+      :loading="loaderSpiskaUnitov"
+      :last-updated-at="posledneeObnovlenie"
+      :view-mode="rezhim"
+      :show-view-mode="quasar.screen.gt.sm"
+      :chips="unitiStore.aktivnieFiltri"
+      :truncated-limit="unitiStore.obrezanSpisok ? nastroikiSpiska.limit : null"
+      @change="obrabotatIzmenenieFiltrov"
+      @submit="unitiStore.poluchitSpisokUnitov()"
+      @remove-chip="udalitChip"
+      @clear-filters="unitiStore.sbrozitFiltri()"
+      @create="openAddForm"
+      @update:view-mode="izmenitRezhim"
     />
 
-    <q-linear-progress
-        v-if="loaderSpiskaUnitov"
-        indeterminate
-        color="primary"
-        class="q-mb-md"
-    />
+    <GhBanner
+      v-if="oshibkaZagruzkiSpiska"
+      variant="danger"
+      :title="$t('unit.spisok_unitov.list.error_title')"
+      class="unit-page__error"
+    >
+      <p class="unit-page__error-text">
+        {{ $t("unit.spisok_unitov.page.error_description") }}
+      </p>
 
-    <div v-if="oshibkaZagruzkiSpiska" class="unit-list__error" role="alert">
-      <q-icon name="error_outline" size="20px" />
-      <span class="unit-list__error-text">{{ $t('unit.spisok_unitov.list.error_title') }}</span>
-      <q-btn
-          flat
-          dense
-          no-caps
-          color="primary"
+      <template #actions>
+        <GhButton
+          size="sm"
+          icon="sync"
           :label="$t('unit.spisok_unitov.list.retry')"
-          @click="unitiStore.poluchitSpisokUnitov()"
-      />
-    </div>
+          @click="obnovitSpisok"
+        />
+      </template>
+    </GhBanner>
 
-    <template v-else-if="effektivniyRezhim === 'workspace'">
-      <div class="unit-workspace">
-        <UnitListPane
+    <template v-else>
+      <div
+        v-if="pokazatSkeletony"
+        class="unit-cards-grid"
+        aria-busy="true"
+      >
+        <GhBox
+          v-for="n in 6"
+          :key="`unit-skeleton-${n}`"
+          padding="none"
+          class="unit-card-skeleton"
+        >
+          <div class="unit-card-skeleton__body" aria-hidden="true">
+            <GhSkeleton variant="text" width="55%" height="16" />
+            <GhSkeleton variant="text" width="35%" height="12" />
+            <GhSkeleton variant="rect" width="100%" height="32" />
+            <GhSkeleton variant="text" width="80%" height="12" />
+          </div>
+        </GhBox>
+      </div>
+
+      <template v-else-if="effektivniyRezhim === 'workspace'">
+        <div class="unit-workspace">
+          <UnitListPane
             :items="spisok"
             :selected-id="selectedUnitId"
             :empty-filtered="unitiStore.estAktivnieFiltri"
             @select="vybratUnit"
             @reset="unitiStore.sbrozitFiltri()"
-        />
-        <UnitDetailsPane :item="vibraniyUnit" />
-      </div>
-    </template>
+          />
+          <UnitDetailsPane :item="vibraniyUnit" />
+        </div>
+      </template>
 
-    <template v-else>
-      <div v-if="spisok.length === 0" class="unit-cards-grid__empty">
-        <template v-if="unitiStore.estAktivnieFiltri">
-          <span class="unit-cards-grid__empty-title">
-            {{ $t('unit.spisok_unitov.list.empty_filtered') }}
-          </span>
-          <q-btn
-              class="unit-cards-grid__empty-action"
-              flat
-              dense
-              no-caps
-              color="primary"
-              icon="filter_alt_off"
+      <template v-else>
+        <GhEmptyState
+          v-if="spisok.length === 0"
+          :icon="unitiStore.estAktivnieFiltri ? 'search' : 'rocket'"
+          :title="
+            unitiStore.estAktivnieFiltri
+              ? $t('unit.spisok_unitov.list.empty_filtered')
+              : $t('unit.spisok_unitov.list.empty_result')
+          "
+          :description="$t('unit.spisok_unitov.page.empty_description')"
+        >
+          <template #actions>
+            <GhButton
+              v-if="unitiStore.estAktivnieFiltri"
+              icon="filter"
               :label="$t('unit.spisok_unitov.filter.reset')"
               @click="unitiStore.sbrozitFiltri()"
-          />
-        </template>
-        <template v-else>
-          {{ $t('unit.spisok_unitov.list.empty_result') }}
-        </template>
-      </div>
+            />
+            <GhButton
+              v-else
+              variant="primary"
+              icon="plus"
+              :label="$t('unit.spisok_unitov.buttons.add')"
+              @click="openAddForm"
+            />
+          </template>
+        </GhEmptyState>
 
-      <div v-else class="unit-cards-grid">
-        <UnitCard
+        <div v-else class="unit-cards-grid">
+          <UnitCard
             v-for="item in spisok"
             :key="'unit_card' + item.id"
             :item="item"
-        />
-      </div>
+          />
+        </div>
+      </template>
     </template>
 
-    <q-dialog v-model="enableAddForm" persistent transition-show="scale" transition-hide="scale" backdrop-filter="blur(4px)">
+    <GhDialog
+      v-model="enableAddForm"
+      persistent
+      width="700px"
+      :title="$t('unit.form_add_unit.caption')"
+    >
       <FormaSozdaniyaUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()" />
-    </q-dialog>
+    </GhDialog>
 
-    <q-dialog v-model="enableKonfigForm" persistent transition-show="scale" transition-hide="scale">
+    <GhDialog
+      v-model="enableKonfigForm"
+      persistent
+      width="700px"
+      :title="$t('unit.form_fill_variables.caption')"
+    >
       <FormaZapolneniyaPeremenihUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()" />
-    </q-dialog>
+    </GhDialog>
 
-    <q-dialog v-model="enableFormiDeistviya" persistent transition-show="scale" transition-hide="scale">
+    <GhDialog
+      v-model="enableFormiDeistviya"
+      persistent
+      width="700px"
+      :title="$t('unit.form_actions.caption')"
+    >
       <FormaDeistviyUnita @formaBilaOtpravlena="unitiStore.poluchitSpisokUnitov()" />
-    </q-dialog>
+    </GhDialog>
 
     <!-- Диалог создания сессии общий с модулем OpenCode: карточка юнита
          только открывает его с предвыбранным юнитом. -->
@@ -471,49 +636,37 @@ watch(effektivniyRezhim, (noviyRezhim: UnitListViewMode) => {
 </template>
 
 <style scoped>
+.unit-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.unit-page__error-text {
+  margin: 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
 .unit-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   align-items: start;
-  gap: var(--app-space-4);
+  gap: 16px;
 }
 
-.unit-cards-grid__empty {
-  padding: var(--app-space-4);
-  color: var(--app-text-secondary);
-}
-
-.unit-cards-grid__empty-title {
-  display: block;
-}
-
-.unit-cards-grid__empty-action {
-  margin-top: var(--app-space-2);
-}
-
-.unit-list__error {
+.unit-card-skeleton__body {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--app-space-2);
-  padding: var(--app-space-3);
-  border: 1px solid color-mix(in srgb, var(--app-negative) 35%, transparent);
-  border-radius: var(--app-radius-md);
-  background: color-mix(in srgb, var(--app-negative) 8%, transparent);
-  color: var(--app-negative);
-}
-
-.unit-list__error-text {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--app-font-size-body);
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
 }
 
 .unit-workspace {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   align-items: start;
-  gap: var(--app-space-4);
+  gap: 16px;
 }
 
 @media (max-width: 1023.98px) {

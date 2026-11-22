@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import {computed, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
-import {useQuasar} from "quasar";
+import {
+  GhInput,
+  GhSelect,
+} from "@/components/ui";
+import type {GhSelectOption} from "@/components/ui";
 import type {
   HranilishaFilterChip,
   HranilishaFilterKey,
@@ -40,13 +44,9 @@ const emit = defineEmits<{
 }>();
 
 const {t, locale} = useI18n();
-const quasar = useQuasar();
 
-/**
- * Статусы рендерятся отдельной строкой только на десктопе (>= 1024px).
- * На узких экранах они прячутся в меню кнопки «Фильтры».
- */
-const statusiNaDesktope = computed<boolean>(() => quasar.screen.gt.sm);
+/** id нативного поиска: на него опирается хоткей `/` страницы. */
+const IDENTIFIKATOR_POISKA = "hranilisha-filter-search";
 
 /** Локальное значение поиска: props не мутируем, наружу уходит копия. */
 const poisk = ref<string>(props.filters.search ?? "");
@@ -76,12 +76,19 @@ function izmenitPoisk(znachenie: string | number | null) {
   });
 }
 
-function izmenitTip(type: string | null) {
-  emit("change", {filters: skopirovatFiltri({type}), immediate: true});
+function izmenitTip(znachenie: string | number | null) {
+  emit("change", {
+    filters: skopirovatFiltri({type: znachenie === null ? null : String(znachenie)}),
+    immediate: true,
+  });
 }
 
-function izmenitSort(sort: HranilishaSort) {
-  emit("change", {filters: skopirovatFiltri({sort}), immediate: true});
+function izmenitSort(znachenie: string | number | null) {
+  if (typeof znachenie !== "string") {
+    return;
+  }
+
+  emit("change", {filters: skopirovatFiltri({sort: znachenie as HranilishaSort}), immediate: true});
 }
 
 function izmenitStatusi(statuses: HranilishaFilterStatus[]) {
@@ -90,21 +97,21 @@ function izmenitStatusi(statuses: HranilishaFilterStatus[]) {
 
 const SORTIROVKI: HranilishaSort[] = ["name_asc", "type_asc"];
 
-const sortOptions = computed<Array<{value: HranilishaSort; label: string}>>(() => {
+const sortOptions = computed<GhSelectOption[]>(() => {
   return SORTIROVKI.map((sort: HranilishaSort) => ({
     value: sort,
     label: t("unit.spisok_rep.filter.sort." + sort),
   }));
 });
 
-/** Подпись текущей сортировки — для tooltip иконки-меню. */
+/** Подпись текущей сортировки — для tooltip и доступного имени селекта. */
 const tekushayaSortirovka = computed<string>(() => {
   const option = sortOptions.value.find((item) => item.value === props.filters.sort);
 
   return option?.label ?? t("unit.spisok_rep.filter.sort.label");
 });
 
-const tipOptions = computed<Array<{value: string | null; label: string}>>(() => {
+const tipOptions = computed<GhSelectOption[]>(() => {
   return [
     {value: null, label: t("unit.spisok_rep.filter.all_types")},
     ...props.types,
@@ -125,133 +132,60 @@ const reposCount = computed<string>(() => {
 
 <template>
   <div class="hranilisha-filter" role="toolbar" :aria-label="$t('unit.spisok_rep.filter.filters_button')">
-    <!-- Строка 1: тулбар. На десктопе без переносов, на <1024px — горизонтальный скролл. -->
     <div class="hranilisha-filter__row">
-      <q-input
-          class="hranilisha-filter__search"
-          dense
-          borderless
-          clearable
-          hide-bottom-space
-          :model-value="poisk"
-          :placeholder="$t('unit.spisok_rep.filter.search')"
-          @update:model-value="izmenitPoisk"
-      >
-        <template #prepend>
-          <q-icon name="search" size="18px" />
-        </template>
-      </q-input>
+      <div class="hranilisha-filter__search">
+        <label :for="IDENTIFIKATOR_POISKA" class="gh-visually-hidden">
+          {{ $t('unit.spisok_rep.filter.search') }}
+        </label>
+        <GhInput
+            :id="IDENTIFIKATOR_POISKA"
+            size="sm"
+            icon="search"
+            clearable
+            :disabled="loading"
+            :model-value="poisk"
+            :placeholder="$t('unit.spisok_rep.filter.search')"
+            @update:model-value="izmenitPoisk"
+        />
+      </div>
 
-      <q-select
-          class="hranilisha-filter__select"
-          dense
-          borderless
-          hide-bottom-space
-          emit-value
-          map-options
-          options-dense
-          popup-content-class="hranilisha-filter__type-menu"
-          :model-value="filters.type"
-          :options="tipOptions"
-          :aria-label="$t('unit.spisok_rep.filter.type_label')"
-          @update:model-value="izmenitTip"
-      />
+      <div class="hranilisha-filter__select">
+        <GhSelect
+            size="sm"
+            :model-value="filters.type"
+            :options="tipOptions"
+            :placeholder="$t('unit.spisok_rep.filter.all_types')"
+            :aria-label="$t('unit.spisok_rep.filter.type_label')"
+            @update:model-value="izmenitTip"
+        />
+      </div>
 
-      <q-btn
-          class="hranilisha-filter__sort"
-          dense
-          flat
-          color="primary"
-          icon="sort"
-          :aria-label="tekushayaSortirovka"
-      >
-        <q-tooltip>{{ tekushayaSortirovka }}</q-tooltip>
-
-        <q-menu anchor="bottom right" self="top right">
-          <q-list dense class="hranilisha-filter__sort-list">
-            <q-item
-                v-for="option in sortOptions"
-                :key="option.value"
-                clickable
-                :active="filters.sort === option.value"
-                active-class="hranilisha-filter__sort-item--active"
-                @click="izmenitSort(option.value)"
-            >
-              <q-item-section avatar class="hranilisha-filter__sort-check">
-                <q-icon v-if="filters.sort === option.value" name="check" size="18px" />
-              </q-item-section>
-              <q-item-section>{{ option.label }}</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </q-btn>
+      <div class="hranilisha-filter__sort">
+        <GhSelect
+            size="sm"
+            :model-value="filters.sort"
+            :options="sortOptions"
+            :placeholder="tekushayaSortirovka"
+            :aria-label="$t('unit.spisok_rep.filter.sort.label')"
+            @update:model-value="izmenitSort"
+        />
+      </div>
 
       <span class="hranilisha-filter__spacer" />
-
-      <q-btn
-          dense
-          flat
-          color="primary"
-          icon="refresh"
-          :loading="loading"
-          :aria-label="$t('unit.spisok_rep.filter.refresh')"
-          @click="emit('submit')"
-      >
-        <q-tooltip>{{ $t('unit.spisok_rep.filter.refresh') }}</q-tooltip>
-      </q-btn>
 
       <span v-if="lastUpdatedAt !== null" class="hranilisha-filter__updated">
         {{ $t('unit.spisok_rep.filter.updated_at', {time: convertDate(lastUpdatedAt)}) }}
       </span>
-
-      <q-btn
-          class="hranilisha-filter__add"
-          dense
-          no-caps
-          unelevated
-          color="primary"
-          icon="add"
-          :label="$t('unit.spisok_rep.buttons.add')"
-          @click="emit('create')"
-      />
     </div>
 
-    <!-- Строка 2: статусы + чипы активных фильтров + счётчик/обрезание. -->
     <div class="hranilisha-filter__bottom">
       <HranilishaFilterStatusComponent
-          v-if="statusiNaDesktope"
           class="hranilisha-filter__statuses"
           :model-value="filters.statuses"
           :counts="counts"
           :total="total"
           @update:model-value="izmenitStatusi"
       />
-
-      <q-btn
-          v-else
-          class="hranilisha-filter__filters-btn"
-          dense
-          no-caps
-          outline
-          color="primary"
-          icon="tune"
-          :label="$t('unit.spisok_rep.filter.filters_button')"
-      >
-        <q-badge v-if="filters.statuses.length > 0" color="primary" floating>
-          {{ filters.statuses.length }}
-        </q-badge>
-
-        <q-menu anchor="bottom left" self="top left">
-          <div class="hranilisha-filter__menu">
-            <HranilishaFilterStatusComponent
-                :model-value="filters.statuses"
-                :counts="counts"
-                :total="total"
-                @update:model-value="izmenitStatusi"
-            />
-          </div>
-        </q-menu>
-      </q-btn>
 
       <HranilishaFilterChips
           v-if="chips.length > 0"
@@ -262,7 +196,7 @@ const reposCount = computed<string>(() => {
 
       <span class="hranilisha-filter__spacer" />
 
-      <span class="hranilisha-filter__count text-tabular">{{ reposCount }}</span>
+      <span class="hranilisha-filter__count">{{ reposCount }}</span>
 
       <span v-if="truncatedLimit !== null" class="hranilisha-filter__truncated">
         {{ $t('unit.spisok_rep.filter.truncated', {limit: truncatedLimit}) }}
@@ -273,29 +207,19 @@ const reposCount = computed<string>(() => {
 
 <style scoped>
 .hranilisha-filter {
-  /* Единая высота всех контролов строки: поля, кнопки, чип. */
-  --hranilisha-control-height: 40px;
-
   display: flex;
   flex-direction: column;
-  gap: var(--app-space-2);
+  gap: 8px;
   min-width: 0;
+  margin-bottom: 16px;
 }
 
-/* Строка 1: без переносов; на узких экранах уходит в горизонтальный скролл. */
 .hranilisha-filter__row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--app-space-2);
+  gap: 8px;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.hranilisha-filter__row::-webkit-scrollbar,
-.hranilisha-filter__bottom::-webkit-scrollbar {
-  display: none;
 }
 
 .hranilisha-filter__search {
@@ -304,139 +228,55 @@ const reposCount = computed<string>(() => {
 }
 
 .hranilisha-filter__select {
-  flex: 0 0 160px;
-  width: 160px;
-  min-width: 150px;
-}
-
-/* Поля фильтра: заметная граница в покое, темнее на hover, primary на фокусе. */
-.hranilisha-filter__search :deep(.q-field__control),
-.hranilisha-filter__select :deep(.q-field__control) {
-  height: var(--hranilisha-control-height);
-  min-height: var(--hranilisha-control-height);
-  padding: 0 var(--app-space-3);
-  border: 1px solid var(--app-border);
-  border-radius: 0;
-  background: var(--app-surface-muted);
-  transition:
-      background-color var(--app-duration-fast) var(--app-easing),
-      border-color var(--app-duration-fast) var(--app-easing);
-}
-
-.hranilisha-filter__search :deep(.q-field__control:hover),
-.hranilisha-filter__select :deep(.q-field__control:hover) {
-  border-color: var(--app-text-disabled);
-}
-
-.hranilisha-filter__search :deep(.q-field--focused .q-field__control),
-.hranilisha-filter__select :deep(.q-field--focused .q-field__control) {
-  border-color: var(--app-focus-ring);
-  background: var(--app-surface);
-}
-
-.hranilisha-filter__search :deep(.q-field__native),
-.hranilisha-filter__select :deep(.q-field__native) {
-  min-height: 30px;
-  color: var(--app-text);
-}
-
-/* Выбранное значение типа не прилипает к левой границе поля. */
-.hranilisha-filter__select :deep(.q-field__native) {
-  padding-left: var(--app-space-1);
-}
-
-.hranilisha-filter__search :deep(.q-field__prepend),
-.hranilisha-filter__select :deep(.q-field__append) {
-  padding: 0;
-  color: var(--app-text-secondary);
+  flex: 0 1 auto;
+  min-width: 160px;
+  max-width: 240px;
 }
 
 .hranilisha-filter__sort {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 160px;
+  max-width: 240px;
 }
 
-/* Primary-кнопка строки: та же высота, что у поля, и воздух вокруг подписи. */
-.hranilisha-filter .hranilisha-filter__add {
-  height: var(--hranilisha-control-height);
-  padding-inline: var(--app-space-4);
+/* Текст сортировки и стрелка — без лишнего зазора внутри контрола. */
+.hranilisha-filter__sort :deep(.q-field__native) {
+  display: flex;
+  align-items: center;
 }
 
-.hranilisha-filter .hranilisha-filter__add :deep(.q-btn__content) {
-  gap: var(--app-space-1);
-}
-
-.hranilisha-filter__sort-list {
-  min-width: 220px;
-}
-
-.hranilisha-filter__sort-check {
-  min-width: 32px;
-  padding-right: 0;
-}
-
-.hranilisha-filter__sort-item--active {
-  color: var(--app-primary);
-  background: var(--app-surface-muted);
+.hranilisha-filter__sort :deep(.q-field__append) {
+  height: auto;
+  padding: 0 8px;
 }
 
 .hranilisha-filter__spacer {
   flex: 1 1 0;
-  min-width: var(--app-space-2);
+  min-width: 8px;
 }
 
 .hranilisha-filter__updated {
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
   white-space: nowrap;
 }
 
-/* Строка 2: статусы + чипы + счётчик. */
 .hranilisha-filter__bottom {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--app-space-2);
+  gap: 8px;
   min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
 .hranilisha-filter__statuses {
   flex: 0 0 auto;
 }
 
-.hranilisha-filter__filters-btn {
-  flex: 0 0 auto;
-}
-
-.hranilisha-filter__menu {
-  padding: var(--app-space-2);
-  max-width: 320px;
-}
-
 .hranilisha-filter__count,
 .hranilisha-filter__truncated {
-  color: var(--app-text-secondary);
-  font-size: var(--app-font-size-caption);
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
   white-space: nowrap;
-}
-
-@media (max-width: 1023.98px) {
-  .hranilisha-filter__bottom {
-    flex-wrap: wrap;
-    overflow-x: visible;
-  }
-}
-</style>
-
-<!-- Меню селекта рендерится в портале, поэтому scoped-стили до него не достают. -->
-<style>
-.hranilisha-filter__type-menu .q-item {
-  padding-right: var(--app-space-4);
-  padding-left: var(--app-space-4);
-}
-
-.hranilisha-filter__type-menu .q-item__section--main {
-  min-width: 0;
 }
 </style>

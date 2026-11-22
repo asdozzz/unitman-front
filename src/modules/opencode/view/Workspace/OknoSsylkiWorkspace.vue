@@ -3,6 +3,14 @@ import { computed, onBeforeUnmount, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { copyToClipboard } from "quasar";
 import {
+    GhBanner,
+    GhButton,
+    GhDialog,
+    GhFormField,
+    GhIcon,
+    GhInput,
+} from "@/components/ui";
+import {
     portKorrektniy,
     useStorPomoschnikaSsylkiWorkspace,
 } from "@/modules/opencode/store/StorPomoschnikaSsylkiWorkspace";
@@ -81,88 +89,90 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <q-dialog :model-value="otkrita" persistent @update:model-value="zakrit()">
-    <q-card style="min-width: 460px; max-width: 600px">
-      <q-card-section class="bg-primary text-white">
-        <div class="text-subtitle2">{{ $t('opencode.workspace.helper.caption') }}</div>
-      </q-card-section>
-
-      <q-card-section class="q-gutter-sm">
-        <q-input
+  <GhDialog
+      :model-value="otkrita"
+      :title="$t('opencode.workspace.helper.caption')"
+      width="560px"
+      persistent
+      @update:model-value="zakrit()"
+  >
+    <div class="opencode-form">
+      <GhFormField
+          :label="$t('opencode.workspace.helper.fields.port')"
+          :caption="$t('opencode.workspace.helper.hint_port')"
+          :error="portNekorrektniy ? $t('opencode.workspace.helper.errors.invalid_port') : ''"
+      >
+        <GhInput
             :model-value="port"
             type="number"
-            min="1"
-            max="65535"
-            :label="$t('opencode.workspace.helper.fields.port')"
-            :hint="$t('opencode.workspace.helper.hint_port')"
-            :error="portNekorrektniy"
-            :error-message="$t('opencode.workspace.helper.errors.invalid_port')"
-            filled
-            dense
-            autofocus
             @update:model-value="obnovitPort"
         />
+      </GhFormField>
 
-        <q-input
-            v-model="suffix"
-            :label="$t('opencode.workspace.helper.fields.suffix')"
-            :hint="$t('opencode.workspace.helper.hint_suffix')"
-            filled
-            dense
-        />
+      <GhFormField
+          :label="$t('opencode.workspace.helper.fields.suffix')"
+          :caption="$t('opencode.workspace.helper.hint_suffix')"
+      >
+        <GhInput v-model="suffix" />
+      </GhFormField>
 
-        <div v-if="oshibka" class="text-negative">{{ oshibka }}</div>
+      <GhBanner v-if="oshibka" variant="danger">{{ oshibka }}</GhBanner>
 
-        <q-input
-            v-if="ssylka !== null"
-            :model-value="ssylka"
-            :label="$t('opencode.workspace.helper.result_link')"
-            readonly
-            filled
-            dense
-        >
+      <GhFormField
+          v-if="ssylka !== null"
+          :label="$t('opencode.workspace.helper.result_link')"
+      >
+        <GhInput :model-value="ssylka" readonly>
           <template #append>
-            <q-btn
-                flat
-                dense
-                :icon="skopirovano ? 'check' : 'content_copy'"
-                :color="skopirovano ? 'positive' : undefined"
+            <GhButton
+                variant="invisible"
+                size="sm"
                 :aria-label="$t('opencode.workspace.helper.buttons.copy')"
                 @click="skopirovat()"
             >
-              <q-tooltip>
-                {{ skopirovano ? $t('opencode.workspace.helper.buttons.copied') : $t('opencode.workspace.helper.buttons.copy') }}
-              </q-tooltip>
-            </q-btn>
+              <GhIcon
+                  :name="skopirovano ? 'check' : 'copy'"
+                  :class="{ 'okno-ssylki__copied': skopirovano }"
+              />
+            </GhButton>
 
-            <q-btn
-                flat
-                dense
-                icon="open_in_new"
+            <GhButton
+                variant="invisible"
+                size="sm"
+                icon="link-external"
                 :aria-label="$t('opencode.workspace.helper.buttons.open')"
                 @click="otkryt()"
-            >
-              <q-tooltip>{{ $t('opencode.workspace.helper.buttons.open') }}</q-tooltip>
-            </q-btn>
+            />
           </template>
-        </q-input>
-      </q-card-section>
+        </GhInput>
+      </GhFormField>
+    </div>
 
-      <q-card-actions align="right">
-        <q-btn
-            flat
-            :label="$t('common.buttons.cancel')"
-            :disable="loader"
-            @click="zakrit()"
-        />
-        <q-btn
-            color="primary"
-            :label="$t('opencode.workspace.helper.buttons.ok')"
-            :loading="loader"
-            :disable="!mozhnoSformirovat"
-            @click="sformirovat()"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+    <template #footer>
+      <GhButton
+          :label="$t('common.buttons.cancel')"
+          :disabled="loader"
+          @click="zakrit()"
+      />
+      <GhButton
+          variant="primary"
+          :label="$t('opencode.workspace.helper.buttons.ok')"
+          :loading="loader"
+          :disabled="!mozhnoSformirovat"
+          @click="sformirovat()"
+      />
+    </template>
+  </GhDialog>
 </template>
+
+<style scoped>
+.opencode-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.okno-ssylki__copied {
+  color: var(--fgColor-success);
+}
+</style>
