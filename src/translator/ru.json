@@ -82,7 +82,61 @@
     "description_active": "Дефолтный раннер доступен и обрабатывает задачи.",
     "error_title": "Не удалось получить статус раннера",
     "unknown_title": "Статус неизвестен",
-    "unknown_description": "Данные о состоянии раннера ещё не получены."
+    "unknown_description": "Данные о состоянии раннера ещё не получены.",
+    "levels": {
+      "ok": "Норма",
+      "warning": "Внимание",
+      "critical": "Критично",
+      "blocker": "Блокировка"
+    },
+    "runners_page": {
+      "title": "Раннеры",
+      "subtitle": "Состояние серверов раннеров: нагрузка, диски и Docker.",
+      "status_active": "В работе",
+      "status_inactive": "Неактивен",
+      "status_stale": "Нет связи",
+      "task_queue": "Очередь",
+      "last_health": "Последний health",
+      "blocked": "Ресурсоёмкие операции заблокированы",
+      "no_resources": "Снимок ресурсов ещё не получен.",
+      "legacy_note": "Показана только память из старого health-запроса. Диски и CPU появятся после обновления и перезапуска раннера.",
+      "error_title": "Не удалось получить список раннеров",
+      "empty_title": "Данных пока нет",
+      "empty_description": "Раннер ещё не присылал снимок ресурсов.",
+      "no_resources_title": "Ресурсы не переданы",
+      "no_resources_description": "Раннер прислал health-push без структурированного снимка ресурсов. Обновите раннер.",
+      "no_disks_title": "Диски не обнаружены",
+      "no_disks_description": "Раннер не смог прочитать занятое место на дисках.",
+      "blocker_title": "Ресурсоёмкие операции заблокированы",
+      "blocker_description": "Потребление памяти или диска достигло чёрного уровня (90%). Сборка, запуск и обновление юнитов и workspace недоступны.",
+      "stale_title": "Данные устарели",
+      "stale_description": "Health-push от раннера давно не приходил: показанные значения могут быть неактуальны.",
+      "host": "Хост",
+      "collected_at": "Замер",
+      "memory": "Память",
+      "cpu": "CPU",
+      "docker": "Docker",
+      "disks": "Диски",
+      "used": "Использовано",
+      "available": "свободно",
+      "total": "Всего",
+      "free": "Свободно",
+      "usage": "Загрузка",
+      "load_average": "Load average (1/5/15)",
+      "cores": "Ядра",
+      "docker_total": "Всего",
+      "docker_layers": "Образы",
+      "docker_containers": "Контейнеры",
+      "docker_volumes": "Тома",
+      "docker_build_cache": "Кэш сборки",
+      "docker_reclaimable": "Можно освободить",
+      "levels": {
+        "ok": "Норма",
+        "warning": "Внимание",
+        "critical": "Критично",
+        "blocker": "Блокировка"
+      }
+    }
   },
   "app": {
     "skip_to_content": "Перейти к содержимому",
@@ -108,7 +162,8 @@
       "init": "Инициализация",
       "unit_jobs": "Задачи юнита",
       "unauthorized": "Доступ запрещён",
-      "not_found": "Страница не найдена"
+      "not_found": "Страница не найдена",
+      "runners": "Раннеры"
     },
     "header": {
       "profile": "Профиль",
@@ -132,7 +187,12 @@
       "toggle_sidebar": "Свернуть или развернуть меню",
       "role_admin": "Администратор",
       "role_user": "Пользователь",
-      "email": "Email"
+      "email": "Email",
+      "runner_threats": "Требуют внимания: {count}",
+      "runner_threats_aria": "Раннеры, требующие внимания: {count}",
+      "runner_threats_hint": "Открыть раздел «Раннеры»",
+      "runner_threats_open": "Открыть раздел «Раннеры»",
+      "runner_threats_non_admin": "Подробности доступны администратору."
     },
     "sidebar": {
       "groups": {
@@ -146,6 +206,7 @@
         "repositories": "Репозитории",
         "accounts": "Аккаунты",
         "initialization": "Инициализация",
+        "runners": "Раннеры",
         "settings": "Настройки",
         "ai_assistant": "ИИ-помощник",
         "sessions": "Сессии",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
@@ -15,6 +15,9 @@ import {
 } from "@/components/ui";
 import type { GhSegmentedOption } from "@/components/ui";
 import { useAuthStore } from "@/modules/account/store/auth";
+import { storeUgrozRannerov } from "@/modules/runner/store/StoreUgrozRannerov";
+import type { UrovenResursov } from "@/modules/runner/model/ResursiServera";
+import { VARIANT_UROVNYA } from "@/modules/runner/utils/urovniResursov";
 import { saveAppSettings } from "@/utils/appSettings";
 
 const emit = defineEmits<{
@@ -29,6 +32,43 @@ const $q = useQuasar();
 const authStore = useAuthStore();
 const { email, getLocale, isAdmin, loaderIzmemeniyaYazika } =
     storeToRefs(authStore);
+
+const ugrozyStore = storeUgrozRannerov();
+const { svodka: ugrozy, init: ugrozyInit } = storeToRefs(ugrozyStore);
+
+const estUgrozy = computed<boolean>(() => ugrozy.value.hasThreats);
+
+const podpisUgroz = computed<string>(() =>
+    t("app.header.runner_threats", { count: ugrozy.value.count }),
+);
+
+/** Приводит строковый уровень из API к литеральному типу. */
+function urovenKak(level: string): UrovenResursov {
+    return level === "warning" || level === "critical" || level === "blocker"
+        ? level
+        : "ok";
+}
+
+function podpisUrovnya(level: string): string {
+    return t(`runner.levels.${urovenKak(level)}`);
+}
+
+/** Переход в раздел «Раннеры» (доступен только администратору). */
+function pereytiVRazdelRannerov(): void {
+    void router.push("/runner/list");
+}
+
+onMounted(() => {
+    if (!ugrozyInit.value) {
+        ugrozyStore.zapustitOprosUgrozy();
+    } else {
+        ugrozyStore.vostanovitOprosUgrozy();
+    }
+});
+
+onBeforeUnmount(() => {
+    ugrozyStore.ostanovitOprosUgrozy();
+});
 
 /** Идентификатор поля поиска; на него переводит фокус глобальный хоткей `/`. */
 const IDENTIFIKATOR_POISKA = "app-header-search";
@@ -150,6 +190,54 @@ function vyiti(): void {
         </label>
 
         <div class="app-header__actions">
+            <div
+                v-if="estUgrozy"
+                class="app-header__action app-header__threats"
+                :class="`app-header__threats--${urovenKak(ugrozy.worstLevel)}`"
+            >
+                <GhButton
+                    variant="invisible"
+                    icon="alert"
+                    :label="podpisUgroz"
+                    :aria-label="t('app.header.runner_threats_aria', { count: ugrozy.count })"
+                />
+
+                <q-menu
+                    auto-close
+                    class="primer gh-popover"
+                    anchor="bottom middle"
+                    self="top middle"
+                    :offset="[0, 6]"
+                >
+                    <div class="gh-popover__list">
+                        <div
+                            v-for="ranner in ugrozy.runners"
+                            :key="ranner.id"
+                            class="gh-popover__row"
+                        >
+                            <span class="gh-popover__id gh-mono">{{ ranner.id }}</span>
+                            <GhLabel
+                                :variant="VARIANT_UROVNYA[urovenKak(ranner.level)]"
+                                :label="podpisUrovnya(ranner.level)"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="gh-popover__actions">
+                        <GhButton
+                            v-if="isAdmin"
+                            size="sm"
+                            variant="primary"
+                            :label="t('app.header.runner_threats_open')"
+                            @click="pereytiVRazdelRannerov"
+                        />
+                        <span v-else class="gh-popover__hint">
+                            {{ t("app.header.runner_threats_non_admin") }}
+                        </span>
+                    </div>
+                </q-menu>
+            </div>
+
             <div class="app-header__action">
                 <GhButton
                     variant="invisible"
@@ -403,6 +491,16 @@ function vyiti(): void {
     background-color: var(--bgColor-neutral-muted);
 }
 
+.app-header__threats--warning :deep(.gh-button) {
+    color: var(--fgColor-attention);
+}
+
+.app-header__threats--critical :deep(.gh-button),
+.app-header__threats--blocker :deep(.gh-button) {
+    color: var(--fgColor-danger);
+}
+
+
 @media (max-width: 767px) {
     .app-header__inner {
         gap: 8px;
@@ -425,6 +523,11 @@ function vyiti(): void {
 
     .app-header__language,
     .app-header__notifications {
+        display: none;
+    }
+
+    /* На узких экранах оставляем только иконку угрозы: тултип сохраняется. */
+    .app-header__threats :deep(.gh-button__label) {
         display: none;
     }
 }

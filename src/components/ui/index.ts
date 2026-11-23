@@ -13,6 +13,7 @@ export { default as GhInput } from "./GhInput.vue";
 export { default as GhKbd } from "./GhKbd.vue";
 export { default as GhLabel } from "./GhLabel.vue";
 export { default as GhPageHeader } from "./GhPageHeader.vue";
+export { default as GhProgress } from "./GhProgress.vue";
 export { default as GhSegmentedControl } from "./GhSegmentedControl.vue";
 export { default as GhSelect } from "./GhSelect.vue";
 export { default as GhSideNav } from "./GhSideNav.vue";
@@ -30,6 +31,7 @@ export type {
   GhCounterVariant,
   GhLabelVariant,
   GhNavItem,
+  GhProgressLevel,
   GhSegmentedOption,
   GhSelectOption,
   GhSideNavGroup,

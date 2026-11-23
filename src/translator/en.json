@@ -82,7 +82,61 @@
     "description_active": "The default runner is available and processing jobs.",
     "error_title": "Failed to get the runner status",
     "unknown_title": "Status unknown",
-    "unknown_description": "Runner state data has not been received yet."
+    "unknown_description": "Runner state data has not been received yet.",
+    "levels": {
+      "ok": "Normal",
+      "warning": "Warning",
+      "critical": "Critical",
+      "blocker": "Blocked"
+    },
+    "runners_page": {
+      "title": "Runners",
+      "subtitle": "Runner server health: load, disks and Docker.",
+      "status_active": "Running",
+      "status_inactive": "Inactive",
+      "status_stale": "Offline",
+      "task_queue": "Queue",
+      "last_health": "Last health",
+      "blocked": "Resource-heavy operations are blocked",
+      "no_resources": "The resource snapshot has not been received yet.",
+      "legacy_note": "Only memory from the legacy health request is shown. Disks and CPU will appear after the runner is updated and restarted.",
+      "error_title": "Failed to get the runner list",
+      "empty_title": "No data yet",
+      "empty_description": "The runner has not sent a resource snapshot yet.",
+      "no_resources_title": "Resources not provided",
+      "no_resources_description": "The runner sent a health push without a structured resource snapshot. Update the runner.",
+      "no_disks_title": "No disks detected",
+      "no_disks_description": "The runner failed to read disk usage.",
+      "blocker_title": "Resource-heavy operations are blocked",
+      "blocker_description": "Memory or disk usage reached the black level (90%). Building, starting and updating units and workspaces is unavailable.",
+      "stale_title": "Data is stale",
+      "stale_description": "The runner health push is outdated: the values shown may be inaccurate.",
+      "host": "Host",
+      "collected_at": "Measured at",
+      "memory": "Memory",
+      "cpu": "CPU",
+      "docker": "Docker",
+      "disks": "Disks",
+      "used": "Used",
+      "available": "free",
+      "total": "Total",
+      "free": "Free",
+      "usage": "Usage",
+      "load_average": "Load average (1/5/15)",
+      "cores": "Cores",
+      "docker_total": "Total",
+      "docker_layers": "Images",
+      "docker_containers": "Containers",
+      "docker_volumes": "Volumes",
+      "docker_build_cache": "Build cache",
+      "docker_reclaimable": "Reclaimable",
+      "levels": {
+        "ok": "Normal",
+        "warning": "Warning",
+        "critical": "Critical",
+        "blocker": "Blocked"
+      }
+    }
   },
   "app": {
     "skip_to_content": "Skip to content",
@@ -108,7 +162,8 @@
       "init": "Initialization",
       "unit_jobs": "Unit jobs",
       "unauthorized": "Access denied",
-      "not_found": "Page not found"
+      "not_found": "Page not found",
+      "runners": "Runners"
     },
     "header": {
       "profile": "Profile",
@@ -132,7 +187,12 @@
       "toggle_sidebar": "Collapse or expand sidebar",
       "role_admin": "Administrator",
       "role_user": "User",
-      "email": "Email"
+      "email": "Email",
+      "runner_threats": "Needs attention: {count}",
+      "runner_threats_aria": "Runners that need attention: {count}",
+      "runner_threats_hint": "Open the Runners section",
+      "runner_threats_open": "Open the Runners section",
+      "runner_threats_non_admin": "Details are available to administrators."
     },
     "sidebar": {
       "groups": {
@@ -146,6 +206,7 @@
         "repositories": "Repositories",
         "accounts": "Accounts",
         "initialization": "Initialization",
+        "runners": "Runners",
         "settings": "Settings",
         "ai_assistant": "AI Assistant",
         "sessions": "Sessions",

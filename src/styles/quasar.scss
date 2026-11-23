@@ -169,3 +169,24 @@ body.body--dark {
     animation: none;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Тултипы в стилистике Primer
+//
+// Quasar по умолчанию рисует чёрный тултип. Для всплывающих подсказок с
+// произвольным содержимым (например, угрозы по раннерам в шапке) используем
+// плоскую поверхность сайта: фон, рамка, тень и системный шрифт.
+// ---------------------------------------------------------------------------
+.q-tooltip.gh-tooltip {
+  max-width: 320px;
+  padding: 6px 8px;
+  background-color: var(--bgColor-default);
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--app-radius-md);
+  box-shadow: var(--shadow-floating-small);
+  color: var(--fgColor-default);
+  font-family: var(--fontStack-system);
+  font-size: var(--fontSize-caption);
+  line-height: var(--lineHeight-normal);
+  opacity: 1;
+}

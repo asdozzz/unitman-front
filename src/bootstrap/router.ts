@@ -3,6 +3,7 @@ import {useAuthStore} from "@/modules/account/store/auth";
 import account from '@/modules/account/routes';
 import unit from '@/modules/unit/routes';
 import opencode from '@/modules/opencode/routes';
+import runner from '@/modules/runner/routes';
 import app from  '@/modules/app/routes';
 import {storeInizializii} from "@/modules/app/store/InitializationStore";
 import i18n from "@/bootstrap/translator";
@@ -14,6 +15,7 @@ const router = createRouter({
         ...account,
         ...unit,
         ...opencode,
+        ...runner,
         ...app,
     ]
 })

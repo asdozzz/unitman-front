@@ -106,6 +106,14 @@ export type GhSegmentedOption = {
 
 export type GhBannerVariant = "accent" | "success" | "attention" | "danger";
 
+/**
+ * Уровень в GhProgress: задаёт цвет полосы.
+ *
+ * `neutral` — справочные показатели, которые не участвуют в оценке угрозы
+ * (например, загрузка CPU).
+ */
+export type GhProgressLevel = "ok" | "warning" | "critical" | "blocker" | "neutral";
+
 export type GhSkeletonVariant = "text" | "circle" | "rect";
 
 export type GhSkeletonAnimation = "wave" | "pulse" | "none";
