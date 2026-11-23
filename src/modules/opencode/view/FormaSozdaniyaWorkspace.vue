@@ -38,6 +38,9 @@ const {
     otkrita,
     name,
     credentialId,
+    model,
+    dostupnieModeli,
+    modelPoUmolchaniyu,
     projectIds,
     prompt,
     proekti,
@@ -62,6 +65,27 @@ const optsRekvizitov = computed<GhSelectOption[]>(() =>
         label: rekvizit.name,
     })),
 );
+
+/** Опции моделей выбранных реквизитов с подписью дефолтной. */
+const optsModelei = computed<GhSelectOption[]>(() => {
+    const marker = t("opencode.rekvizity.default_marker");
+    const poUmolchaniyu = modelPoUmolchaniyu.value;
+
+    return dostupnieModeli.value.map((nazvanie) => ({
+        value: nazvanie,
+        label: nazvanie === poUmolchaniyu ? `${nazvanie} (${marker})` : nazvanie,
+    }));
+});
+
+/** Смена реквизитов: стор сбрасывает модель на их дефолт. */
+function izmenitRekvizity(value: string | number | null): void {
+    formaStore.ustanovitRekvizity(value === null ? "" : String(value));
+}
+
+/** Выбор модели для создаваемого workspace. */
+function izmenitModel(value: string | number | null): void {
+    formaStore.ustanovitModel(value === null ? null : String(value));
+}
 
 /** Имена выбранных проектов без личного токена с правом push. */
 const imenaProektovBezTokena = computed<string>(() =>
@@ -217,7 +241,23 @@ onBeforeUnmount(() => {
       </GhFormField>
 
       <GhFormField :label="$t('opencode.workspace.form.fields.credential')">
-        <GhSelect v-model="credentialId" :options="optsRekvizitov" />
+        <GhSelect
+            :model-value="credentialId"
+            :options="optsRekvizitov"
+            @update:model-value="izmenitRekvizity"
+        />
+      </GhFormField>
+
+      <GhFormField :label="$t('opencode.rekvizity.fields.default_model')">
+        <GhSelect
+            :model-value="model"
+            :options="optsModelei"
+            use-input
+            hide-selected
+            fill-input
+            :placeholder="$t('opencode.rekvizity.fields.default_model')"
+            @update:model-value="izmenitModel"
+        />
       </GhFormField>
 
       <GhFormField

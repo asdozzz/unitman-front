@@ -6,6 +6,12 @@ import ProektiService from "@/modules/unit/services/ProektiService";
 import LichniyTokenService from "@/modules/account/services/LichniyTokenService";
 import type { Proekt } from "@/modules/unit/store/SpisokProektov/model/Proekt";
 import type { Schema } from "@/api/types";
+import type { RekvizityOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
+import {
+    modeliRekvizitov,
+    modelPoUmolchaniyu,
+    normalizovatModel,
+} from "@/modules/opencode/model/ModeliOpenCode";
 import { estTokenSPushomProekta } from "@/modules/unit/utils/lichnieTokeni";
 import { proveritNazvanieVetki } from "@/modules/unit/utils/vetki";
 
@@ -31,6 +37,8 @@ type StorFormiSozdaniyaWorkspaceState = {
     otkrita: boolean;
     name: string;
     credentialId: string;
+    /** Выбранная модель хода; пустая строка — дефолт реквизитов. */
+    model: string;
     /** Проекты в выбранном порядке: он же порядок папок в workspace. */
     projectIds: string[];
     /** Первый промпт: запускается после успешного старта контейнера. */
@@ -79,6 +87,7 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
             otkrita: false,
             name: "",
             credentialId: "",
+            model: "",
             projectIds: [],
             prompt: "",
             proekti: [],
@@ -102,6 +111,21 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
         /** Реквизиты для выпадающего списка. */
         rekvizity(): Schema<"OpenCodeCredential">[] {
             return useStorSpiskaRekvizitovOpenCode().spisok;
+        },
+
+        /** Полные реквизиты выбранного ключа (с моделями провайдера). */
+        vybrannieRekvizity(state): RekvizityOpenCode | null {
+            return useStorSpiskaRekvizitovOpenCode().rekvizityPoId(state.credentialId);
+        },
+
+        /** Модели, доступные для выбранных реквизитов. */
+        dostupnieModeli(): string[] {
+            return modeliRekvizitov(this.vybrannieRekvizity);
+        },
+
+        /** Модель по умолчанию выбранных реквизитов. */
+        modelPoUmolchaniyu(): string {
+            return modelPoUmolchaniyu(this.vybrannieRekvizity);
         },
 
         /**
@@ -161,10 +185,12 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
         /** Открыть диалог с чистой формой. */
         otkrit() {
             const rekvizity = useStorSpiskaRekvizitovOpenCode().spisok;
+            const pervaya = rekvizity.length > 0 ? rekvizity[0] : null;
 
             this.otkrita = true;
             this.name = "";
-            this.credentialId = rekvizity.length > 0 ? rekvizity[0].id : "";
+            this.credentialId = pervaya?.id ?? "";
+            this.model = modelPoUmolchaniyu(pervaya);
             this.projectIds = [];
             this.prompt = "";
             this.oshibkaOtBackenda = null;
@@ -192,6 +218,24 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
             this.oshibkaOtBackenda = null;
             this.loader = false;
             this.etapSozdaniya = null;
+        },
+
+        /**
+         * Сменить реквизиты и сбросить модель на их дефолт.
+         *
+         * Модель предыдущих реквизитов может быть недоступна новым, поэтому
+         * при смене ключа выбор всегда сбрасывается на `defaultModel`.
+         */
+        ustanovitRekvizity(credentialId: string) {
+            this.credentialId = credentialId;
+            this.model = modelPoUmolchaniyu(
+                useStorSpiskaRekvizitovOpenCode().rekvizityPoId(credentialId),
+            );
+        },
+
+        /** Записать выбранную модель; `null` очищает выбор до дефолта. */
+        ustanovitModel(model: string | null) {
+            this.model = model ?? "";
         },
 
         /**
@@ -452,11 +496,13 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
                 // Фаза 2: создание workspace с готовыми ветками.
                 this.etapSozdaniya = "workspace";
 
-                const payload: Schema<"SozdatWorkspace"> = {
+                const payload: Schema<"SozdatWorkspace"> & { model?: string | null } = {
                     name: this.name.trim(),
                     credentialId: this.credentialId,
                     projectIds: [...this.projectIds],
                     prompt: this.prompt.trim(),
+                    // Пустую модель не отправляем: бэкенд возьмёт дефолт реквизитов.
+                    model: normalizovatModel(this.model) ?? undefined,
                     // Все проекты получают переопределение, поэтому общая
                     // ветка бэкендом игнорируется; поле обязано быть непустым.
                     branch: (this.lokalnieVetki[this.projectIds[0]] ?? "").trim(),

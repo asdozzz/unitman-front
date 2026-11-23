@@ -1,5 +1,12 @@
 import { defineStore } from "pinia";
 import UnitSessionService from "@/modules/opencode/services/UnitSessionService";
+import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
+import type { RekvizityOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
+import {
+    modeliRekvizitov,
+    modelPoUmolchaniyu,
+    normalizovatModel,
+} from "@/modules/opencode/model/ModeliOpenCode";
 import type {
     UnitSession,
     UnitSessionAnswer,
@@ -14,6 +21,10 @@ type StorChataSessiiUnitaState = {
     sostoyanie: UnitSessionState | null;
     hody: UnitSessionTurn[];
     prompt: string;
+    /** Выбранная модель для следующих ходов. */
+    model: string;
+    /** Последняя использованная модель (сохраняется между сессиями). */
+    poslednyayaModel: string;
     loader: boolean;
     otpravka: boolean;
     oshibka: string | null;
@@ -32,6 +43,8 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             sostoyanie: null,
             hody: [],
             prompt: "",
+            model: "",
+            poslednyayaModel: "",
             loader: false,
             otpravka: false,
             oshibka: null,
@@ -41,6 +54,26 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
     getters: {
         posledniyHod(state): UnitSessionTurn | null {
             return state.hody.length === 0 ? null : state.hody[state.hody.length - 1];
+        },
+
+        /** Полные реквизиты сессии (с моделями провайдера). */
+        vybrannieRekvizity(state): RekvizityOpenCode | null {
+            return useStorSpiskaRekvizitovOpenCode().rekvizityPoId(state.session?.credentialId ?? "");
+        },
+
+        /** Модели, доступные для сессии. */
+        dostupnieModeli(): string[] {
+            return modeliRekvizitov(this.vybrannieRekvizity);
+        },
+
+        /**
+         * Модель по умолчанию: модель сессии, затем последняя использованная,
+         * затем дефолт реквизитов.
+         */
+        modelPoUmolchaniyu(state): string {
+            return state.session?.model
+                || state.poslednyayaModel
+                || modelPoUmolchaniyu(this.vybrannieRekvizity);
         },
 
         hodVipolnyaetsya(): boolean {
@@ -78,6 +111,7 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             this.sessionId = sessionId;
             this.loader = true;
             this.oshibka = null;
+            this.model = "";
 
             await Promise.all([
                 this.zagruzitSessiyu(),
@@ -85,8 +119,28 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
                 this.zagruzitSostoyanie(),
             ]);
 
+            this.primenitModelPoUmolchaniyu();
+
             this.loader = false;
             this.zapustitOpros();
+        },
+
+        /** Записать выбранную модель и запомнить её как последнюю. */
+        ustanovitModel(model: string | null) {
+            this.model = model ?? "";
+
+            const normalizovannaya = normalizovatModel(this.model);
+
+            if (normalizovannaya !== null) {
+                this.poslednyayaModel = normalizovannaya;
+            }
+        },
+
+        /** Подставить модель по умолчанию, если пользователь ещё не выбрал. */
+        primenitModelPoUmolchaniyu() {
+            if (this.model === "") {
+                this.model = this.modelPoUmolchaniyu;
+            }
         },
 
         zakrit() {
@@ -144,6 +198,7 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             const response = await UnitSessionService.prompt({
                 sessionId: this.sessionId,
                 text: tekst,
+                model: normalizovatModel(this.model) ?? undefined,
             });
 
             this.otpravka = false;
@@ -172,6 +227,7 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             const response = await UnitSessionService.otvetit({
                 turnId: idHoda,
                 answers,
+                model: normalizovatModel(this.model) ?? undefined,
             });
 
             this.otpravka = false;

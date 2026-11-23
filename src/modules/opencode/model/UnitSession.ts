@@ -8,6 +8,8 @@
 export type UnitSession = {
     id: string;
     credentialId: string;
+    /** Модель сессии; `null` — дефолт реквизитов. */
+    model?: string | null;
     title: string;
     externalSessionId: string | null;
     unitId: string;
@@ -45,6 +47,8 @@ export type UnitSessionTurn = {
     sessionId: string;
     seq: number;
     workflowId: string;
+    /** Фактическая модель хода; отсутствует у старых записей. */
+    model?: string | null;
     status: "RUNNING" | "ANSWERED" | "AWAITING_INPUT" | "FAILED";
     requestText: string;
     answers: UnitSessionAnswer[];

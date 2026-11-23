@@ -5,12 +5,20 @@ import {useStorSpiskaSessiyOpenCode} from "@/modules/opencode/store/StorSpiskaSe
 import UnitiService from "@/modules/unit/services/UnitiService";
 import type {Unit} from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import type {Schema} from "@/api/types";
+import type {RekvizityOpenCode} from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
+import {
+    modeliRekvizitov,
+    modelPoUmolchaniyu,
+    normalizovatModel,
+} from "@/modules/opencode/model/ModeliOpenCode";
 
 type StorFormiSozdaniyaSessiiState = {
     otkrita: boolean;
     /** Заголовок необязателен: пустое значение бэкенд заполнит сам. */
     title: string;
     credentialId: string;
+    /** Выбранная модель хода; пустая строка — дефолт реквизитов. */
+    model: string;
     /**
      * Юниты, к которым привязывается новая сессия.
      *
@@ -43,6 +51,7 @@ export const useStorFormiSozdaniyaSessii = defineStore("StorFormiSozdaniyaSessii
             otkrita: false,
             title: "",
             credentialId: "",
+            model: "",
             unitIds: [],
             uniti: [],
             loaderUnitov: false,
@@ -56,6 +65,21 @@ export const useStorFormiSozdaniyaSessii = defineStore("StorFormiSozdaniyaSessii
         /** Реквизиты для выпадающего списка. */
         rekvizity(): Schema<"OpenCodeCredential">[] {
             return useStorSpiskaRekvizitovOpenCode().spisok;
+        },
+
+        /** Полные реквизиты выбранного ключа (с моделями провайдера). */
+        vybrannieRekvizity(state): RekvizityOpenCode | null {
+            return useStorSpiskaRekvizitovOpenCode().rekvizityPoId(state.credentialId);
+        },
+
+        /** Модели, доступные для выбранных реквизитов. */
+        dostupnieModeli(): string[] {
+            return modeliRekvizitov(this.vybrannieRekvizity);
+        },
+
+        /** Модель по умолчанию выбранных реквизитов. */
+        modelPoUmolchaniyu(): string {
+            return modelPoUmolchaniyu(this.vybrannieRekvizity);
         },
 
         /** Сохранение невозможно без выбранных реквизитов или во время запроса. */
@@ -73,10 +97,12 @@ export const useStorFormiSozdaniyaSessii = defineStore("StorFormiSozdaniyaSessii
          */
         otkrit(unitIds: string[] = []) {
             const rekvizity = useStorSpiskaRekvizitovOpenCode().spisok;
+            const pervaya = rekvizity.length > 0 ? rekvizity[0] : null;
 
             this.otkrita = true;
             this.title = "";
-            this.credentialId = rekvizity.length > 0 ? rekvizity[0].id : "";
+            this.credentialId = pervaya?.id ?? "";
+            this.model = modelPoUmolchaniyu(pervaya);
             this.unitIds = [...unitIds];
             this.oshibkaOtBackenda = null;
             this.loader = false;
@@ -96,6 +122,24 @@ export const useStorFormiSozdaniyaSessii = defineStore("StorFormiSozdaniyaSessii
             this.otkrita = false;
             this.oshibkaOtBackenda = null;
             this.loader = false;
+        },
+
+        /**
+         * Сменить реквизиты и сбросить модель на их дефолт.
+         *
+         * Модель предыдущих реквизитов может быть недоступна новым, поэтому
+         * при смене ключа выбор всегда сбрасывается на `defaultModel`.
+         */
+        ustanovitRekvizity(credentialId: string) {
+            this.credentialId = credentialId;
+            this.model = modelPoUmolchaniyu(
+                useStorSpiskaRekvizitovOpenCode().rekvizityPoId(credentialId),
+            );
+        },
+
+        /** Записать выбранную модель; `null` очищает выбор до дефолта. */
+        ustanovitModel(model: string | null) {
+            this.model = model ?? "";
         },
 
         /**
@@ -162,6 +206,8 @@ export const useStorFormiSozdaniyaSessii = defineStore("StorFormiSozdaniyaSessii
                 // Пустой массив не отправляем: бэкенд принимает либо `unitIds`,
                 // либо `unit`, поэтому отсутствие поля означает «без юнитов».
                 unitIds: this.unitIds.length > 0 ? [...this.unitIds] : undefined,
+                // Пустую модель не отправляем: бэкенд возьмёт дефолт реквизитов.
+                model: normalizovatModel(this.model) ?? undefined,
             });
 
             this.loader = false;

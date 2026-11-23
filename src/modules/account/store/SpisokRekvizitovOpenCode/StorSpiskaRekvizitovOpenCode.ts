@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
 import OpenCodeCredentialService from "@/modules/account/services/OpenCodeCredentialService";
 import { useFormaRekvizitovOpenCodeStore } from "@/modules/account/store/SpisokRekvizitovOpenCode/FormaRekvizitovOpenCodeStore";
-import type { Schema } from "@/api/types";
+import type { RekvizityOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
 
 export type SostoyanieSpiskaRekvizitovOpenCode = {
-    spisok: Schema<"OpenCodeCredential">[];
+    spisok: RekvizityOpenCode[];
     loaderSpiska: boolean;
     oshibkaZagruzki: string | null;
     /** id реквизитов, по которым выполняется удаление. */
@@ -78,6 +78,11 @@ export const useStorSpiskaRekvizitovOpenCode = defineStore('StorSpiskaRekvizitov
         /** Название реквизитов по id — для подписи выбранного ключа в чате. */
         imyaRekvizitov(id: string): string | null {
             return this.spisok.find((rekvizity) => rekvizity.id === id)?.name ?? null;
+        },
+
+        /** Реквизиты по id — для форм сессий и workspace. */
+        rekvizityPoId(id: string): RekvizityOpenCode | null {
+            return this.spisok.find((rekvizity) => rekvizity.id === id) ?? null;
         },
     },
 });

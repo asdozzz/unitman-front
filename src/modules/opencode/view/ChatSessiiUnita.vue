@@ -8,8 +8,10 @@ import {
     GhIcon,
     GhInput,
     GhLabel,
+    GhSelect,
     GhSkeleton,
 } from "@/components/ui";
+import type { GhSelectOption } from "@/components/ui";
 import { useStorChataSessiiUnita } from "@/modules/opencode/store/StorChataSessiiUnita";
 import type { UnitSessionAnswer } from "@/modules/opencode/model/UnitSession";
 
@@ -22,6 +24,8 @@ const {
     sostoyanie,
     hody,
     prompt,
+    model,
+    dostupnieModeli,
     loader,
     otpravka,
     oshibka,
@@ -29,6 +33,16 @@ const {
     readOnly,
     prichinaReadOnly,
 } = storeToRefs(stor);
+
+/** Опции моделей реквизитов сессии. */
+const optsModelei = computed<GhSelectOption[]>(() =>
+    dostupnieModeli.value.map((nazvanie) => ({ value: nazvanie, label: nazvanie })),
+);
+
+/** Смена модели действует только на последующие ходы. */
+function izmenitModel(value: string | number | null): void {
+    stor.ustanovitModel(value === null ? null : String(value));
+}
 
 const zagolovok = computed<string>(() => {
     return session.value?.title || sostoyanie.value?.unitId || props.id;
@@ -90,6 +104,18 @@ onUnmounted(() => {
       <GhLabel v-if="readOnly" variant="neutral">
         {{ $t('opencode.unit_sessions.badges.read_only') }}
       </GhLabel>
+      <div class="unit-session-chat__model-select">
+        <GhSelect
+            :model-value="model"
+            :options="optsModelei"
+            size="sm"
+            use-input
+            hide-selected
+            fill-input
+            :placeholder="$t('opencode.rekvizity.fields.default_model')"
+            @update:model-value="izmenitModel"
+        />
+      </div>
       <GhButton
           v-if="session && !session.archived"
           variant="invisible"
@@ -135,6 +161,10 @@ onUnmounted(() => {
               class="unit-session-chat__assistant"
           >
             {{ hod.result.Answer }}
+          </div>
+
+          <div v-if="hod.model" class="unit-session-chat__model-caption">
+            {{ hod.model }}
           </div>
 
           <div
@@ -233,6 +263,16 @@ onUnmounted(() => {
 }
 
 .unit-session-chat__subtitle {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.unit-session-chat__model-select {
+  flex: 0 0 200px;
+  min-width: 140px;
+}
+
+.unit-session-chat__model-caption {
   color: var(--fgColor-muted);
   font-size: var(--fontSize-caption);
 }

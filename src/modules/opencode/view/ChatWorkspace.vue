@@ -9,8 +9,10 @@ import {
     GhIcon,
     GhInput,
     GhLabel,
+    GhSelect,
     GhSkeleton,
 } from "@/components/ui";
+import type { GhSelectOption } from "@/components/ui";
 import { useStorChataWorkspace } from "@/modules/opencode/store/StorChataWorkspace";
 import type { WorkspaceAnswer } from "@/modules/opencode/model/WorkspaceSession";
 
@@ -23,6 +25,8 @@ const {
     sostoyanie,
     hody,
     prompt,
+    model,
+    dostupnieModeli,
     loader,
     otpravka,
     oshibka,
@@ -31,6 +35,16 @@ const {
 
 const zagolovok = computed<string>(() => workspace.value?.name || props.id);
 const proekty = computed(() => sostoyanie.value?.projects ?? workspace.value?.projects ?? []);
+
+/** Каталог моделей всех реквизитов: workspace не отдаёт `credentialId`. */
+const optsModelei = computed<GhSelectOption[]>(() =>
+    dostupnieModeli.value.map((nazvanie) => ({ value: nazvanie, label: nazvanie })),
+);
+
+/** Смена модели действует только на последующие ходы. */
+function izmenitModel(value: string | number | null): void {
+    stor.ustanovitModel(value === null ? null : String(value));
+}
 
 /**
  * Бэкенд присылает машинный ключ ошибки (`opencode.turn.awaiting_answer`).
@@ -89,6 +103,18 @@ onUnmounted(() => {
       <GhLabel v-if="sostoyanie?.readOnly ?? workspace?.readOnly" variant="neutral">
         {{ $t('opencode.workspace.badges.read_only') }}
       </GhLabel>
+      <div class="workspace-chat__model-select">
+        <GhSelect
+            :model-value="model"
+            :options="optsModelei"
+            size="sm"
+            use-input
+            hide-selected
+            fill-input
+            :placeholder="$t('opencode.rekvizity.fields.default_model')"
+            @update:model-value="izmenitModel"
+        />
+      </div>
       <GhButton
           v-if="workspace && !workspace.archived"
           variant="invisible"
@@ -140,6 +166,10 @@ onUnmounted(() => {
               class="workspace-chat__assistant"
           >
             {{ hod.result.Answer }}
+          </div>
+
+          <div v-if="hod.model" class="workspace-chat__model-caption">
+            {{ hod.model }}
           </div>
 
           <div
@@ -238,6 +268,16 @@ onUnmounted(() => {
 }
 
 .workspace-chat__subtitle {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.workspace-chat__model-select {
+  flex: 0 0 200px;
+  min-width: 140px;
+}
+
+.workspace-chat__model-caption {
   color: var(--fgColor-muted);
   font-size: var(--fontSize-caption);
 }

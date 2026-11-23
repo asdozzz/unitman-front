@@ -1,5 +1,14 @@
 import apiClient from "@/bootstrap/apiClient";
 import type { Schema } from "@/api/types";
+import type {
+    IdRekvizitovOpenCode,
+    OtvetSpiskaModeleiOpenCode,
+    ProvayderOpenCode,
+    RekvizityOpenCode,
+    ZaprosIzmeneniyaRekvizitovOpenCode,
+    ZaprosSpiskaModeleiOpenCode,
+    ZaprosSozdaniyaRekvizitovOpenCode,
+} from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
 
 /**
  * Сервис реквизитов OpenCode (`/account/opencode/*`).
@@ -8,17 +17,38 @@ import type { Schema } from "@/api/types";
  * отдаётся — в списке приходит только маска `apiKeyHint`.
  *
  * Тела запросов и типы ответов выводятся из сгенерированной OpenAPI-схемы
- * (`yarn gen:api`).
+ * (`yarn gen:api`) через типы модуля account (`OpenCodeRekvizity`).
  */
 class OpenCodeCredentialService {
-    /** Контракт объявляет эндпоинт как GET; ответ — `OpenCodeCredential[]`. */
-    spisokRekvizitov() {
-        return apiClient.get('/account/opencode/spisokRekvizitov');
+    /** Каталог провайдеров: код, название, baseUrl и статические модели. */
+    providers() {
+        return apiClient.get<ProvayderOpenCode[]>('/account/opencode/providers');
     }
 
-    /** Создание реквизитов. Ответ — `IdHolder`, ключ в ответе не возвращается. */
-    sozdatRekvizity(params: Schema<"SozdatRekvizityOpenCode">) {
-        return apiClient.post('/account/opencode/sozdatRekvizity', params);
+    /**
+     * Список моделей у провайдера.
+     *
+     * HTTP всегда 200: при ошибке провайдера приходит `source: 'static'` и
+     * `errorKey`, форма при этом не блокируется.
+     */
+    spisokModelei(params: ZaprosSpiskaModeleiOpenCode) {
+        return apiClient.post<OtvetSpiskaModeleiOpenCode>(
+            '/account/opencode/spisokModelei',
+            params,
+        );
+    }
+
+    /** Реквизиты текущего пользователя (с провайдером и моделями). */
+    spisokRekvizitov() {
+        return apiClient.get<RekvizityOpenCode[]>('/account/opencode/spisokRekvizitov');
+    }
+
+    /** Создание реквизитов. Ответ — идентификатор; ключ не возвращается. */
+    sozdatRekvizity(params: ZaprosSozdaniyaRekvizitovOpenCode) {
+        return apiClient.post<IdRekvizitovOpenCode>(
+            '/account/opencode/sozdatRekvizity',
+            params,
+        );
     }
 
     /**
@@ -28,8 +58,11 @@ class OpenCodeCredentialService {
      * Бэкенд отвечает `data: null`, поэтому после вызова список
      * перезапрашивается, а не правится по ответу.
      */
-    izmenitRekvizity(params: Schema<"IzmenitRekvizityOpenCode">) {
-        return apiClient.post('/account/opencode/izmenitRekvizity', params);
+    izmenitRekvizity(params: ZaprosIzmeneniyaRekvizitovOpenCode) {
+        return apiClient.post<null>(
+            '/account/opencode/izmenitRekvizity',
+            params,
+        );
     }
 
     /** Удаление реквизитов. Ответ — `data: null`. */

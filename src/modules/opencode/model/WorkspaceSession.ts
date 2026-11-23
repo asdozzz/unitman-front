@@ -25,6 +25,8 @@ export type WorkspaceProject = {
 export type WorkspaceSession = {
     id: string;
     name: string;
+    /** Модель сессии; `null` — дефолт реквизитов. */
+    model?: string | null;
     branch: string;
     status: WorkspaceStatus;
     readOnly: boolean;
@@ -63,6 +65,8 @@ export type WorkspaceTurn = {
     id: string;
     sessionId: string;
     seq: number;
+    /** Фактическая модель хода; отсутствует у старых записей. */
+    model?: string | null;
     status: "RUNNING" | "ANSWERED" | "AWAITING_INPUT" | "FAILED";
     requestText: string;
     answers: WorkspaceAnswer[];

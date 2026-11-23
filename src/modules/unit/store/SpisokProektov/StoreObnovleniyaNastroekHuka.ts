@@ -9,13 +9,23 @@ export class HookSettingsForm {
     avtoobnovlenie: boolean;
     avtoudalenie: boolean;
     obnovlenieBezSbrosaPodgotovki: boolean;
+    /** Git-вебхук проекта уже присылал валидное событие. */
+    vebhukNastroen: boolean;
 
-    constructor(id: string = "", avtosozdanie: boolean = false, avtoobnovlenie: boolean = true, avtoudalenie: boolean = true, obnovlenieBezSbrosaPodgotovki: boolean = false) {
+    constructor(
+        id: string = "",
+        avtosozdanie: boolean = false,
+        avtoobnovlenie: boolean = true,
+        avtoudalenie: boolean = true,
+        obnovlenieBezSbrosaPodgotovki: boolean = false,
+        vebhukNastroen: boolean = false,
+    ) {
         this.id = id;
         this.avtosozdanie = avtosozdanie;
         this.avtoobnovlenie = avtoobnovlenie;
         this.avtoudalenie = avtoudalenie;
         this.obnovlenieBezSbrosaPodgotovki = obnovlenieBezSbrosaPodgotovki;
+        this.vebhukNastroen = vebhukNastroen;
     }
 }
 

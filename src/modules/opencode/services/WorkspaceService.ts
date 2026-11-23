@@ -43,6 +43,8 @@ class WorkspaceService {
         prompt: string;
         branch: string;
         projectBranches?: { projectId: string; branch: string }[];
+        /** Модель хода; пустое значение — дефолт реквизитов. */
+        model?: string | null;
     }): Promise<ApiResponse<{ id: string; status: WorkspaceSession["status"] }>> {
         return apiClient.post<{ id: string; status: WorkspaceSession["status"] }>(
             "/opencode/workspace/sozdat",
@@ -81,10 +83,15 @@ class WorkspaceService {
         return apiClient.post<{ link: string }>("/opencode/workspace/ssylkaPoPortu", params);
     }
 
-    prompt(params: { workspaceId: string; text: string }): Promise<ApiResponse<WorkspaceLaunch>> {
+    prompt(params: {
+        workspaceId: string;
+        text: string;
+        model?: string | null;
+    }): Promise<ApiResponse<WorkspaceLaunch>> {
         return apiClient.post<WorkspaceLaunch>("/opencode/prompt", {
             sessionId: params.workspaceId,
             text: params.text,
+            model: params.model ?? undefined,
         });
     }
 
@@ -105,9 +112,11 @@ class WorkspaceService {
     otvetit(params: {
         turnId: string;
         answers: WorkspaceAnswer[];
+        model?: string | null;
     }): Promise<ApiResponse<WorkspaceLaunch>> {
         return apiClient.post<WorkspaceLaunch>("/opencode/otvetit", {
             turnId: params.turnId,
+            model: params.model ?? undefined,
             answers: params.answers.map((answer) => ({
                 QuestionId: answer.QuestionId,
                 OptionId: answer.OptionId,

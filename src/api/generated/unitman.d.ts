@@ -165,6 +165,23 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/account/opencode/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Каталог провайдеров OpenCode */
+        get: operations["get_app_account_infra_opencodecredential_providers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/opencode/sozdatRekvizity": {
         parameters: {
             query?: never;
@@ -176,6 +193,23 @@ export type paths = {
         put?: never;
         /** Добавить реквизиты OpenCode */
         post: operations["post_app_account_infra_opencodecredential_sozdatrekvizity"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/opencode/spisokModelei": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Загрузить список моделей у провайдера OpenCode */
+        post: operations["post_app_account_infra_opencodecredential_spisokmodelei"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3122,10 +3156,16 @@ export type components = {
              * @description Новый API-ключ. null или пустая строка — оставить прежний
              */
             apiKey?: string | null;
+            /** @description Новая дефолтная модель; null — оставить прежнюю */
+            defaultModel?: string | null;
             /** Format: uuid */
             id: string;
             model?: string | null;
+            /** @description Новый набор моделей (заменяет прежний целиком); null — оставить прежний */
+            models?: string[] | null;
             name?: string | null;
+            /** @description Новый провайдер; null — оставить прежний */
+            provider?: string | null;
             url?: string | null;
         };
         IzmenitUrlWebhooka: {
@@ -3223,6 +3263,11 @@ export type components = {
         };
         /** @description Промпт пользователя, запускающий новый ход */
         NachatPrompt: {
+            /**
+             * @description Переопределение модели перед ходом; приоритет: запрос → модель сессии → дефолт реквизитов
+             * @example gpt-4o-mini
+             */
+            model?: string | null;
             /** Format: uuid */
             sessionId: string;
             /**
@@ -3254,6 +3299,7 @@ export type components = {
             avtoudalenie: boolean;
             id: string;
             obnovlenieBezSbrosaPodgotovki: boolean;
+            vebhukNastroen: boolean;
         };
         ObnovitToken: {
             /**
@@ -3283,18 +3329,39 @@ export type components = {
              * @example 1762000000
              */
             createdAt: number;
+            /**
+             * @description Дефолтная модель реквизитов
+             * @example gpt-4o
+             */
+            defaultModel: string;
             /** Format: uuid */
             id: string;
-            /** @example claude-sonnet-4 */
+            /**
+             * @description Синоним `defaultModel` для обратной совместимости
+             * @example gpt-4o
+             */
             model: string;
+            /**
+             * @description Все модели реквизитов
+             * @example [
+             *       "gpt-4o",
+             *       "gpt-4o-mini"
+             *     ]
+             */
+            models: string[];
             /** @example Рабочий ключ */
             name: string;
+            /**
+             * @description Код провайдера из каталога
+             * @example openai
+             */
+            provider: string;
             /**
              * @description Момент последнего изменения, unix timestamp (секунды)
              * @example 1762000000
              */
             updatedAt: number;
-            /** @example https://api.opencode.ai */
+            /** @example https://api.openai.com/v1 */
             url: string;
         };
         OpenCodeQuestion: {
@@ -3335,6 +3402,11 @@ export type components = {
             id: string;
             /** @description Ссылка на редактор workspace; null для unit-сессий и если proxy host первого проекта пуст */
             ideLink?: string | null;
+            /**
+             * @description Модель, выбранная при создании сессии; null — будет использована дефолтная модель реквизитов
+             * @example gpt-4o
+             */
+            model?: string | null;
             /** @example Рефакторинг модуля биллинга */
             title: string;
             /**
@@ -3393,6 +3465,11 @@ export type components = {
             finishedAt?: number | null;
             /** Format: uuid */
             id: string;
+            /**
+             * @description Фактическая модель хода после разрешения приоритета; null — использовалась дефолтная модель реквизитов
+             * @example gpt-4o-mini
+             */
+            model?: string | null;
             /**
              * @description Имя Centrifugo-канала прогресса этого хода. Для завершённых ходов остаётся прежним и может использоваться для дозагрузки снапшота через /poluchitProgressHoda.
              * @example unit_progress#6f1c5e0a-7d1f-4d59-9a54-0c2f8a2e6f11
@@ -3485,6 +3562,11 @@ export type components = {
         OtvetitNaVopros: {
             /** @description Ответы по каждому вопросу хода */
             answers: components["schemas"]["OpenCodeAnswer"][];
+            /**
+             * @description Переопределение модели для нового хода; приоритет: запрос → модель сессии → дефолт реквизитов
+             * @example gpt-4o-mini
+             */
+            model?: string | null;
             /**
              * Format: uuid
              * @description Ход в статусе AWAITING_INPUT
@@ -3669,6 +3751,11 @@ export type components = {
             avtosozdanie: boolean;
             avtoudalenie: boolean;
             obnovlenieBezSbrosaPodgotovki: boolean;
+            /**
+             * @description Git-вебхук проекта уже присылал валидное событие. Пока false, Unitman сам опрашивает ветки.
+             * @example false
+             */
+            vebhukNastroen: boolean;
         };
         /** @description Проект (read-модель ProjectList) */
         ProjectListItem: {
@@ -3753,6 +3840,36 @@ export type components = {
         ProveritProxyHost: {
             /** @default  */
             proxyHost?: string;
+        };
+        /** @description Элемент каталога провайдеров OpenCode (ProvayderOpenCodeReadModel); список моделей запрашивается отдельно */
+        ProviderOpenCode: {
+            /**
+             * @description Схема авторизации: bearer, api_key_header или none
+             * @example bearer
+             */
+            authStyle: string;
+            /**
+             * @description Базовый URL для подстановки в реквизиты; пустой для `custom`
+             * @example https://api.openai.com/v1
+             */
+            baseUrl: string;
+            /**
+             * @description Код провайдера; он же значение `provider` в реквизитах
+             * @example openai
+             */
+            code: string;
+            /**
+             * @description Путь эндпоинта списка моделей относительно `baseUrl`
+             * @example /models
+             */
+            modelsPath: string;
+            /** @example OpenAI */
+            name: string;
+            /**
+             * @description Поддерживает ли провайдер live-запрос списка моделей
+             * @example true
+             */
+            supportsModelList: boolean;
         };
         /** @description Результат проверки доступности proxy host */
         ProxyHostCheckResult: {
@@ -3975,7 +4092,7 @@ export type components = {
             status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
             units: components["schemas"]["WorkspaceUnit"][];
         };
-        /** @description Реквизиты подключения к OpenCode (API-ключ шифруется на бэкенде) */
+        /** @description Реквизиты подключения к OpenCode (API-ключ шифруется на бэкенде). Для известного провайдера `url` можно не передавать — подставляется `baseUrl` каталога; для `custom` он обязателен */
         SozdatRekvizityOpenCode: {
             /**
              * Format: password
@@ -3983,20 +4100,39 @@ export type components = {
              */
             apiKey: string;
             /**
-             * @description Идентификатор модели OpenCode
+             * @description Дефолтная модель набора; пустое значение — первая модель из `models`
+             * @example gpt-4o
+             */
+            defaultModel?: string | null;
+            /**
+             * @description Устаревший синоним единственной модели. При заполненном `model` и пустых `models` набором становится `[model]`
              * @example claude-sonnet-4
              */
-            model: string;
+            model?: string | null;
+            /**
+             * @description Набор моделей реквизитов (1–50, без дубликатов). Пустой массив при заполненном legacy `model` трактуется как `[model]`
+             * @example [
+             *       "gpt-4o",
+             *       "gpt-4o-mini"
+             *     ]
+             */
+            models?: string[];
             /**
              * @description Произвольное имя реквизитов, уникальное в рамках аккаунта
              * @example Рабочий ключ
              */
             name: string;
             /**
-             * @description Базовый URL API OpenCode
-             * @example https://api.opencode.ai
+             * @description Код провайдера из `GET /api/account/opencode/providers`; `custom` — произвольный OpenAI-совместимый эндпоинт
+             * @default custom
+             * @example openai
              */
-            url: string;
+            provider?: string;
+            /**
+             * @description Базовый URL API. Для известного провайдера игнорируется и подставляется из каталога, для `custom` обязателен (`account.opencode_credential.empty_url`)
+             * @example https://api.openai.com/v1
+             */
+            url?: string | null;
         };
         /** @description Создание сессии OpenCode под выбранные реквизиты; сессию можно сразу привязать к существующим юнитам (`unitIds`) либо создать один новый юнит вместе с ней (`unit`) */
         SozdatSessiyu: {
@@ -4005,6 +4141,11 @@ export type components = {
              * @description Идентификатор реквизитов из /api/account/opencode (обязателен: ключ выбирает пользователь)
              */
             credentialId: string;
+            /**
+             * @description Модель из набора реквизитов; пустое значение — дефолтная модель реквизитов. Недопустимая модель даёт `account.opencode_credential.model_not_available`
+             * @example gpt-4o
+             */
+            model?: string | null;
             /**
              * @description Необязательный заголовок сессии; при пустом значении подставляется по первому промпту
              * @example Рефакторинг модуля биллинга
@@ -4090,6 +4231,11 @@ export type components = {
             /** Format: uuid */
             credentialId: string;
             /**
+             * @description Модель из набора реквизитов; пустое значение — дефолтная модель реквизитов
+             * @example gpt-4o
+             */
+            model?: string | null;
+            /**
              * @description Название workspace, уникальное в рамках аккаунта
              * @example payments-refactor
              */
@@ -4107,6 +4253,34 @@ export type components = {
             prompt: string;
         };
         SpisokLichnihTokenov: Record<string, never>;
+        /** @description Результат загрузки списка моделей (SpisokModeleiReadModel). При отсутствии live-списка или ошибке провайдера отдаётся пустой список, `source: manual` и `errorKey`, HTTP 200 */
+        SpisokModelei: {
+            /**
+             * @description Ключ перевода ошибки провайдера; null при успехе
+             * @example account.opencode_credential.provider_unavailable
+             */
+            errorKey: string | null;
+            /**
+             * @example [
+             *       "gpt-4o",
+             *       "gpt-4o-mini"
+             *     ]
+             */
+            models: string[];
+            /** @example openai */
+            provider: string;
+            /**
+             * @description HTTP-статус ответа провайдера; null, если ответа не было (сеть, таймаут) или список не запрашивался
+             * @example 403
+             */
+            providerStatus?: number | null;
+            /**
+             * @description `live` — список получен от провайдера, `manual` — провайдер не отдаёт список или запрос завершился ошибкой
+             * @example live
+             * @enum {string}
+             */
+            source: "live" | "manual";
+        };
         /** @description Список редакторов юнита с состоянием их личных токенов */
         SpisokRedaktorov: {
             /** @example false */
@@ -4258,6 +4432,28 @@ export type components = {
             /** @enum {string} */
             type: "string" | "integer" | "float" | "collection";
         };
+        /** @description Отложенное намерение по юниту (вебхук или polling) */
+        UnitIntention: {
+            /**
+             * @description Unix timestamp создания намерения
+             * @example 1730000000
+             */
+            createdAt: number;
+            /**
+             * @description ready — можно применять; held_autoobnovlenie — ждёт включения автообновления
+             * @enum {string}
+             */
+            status: "ready" | "held_autoobnovlenie";
+            /** @enum {string} */
+            tipSobitiya: "KOD_OBNOVLEN" | "VETKA_UDALENA" | "VETKA_SMERZHENA";
+            /**
+             * @description Unix timestamp события ветки
+             * @example 1730000000
+             */
+            unixtime: number;
+            /** @example feature/123 */
+            vetka: string;
+        };
         /** @description Ссылка на сервис запущенного юнита */
         UnitLink: {
             /** @example http://8080.feature-123.my-app.proxy.example */
@@ -4320,6 +4516,8 @@ export type components = {
             moguRedaktirovat?: boolean | null;
             /** @example feature-123 */
             name: string;
+            /** @description Отложенные намерения по юниту (вебхук или polling) */
+            namereniya?: components["schemas"]["UnitIntention"][];
             peremenie: components["schemas"]["UnitVariableValue"][];
             /**
              * @description Причина занятости: `opencode_hod` — юнит захвачен ходом OpenCode, `prozes` — у юнита есть незавершённый процесс; null — юнит свободен. Значение `opencode_hod` приходит из таблицы `unit_zanyatost`, `prozes` вычисляется по незавершённым процессам read-модели.
@@ -4597,6 +4795,11 @@ export type components = {
             /** Format: uuid */
             id: string;
             ideLink?: string | null;
+            /**
+             * @description Модель workspace-сессии; null — дефолтная модель реквизитов
+             * @example gpt-4o
+             */
+            model?: string | null;
             name: string;
             projects: components["schemas"]["WorkspaceProject"][];
             readOnly: boolean;
@@ -5116,6 +5319,48 @@ export interface operations {
             };
         };
     };
+    get_app_account_infra_opencodecredential_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Статический каталог провайдеров с baseUrl и стартовым списком моделей */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Провайдеры OpenCode */
+                        data: components["schemas"]["ProviderOpenCode"][];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_account_infra_opencodecredential_sozdatrekvizity: {
         parameters: {
             query?: never;
@@ -5137,6 +5382,58 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: components["schemas"]["IdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_opencodecredential_spisokmodelei: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Одноразовый ключ, не сохраняется */
+                    apiKey?: string | null;
+                    /** @description Сохранённые реквизиты, ключ расшифровывается */
+                    credentialId?: string | null;
+                    /** @description Код провайдера */
+                    provider: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Список моделей: live-ответ провайдера либо manual-режим с ключом ошибки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["SpisokModelei"];
                         /**
                          * @example success
                          * @enum {string}
@@ -6701,7 +6998,13 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, never>;
+                "application/json": {
+                    answers: Record<string, never>[];
+                    /** @description Переопределение модели перед ходом */
+                    model?: string | null;
+                    /** Format: uuid */
+                    turnId: string;
+                };
             };
         };
         responses: {
@@ -6767,7 +7070,13 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, never>;
+                "application/json": {
+                    /** @description Переопределение модели перед ходом */
+                    model?: string | null;
+                    /** Format: uuid */
+                    sessionId: string;
+                    text: string;
+                };
             };
         };
         responses: {
@@ -6833,7 +7142,15 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, never>;
+                "application/json": {
+                    /** Format: uuid */
+                    credentialId: string;
+                    /** @description Модель из набора реквизитов; по умолчанию — дефолтная */
+                    model?: string | null;
+                    title?: string | null;
+                    /** Format: uuid */
+                    unitId: string;
+                };
             };
         };
         responses: {
@@ -6977,7 +7294,13 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, never>;
+                "application/json": {
+                    answers: Record<string, never>[];
+                    /** @description Переопределение модели перед ходом */
+                    model?: string | null;
+                    /** Format: uuid */
+                    turnId: string;
+                };
             };
         };
         responses: {
@@ -7043,7 +7366,13 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, never>;
+                "application/json": {
+                    /** @description Переопределение модели перед ходом */
+                    model?: string | null;
+                    text: string;
+                    /** Format: uuid */
+                    workspaceId: string;
+                };
             };
         };
         responses: {

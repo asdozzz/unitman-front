@@ -31,7 +31,14 @@ const route = useRoute();
 async function zagruzitNastroiki(): Promise<void> {
   await storeProekta.poluchitProekt(route.params.id as string);
   if (proekt.value) {
-    formStore.otkritFormu(new HookSettingsForm(proekt.value.id, proekt.value.nastroikiHukaProekta.avtosozdanie, proekt.value.nastroikiHukaProekta.avtoobnovlenie, proekt.value.nastroikiHukaProekta.avtoudalenie, proekt.value.nastroikiHukaProekta.obnovlenieBezSbrosaPodgotovki))
+    formStore.otkritFormu(new HookSettingsForm(
+        proekt.value.id,
+        proekt.value.nastroikiHukaProekta.avtosozdanie,
+        proekt.value.nastroikiHukaProekta.avtoobnovlenie,
+        proekt.value.nastroikiHukaProekta.avtoudalenie,
+        proekt.value.nastroikiHukaProekta.obnovlenieBezSbrosaPodgotovki,
+        proekt.value.nastroikiHukaProekta.vebhukNastroen,
+    ))
   }
 }
 
@@ -116,7 +123,16 @@ function skopirovatHook(): void {
               :label="$t('unit.form_project_settings.fields.labels.updateWithoutReset')"
               @update:model-value="form.obnovlenieBezSbrosaPodgotovki = $event"
           />
+          <GhSwitch
+              :model-value="form.vebhukNastroen"
+              :label="$t('unit.form_project_settings.fields.labels.gitWebhookConfigured')"
+              @update:model-value="form.vebhukNastroen = $event"
+          />
         </div>
+
+        <p class="hook-settings__hint">
+          {{ $t('unit.proekt.hook_settings.git_webhook_hint') }}
+        </p>
 
         <GhBanner v-if="oshibkaOtBackenda" variant="danger" class="hook-settings__error">
           {{ oshibkaOtBackenda }}

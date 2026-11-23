@@ -439,7 +439,8 @@
       },
       "hook_settings": {
         "hint": "To make the settings below work, configure a webhook in your repository hosting systems (gitlab, github).",
-        "chip_label": "repository event handler"
+        "chip_label": "repository event handler",
+        "git_webhook_hint": "While the Git webhook is not confirmed, Unitman polls repository branches itself. The flag turns on automatically after the first valid event."
       },
       "jobs": {
         "title": "Project jobs",
@@ -694,7 +695,8 @@
           "autoCreate": "Auto create unit",
           "autoUpdate": "Auto update unit",
           "autoDelete": "Auto delete unit",
-          "updateWithoutReset": "Updating without resetting the preparation"
+          "updateWithoutReset": "Updating without resetting the preparation",
+          "gitWebhookConfigured": "Git webhook configured"
         }
       },
       "buttons": {
@@ -976,6 +978,16 @@
           "error_hint": "The last operation finished with an error",
           "no_variables": "No variables configured"
         },
+        "intentions": {
+          "update": "Update pending",
+          "update_held": "Waiting for auto-update to be enabled",
+          "delete": "Deletion pending",
+          "merge": "Deletion pending after merge",
+          "tooltip": "Unit intentions",
+          "type_update": "update",
+          "type_delete": "branch deletion",
+          "type_merge": "branch merge"
+        },
         "container_state": {
           "title": "Container state does not match the expected state",
           "message": "Expected: {expected}. Actual: {actual}.",
@@ -1236,6 +1248,21 @@
     }
   },
   "opencode": {
+    "providers": {
+      "openai": "OpenAI",
+      "anthropic": "Anthropic",
+      "google": "Google Gemini",
+      "openrouter": "OpenRouter",
+      "deepseek": "DeepSeek",
+      "mistral": "Mistral",
+      "groq": "Groq",
+      "xai": "xAI",
+      "together": "Together AI",
+      "ollama": "Ollama",
+      "opencode": "OpenCode Zen",
+      "opencode-go": "OpenCode Go",
+      "custom": "Other OpenAI-compatible"
+    },
     "notifications": {
       "new_answer": "New message in the session \"{title}\"",
       "new_question": "OpenCode is waiting for an answer in the session \"{title}\"",
@@ -1393,7 +1420,27 @@
       },
       "fields": {
         "api_key_hint": "Key",
-        "updated_at": "Updated"
+        "updated_at": "Updated",
+        "provider": "Provider",
+        "models": "Models",
+        "default_model": "Default model"
+      },
+      "default_marker": "default",
+      "model_errors": {
+        "empty_models": "Add at least one model",
+        "too_many_models": "Too many models: 50 at most",
+        "duplicate_model": "Models must not repeat",
+        "model_not_available": "The model is not available for these credentials",
+        "unknown_provider": "Unknown provider",
+        "empty_provider": "Select a provider",
+        "empty_url": "Enter the provider URL",
+        "provider_list_not_supported": "The provider does not expose a model list",
+        "provider_unavailable": "The provider is unavailable",
+        "provider_error": "Provider error",
+        "provider_invalid_key": "The provider rejected the request: the API key is most likely invalid",
+        "provider_response_too_large": "The provider response is too large",
+        "provider_invalid_response": "Invalid provider response",
+        "provider_empty_response": "The provider returned an empty model list"
       },
       "delete": {
         "caption": "Delete credentials?",
@@ -1404,11 +1451,29 @@
         "caption_edit": "Edit OpenCode credentials",
         "fields": {
           "name": "Name",
+          "provider": "Provider",
+          "provider_hint": "The base URL is filled in automatically",
+          "provider_error": "Failed to load the provider catalog",
           "url": "Gateway URL",
+          "url_custom": "A custom provider requires a URL",
+          "url_derived": "The URL comes from the provider catalog",
           "model": "Model",
+          "models": "Models",
+          "default_model": "Default model",
           "api_key": "API key",
           "api_key_new": "The key is encrypted and never shown after saving",
           "api_key_keep": "Leave empty to keep the current key ({hint})"
+        },
+        "models": {
+          "hint": "Pick models from the list returned by the provider",
+          "hint_manual": "The provider does not expose a model list — add names manually",
+          "need_key": "Enter the API key to load the model list",
+          "add_placeholder": "Model name",
+          "add": "Add model",
+          "refresh": "Refresh model list from provider",
+          "empty": "Add at least one model",
+          "source_live": "The list was returned by the provider",
+          "source_manual": "The provider does not expose a model list — enter the name manually"
         },
         "buttons": {
           "close": "Cancel",

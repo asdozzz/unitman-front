@@ -439,7 +439,8 @@
       },
       "hook_settings": {
         "hint": "Для работы настроек ниже, нужно настроить вебхук в своих системах хранения репозиториев (gitlab, github).",
-        "chip_label": "обработчик событий репозитория"
+        "chip_label": "обработчик событий репозитория",
+        "git_webhook_hint": "Пока Git-вебхук не подтверждён, Unitman сам опрашивает ветки репозитория. После первого валидного события флаг включится автоматически."
       },
       "jobs": {
         "title": "Задачи проекта",
@@ -602,7 +603,8 @@
           "autoCreate": "Автосоздание юнита при создании ветки",
           "autoUpdate": "Автообновление юнита при пуше в ветку",
           "autoDelete": "Автоудаление юнита при удалении ветки",
-          "updateWithoutReset": "Обновление юнита без сброса подготовки"
+          "updateWithoutReset": "Обновление юнита без сброса подготовки",
+          "gitWebhookConfigured": "Git-вебхук настроен"
         }
       },
       "buttons": {
@@ -957,6 +959,16 @@
           "error_hint": "Последняя операция завершилась ошибкой",
           "no_variables": "Переменные не заданы"
         },
+        "intentions": {
+          "update": "Ожидает обновления",
+          "update_held": "Ждёт включения автообновления",
+          "delete": "Ожидает удаления",
+          "merge": "Ожидает удаления после слияния",
+          "tooltip": "Намерения по юниту",
+          "type_update": "обновление",
+          "type_delete": "удаление ветки",
+          "type_merge": "слияние ветки"
+        },
         "container_state": {
           "title": "Контейнер не соответствует ожидаемому состоянию",
           "message": "Ожидалось: {expected}. Фактически: {actual}.",
@@ -1217,6 +1229,21 @@
     }
   },
   "opencode": {
+    "providers": {
+      "openai": "OpenAI",
+      "anthropic": "Anthropic",
+      "google": "Google Gemini",
+      "openrouter": "OpenRouter",
+      "deepseek": "DeepSeek",
+      "mistral": "Mistral",
+      "groq": "Groq",
+      "xai": "xAI",
+      "together": "Together AI",
+      "ollama": "Ollama",
+      "opencode": "OpenCode Zen",
+      "opencode-go": "OpenCode Go",
+      "custom": "Другой OpenAI-совместимый"
+    },
     "notifications": {
       "new_answer": "Новое сообщение в сессии «{title}»",
       "new_question": "OpenCode ждёт ответа в сессии «{title}»",
@@ -1374,7 +1401,27 @@
       },
       "fields": {
         "api_key_hint": "Ключ",
-        "updated_at": "Обновлено"
+        "updated_at": "Обновлено",
+        "provider": "Провайдер",
+        "models": "Модели",
+        "default_model": "Модель по умолчанию"
+      },
+      "default_marker": "по умолчанию",
+      "model_errors": {
+        "empty_models": "Добавьте хотя бы одну модель",
+        "too_many_models": "Слишком много моделей: не более 50",
+        "duplicate_model": "Модели не должны повторяться",
+        "model_not_available": "Модель недоступна для этих реквизитов",
+        "unknown_provider": "Неизвестный провайдер",
+        "empty_provider": "Выберите провайдера",
+        "empty_url": "Укажите URL провайдера",
+        "provider_list_not_supported": "Провайдер не отдаёт список моделей",
+        "provider_unavailable": "Провайдер недоступен",
+        "provider_error": "Ошибка провайдера",
+        "provider_invalid_key": "Провайдер отклонил запрос: вероятнее всего, указан невалидный API-ключ",
+        "provider_response_too_large": "Ответ провайдера слишком большой",
+        "provider_invalid_response": "Некорректный ответ провайдера",
+        "provider_empty_response": "Провайдер вернул пустой список моделей"
       },
       "delete": {
         "caption": "Удалить реквизиты?",
@@ -1385,11 +1432,29 @@
         "caption_edit": "Изменение реквизитов OpenCode",
         "fields": {
           "name": "Название",
+          "provider": "Провайдер",
+          "provider_hint": "Базовый URL подставится автоматически",
+          "provider_error": "Не удалось загрузить каталог провайдеров",
           "url": "URL шлюза",
+          "url_custom": "Для своего провайдера URL обязателен",
+          "url_derived": "URL берётся из каталога провайдера",
           "model": "Модель",
+          "models": "Модели",
+          "default_model": "Модель по умолчанию",
           "api_key": "API-ключ",
           "api_key_new": "Ключ шифруется и не отображается после сохранения",
           "api_key_keep": "Оставьте поле пустым, чтобы сохранить текущий ключ ({hint})"
+        },
+        "models": {
+          "hint": "Выберите модели из списка, полученного от провайдера",
+          "hint_manual": "Провайдер не отдаёт список моделей — добавьте названия вручную",
+          "need_key": "Введите API-ключ, чтобы загрузить список моделей",
+          "add_placeholder": "Название модели",
+          "add": "Добавить модель",
+          "refresh": "Обновить список моделей у провайдера",
+          "empty": "Добавьте хотя бы одну модель",
+          "source_live": "Список получен от провайдера",
+          "source_manual": "Провайдер не отдаёт список моделей — введите название вручную"
         },
         "buttons": {
           "close": "Отмена",

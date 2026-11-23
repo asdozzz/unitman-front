@@ -1,12 +1,18 @@
-<script setup lang="ts">
-import { computed } from "vue";
+<script setup lang="ts" generic="T extends string | number | null | Array<string | number>">
+import { computed, getCurrentInstance, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import GhIcon from "./GhIcon.vue";
 import type { GhControlSize, GhSelectOption } from "./types";
 
+/**
+ * Тип значения задаётся потребителем через `v-model`: в одиночном режиме это
+ * `string | number | null`, в режиме `multiple` — массив `(string | number)[]`.
+ * Благодаря generic-компоненту старые вызовы сохраняют узкий тип emit, а
+ * множественный выбор получает массив без `as`-приведения на стороне формы.
+ */
 const props = withDefaults(
   defineProps<{
-    modelValue: string | number | null;
+    modelValue: T;
     options: GhSelectOption[];
     label?: string;
     placeholder?: string;
@@ -27,6 +33,10 @@ const props = withDefaults(
     fillInput?: boolean;
     /** Спиннер загрузки в поле (например, пока грузятся ветки). */
     loading?: boolean;
+    /** Множественный выбор: `modelValue` — массив значений, emit отдаёт массив. */
+    multiple?: boolean;
+    /** Показывать выбранные значения чипами (имеет смысл вместе с `multiple`). */
+    useChips?: boolean;
   }>(),
   {
     label: "",
@@ -43,11 +53,13 @@ const props = withDefaults(
     hideSelected: false,
     fillInput: false,
     loading: false,
+    multiple: false,
+    useChips: false,
   },
 );
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string | number | null): void;
+  (e: "update:modelValue", value: T): void;
   (
     e: "filter",
     inputValue: string,
@@ -57,6 +69,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const instance = getCurrentInstance();
 
 const podskazka = computed<string>(
   () => props.placeholder || t("common.select.placeholder"),
@@ -66,8 +79,91 @@ const ariaInvalidFinal = computed<boolean | undefined>(() =>
   props.ariaInvalid || props.error ? true : undefined,
 );
 
-function obnovitZnachenie(value: string | number | null): void {
-  emit("update:modelValue", value);
+/** Чипы Quasar имеют смысл только при множественном выборе. */
+const mnogoznachniy = computed<boolean>(() => props.multiple || props.useChips);
+
+/**
+ * `use-input` без `fill-input` заставляет Quasar показывать выбранное значение
+ * отдельным элементом и одновременно placeholder. Для одиночного выбора
+ * включаем `fill-input` автоматически, чтобы в поле было ровно одно значение.
+ */
+const ispolzovatFillInput = computed<boolean>(
+  () => props.fillInput || (props.useInput && !mnogoznachniy.value),
+);
+
+/**
+ * `@filter` имеет смысл только когда родитель сам управляет списком опций.
+ *
+ * Важно: условное выражение прямо в шаблоне Vue компилируется в
+ * inline-обработчик, и Quasar видел бы `onFilter` даже без слушателя родителя —
+ * тогда при открытии меню QSelect вызывал бы `filter('')`, закрывал меню и
+ * вечно крутил индикатор загрузки. Поэтому обработчик передаётся через
+ * `v-bind` вычисляемого объекта: без слушателя `onFilter` действительно нет.
+ */
+const estVneshniyFiltr = computed<boolean>(
+  () => Boolean(instance?.vnode.props?.onFilter),
+);
+
+/**
+ * Локальная фильтрация статического списка: без обработчика ввод в поле
+ * (use-input) вообще не влияет на опции, а для длинных списков моделей
+ * поиск необходим.
+ */
+const lokalnieOpcii = ref<GhSelectOption[]>([...props.options]);
+
+watch(
+  () => props.options,
+  (opcii) => {
+    lokalnieOpcii.value = [...opcii];
+  },
+);
+
+function filtrovatLokalno(
+  inputValue: string,
+  update: (callback: () => void) => void,
+): void {
+  update(() => {
+    const igla = inputValue.trim().toLowerCase();
+
+    lokalnieOpcii.value = igla === ""
+      ? [...props.options]
+      : props.options.filter((opcija) =>
+          opcija.label.toLowerCase().includes(igla),
+        );
+  });
+}
+
+const vidimieOpcii = computed<GhSelectOption[]>(() =>
+  estVneshniyFiltr.value ? props.options : lokalnieOpcii.value,
+);
+
+const filtrProps = computed<Record<string, unknown>>(() =>
+  estVneshniyFiltr.value
+    ? { onFilter: propogatFilter }
+    : { onFilter: filtrovatLokalno },
+);
+
+/** В multiple-режиме placeholder не нужен, если уже есть выбранные чипы. */
+const estVibranieZnacheniya = computed<boolean>(() => {
+  if (Array.isArray(props.modelValue)) {
+    return props.modelValue.length > 0;
+  }
+
+  return props.modelValue !== null && props.modelValue !== "";
+});
+
+const podskazkaDlyaPolya = computed<string>(() =>
+  mnogoznachniy.value && estVibranieZnacheniya.value ? "" : podskazka.value,
+);
+
+function obnovitZnachenie(value: unknown): void {
+  emit("update:modelValue", value as T);
+
+  // После выбора возвращаем полный список: следующий поиск не должен
+  // начинаться с результатов прошлого запроса.
+  if (!estVneshniyFiltr.value) {
+    lokalnieOpcii.value = [...props.options];
+  }
 }
 
 /** Пробрасывает фильтрацию ввода наружу для серверного поиска опций. */
@@ -83,15 +179,21 @@ function propogatFilter(
 <template>
   <div
     class="gh-select primer"
-    :class="[`gh-select--${size}`, { 'gh-select--error': error }]"
+    :class="[
+      `gh-select--${size}`,
+      {
+        'gh-select--error': error,
+        'gh-select--multiple': mnogoznachniy,
+      },
+    ]"
   >
     <span v-if="label" class="gh-select__label">{{ label }}</span>
 
     <q-select
       class="gh-select__field"
       :model-value="modelValue"
-      :options="options"
-      :placeholder="podskazka"
+      :options="vidimieOpcii"
+      :placeholder="podskazkaDlyaPolya"
       :disable="disabled"
       :clearable="clearable"
       :error="error"
@@ -101,16 +203,18 @@ function propogatFilter(
       :aria-invalid="ariaInvalidFinal"
       :use-input="useInput"
       :hide-selected="hideSelected"
-      :fill-input="fillInput"
+      :fill-input="ispolzovatFillInput"
       :loading="loading"
+      :multiple="mnogoznachniy"
+      :use-chips="useChips"
       emit-value
       map-options
       outlined
       dense
       hide-bottom-space
       popup-content-class="gh-select__menu primer"
+      v-bind="filtrProps"
       @update:model-value="obnovitZnachenie"
-      @filter="propogatFilter"
     >
       <template #option="scope">
         <q-item v-bind="scope.itemProps" class="gh-select__option">
@@ -298,6 +402,75 @@ function propogatFilter(
 .gh-select__error-icon {
   flex-shrink: 0;
   color: var(--fgColor-danger);
+}
+
+/*
+ * Множественный режим: чипы переносятся на новую строку, поэтому поле
+ * перестаёт быть фиксированной высоты и растёт по содержимому.
+ */
+.gh-select--multiple .gh-select__field,
+.gh-select--multiple .gh-select__field :deep(.q-field__control) {
+  height: auto;
+  min-height: var(--control-height-md);
+}
+
+.gh-select--multiple .gh-select__field :deep(.q-field__control) {
+  padding: 2px 0;
+}
+
+.gh-select--multiple .gh-select__field :deep(.q-field__control-container) {
+  flex-wrap: wrap;
+  height: auto;
+  padding: 2px 8px;
+  gap: 4px;
+}
+
+.gh-select--multiple .gh-select__field :deep(.q-field__native) {
+  white-space: normal;
+}
+
+/*
+ * В multiple-режиме поле растёт по чипам, и `height: 100%` у append не
+ * разрешается (высота контрола auto) — иконка очистки и стрелка прилипали
+ * к верху. Растягиваем append на всю высоту контрола: его собственный
+ * `align-items: center` центрирует иконки по вертикали.
+ */
+.gh-select--multiple .gh-select__field :deep(.q-field__append) {
+  height: auto;
+  min-height: var(--control-height-md);
+  align-self: stretch;
+}
+
+.gh-select__field :deep(.q-chip) {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  margin: 0;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-accent-muted);
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-caption);
+  line-height: var(--lineHeight-tight);
+}
+
+.gh-select__field :deep(.q-chip__content) {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 6px;
+}
+
+.gh-select__field :deep(.q-chip .q-chip__icon--remove) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  height: 100%;
+  margin: 0 2px 0 0;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.75;
 }
 
 .gh-select--sm .gh-select__field {

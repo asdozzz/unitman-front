@@ -9,6 +9,9 @@ import type {FaylTipaToma} from "@/modules/unit/store/SpisokProektov/model/TipTo
 
 export type Unit = Schema<"UnitListItem">;
 
+/** Отложенное намерение по юниту из Git-вебхука или polling. */
+export type UnitIntention = NonNullable<Unit["namereniya"]>[number];
+
 export type Deistviye = Schema<"UnitAction">;
 
 /**

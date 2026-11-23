@@ -5,6 +5,7 @@ import { convertDate, convertDateTime } from "@/utils/dates";
 import { GhIcon } from "@/components/ui";
 import UnitStatusBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitStatusBadge.vue";
 import UnitRedaktorBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitRedaktorBadge.vue";
+import UnitIntentionsBadge from "@/modules/unit/view/Unit/SpisokUnitov/UnitIntentionsBadge.vue";
 
 defineProps<{
   item: Unit;
@@ -31,13 +32,17 @@ defineProps<{
     <!-- «Ошибка» в тулбаре не дублируется: её показывает alert-стрип карточки.
          Ряд бейджей не рендерим, если показывать нечего (ошибка без редактора). -->
     <div
-      v-if="state.status !== 'error' || item.redaktorMode"
+      v-if="state.status !== 'error' || item.redaktorMode || (item.namereniya?.length ?? 0) > 0"
       class="unit-card__head-badges"
     >
       <UnitStatusBadge v-if="state.status !== 'error'" :state="state" hide-detail />
       <UnitRedaktorBadge
         :mode="item.redaktorMode ?? null"
         :prichina-zapreta="item.prichinaZapreta ?? null"
+      />
+      <UnitIntentionsBadge
+        v-if="(item.namereniya?.length ?? 0) > 0"
+        :namereniya="item.namereniya ?? []"
       />
     </div>
   </div>

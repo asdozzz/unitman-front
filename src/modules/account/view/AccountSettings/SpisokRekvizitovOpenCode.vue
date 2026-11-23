@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
-import type { Schema } from "@/api/types";
 import {
   GhActionMenu,
   GhBanner,
@@ -10,15 +9,20 @@ import {
   GhButton,
   GhDialog,
   GhEmptyState,
+  GhIcon,
   GhSkeleton,
 } from "@/components/ui";
 import type { GhActionMenuItem } from "@/components/ui";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import { useFormaRekvizitovOpenCodeStore } from "@/modules/account/store/SpisokRekvizitovOpenCode/FormaRekvizitovOpenCodeStore";
+import type {
+  KodProvayderaOpenCode,
+  RekvizityOpenCode,
+} from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
 import FormaRekvizitovOpenCode from "@/modules/account/view/AccountSettings/FormaRekvizitovOpenCode.vue";
 import { convertDate } from "@/utils/dates";
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const storSpiska = useStorSpiskaRekvizitovOpenCode();
 const formaStore = useFormaRekvizitovOpenCodeStore();
@@ -26,7 +30,27 @@ const formaStore = useFormaRekvizitovOpenCodeStore();
 const { spisok, loaderSpiska, oshibkaZagruzki, udalyaemiId } = storeToRefs(storSpiska);
 
 const dialogUdaleniya = ref<boolean>(false);
-const udalyaemieRekvizity = ref<Schema<"OpenCodeCredential"> | null>(null);
+const udalyaemieRekvizity = ref<RekvizityOpenCode | null>(null);
+
+/** Локализованное имя провайдера; при отсутствии ключа показывается код. */
+function imyaProvaydera(kod: KodProvayderaOpenCode | string): string {
+  const key = `opencode.providers.${kod}`;
+
+  return te(key) ? t(key) : kod;
+}
+
+/** Модели реквизитов с подсветкой дефолтной. */
+function modeliSDefoltom(rekvizity: RekvizityOpenCode): string[] {
+  if (rekvizity.models.length === 0) {
+    return rekvizity.defaultModel !== "" ? [rekvizity.defaultModel] : [];
+  }
+
+  return rekvizity.models;
+}
+
+function etoDefoltnayaModel(rekvizity: RekvizityOpenCode, model: string): boolean {
+  return model === rekvizity.defaultModel;
+}
 
 const pokazatSkeletony = computed<boolean>(
   () => loaderSpiska.value && spisok.value.length === 0,
@@ -50,7 +74,7 @@ function punktyMenu(): GhActionMenuItem[] {
 }
 
 function vybratDeistvie(
-  rekvizity: Schema<"OpenCodeCredential">,
+  rekvizity: RekvizityOpenCode,
   item: GhActionMenuItem,
 ): void {
   if (item.id === "edit") {
@@ -67,7 +91,7 @@ function otkrytSozdanie(): void {
   formaStore.otkritSozdanie();
 }
 
-function otkrytUdalenie(rekvizity: Schema<"OpenCodeCredential">): void {
+function otkrytUdalenie(rekvizity: RekvizityOpenCode): void {
   udalyaemieRekvizity.value = rekvizity;
   dialogUdaleniya.value = true;
 }
@@ -171,8 +195,9 @@ onMounted(() => {
           <thead>
             <tr>
               <th scope="col">{{ t("opencode.rekvizity.form.fields.name") }}</th>
+              <th scope="col">{{ t("opencode.rekvizity.form.fields.provider") }}</th>
               <th scope="col">{{ t("opencode.rekvizity.form.fields.url") }}</th>
-              <th scope="col">{{ t("opencode.rekvizity.form.fields.model") }}</th>
+              <th scope="col">{{ t("opencode.rekvizity.form.fields.models") }}</th>
               <th scope="col">{{ t("opencode.rekvizity.fields.api_key_hint") }}</th>
               <th scope="col">{{ t("opencode.rekvizity.fields.updated_at") }}</th>
               <th scope="col" class="rekvizity__th-actions">
@@ -187,10 +212,34 @@ onMounted(() => {
                 <div class="rekvizity__name">{{ rekvizity.name }}</div>
               </td>
               <td>
+                <span class="rekvizity__provider">{{ imyaProvaydera(rekvizity.provider) }}</span>
+              </td>
+              <td>
                 <span class="gh-mono rekvizity__url">{{ rekvizity.url }}</span>
               </td>
               <td>
-                <span class="gh-mono">{{ rekvizity.model }}</span>
+                <div class="rekvizity__models">
+                  <span
+                    v-for="model in modeliSDefoltom(rekvizity)"
+                    :key="model"
+                    class="rekvizity__model"
+                    :class="{ 'rekvizity__model--default': etoDefoltnayaModel(rekvizity, model) }"
+                  >
+                    <GhIcon
+                      v-if="etoDefoltnayaModel(rekvizity, model)"
+                      name="star-fill"
+                      :size="12"
+                      class="rekvizity__model-icon"
+                    />
+                    <span class="gh-mono">{{ model }}</span>
+                    <span
+                      v-if="etoDefoltnayaModel(rekvizity, model)"
+                      class="rekvizity__model-marker"
+                    >
+                      {{ t("opencode.rekvizity.default_marker") }}
+                    </span>
+                  </span>
+                </div>
               </td>
               <td>
                 <code class="gh-mono">{{ rekvizity.apiKeyHint }}</code>
@@ -312,6 +361,51 @@ onMounted(() => {
 .rekvizity__name {
   font-weight: var(--fontWeight-semibold);
   overflow-wrap: anywhere;
+}
+
+.rekvizity__provider {
+  display: inline-block;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.rekvizity__models {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 320px;
+}
+
+.rekvizity__model {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+  background-color: var(--bgColor-muted);
+  color: var(--fgColor-default);
+  font-size: var(--fontSize-caption);
+  line-height: var(--lineHeight-tight);
+  overflow-wrap: anywhere;
+}
+
+.rekvizity__model--default {
+  border-color: var(--borderColor-accent-emphasis);
+  background-color: var(--bgColor-accent-muted);
+}
+
+.rekvizity__model-icon {
+  flex-shrink: 0;
+  color: var(--fgColor-accent);
+}
+
+.rekvizity__model-marker {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
 }
 
 .rekvizity__url {

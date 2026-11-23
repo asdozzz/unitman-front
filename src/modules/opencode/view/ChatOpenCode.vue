@@ -12,9 +12,10 @@ import {
     GhIcon,
     GhInput,
     GhLabel,
+    GhSelect,
     GhSkeleton,
 } from "@/components/ui";
-import type { GhLabelVariant, OcticonName } from "@/components/ui";
+import type { GhLabelVariant, GhSelectOption, OcticonName } from "@/components/ui";
 import { useStorChataOpenCode } from "@/modules/opencode/store/StorChataOpenCode";
 import { useStorSpiskaSessiyOpenCode } from "@/modules/opencode/store/StorSpiskaSessiyOpenCode";
 import { useStorFormiPrivyazkiUnitaKSessii } from "@/modules/opencode/store/StorFormiPrivyazkiUnitaKSessii";
@@ -27,6 +28,12 @@ import {
 import { statusTranzitniy, type Workspace } from "@/modules/opencode/model/Workspace";
 import type { TipSessiiChata } from "@/modules/opencode/store/StorChataOpenCode";
 import { useStorPomoschnikaSsylkiWorkspace } from "@/modules/opencode/store/StorPomoschnikaSsylkiWorkspace";
+import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
+import {
+    modeliRekvizitov,
+    modelIzObekta,
+    modelPoUmolchaniyu as modelPoUmolchaniyuRekvizitov,
+} from "@/modules/opencode/model/ModeliOpenCode";
 import PanelShagovHoda from "@/modules/opencode/view/PanelShagovHoda.vue";
 import WorkspaceStatusBadge from "@/modules/opencode/view/Workspace/WorkspaceStatusBadge.vue";
 import OknoSsylkiWorkspace from "@/modules/opencode/view/Workspace/OknoSsylkiWorkspace.vue";
@@ -40,6 +47,7 @@ const route = useRoute();
 const $q = useQuasar();
 const stor = useStorChataOpenCode();
 const storSessiy = useStorSpiskaSessiyOpenCode();
+const storRekvizitov = useStorSpiskaRekvizitovOpenCode();
 const formaPrivyazki = useStorFormiPrivyazkiUnitaKSessii();
 const storPomoschnika = useStorPomoschnikaSsylkiWorkspace();
 
@@ -58,9 +66,35 @@ const {
     mozhnoOtpravlyat,
     workspace,
     oshibkaSostoyaniyaWorkspace,
+    model,
 } = storeToRefs(stor);
 
 const sessiya = computed(() => storSessiy.spisok.find((element) => element.id === props.id) ?? null);
+
+/** Реквизиты открытой сессии: из них берётся каталог моделей. */
+const rekvizitySessii = computed(() => {
+    const credentialId = sessiya.value?.credentialId ?? "";
+
+    return credentialId === "" ? null : storRekvizitov.rekvizityPoId(credentialId);
+});
+
+/** Модель сессии из read-модели (поле появилось раньше OpenAPI-схемы). */
+const modelSessii = computed<string | null>(() => modelIzObekta(sessiya.value));
+
+/** Дефолтная модель реквизитов — последний шаг цепочки выбора. */
+const modelRekvizitov = computed<string | null>(() =>
+    modelPoUmolchaniyuRekvizitov(rekvizitySessii.value) || null,
+);
+
+/** Опции моделей реквизитов сессии. */
+const optsModelei = computed<GhSelectOption[]>(() =>
+    modeliRekvizitov(rekvizitySessii.value).map((nazvanie) => ({ value: nazvanie, label: nazvanie })),
+);
+
+/** Смена модели действует только на последующие ходы. */
+function izmenitModel(value: string | number | null): void {
+    stor.ustanovitModel(value === null ? null : String(value));
+}
 
 /**
  * Тип сессии из query.
@@ -342,7 +376,12 @@ onMounted(async () => {
         await storSessiy.poluchitSpisok();
     }
 
-    await stor.otkritSessiyu(props.id, tipIzQuery.value);
+    await stor.otkritSessiyu(
+        props.id,
+        tipIzQuery.value,
+        modelSessii.value,
+        modelRekvizitov.value,
+    );
 });
 
 onUnmounted(() => {
@@ -355,7 +394,12 @@ onUnmounted(() => {
 // Переход между сессиями без размонтирования (например, из списка в чат)
 // не должен оставлять наблюдение за прежним ходом.
 watch(() => props.id, (noviyId) => {
-    void stor.otkritSessiyu(noviyId, tipIzQuery.value);
+    void stor.otkritSessiyu(
+        noviyId,
+        tipIzQuery.value,
+        modelSessii.value,
+        modelRekvizitov.value,
+    );
 });
 </script>
 
@@ -397,6 +441,20 @@ watch(() => props.id, (noviyId) => {
       </div>
 
       <span class="opencode-chat__spacer" />
+
+      <div class="opencode-chat__model-select">
+        <GhSelect
+            :model-value="model"
+            :options="optsModelei"
+            size="sm"
+            use-input
+            hide-selected
+            fill-input
+            :disabled="arhivirovana"
+            :placeholder="$t('opencode.rekvizity.fields.default_model')"
+            @update:model-value="izmenitModel"
+        />
+      </div>
 
       <GhLabel
           :variant="indikatorProgressa.variant"
@@ -573,6 +631,7 @@ watch(() => props.id, (noviyId) => {
                   :class="hod.status === 'FAILED' ? 'opencode-chat__turn-status--fail' : 'opencode-chat__turn-status--ok'"
               >{{ $t(podpisStatusa(hod.status)) }}</span>
               <template v-if="hod.result"> · {{ $t(podpisVida(hod.result.Kind)) }}</template>
+              <template v-if="modelIzObekta(hod)"> · {{ modelIzObekta(hod) }}</template>
             </div>
 
             <div v-if="hod.result?.Kind === 'ANSWER'" class="pre-wrap">
@@ -783,6 +842,11 @@ watch(() => props.id, (noviyId) => {
 
 .opencode-chat__spacer {
   flex: 1 1 auto;
+}
+
+.opencode-chat__model-select {
+  flex: 0 0 200px;
+  min-width: 140px;
 }
 
 .opencode-chat__icon-link {

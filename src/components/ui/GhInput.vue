@@ -60,6 +60,12 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string | number | null): void;
+  /**
+   * Нативный `blur` не всплывает, поэтому объявляем событие явно и
+   * пробрасываем его из `q-input`: иначе `@blur` на `GhInput` вешается на
+   * корневую обёртку и не срабатывает.
+   */
+  (e: "blur", event: Event): void;
 }>();
 
 const estTextarea = computed<boolean>(() => props.type === "textarea");
@@ -105,6 +111,7 @@ function obnovitZnachenie(value: string | number | null): void {
       outlined
       dense
       @update:model-value="obnovitZnachenie"
+      @blur="emit('blur', $event)"
     >
       <template v-if="icon" #prepend>
         <GhIcon :name="icon" class="gh-input__icon" />

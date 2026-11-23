@@ -10,6 +10,7 @@ import {
 } from "@/modules/opencode/model/ChatOpenCode";
 import {podpisatsyaNaProgressHoda} from "@/modules/opencode/model/websocket/PodpiskaNaProgressHoda";
 import {statusTranzitniy} from "@/modules/opencode/model/Workspace";
+import {modelIzObekta, normalizovatModel} from "@/modules/opencode/model/ModeliOpenCode";
 import type {Schema} from "@/api/types";
 
 /** Как сейчас приходят данные о шагах: через websocket, опросом или никак. */
@@ -47,6 +48,10 @@ type StorChataOpenCodeState = {
     workspace: Schema<"SostoyanieWorkspace"> | null;
     /** Ошибка загрузки состояния workspace (например, operation_failed). */
     oshibkaSostoyaniyaWorkspace: string | null;
+    /** Выбранная модель для следующих ходов. */
+    model: string;
+    /** Последняя использованная модель (сохраняется между сессиями). */
+    poslednyayaModel: string;
 };
 
 /**
@@ -73,6 +78,8 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
             rezhimSessii: null,
             workspace: null,
             oshibkaSostoyaniyaWorkspace: null,
+            model: "",
+            poslednyayaModel: "",
         };
     },
 
@@ -136,11 +143,17 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
          * из истории: бэкенд возвращает их в каждом ходе, поэтому заново
          * запускать ничего не нужно.
          */
-        async otkritSessiyu(sessiyaId: string, tip: TipSessiiChata | null = null) {
+        async otkritSessiyu(
+            sessiyaId: string,
+            tip: TipSessiiChata | null = null,
+            modelSessii: string | null = null,
+            modelRekvizitov: string | null = null,
+        ) {
             this.sessiyaId = sessiyaId;
             this.rezhimSessii = tip;
             this.workspace = null;
             this.oshibkaSostoyaniyaWorkspace = null;
+            this.model = "";
             this.ostanovitOprosSostoyaniyaWorkspace();
 
             if (this.rezhimSessii === null) {
@@ -151,6 +164,25 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
 
             if (this.rezhimSessii === "workspace") {
                 await this.obnovitSostoyanieWorkspace();
+            }
+
+            if (this.model === "") {
+                this.model = modelSessii
+                    || this.poslednyayaModel
+                    || modelRekvizitov
+                    || modelIzObekta(this.posledniyHod)
+                    || "";
+            }
+        },
+
+        /** Записать выбранную модель и запомнить её как последнюю. */
+        ustanovitModel(model: string | null) {
+            this.model = model ?? "";
+
+            const normalizovannaya = normalizovatModel(this.model);
+
+            if (normalizovannaya !== null) {
+                this.poslednyayaModel = normalizovannaya;
             }
         },
 
@@ -354,7 +386,11 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
             }
 
             await this.zapustitHod(
-                () => OpenCodeService.prompt({sessionId: sessiyaId, text: soderzhanie}),
+                () => OpenCodeService.prompt({
+                    sessionId: sessiyaId,
+                    text: soderzhanie,
+                    model: normalizovatModel(this.model) ?? undefined,
+                }),
             );
         },
 
@@ -367,7 +403,11 @@ export const useStorChataOpenCode = defineStore("StorChataOpenCode", {
             }
 
             await this.zapustitHod(
-                () => OpenCodeService.otvetit({turnId: hod.id, answers: otvety}),
+                () => OpenCodeService.otvetit({
+                    turnId: hod.id,
+                    answers: otvety,
+                    model: normalizovatModel(this.model) ?? undefined,
+                }),
             );
         },
 

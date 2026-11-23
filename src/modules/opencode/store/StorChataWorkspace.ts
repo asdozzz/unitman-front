@@ -1,5 +1,10 @@
 import { defineStore } from "pinia";
 import WorkspaceService from "@/modules/opencode/services/WorkspaceService";
+import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
+import {
+    modeliRekvizitov,
+    normalizovatModel,
+} from "@/modules/opencode/model/ModeliOpenCode";
 import type {
     WorkspaceAnswer,
     WorkspaceQuestion,
@@ -14,6 +19,10 @@ type StorChataWorkspaceState = {
     sostoyanie: WorkspaceState | null;
     hody: WorkspaceTurn[];
     prompt: string;
+    /** Выбранная модель для следующих ходов. */
+    model: string;
+    /** Последняя использованная модель (сохраняется между сессиями). */
+    poslednyayaModel: string;
     loader: boolean;
     otpravka: boolean;
     oshibka: string | null;
@@ -32,6 +41,8 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             sostoyanie: null,
             hody: [],
             prompt: "",
+            model: "",
+            poslednyayaModel: "",
             loader: false,
             otpravka: false,
             oshibka: null,
@@ -41,6 +52,25 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
     getters: {
         posledniyHod(state): WorkspaceTurn | null {
             return state.hody.length === 0 ? null : state.hody[state.hody.length - 1];
+        },
+
+        /**
+         * Каталог моделей для выбора.
+         *
+         * Read-модель workspace не отдаёт `credentialId`, поэтому точно
+         * определить реквизиты нельзя. Показываем объединённый список моделей
+         * всех реквизитов: бэкенд всё равно проверит выбранную модель.
+         */
+        dostupnieModeli(): string[] {
+            const modeli = useStorSpiskaRekvizitovOpenCode().spisok
+                .flatMap((rekvizity) => modeliRekvizitov(rekvizity));
+
+            return [...new Set(modeli)];
+        },
+
+        /** Модель по умолчанию: модель workspace, затем последняя использованная. */
+        modelPoUmolchaniyu(state): string {
+            return state.workspace?.model || state.poslednyayaModel || "";
         },
 
         hodVipolnyaetsya(): boolean {
@@ -69,6 +99,7 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             this.workspaceId = workspaceId;
             this.loader = true;
             this.oshibka = null;
+            this.model = "";
 
             await Promise.all([
                 this.zagruzitWorkspace(),
@@ -76,8 +107,28 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
                 this.zagruzitSostoyanie(),
             ]);
 
+            this.primenitModelPoUmolchaniyu();
+
             this.loader = false;
             this.zapustitOpros();
+        },
+
+        /** Записать выбранную модель и запомнить её как последнюю. */
+        ustanovitModel(model: string | null) {
+            this.model = model ?? "";
+
+            const normalizovannaya = normalizovatModel(this.model);
+
+            if (normalizovannaya !== null) {
+                this.poslednyayaModel = normalizovannaya;
+            }
+        },
+
+        /** Подставить модель по умолчанию, если пользователь ещё не выбрал. */
+        primenitModelPoUmolchaniyu() {
+            if (this.model === "") {
+                this.model = this.modelPoUmolchaniyu;
+            }
         },
 
         zakrit() {
@@ -135,6 +186,7 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             const response = await WorkspaceService.prompt({
                 workspaceId: this.workspaceId,
                 text: tekst,
+                model: normalizovatModel(this.model) ?? undefined,
             });
 
             this.otpravka = false;
@@ -163,6 +215,7 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             const response = await WorkspaceService.otvetit({
                 turnId: idHoda,
                 answers,
+                model: normalizovatModel(this.model) ?? undefined,
             });
 
             this.otpravka = false;

@@ -38,6 +38,8 @@ class UnitSessionService {
         credentialId: string;
         title?: string | null;
         unitId: string;
+        /** Модель хода; пустое значение — дефолт реквизитов. */
+        model?: string | null;
     }): Promise<ApiResponse<{ id: string }>> {
         return apiClient.post<{ id: string }>("/opencode/unit-session/sozdat", params);
     }
@@ -46,7 +48,11 @@ class UnitSessionService {
         return apiClient.post<UnitSession | null>("/opencode/unit-session/sessiyaPoUnitu", params);
     }
 
-    prompt(params: { sessionId: string; text: string }): Promise<ApiResponse<UnitSessionLaunch>> {
+    prompt(params: {
+        sessionId: string;
+        text: string;
+        model?: string | null;
+    }): Promise<ApiResponse<UnitSessionLaunch>> {
         return apiClient.post<UnitSessionLaunch>("/opencode/unit-session/prompt", params);
     }
 
@@ -60,9 +66,11 @@ class UnitSessionService {
     otvetit(params: {
         turnId: string;
         answers: UnitSessionAnswer[];
+        model?: string | null;
     }): Promise<ApiResponse<UnitSessionLaunch>> {
         return apiClient.post<UnitSessionLaunch>("/opencode/unit-session/otvetit", {
             turnId: params.turnId,
+            model: params.model ?? undefined,
             answers: params.answers.map((answer) => ({
                 QuestionId: answer.QuestionId,
                 OptionId: answer.OptionId,
