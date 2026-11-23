@@ -1276,11 +1276,18 @@
         "archive": "Archive",
         "restore": "Restore",
         "delete": "Delete",
+        "create_units": "Create units",
         "actions": "Workspace actions"
       },
       "fields": {
         "branch": "Branch",
         "projects_count": "Projects: {count}"
+      },
+      "units": {
+        "title": "Units",
+        "hint": "Units created from this workspace. Click to open the filtered unit list.",
+        "confirm_title": "Create units?",
+        "confirm_message": "{count} units will be created — one per workspace project «{name}». The units will start automatically."
       },
       "list": {
         "caption": "Workspace",
@@ -1348,7 +1355,8 @@
       },
       "errors": {
         "not_found": "Workspace not found",
-        "operation_failed": "The workspace operation failed"
+        "operation_failed": "The workspace operation failed",
+        "units_already_created": "Units have already been created for this workspace"
       },
       "helper": {
         "caption": "Workspace port link",

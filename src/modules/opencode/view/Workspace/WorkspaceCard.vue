@@ -30,7 +30,7 @@ import {
  * Карточка не выполняет запросы: она только сообщает о намерении, а список
  * решает, как провести действие (например, архив с подтверждением dirty-файлов).
  */
-type DejstvieWorkspace = "archive" | "restore" | "delete";
+type DejstvieWorkspace = "archive" | "restore" | "delete" | "create_units";
 
 const props = defineProps<{
     workspace: Workspace;
@@ -64,10 +64,21 @@ const emit = defineEmits<{
     archive: [];
     restore: [];
     delete: [];
+    "create-units": [];
+    "open-units": [unitIds: string[]];
 }>();
 
 const tranzitniy = computed(() => statusTranzitniy(props.workspace.status));
 const readOnly = computed(() => estReadOnly(props.workspace));
+const unitiWorkspace = computed(() => props.workspace.units ?? []);
+
+/**
+ * Действие доступно только у работающего workspace без созданных юнитов.
+ * После создания кнопка исчезает навсегда: повторный запуск запрещён.
+ */
+const mozhnoSozdatUniti = computed(() => {
+    return props.workspace.status === "RUNNING" && unitiWorkspace.value.length === 0;
+});
 const mozhnoArhiv = computed(() => mozhnoArhivirovat(props.workspace.status));
 const mozhnoVosstan = computed(() => mozhnoVosstanovit(props.workspace.status));
 const mozhnoUdal = computed(() => mozhnoUdalit(props.workspace.status));
@@ -77,6 +88,15 @@ const dejstvieIdet = computed(() => props.dejstvie !== null && props.dejstvie !=
 /** Пункты меню действий по текущему статусу workspace. */
 const punktyMenu = computed<GhActionMenuItem[]>(() => {
     const punkty: GhActionMenuItem[] = [];
+
+    if (mozhnoSozdatUniti.value) {
+        punkty.push({
+            id: "create_units",
+            label: i18n.global.t("opencode.workspace.buttons.create_units"),
+            icon: "package",
+            disabled: dejstvieIdet.value,
+        });
+    }
 
     if (mozhnoArhiv.value) {
         punkty.push({
@@ -112,6 +132,11 @@ const punktyMenu = computed<GhActionMenuItem[]>(() => {
 
 /** Маршрутизация выбранного пункта меню к событию карточки. */
 function vybratDejstvie(item: GhActionMenuItem): void {
+    if (item.id === "create_units") {
+        emit("create-units");
+        return;
+    }
+
     if (item.id === "archive") {
         emit("archive");
         return;
@@ -125,6 +150,11 @@ function vybratDejstvie(item: GhActionMenuItem): void {
     if (item.id === "delete") {
         emit("delete");
     }
+}
+
+/** Переход на страницу юнитов с фильтром по созданным юнитам. */
+function otkritUniti(): void {
+    emit("open-units", unitiWorkspace.value.map((unit) => unit.unitId));
 }
 
 /** Ключ перевода приходит с бэкенда; неизвестный ключ показываем как есть. */
@@ -215,6 +245,24 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
       <span>{{ $t('opencode.sessions.fields.created_at') }}: <span class="gh-mono">{{ convertDate(workspace.createdAt) }}</span></span>
     </div>
 
+    <div v-if="unitiWorkspace.length > 0" class="workspace-card__units">
+      <span class="workspace-card__units-title">
+        {{ $t('opencode.workspace.units.title') }}
+      </span>
+
+      <button
+          v-for="unit in unitiWorkspace"
+          :key="'ws_unit_' + unit.unitId"
+          type="button"
+          class="workspace-card__unit-chip"
+          :title="`${unit.unitName} · ${unit.branch}`"
+          @click="otkritUniti()"
+      >
+        <GhIcon name="package" :size="12" />
+        <span>{{ unit.unitName }}</span>
+      </button>
+    </div>
+
     <div v-if="workspace.projects.length > 0" class="workspace-card__projects">
       <GhLabel
           v-for="project in workspace.projects"
@@ -275,6 +323,36 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
 
 .workspace-card__spacer {
   flex: 1 1 auto;
+}
+
+.workspace-card__units {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.workspace-card__units-title {
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-small);
+}
+
+.workspace-card__unit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  color: var(--fgColor-accent);
+  font-size: var(--fontSize-small);
+  background: none;
+  border: 1px solid var(--borderColor-accent-muted);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.workspace-card__unit-chip:hover {
+  background-color: var(--bgColor-accent-muted);
 }
 
 .workspace-card__spin {

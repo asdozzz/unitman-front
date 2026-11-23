@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import type { PomoschnikSsylki, Unit } from "@/modules/unit/store/SpisokUnitov/model/Unit";
 import {
+  estPodhodyashayaSsylka,
   normalizovatSuffiks,
   pomoschnikZapolnen,
   useStorPomoschnikaSsylki,
@@ -44,12 +45,23 @@ const suffiks = computed<string | null>(() => normalizovatSuffiks(props.helper?.
 
 const spisokSFiltrom = computed<Unit[]>(() => {
   const zaprosNizhniy = zapros.value.trim().toLowerCase();
+  const helper = props.helper;
 
-  if (!zaprosNizhniy) {
-    return spisok.value;
+  if (!pomoschnikZapolnen(helper)) {
+    return [];
   }
 
-  return spisok.value.filter((unit: Unit) => {
+  // Показываем только юниты с готовой ссылкой на нужный сервис.
+  // `links` появляются после успешной сборки, запуск не требуется.
+  const sPodhodyashcheySsylkoy = spisok.value.filter((unit: Unit) => {
+    return estPodhodyashayaSsylka(unit, helper);
+  });
+
+  if (!zaprosNizhniy) {
+    return sPodhodyashcheySsylkoy;
+  }
+
+  return sPodhodyashcheySsylkoy.filter((unit: Unit) => {
     return (
       unit.name.toLowerCase().includes(zaprosNizhniy) ||
       unit.branch.toLowerCase().includes(zaprosNizhniy)
@@ -69,7 +81,9 @@ watch(
     storPomoschnika.ochistitOshibku();
 
     if (pomoschnikZapolnen(props.helper)) {
-      await storPomoschnika.poluchitSpisokUnitovProekta(props.helper.projectId);
+      // Перечитываем список при каждом открытии: юнит мог собраться,
+      // пока диалог был закрыт, и его ссылки уже появились.
+      await storPomoschnika.obnovitSpisokUnitovProekta(props.helper.projectId);
     }
   },
   { immediate: true },

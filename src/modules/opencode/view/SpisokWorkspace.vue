@@ -181,6 +181,40 @@ function vosstanovit(workspace: Workspace) {
     void stor.vosstanovit(workspace.id);
 }
 
+/**
+ * Создать юниты для всех проектов workspace.
+ *
+ * После успеха карточка покажет чипсы созданных юнитов, а действие исчезнет:
+ * повторное создание запрещено и на бэкенде.
+ */
+function sozdatUniti(workspace: Workspace) {
+    $q.dialog({
+        title: i18n.global.t("opencode.workspace.units.confirm_title"),
+        message: i18n.global.t("opencode.workspace.units.confirm_message", {
+            name: workspace.name,
+            count: workspace.projects.length,
+        }),
+        persistent: true,
+        ok: {
+            label: i18n.global.t("opencode.workspace.buttons.create_units"),
+            color: "primary",
+            unelevated: true,
+        },
+        cancel: { label: i18n.global.t("common.buttons.cancel"), flat: true },
+    }).onOk(() => {
+        void stor.sozdatUniti(workspace.id);
+    });
+}
+
+/** Перейти на страницу юнитов с фильтром по созданным юнитам. */
+function otkritUniti(unitIds: string[]) {
+    if (unitIds.length === 0) {
+        return;
+    }
+
+    void router.push({ path: "/", query: { unitIds: unitIds.join(",") } });
+}
+
 /** Удаление необратимо: контейнер, тома, каталог и записи БД. */
 function udalit(workspace: Workspace) {
     $q.dialog({
@@ -387,6 +421,8 @@ onUnmounted(() => {
             @archive="arhivirovat(workspace)"
             @restore="vosstanovit(workspace)"
             @delete="udalit(workspace)"
+            @create-units="sozdatUniti(workspace)"
+            @open-units="otkritUniti"
         />
       </div>
     </div>

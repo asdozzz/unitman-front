@@ -41,6 +41,33 @@ export function normalizovatSuffiks(suffix: string | null | undefined): string |
     return znachenie ? znachenie : null;
 }
 
+/** Протокол ссылки: пустое значение для бэкенда означает `http`. */
+function normalizovatTip(type: string | null | undefined): string {
+    const znachenie = type?.trim().toLowerCase();
+
+    return znachenie ? znachenie : "http";
+}
+
+/**
+ * Есть ли у юнита готовая ссылка на сервис из помощника.
+ *
+ * `links` заполняются после успешной сборки юнита, запуск не требуется.
+ * Селектор показывает только такие юниты: клик по ним гарантированно
+ * проходит проверку `poluchitSsylkuPoPomoschniku`.
+ */
+export function estPodhodyashayaSsylka(
+    unit: Unit,
+    helper: ZapolnennyPomoschnikSsylki,
+): boolean {
+    const tip = normalizovatTip(helper.type);
+
+    return (unit.links ?? []).some((link) => {
+        return link.service === helper.service
+            && Number(link.port) === helper.port
+            && normalizovatTip(link.protocol) === tip;
+    });
+}
+
 /**
  * Стор помощника подстановки ссылки.
  *

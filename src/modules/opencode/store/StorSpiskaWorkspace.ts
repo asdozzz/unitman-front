@@ -10,7 +10,7 @@ import {
 } from "@/modules/opencode/model/Workspace";
 import type { Schema } from "@/api/types";
 
-type DejstvieWorkspace = "archive" | "restore" | "delete";
+type DejstvieWorkspace = "archive" | "restore" | "delete" | "create_units";
 
 type StorSpiskaWorkspaceState = {
     spisok: Workspace[];
@@ -159,6 +159,29 @@ export const useStorSpiskaWorkspace = defineStore("StorSpiskaWorkspace", {
             }
 
             return response.data;
+        },
+
+        /**
+         * Создать юниты для всех проектов workspace.
+         *
+         * Повторный вызов запрещён: после успеха карточка больше не показывает
+         * действие, а бэкенд отвечает `opencode.workspace.units_already_created`.
+         */
+        async sozdatUniti(id: string): Promise<boolean> {
+            this.nachatDejstvie(id, "create_units");
+
+            const response = await OpenCodeService.sozdatUnitiWorkspace({ workspaceId: id });
+
+            this.zavershitDejstvie();
+
+            if (response.status !== "success") {
+                this.oshibkaDejstviya = response.status === "fail" ? response.data.message : response.message;
+                return false;
+            }
+
+            await this.poluchitSpisok();
+
+            return true;
         },
 
         /** Восстановить архивный workspace или workspace в ошибке. */

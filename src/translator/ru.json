@@ -1257,11 +1257,18 @@
         "archive": "Архивировать",
         "restore": "Восстановить",
         "delete": "Удалить",
+        "create_units": "Создать юниты",
         "actions": "Действия с workspace"
       },
       "fields": {
         "branch": "Ветка",
         "projects_count": "Проектов: {count}"
+      },
+      "units": {
+        "title": "Юниты",
+        "hint": "Созданные из workspace юниты. Нажмите, чтобы открыть список с фильтром.",
+        "confirm_title": "Создать юниты?",
+        "confirm_message": "Будет создано юнитов: {count} — по одному на каждый проект workspace «{name}». Юниты запустятся автоматически."
       },
       "list": {
         "caption": "Workspace",
@@ -1329,7 +1336,8 @@
       },
       "errors": {
         "not_found": "Workspace не найден",
-        "operation_failed": "Операция с workspace завершилась ошибкой"
+        "operation_failed": "Операция с workspace завершилась ошибкой",
+        "units_already_created": "Для этого workspace юниты уже созданы"
       },
       "helper": {
         "caption": "Ссылка на порт workspace",

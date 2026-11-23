@@ -174,6 +174,16 @@ class OpenCodeService {
     }
 
     /**
+     * Создать по одному юниту на каждый проект workspace.
+     *
+     * Связи через хелперы переменных вычисляются на бэкенде. Повторный вызов
+     * запрещён: после создания юнитов карточка больше не показывает действие.
+     */
+    sozdatUnitiWorkspace(params: { workspaceId: string }) {
+        return apiClient.post<'/opencode/workspace/sozdatUniti'>('/opencode/workspace/sozdatUniti', params);
+    }
+
+    /**
      * Состояние workspace: жизненный цикл, причина блокировки, последний ход.
      *
      * Для unit-сессии отвечает ошибкой `opencode.workspace.not_found` — по ней

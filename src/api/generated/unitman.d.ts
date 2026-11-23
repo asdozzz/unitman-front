@@ -838,6 +838,176 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/opencode/unit-session/arhivirovat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Архивировать unit-сессию */
+        post: operations["post_app_opencode_infra_unitsession_arhivirovat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/istoriya": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** История ходов unit-сессии */
+        post: operations["post_app_opencode_infra_unitsession_istoriya"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/otvetit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ответить на вопросы предыдущего хода */
+        post: operations["post_app_opencode_infra_unitsession_otvetit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/poluchitProgressHoda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Снапшот прогресса хода unit-сессии */
+        post: operations["post_app_opencode_infra_unitsession_poluchitprogresshoda"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/poluchitResultatHoda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Результат хода unit-сессии */
+        post: operations["post_app_opencode_infra_unitsession_poluchitresultathoda"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Запустить ход unit-сессии */
+        post: operations["post_app_opencode_infra_unitsession_prompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/sessiyaPoUnitu": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Активная unit-сессия юнита */
+        post: operations["post_app_opencode_infra_unitsession_sessiyapounitu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/sostoyanie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Состояние unit-сессии */
+        post: operations["post_app_opencode_infra_unitsession_sostoyanie"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/sozdat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Создать unit-сессию для одного юнита */
+        post: operations["post_app_opencode_infra_unitsession_sozdat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/unit-session/spisok": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список unit-сессий текущего пользователя */
+        get: operations["get_app_opencode_infra_unitsession_spisok"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/opencode/uvedomleniya": {
         parameters: {
             query?: never;
@@ -849,6 +1019,108 @@ export type paths = {
         get: operations["get_app_opencode_infra_opencode_uvedomleniya"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace-session/istoriya": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** История ходов workspace */
+        post: operations["post_app_opencode_infra_workspacesession_istoriya"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace-session/otvetit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ответить на вопросы хода workspace */
+        post: operations["post_app_opencode_infra_workspacesession_otvetit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace-session/poluchitProgressHoda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Снапшот прогресса хода workspace */
+        post: operations["post_app_opencode_infra_workspacesession_poluchitprogresshoda"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace-session/poluchitResultatHoda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Результат хода workspace */
+        post: operations["post_app_opencode_infra_workspacesession_poluchitresultathoda"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace-session/prompt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Запустить ход workspace */
+        post: operations["post_app_opencode_infra_workspacesession_prompt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace-session/sostoyanie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Состояние чата workspace */
+        post: operations["post_app_opencode_infra_workspacesession_sostoyanie"];
         delete?: never;
         options?: never;
         head?: never;
@@ -900,6 +1172,26 @@ export type paths = {
         put?: never;
         /** Создать workspace-сессию */
         post: operations["post_app_opencode_infra_workspace_sozdat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/sozdatUniti": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Создать юниты для проектов workspace
+         * @description Создаёт по одному юниту на каждый проект workspace и автоматически связывает хелперы, указывающие на проекты этого workspace. Юниты запускаются штатным конвейером.
+         */
+        post: operations["post_app_opencode_infra_workspace_sozdatuniti"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3681,6 +3973,7 @@ export type components = {
             readOnly: boolean;
             /** @enum {string} */
             status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+            units: components["schemas"]["WorkspaceUnit"][];
         };
         /** @description Реквизиты подключения к OpenCode (API-ключ шифруется на бэкенде) */
         SozdatRekvizityOpenCode: {
@@ -3749,6 +4042,11 @@ export type components = {
             /** @description Тома юнита. Значения `dir` и `name` берутся из ответа `poluchitKonfigIzHranilisha`, `fileId` — идентификатор файла из медиатеки (может отсутствовать) */
             volumes?: components["schemas"]["SozdatUnitVolume"][];
             znacheniePeremenoi?: components["schemas"]["ZnacheniePeremenoi"][];
+        };
+        /** @description Создание юнитов для всех проектов workspace */
+        SozdatUnitiWorkspace: {
+            /** Format: uuid */
+            workspaceId: string;
         };
         /** @description Результат создания юнита */
         SozdatUnitResult: {
@@ -4304,6 +4602,8 @@ export type components = {
             readOnly: boolean;
             /** @enum {string} */
             status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+            /** @description Юниты, созданные из workspace; после создания повторный запуск запрещён */
+            units: components["schemas"]["WorkspaceUnit"][];
             /** @example 1762000000 */
             updatedAt: number;
         };
@@ -4326,6 +4626,17 @@ export type components = {
             /** Format: uuid */
             projectId: string;
             projectName: string;
+        };
+        /** @description Юнит, созданный из workspace (WorkspaceUnitReadModel) */
+        WorkspaceUnit: {
+            /** @example feature/payments */
+            branch: string;
+            /** Format: uuid */
+            projectId: string;
+            /** Format: uuid */
+            unitId: string;
+            /** @example payments-refactor */
+            unitName: string;
         };
         ZapolnitPeremenieUnita: {
             /** Format: uuid */
@@ -6337,6 +6648,225 @@ export interface operations {
             };
         };
     };
+    post_app_opencode_infra_unitsession_arhivirovat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Сессия архивирована */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_istoriya: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description История ходов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_otvetit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Запуск хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_poluchitprogresshoda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Прогресс или null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_poluchitresultathoda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Состояние хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_prompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Запуск хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_sessiyapounitu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Сессия или null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_sostoyanie: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Состояние сессии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_unitsession_sozdat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Идентификатор созданной сессии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_opencode_infra_unitsession_spisok: {
+        parameters: {
+            query?: {
+                onlyActive?: boolean;
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список unit-сессий */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_app_opencode_infra_opencode_uvedomleniya: {
         parameters: {
             query?: {
@@ -6409,6 +6939,138 @@ export interface operations {
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspacesession_istoriya: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description История ходов */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspacesession_otvetit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Запуск хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspacesession_poluchitprogresshoda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Прогресс или null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspacesession_poluchitresultathoda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Состояние хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspacesession_prompt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Запуск хода */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspacesession_sostoyanie: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Состояние workspace */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6534,6 +7196,53 @@ export interface operations {
                              * @enum {string}
                              */
                             status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_sozdatuniti: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SozdatUnitiWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Созданные юниты */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            units?: components["schemas"]["WorkspaceUnit"][];
                         };
                         /**
                          * @example success
