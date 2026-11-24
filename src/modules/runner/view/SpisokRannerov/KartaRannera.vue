@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { GhIcon, GhLabel, GhProgress } from "@/components/ui";
+import { GhButton, GhIcon, GhLabel, GhProgress } from "@/components/ui";
 import type { GhLabelVariant, OcticonName } from "@/components/ui";
+import { useAuthStore } from "@/modules/account/store/auth";
 import type { RannerKarta, UrovenResursov } from "@/modules/runner/model/ResursiServera";
+import { storeSpiskaRannerov } from "@/modules/runner/store/StoreSpiskaRannerov";
 import {
   IKONKA_UROVNYA,
   VARIANT_UROVNYA,
   formatirovatBayty,
   urovenPoProcentu,
 } from "@/modules/runner/utils/urovniResursov";
+import PublicAddressDialog from "@/modules/runner/view/SpisokRannerov/PublicAddressDialog.vue";
 
 const props = defineProps<{
   karta: RannerKarta;
@@ -17,7 +20,20 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 
+const authStore = useAuthStore();
+const mozhnoUpravlyat = computed<boolean>(() => authStore.isAdmin);
+
+const pokazatDialogAdresa = ref(false);
+
 const resursi = computed(() => props.karta.resources);
+
+const adresZadana = computed<boolean>(
+  () => props.karta.hasPublicAddress && props.karta.publicAddress !== null,
+);
+
+function obnovitSpisok(): void {
+  void storeSpiskaRannerov().zagruzit();
+}
 
 /**
  * Память из легаси-снимка `/proc/meminfo`: старый health-push не содержит
@@ -121,6 +137,37 @@ function formatirovatDatu(unixtime: number): string {
       · {{ t("runner.runners_page.last_health") }}:
       {{ formatirovatDatu(karta.lastHealthAt) }}
     </p>
+
+    <div class="runner-card__public-address">
+      <div class="runner-card__public-address-value">
+        <span class="runner-card__public-address-label">
+          {{ t("runner.runners_page.public_address.label") }}:
+        </span>
+        <span
+          v-if="adresZadana && karta.publicAddress"
+          class="runner-card__public-address-link gh-mono"
+          :title="karta.publicAddress"
+        >
+          {{ karta.publicAddress }}
+        </span>
+        <span v-else class="runner-card__public-address-empty">
+          {{ t("runner.runners_page.public_address.not_set") }}
+        </span>
+      </div>
+
+      <GhButton
+        v-if="mozhnoUpravlyat"
+        size="sm"
+        variant="invisible"
+        icon="link"
+        :label="
+          adresZadana
+            ? t('runner.runners_page.public_address.edit')
+            : t('runner.runners_page.public_address.set')
+        "
+        @click="pokazatDialogAdresa = true"
+      />
+    </div>
 
     <p v-if="karta.blocked" class="runner-card__blocked">
       {{ karta.blockReason || t("runner.runners_page.blocked") }}
@@ -297,6 +344,15 @@ function formatirovatDatu(unixtime: number): string {
     <p v-else class="runner-card__meta runner-card__meta--muted">
       {{ t("runner.runners_page.no_resources") }}
     </p>
+
+    <PublicAddressDialog
+      v-if="mozhnoUpravlyat"
+      v-model="pokazatDialogAdresa"
+      :runner-id="karta.id"
+      :current-address="karta.publicAddress"
+      :has-public-address="karta.hasPublicAddress"
+      @obnovit="obnovitSpisok"
+    />
   </GhBox>
 </template>
 
@@ -357,6 +413,41 @@ function formatirovatDatu(unixtime: number): string {
 .runner-card__meta code {
   color: var(--fgColor-default);
   font-size: inherit;
+}
+
+.runner-card__public-address {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: 6px;
+  background-color: var(--bgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.runner-card__public-address-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.runner-card__public-address-label {
+  color: var(--fgColor-muted);
+}
+
+.runner-card__public-address-link {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runner-card__public-address-empty {
+  color: var(--fgColor-muted);
+  font-style: italic;
 }
 
 .runner-card__blocked {

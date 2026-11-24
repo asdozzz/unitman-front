@@ -2,7 +2,6 @@
 import {storeToRefs} from "pinia";
 import {useAddProjectFormStore} from "@/modules/unit/store/SpisokProektov/AddProjectFormStore";
 import {onMounted, ref} from "vue";
-import {storeInizializii} from "@/modules/app/store/InitializationStore";
 import i18n from "@/bootstrap/translator";
 import {OshibkaMaski, proveritMaskuVetki} from "@/modules/unit/utils/zashishennieVetki";
 import {
@@ -45,10 +44,8 @@ function dobavitMasku(value: string, done: NewValueDone): void {
 }
 
 const addFormStore = useAddProjectFormStore();
-const { form, oshibkaOtBackenda, loader, hranilisha, proekti, proverkaProxyHost } = storeToRefs(addFormStore);
+const { form, oshibkaOtBackenda, loader, hranilisha, proekti } = storeToRefs(addFormStore);
 
-const initStore = storeInizializii();
-const { getProxyHost } = storeToRefs(initStore);
 onMounted(async () => {
   await addFormStore.poluchitActivnieHranilisha();
 })
@@ -81,7 +78,6 @@ function projectCodeSelected(value: string | number | null): void {
     localProjectCode.value = null;
     form.value.projectCode = "";
     form.value.projectName = "";
-    form.value.proxyHost = "";
     return;
   }
 
@@ -91,8 +87,6 @@ function projectCodeSelected(value: string | number | null): void {
   localProjectCode.value = kod;
   form.value.projectCode = kod;
   form.value.projectName = (nayden?.label ?? kod).replace(/[^a-zA-Z0-9_-]+/g, "_");
-  // getProxyHost получен через storeToRefs, то есть это ComputedRef<string>.
-  form.value.proxyHost = getProxyHost.value;
 }
 
 function filterSpiskaProektov(val: string | null, update: (callback: () => void) => void): void {
@@ -170,27 +164,6 @@ function filterSpiskaProektov(val: string | null, update: (callback: () => void)
         />
       </GhFormField>
 
-      <GhFormField :label="$t('unit.form_add_project.fields.labels.proxyHost')">
-        <GhInput v-model="form.proxyHost" />
-      </GhFormField>
-
-      <div v-if="form.proxyHost.length > 0" class="add-project__proxy">
-        <GhButton
-            variant="default"
-            size="sm"
-            icon="check"
-            :label="$t('unit.form_add_project.buttons.check_proxy_host')"
-            :loading="proverkaProxyHost.loader"
-            @click="addFormStore.proveritProxyHost"
-        />
-        <span v-if="proverkaProxyHost.result === true" class="add-project__proxy--ok">
-          {{ $t('common.states.available') }}
-        </span>
-        <span v-if="proverkaProxyHost.result === false" class="add-project__proxy--fail">
-          {{ $t('common.states.unavailable') }}
-        </span>
-      </div>
-
       <GhFormField :label="$t('unit.form_add_project.fields.labels.unitContainerMemory')">
         <GhInput
             :model-value="form.memoryLimit"
@@ -248,23 +221,6 @@ function filterSpiskaProektov(val: string | null, update: (callback: () => void)
 .add-project__native--single :deep(.q-field__inner) {
   height: 100%;
   min-height: 0;
-}
-
-.add-project__proxy {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.add-project__proxy--ok {
-  color: var(--fgColor-success);
-  font-size: var(--fontSize-caption);
-}
-
-.add-project__proxy--fail {
-  color: var(--fgColor-danger);
-  font-size: var(--fontSize-caption);
 }
 
 .add-project__error {

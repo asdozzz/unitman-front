@@ -74,15 +74,6 @@
     }
   },
   "runner": {
-    "non_active": "the runner is non active, please notify the administrator",
-    "title": "Runner status",
-    "subtitle": "State of the default build and run executor.",
-    "status_active": "Active",
-    "status_non_active": "Inactive",
-    "description_active": "The default runner is available and processing jobs.",
-    "error_title": "Failed to get the runner status",
-    "unknown_title": "Status unknown",
-    "unknown_description": "Runner state data has not been received yet.",
     "levels": {
       "ok": "Normal",
       "warning": "Warning",
@@ -101,8 +92,38 @@
       "no_resources": "The resource snapshot has not been received yet.",
       "legacy_note": "Only memory from the legacy health request is shown. Disks and CPU will appear after the runner is updated and restarted.",
       "error_title": "Failed to get the runner list",
-      "empty_title": "No data yet",
-      "empty_description": "The runner has not sent a resource snapshot yet.",
+      "empty_title": "No runners registered",
+      "empty_description": "Until at least one runner is registered, creating and starting units is unavailable. Follow the steps below — the card will appear automatically.",
+      "registration": {
+        "title": "How to register a runner",
+        "expand": "Expand instructions",
+        "collapse": "Collapse instructions",
+        "intro": "Registration is runner-driven: the runner calls the backend itself and receives its id and secret.",
+        "steps": {
+          "backend": {
+            "title": "Prepare the backend",
+            "description": "Set a stable RUNNER_SECRET_MASTER_KEY. The same key must be visible to web, web-worker and web-temporal; do not change it after registration.",
+            "code": "make runner-secret"
+          },
+          "init": {
+            "title": "Register the runner",
+            "description": "On the runner host, run init with the backend host. The runner calls POST /api/runner/register and writes config.json with mode 0600.",
+            "code": "runner init <backend-host>"
+          },
+          "restart": {
+            "title": "Restart the runner",
+            "description": "Start the runner process after a successful init. The card will appear in this section automatically; the list refreshes every 30 seconds."
+          },
+          "public_address": {
+            "title": "Set the public address",
+            "description": "In the runner card, click “Set address” and enter an absolute http/https URL, for example https://runner-1.example.com. Without a public address the runner is not selected for builds or links."
+          },
+          "lost_secret": {
+            "title": "If the secret is lost",
+            "description": "Run runner init again: the runner gets a new runnerId and secret. Do not copy config.json between runners."
+          }
+        }
+      },
       "no_resources_title": "Resources not provided",
       "no_resources_description": "The runner sent a health push without a structured resource snapshot. Update the runner.",
       "no_disks_title": "No disks detected",
@@ -111,6 +132,40 @@
       "blocker_description": "Memory or disk usage reached the black level (90%). Building, starting and updating units and workspaces is unavailable.",
       "stale_title": "Data is stale",
       "stale_description": "The runner health push is outdated: the values shown may be inaccurate.",
+      "public_address": {
+        "label": "Public address",
+        "not_set": "Not set",
+        "set": "Set public address",
+        "edit": "Change address",
+        "dialog_title": "Runner public address",
+        "input_label": "Public address (URL)",
+        "placeholder": "https://runner-1.example.com",
+        "caption": "Absolute http/https URL with a non-empty host and no credentials.",
+        "validation": {
+          "required": "Enter a public address",
+          "invalid": "Invalid URL",
+          "scheme": "Only http and https schemes are allowed",
+          "host": "The address must contain a host",
+          "userinfo": "The address must not contain a username or password"
+        },
+        "buttons": {
+          "check": "Check",
+          "save": "Save",
+          "clear": "Clear",
+          "cancel": "Cancel"
+        },
+        "check": {
+          "checking": "Checking availability…",
+          "reachable": "Address is reachable",
+          "unreachable": "Address is unreachable",
+          "unreachable_hint": "The check does not block saving."
+        },
+        "messages": {
+          "saved": "Public address saved",
+          "deleted": "Public address cleared",
+          "error": "The request failed. Please try again."
+        }
+      },
       "host": "Host",
       "collected_at": "Measured at",
       "memory": "Memory",
@@ -159,7 +214,6 @@
     "titles": {
       "login": "Sign in",
       "account_settings": "Account settings",
-      "init": "Initialization",
       "unit_jobs": "Unit jobs",
       "unauthorized": "Access denied",
       "not_found": "Page not found",
@@ -192,7 +246,12 @@
       "runner_threats_aria": "Runners that need attention: {count}",
       "runner_threats_hint": "Open the Runners section",
       "runner_threats_open": "Open the Runners section",
-      "runner_threats_non_admin": "Details are available to administrators."
+      "runner_threats_non_admin": "Details are available to administrators.",
+      "runner_none": "No runners registered",
+      "runner_none_aria": "Attention: no runners registered",
+      "runner_none_description": "Creating, building and starting units is unavailable until at least one runner is registered.",
+      "runner_none_open": "Open the Runners section",
+      "runner_none_non_admin": "Contact an administrator to register a runner."
     },
     "sidebar": {
       "groups": {
@@ -205,7 +264,6 @@
         "projects": "Projects",
         "repositories": "Repositories",
         "accounts": "Accounts",
-        "initialization": "Initialization",
         "runners": "Runners",
         "settings": "Settings",
         "ai_assistant": "AI Assistant",
@@ -229,19 +287,6 @@
       "description": "The address may be outdated or the page may have been moved.",
       "home": "Go to dashboard",
       "units": "Go to units"
-    },
-    "form_proxy_host": {
-      "caption": "Proxy Host Form",
-      "fields": {
-        "label": "Default Proxy Host"
-      },
-      "buttons": {
-        "ok": "Ok",
-        "check": "Test connection"
-      }
-    },
-    "initialization": {
-      "description": "Connection settings for system initialization."
     }
   },
   "hotkeys": {
@@ -772,7 +817,6 @@
           "projectCode": "Project Code",
           "projectName": "Project Name",
           "mainBranch": "Main Branch",
-          "proxyHost": "Proxy Host",
           "unitContainerMemory": "Unit container memory limit, MB",
           "zashishennieVetki": "Protected branches"
         }
@@ -782,15 +826,13 @@
       },
       "buttons": {
         "ok": "Ok",
-        "close": "Close",
-        "check_proxy_host": "Verify"
+        "close": "Close"
       }
     },
     "form_edit_project": {
       "fields": {
         "labels": {
           "projectName": "Project Name",
-          "proxyHost": "Proxy Host",
           "unitContainerMemory": "Unit container memory limit, MB"
         }
       },
@@ -851,8 +893,7 @@
         "repo_id": "Repo id",
         "project_code": "Project code",
         "main_branch": "Main branch",
-        "state": "State",
-        "proxy_host": "Proxy Host"
+        "state": "State"
       },
       "filter": {
         "search": "Project name or code",

@@ -82,12 +82,6 @@ const administrativniePunkty = computed<GhSideNavItem[]>(() => [
         to: "/unit/projects",
     },
     {
-        id: "initialization",
-        label: t("app.sidebar.items.initialization"),
-        icon: "gear",
-        to: "/init",
-    },
-    {
         id: "runners",
         label: t("app.sidebar.items.runners"),
         icon: "server",

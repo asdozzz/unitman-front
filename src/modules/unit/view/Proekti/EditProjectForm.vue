@@ -25,7 +25,7 @@ const route = useRoute();
 async function zagruzitProekt(): Promise<void> {
   await storeProekta.poluchitProekt(route.params.id as string);
   if (proekt.value) {
-    await editFormStore.otkritFormu(new EditProjectForm(proekt.value.id, proekt.value.name, proekt.value.proxyHost, proekt.value.memoryLimit));
+    await editFormStore.otkritFormu(new EditProjectForm(proekt.value.id, proekt.value.name, proekt.value.memoryLimit));
   }
 }
 
@@ -73,10 +73,6 @@ async function otpravitFormu() {
         <div class="edit-project__fields">
           <GhFormField :label="$t('unit.form_edit_project.fields.labels.projectName')">
             <GhInput v-model="form.newProjectName" />
-          </GhFormField>
-
-          <GhFormField :label="$t('unit.form_edit_project.fields.labels.proxyHost')">
-            <GhInput v-model="form.newProxyHost" />
           </GhFormField>
 
           <GhFormField :label="$t('unit.form_edit_project.fields.labels.unitContainerMemory')">

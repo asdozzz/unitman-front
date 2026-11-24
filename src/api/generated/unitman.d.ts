@@ -2051,7 +2051,31 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/runner/getDefaultRunnerActive": {
+    "/runner/{runnerId}/public-address": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Задать публичный адрес раннера (администратор)
+         * @description Адрес обязан быть абсолютным http/https URL с непустым host и без userinfo (`user:pass@`). Неизвестный runnerId — 404. Недоступность адреса сохранение не блокирует: проверка — отдельный эндпоинт.
+         */
+        put: operations["put_app_runner_infra_runnerpublicaddress_putpublicaddress"];
+        post?: never;
+        /**
+         * Очистить публичный адрес раннера (администратор)
+         * @description Раннер остаётся в реестре и может присылать health, но перестаёт выбираться для сборок и построения ссылок.
+         */
+        delete: operations["delete_app_runner_infra_runnerpublicaddress_deletepublicaddress"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runner/{runnerId}/public-address/check": {
         parameters: {
             query?: never;
             header?: never;
@@ -2060,8 +2084,11 @@ export type paths = {
         };
         get?: never;
         put?: never;
-        /** Признак активности раннера по умолчанию */
-        post: operations["post_app_runner_infra_runner_getdefaultrunneractive"];
+        /**
+         * Проверить доступность публичного адреса раннера (администратор)
+         * @description Best-effort `GET <publicAddress>/__unitman/health` с коротким таймаутом. Проверка консультативная: недоступность не является ошибкой запроса и ничего не сохраняет.
+         */
+        post: operations["post_app_runner_infra_runnerpublicaddress_checkpublicaddress"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3875,6 +3902,35 @@ export type components = {
         ProxyHostCheckResult: {
             result: boolean;
         };
+        /** @description Карточка раннера для `GET /api/runner/list` (RannerKartaReadModel). */
+        RannerKartaReadModel: {
+            active: boolean;
+            /** @description Ресурсоёмкие операции запрещены. */
+            blocked: boolean;
+            blockReason: string | null;
+            /** @description true — раннер можно выбирать для сборок и построения ссылок. Секрет раннера в списке отсутствует. */
+            hasPublicAddress: boolean;
+            /** @description Был ли health-push за последние 180 секунд. */
+            healthFresh: boolean;
+            /** Format: uuid */
+            id: string;
+            /** @description Unix-время последнего health-push (0 — ещё не было). */
+            lastHealthAt: number;
+            /** @description Эффективный уровень ресурсной угрозы. */
+            level: string;
+            memoryInfo: components["schemas"]["RunnerMemoryInfo"];
+            /**
+             * Format: uri
+             * @description Публичный адрес раннера, заданный администратором.
+             */
+            publicAddress: string | null;
+            /** @description Unix-время регистрации. */
+            registeredAt: number | null;
+            /** @description Последний структурированный снимок ресурсов (RunnerResources). */
+            resources: Record<string, never> | null;
+            /** @description Всегда строго равен `id` зарегистрированного раннера. */
+            taskQueue: string;
+        };
         /** @description Состояние одного прикреплённого редактора юнита */
         RedaktorUnita: {
             imeetTokenNaProekt: boolean;
@@ -3992,6 +4048,30 @@ export type components = {
             freeAsKb: number;
             /** @example 16777216 */
             totalAsKb: number;
+        };
+        /** @description Сохранённый публичный адрес раннера. */
+        RunnerPublicAddress: {
+            /**
+             * Format: uri
+             * @example https://runner-1.example.com
+             */
+            publicAddress: string;
+            /** Format: uuid */
+            runnerId: string;
+        };
+        /** @description Результат best-effort проверки `GET <publicAddress>/__unitman/health`. Проверка не сохраняет адрес и не блокирует сохранение. */
+        RunnerPublicAddressCheck: {
+            /** @description Причина недоступности (HTTP-статус или транспортная ошибка). */
+            error?: string;
+            reachable: boolean;
+        };
+        /** @description Тело PUT/DELETE-check публичного адреса раннера. */
+        RunnerPublicAddressRequest: {
+            /**
+             * Format: uri
+             * @example https://runner-1.example.com
+             */
+            publicAddress: string;
         };
         /** @description Состояние раннера (RunnerState::jsonSerialize) */
         RunnerState: {
@@ -4355,6 +4435,23 @@ export type components = {
         UdalitWorkspace: {
             /** Format: uuid */
             workspaceId: string;
+        };
+        /** @description Сводка угроз по раннерам для `GET /api/runner/threats` (UgrozyRannerovReadModel). */
+        UgrozyRannerovReadModel: {
+            /** @description Количество проблемных раннеров. */
+            count: number;
+            hasThreats: boolean;
+            /** @description Общее число зарегистрированных раннеров (включая неактивные). Ноль означает, что не зарегистрирован ни один раннер. */
+            registeredCount: number;
+            runners: {
+                blocked: boolean;
+                healthFresh: boolean;
+                /** Format: uuid */
+                id: string;
+                level: string;
+            }[];
+            /** @description Худший уровень угрозы среди раннеров. */
+            worstLevel: string;
         };
         UnblockByAdmin: {
             /** Format: uuid */
@@ -9783,25 +9880,36 @@ export interface operations {
             };
         };
     };
-    post_app_runner_infra_runner_getdefaultrunneractive: {
+    put_app_runner_infra_runnerpublicaddress_putpublicaddress: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                runnerId: string;
+            };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunnerPublicAddressRequest"];
+            };
+        };
         responses: {
-            /** @description Состояние раннера */
+            /** @description Адрес сохранён */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        active: boolean;
-                    };
+                    "application/json": components["schemas"]["RunnerPublicAddress"];
                 };
+            };
+            /** @description runner.public_address.invalid */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Не авторизован */
             401: {
@@ -9810,8 +9918,110 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
-            500: {
+            /** @description Недостаточно прав (не администратор) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    delete_app_runner_infra_runnerpublicaddress_deletepublicaddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                runnerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Адрес очищен */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав (не администратор) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_runner_infra_runnerpublicaddress_checkpublicaddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                runnerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunnerPublicAddressRequest"];
+            };
+        };
+        responses: {
+            /** @description Результат проверки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunnerPublicAddressCheck"];
+                };
+            };
+            /** @description runner.public_address.invalid */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав (не администратор) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

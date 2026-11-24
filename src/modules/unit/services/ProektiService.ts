@@ -29,10 +29,6 @@ class ProektiService {
         return apiClient.post('/project/ustanovitZashishennieVetki', params);
     }
 
-    proveritProxyHost(params: Schema<"ProveritProxyHost">) {
-        return apiClient.post('/project/proverkaProxyHost', params);
-    }
-
     read(id: string) {
         return apiClient.post(buildPath('/project/read/{id}', { id }));
     }

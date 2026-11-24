@@ -42,14 +42,6 @@ defineProps<{
       <span class="proekt-card__meta-text proekt-card__branch" :title="item.mainBranch">{{ item.mainBranch }}</span>
     </span>
 
-    <template v-if="item.proxyHost">
-      <span class="proekt-card__separator">·</span>
-
-      <span class="proekt-card__meta-item">
-        <GhIcon name="globe" :size="14" />
-        <span class="proekt-card__meta-text" :title="item.proxyHost">{{ item.proxyHost }}</span>
-      </span>
-    </template>
   </div>
 </template>
 

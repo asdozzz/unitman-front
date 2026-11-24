@@ -10,6 +10,7 @@ const PUSTAYA_SVODKA: UgrozyRannerov = {
     worstLevel: "ok",
     count: 0,
     runners: [],
+    registeredCount: 0,
 };
 
 type UgrozyRannerovStore = {
@@ -18,6 +19,8 @@ type UgrozyRannerovStore = {
     oshibka: string;
     init: boolean;
     pause: boolean;
+    /** Первый успешный ответ получен: пустой реестр не путается с загрузкой. */
+    loaded: boolean;
 }
 
 export const storeUgrozRannerov = defineStore('UgrozRannerov', {
@@ -28,10 +31,15 @@ export const storeUgrozRannerov = defineStore('UgrozRannerov', {
             oshibka: "",
             init: false,
             pause: false,
+            loaded: false,
         };
     },
     getters: {
-        estUgrozy: (state): boolean => state.svodka.hasThreats,
+        estUgrozy: (state): boolean =>
+            state.loaded &&
+            (state.svodka.hasThreats || state.svodka.registeredCount === 0),
+        netZaregistrirovannyhRannerov: (state): boolean =>
+            state.loaded && state.svodka.registeredCount === 0,
         hudshiyUroven: (state) => state.svodka.worstLevel,
     },
     actions: {
@@ -47,6 +55,7 @@ export const storeUgrozRannerov = defineStore('UgrozRannerov', {
             } else {
                 this.oshibka = "";
                 this.svodka = response.data;
+                this.loaded = true;
             }
 
             this.loader = false;

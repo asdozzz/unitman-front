@@ -71,7 +71,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import "dayjs/locale/ru";
 import "dayjs/locale/en";
 import dayjs from "dayjs";
@@ -87,7 +87,6 @@ import { loadAppSettings, saveAppSettings } from "@/utils/appSettings";
 const { t } = useI18n();
 const $q = useQuasar();
 const router = useRouter();
-const route = useRoute();
 
 const nastroiki = loadAppSettings();
 
@@ -111,12 +110,9 @@ const shirinaSaidbara = computed<number>(() =>
 );
 
 /**
- * Каркас (хедер и сайдбар) показывается авторизованным пользователям и на
- * странице первичной инициализации, которая доступна без входа.
+ * Каркас (хедер и сайдбар) показывается авторизованным пользователям.
  */
-const pokazatKarkas = computed<boolean>(
-    () => isAuth.value || route.path === "/init",
-);
+const pokazatKarkas = computed<boolean>(() => isAuth.value);
 
 onMounted(() => {
     authStore.updateLocale(getLocale.value);

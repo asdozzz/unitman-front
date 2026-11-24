@@ -6,12 +6,10 @@ import i18n from '@/bootstrap/translator';
 export class EditProjectForm {
     id: string;
     newProjectName: string;
-    newProxyHost: string;
     memoryLimit: number;
-    constructor(id: string = "", newProjectName: string = "", newProxyHost: string | null = null, memoryLimit: number | null = null) {
+    constructor(id: string = "", newProjectName: string = "", memoryLimit: number | null = null) {
         this.id = id;
         this.newProjectName = newProjectName;
-        this.newProxyHost = newProxyHost  ?? "";
         this.memoryLimit = memoryLimit ?? 0;
     }
 }

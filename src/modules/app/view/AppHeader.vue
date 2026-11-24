@@ -34,12 +34,28 @@ const { email, getLocale, isAdmin, loaderIzmemeniyaYazika } =
     storeToRefs(authStore);
 
 const ugrozyStore = storeUgrozRannerov();
-const { svodka: ugrozy, init: ugrozyInit } = storeToRefs(ugrozyStore);
+const {
+    svodka: ugrozy,
+    init: ugrozyInit,
+    netZaregistrirovannyhRannerov: netRannerov,
+} = storeToRefs(ugrozyStore);
 
-const estUgrozy = computed<boolean>(() => ugrozy.value.hasThreats);
+const estUgrozy = computed<boolean>(() => ugrozyStore.estUgrozy);
+
+const klassUgroz = computed<string>(() =>
+    netRannerov.value ? "warning" : urovenKak(ugrozy.value.worstLevel),
+);
 
 const podpisUgroz = computed<string>(() =>
-    t("app.header.runner_threats", { count: ugrozy.value.count }),
+    netRannerov.value
+        ? t("app.header.runner_none")
+        : t("app.header.runner_threats", { count: ugrozy.value.count }),
+);
+
+const ariaUgroz = computed<string>(() =>
+    netRannerov.value
+        ? t("app.header.runner_none_aria")
+        : t("app.header.runner_threats_aria", { count: ugrozy.value.count }),
 );
 
 /** Приводит строковый уровень из API к литеральному типу. */
@@ -193,13 +209,13 @@ function vyiti(): void {
             <div
                 v-if="estUgrozy"
                 class="app-header__action app-header__threats"
-                :class="`app-header__threats--${urovenKak(ugrozy.worstLevel)}`"
+                :class="`app-header__threats--${klassUgroz}`"
             >
                 <GhButton
                     variant="invisible"
                     icon="alert"
                     :label="podpisUgroz"
-                    :aria-label="t('app.header.runner_threats_aria', { count: ugrozy.count })"
+                    :aria-label="ariaUgroz"
                 />
 
                 <q-menu
@@ -209,32 +225,59 @@ function vyiti(): void {
                     self="top middle"
                     :offset="[0, 6]"
                 >
-                    <div class="gh-popover__list">
-                        <div
-                            v-for="ranner in ugrozy.runners"
-                            :key="ranner.id"
-                            class="gh-popover__row"
-                        >
-                            <span class="gh-popover__id gh-mono">{{ ranner.id }}</span>
-                            <GhLabel
-                                :variant="VARIANT_UROVNYA[urovenKak(ranner.level)]"
-                                :label="podpisUrovnya(ranner.level)"
-                            />
+                    <template v-if="netRannerov">
+                        <div class="app-header__threats-empty">
+                            <p class="app-header__threats-title">
+                                {{ t("app.header.runner_none") }}
+                            </p>
+                            <p class="app-header__threats-text">
+                                {{ t("app.header.runner_none_description") }}
+                            </p>
                         </div>
-                    </div>
 
-                    <div class="gh-popover__actions">
-                        <GhButton
-                            v-if="isAdmin"
-                            size="sm"
-                            variant="primary"
-                            :label="t('app.header.runner_threats_open')"
-                            @click="pereytiVRazdelRannerov"
-                        />
-                        <span v-else class="gh-popover__hint">
-                            {{ t("app.header.runner_threats_non_admin") }}
-                        </span>
-                    </div>
+                        <div class="gh-popover__actions">
+                            <GhButton
+                                v-if="isAdmin"
+                                size="sm"
+                                variant="primary"
+                                icon="server"
+                                :label="t('app.header.runner_none_open')"
+                                @click="pereytiVRazdelRannerov"
+                            />
+                            <span v-else class="gh-popover__hint">
+                                {{ t("app.header.runner_none_non_admin") }}
+                            </span>
+                        </div>
+                    </template>
+
+                    <template v-else>
+                        <div class="gh-popover__list">
+                            <div
+                                v-for="ranner in ugrozy.runners"
+                                :key="ranner.id"
+                                class="gh-popover__row"
+                            >
+                                <span class="gh-popover__id gh-mono">{{ ranner.id }}</span>
+                                <GhLabel
+                                    :variant="VARIANT_UROVNYA[urovenKak(ranner.level)]"
+                                    :label="podpisUrovnya(ranner.level)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="gh-popover__actions">
+                            <GhButton
+                                v-if="isAdmin"
+                                size="sm"
+                                variant="primary"
+                                :label="t('app.header.runner_threats_open')"
+                                @click="pereytiVRazdelRannerov"
+                            />
+                            <span v-else class="gh-popover__hint">
+                                {{ t("app.header.runner_threats_non_admin") }}
+                            </span>
+                        </div>
+                    </template>
                 </q-menu>
             </div>
 
@@ -489,6 +532,27 @@ function vyiti(): void {
 
 .app-header__menu-list :deep(.q-item:hover) {
     background-color: var(--bgColor-neutral-muted);
+}
+
+.app-header__threats-empty {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 320px;
+    padding: 8px 12px;
+}
+
+.app-header__threats-title {
+    margin: 0;
+    font-size: var(--fontSize-body);
+    font-weight: var(--fontWeight-semibold);
+}
+
+.app-header__threats-text {
+    margin: 0;
+    color: var(--fgColor-muted);
+    font-size: var(--fontSize-caption);
+    line-height: var(--lineHeight-normal);
 }
 
 .app-header__threats--warning :deep(.gh-button) {

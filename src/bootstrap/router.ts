@@ -5,7 +5,6 @@ import unit from '@/modules/unit/routes';
 import opencode from '@/modules/opencode/routes';
 import runner from '@/modules/runner/routes';
 import app from  '@/modules/app/routes';
-import {storeInizializii} from "@/modules/app/store/InitializationStore";
 import i18n from "@/bootstrap/translator";
 
 const router = createRouter({
@@ -23,10 +22,9 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
 
     // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/login', '/init'];
+    const publicPages = ['/login'];
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
-    const initStore = storeInizializii();
 
     if (authRequired && authStore.tokenData) {
         // Сессия сохранена в localStorage, но access-токен мог истечь за время
@@ -35,16 +33,10 @@ router.beforeEach(async (to, _from, next) => {
         await authStore.obespechitAktualniyToken();
     }
 
-    if (initStore.list.data.length === 0) {
-        await initStore.poluchitSpisok();
-    }
-
     if (authRequired) {
         if (!authStore.tokenData) {
             authStore.returnUrl = to.fullPath;
             return next('/login');
-        } else if (authStore.isAdmin && initStore.estNeZapolnenie && to.fullPath !== '/init') {
-            return next('/init');
         }
     }
 

@@ -89,6 +89,12 @@ export type RannerKarta = {
   resources: ResursiServera | null;
   /** Присутствует у старых раннеров без структурированного снимка ресурсов. */
   memoryInfo?: ResursPamyatiLegacy | null;
+  /** Публичный адрес раннера, заданный администратором; `null` — не задан. */
+  publicAddress: string | null;
+  /** Unix-время регистрации раннера. */
+  registeredAt: number | null;
+  /** `true`, если публичный адрес задан и раннер доступен для ссылок. */
+  hasPublicAddress: boolean;
 };
 
 /** Краткая угроза по одному раннеру для шапки сайта. */
@@ -105,4 +111,6 @@ export type UgrozyRannerov = {
   worstLevel: UrovenResursov;
   count: number;
   runners: UgrozaRannera[];
+  /** Общее число зарегистрированных раннеров, включая неактивные. */
+  registeredCount: number;
 };
