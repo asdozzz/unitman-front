@@ -247,12 +247,15 @@ const menyu = computed<Menyu>(() => {
       "open-editor",
       t("unit.spisok_unitov.card.buttons.open_editor"),
       "code",
-      () =>
-        window.open(
-          props.item.redaktorLink as string,
-          "_blank",
-          "noopener,noreferrer",
-        ),
+      () => {
+        // IDE стартует по требованию. Открываем внутреннюю страницу, она
+        // запросит ссылку редактора и только потом перейдёт на IDE.
+        const target = router.resolve({
+          name: "unit_redaktor",
+          params: { id: props.item.id },
+        });
+        window.open(target.href, "_blank", "noopener,noreferrer");
+      },
       false,
     );
   }

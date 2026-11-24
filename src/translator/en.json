@@ -1206,7 +1206,10 @@
         "net_tokena": "You have no personal storage token with access to the project"
       },
       "link": {
-        "expires": "Link expires"
+        "expires": "Link expires",
+        "starting": "Starting the editor…",
+        "start_failed": "Failed to start the editor",
+        "unit_not_found": "Unit not found"
       },
       "ne_avtor": "You are not the unit author",
       "vetka_zashishena": "The branch is protected: file editing is unavailable",
