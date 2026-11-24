@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
 import {useAddProjectFormStore} from "@/modules/unit/store/SpisokProektov/AddProjectFormStore";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import i18n from "@/bootstrap/translator";
 import {OshibkaMaski, proveritMaskuVetki} from "@/modules/unit/utils/zashishennieVetki";
 import {
@@ -44,7 +44,16 @@ function dobavitMasku(value: string, done: NewValueDone): void {
 }
 
 const addFormStore = useAddProjectFormStore();
-const { form, oshibkaOtBackenda, loader, hranilisha, proekti } = storeToRefs(addFormStore);
+const { enable, form, oshibkaOtBackenda, loader, hranilisha, proekti, vetki } = storeToRefs(addFormStore);
+
+/** Опции селекта веток — плоский список имён (модель хранит строки-маски). */
+const opciiVetok = computed<string[]>(() => vetki.value.spisok.map((vetka) => vetka.value));
+
+/** Серверный поиск веток: запрос уходит в хранилище с параметром `query`. */
+function filterSpiskaVetok(val: string | null, update: (cb: () => void) => void): void {
+  vetki.value.query = val ?? "";
+  update(() => void addFormStore.poluchitVetkiHranilisha());
+}
 
 onMounted(async () => {
   await addFormStore.poluchitActivnieHranilisha();
@@ -63,21 +72,46 @@ async function otpravitFormu() {
 
 }
 
-function repoSelected(value: string | number | null): void {
-  form.value.repoId = value === null ? "" : String(value);
+/** Сбросить выбранный проект: и локальную модель, и поля формы. */
+function sbrositViborProekta(): void {
+  localProjectCode.value = null;
+  form.value.projectCode = "";
+  form.value.projectName = "";
+}
 
-  if (!value) {
-    proekti.value.spisok = [];
-  } else {
-    addFormStore.poluchitProektiRepi();
+/**
+ * Диалог может оставаться смонтированным между открытиями, поэтому при
+ * повторном открытии сбрасываем локальное состояние селекта проекта.
+ */
+watch(enable, (otkrit) => {
+  if (otkrit) {
+    sbrositViborProekta();
+    lokalnayaOshibkaVetok.value = null;
   }
+});
+
+function repoSelected(value: string | number | null): void {
+  const repoId = value === null ? "" : String(value);
+
+  if (repoId === form.value.repoId) {
+    return;
+  }
+
+  form.value.repoId = repoId;
+  sbrositViborProekta();
+
+  // Ветки зависят и от репозитория, и от кода проекта: код сброшен выше,
+  // поэтому список веток тоже нужно очистить.
+  addFormStore.sbrositVetki();
+
+  // Стор сам очистит список при пустом repoId и загрузит проекты иначе.
+  addFormStore.poluchitProektiRepi();
 }
 
 function projectCodeSelected(value: string | number | null): void {
   if (value === null || value === "") {
-    localProjectCode.value = null;
-    form.value.projectCode = "";
-    form.value.projectName = "";
+    sbrositViborProekta();
+    addFormStore.sbrositVetki();
     return;
   }
 
@@ -87,11 +121,11 @@ function projectCodeSelected(value: string | number | null): void {
   localProjectCode.value = kod;
   form.value.projectCode = kod;
   form.value.projectName = (nayden?.label ?? kod).replace(/[^a-zA-Z0-9_-]+/g, "_");
-}
 
-function filterSpiskaProektov(val: string | null, update: (callback: () => void) => void): void {
-  proekti.value.query = val;
-  update(() => addFormStore.poluchitProektiRepi());
+  // Проект в хранилище выбран — можно загружать его ветки для подсказок.
+  if (form.value.repoId) {
+    void addFormStore.poluchitVetkiHranilisha();
+  }
 }
 
 </script>
@@ -109,21 +143,15 @@ function filterSpiskaProektov(val: string | null, update: (callback: () => void)
       </GhFormField>
 
       <GhFormField :label="$t('unit.form_add_project.fields.labels.projectCode')">
-        <q-select
-            v-model="localProjectCode"
-            class="add-project__native add-project__native--single"
-            :loading="proekti.loader"
+        <GhSelect
+            :model-value="localProjectCode"
             :options="proekti.spisok"
-            fill-input
+            :loading="proekti.loader"
+            :disabled="!form.repoId"
+            :placeholder="$t('unit.form_add_project.fields.labels.projectCode')"
             use-input
             hide-selected
-            outlined
-            dense
-            hide-bottom-space
             clearable
-            emit-value
-            map-options
-            @filter="filterSpiskaProektov"
             @update:model-value="projectCodeSelected"
         >
           <template #no-option>
@@ -133,7 +161,7 @@ function filterSpiskaProektov(val: string | null, update: (callback: () => void)
               </q-item-section>
             </q-item>
           </template>
-        </q-select>
+        </GhSelect>
       </GhFormField>
 
       <GhFormField :label="$t('unit.form_add_project.fields.labels.projectName')">
@@ -149,19 +177,37 @@ function filterSpiskaProektov(val: string | null, update: (callback: () => void)
           :caption="$t('unit.form_add_project.hints.zashishennieVetki')"
           :error="lokalnayaOshibkaVetok ?? ''"
       >
+        <!--
+          Тег-инпут масок: выбранные ветки/маски показываются чипами
+          (use-chips), ввод фильтрует подсказки с сервера (@filter), Enter
+          добавляет маску вручную (@new-value). hide-selected/fill-input
+          здесь нельзя: hide-selected скрывает чипы (QSelect.getSelection
+          возвращяет пустой массив), а fill-input не совместим с multiple.
+        -->
         <q-select
             v-model="form.zashishennieVetki"
             class="add-project__native"
+            :options="opciiVetok"
+            :loading="vetki.loader"
+            :disable="!form.repoId || !form.projectCode"
+            :placeholder="form.zashishennieVetki.length === 0 ? $t('unit.form_add_project.fields.placeholders.zashishennieVetki') : ''"
             use-input
             use-chips
             multiple
-            hide-selected
-            fill-input
             outlined
             dense
             hide-bottom-space
             @new-value="dobavitMasku"
-        />
+            @filter="filterSpiskaVetok"
+        >
+          <template #no-option>
+            <q-item>
+              <q-item-section class="text-grey">
+                {{ $t('unit.form_add_project.hints.zashishennieVetkiVvod') }}
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
       </GhFormField>
 
       <GhFormField :label="$t('unit.form_add_project.fields.labels.unitContainerMemory')">
@@ -210,17 +256,6 @@ function filterSpiskaProektov(val: string | null, update: (callback: () => void)
 
 .add-project__native :deep(.q-field__control) {
   border-radius: var(--borderRadius-medium);
-}
-
-/* Однострочный селект — той же высоты, что GhInput/GhSelect (F1). */
-.add-project__native--single :deep(.q-field__control) {
-  height: var(--control-height-md);
-  min-height: var(--control-height-md);
-}
-
-.add-project__native--single :deep(.q-field__inner) {
-  height: 100%;
-  min-height: 0;
 }
 
 .add-project__error {

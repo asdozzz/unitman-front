@@ -53,10 +53,6 @@ class ProektiService {
         return apiClient.post('/project/disable', params);
     }
 
-    sobrat(params: Schema<"PostavitVOcheredNaSborku">) {
-        return apiClient.post('/project/build', params);
-    }
-
     poluchitSpisokPolzovatelei(params: Schema<"PoluchitSpisokPolzovateleiProekta">) {
         return apiClient.post('/project/usersList', params);
     }
@@ -87,6 +83,11 @@ class ProektiService {
 
     poluchitVetkiProekta(params: Schema<"PoluchitSpisokVetokProekta">) {
         return apiClient.post('/project/branchesList', params);
+    }
+
+    /** Ветки проекта в хранилище до создания проекта (по repoId + коду проекта). */
+    poluchitVetkiHranilisha(params: Schema<"PoluchitSpisokVetokHranilisha">) {
+        return apiClient.post('/project/branchesListByCode', params);
     }
 
     sozdatVetku(params: Schema<"SozdatVetkuProekta">) {

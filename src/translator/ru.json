@@ -594,6 +594,8 @@
         "title": "Защищённые ветки",
         "hint": "Ветки, подходящие под маски, будут защищены от редактирования файлов в юните.",
         "empty": "Защищённые ветки не добавлены",
+        "placeholder": "release/*",
+        "vvod_podskazka": "Ничего не найдено. Введите маску ветки (например, release/*) и нажмите Enter, чтобы добавить её",
         "buttons": {
           "save": "Сохранить"
         },
@@ -727,10 +729,14 @@
           "mainBranch": "Master ветка",
           "unitContainerMemory": "Лимит памяти на контейнер юнита, MB",
           "zashishennieVetki": "Защищённые ветки"
+        },
+        "placeholders": {
+          "zashishennieVetki": "release/*"
         }
       },
       "hints": {
-        "zashishennieVetki": "Маски веток, защищённых от редактирования файлов в юните (например, release/*)"
+        "zashishennieVetki": "Маски веток, защищённых от редактирования файлов в юните (например, release/*)",
+        "zashishennieVetkiVvod": "Ничего не найдено. Введите маску ветки (например, release/*) и нажмите Enter, чтобы добавить её"
       },
       "buttons": {
         "ok": "Сохранить",
@@ -865,7 +871,6 @@
         "deactivate": "деактивировать",
         "edit": "редактировать",
         "hook_settings": "Найстроки хука репозитория",
-        "build": "собрать",
         "variables": "переменные"
       },
       "card_fields": {
@@ -909,13 +914,9 @@
       "card": {
         "status": {
           "busy": "Выполняется",
-          "success": "Собран",
           "new": "Новый",
           "error": "Ошибка",
           "process_in_progress": "Выполняется процесс",
-          "build_pending": "Собирается",
-          "build_success": "Собран",
-          "build_error": "Ошибка сборки",
           "remove_pending": "Удаляется",
           "remove_error": "Ошибка удаления"
         },
@@ -926,7 +927,6 @@
           "more": "Ещё",
           "jobs": "Выполненные задачи",
           "edit": "Редактировать",
-          "build": "Собрать",
           "activate": "Активировать",
           "deactivate": "Деактивировать",
           "delete": "Удалить",

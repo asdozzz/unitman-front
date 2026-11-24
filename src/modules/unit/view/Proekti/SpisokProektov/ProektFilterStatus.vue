@@ -12,10 +12,7 @@ type OpisanieStatusa = {
  * Порядок чипов заморожен контрактом: от активных процессов к ошибкам.
  */
 const STATUSI: OpisanieStatusa[] = [
-  {status: "BUILD_PENDING", labelKey: "build_pending"},
-  {status: "BUILD_SUCCESS", labelKey: "build_success"},
   {status: "NEW", labelKey: "new"},
-  {status: "BUILD_ERROR", labelKey: "build_error"},
   {status: "REMOVE_PENDING", labelKey: "remove_pending"},
   {status: "REMOVE_ERROR", labelKey: "remove_error"},
 ];
@@ -143,37 +140,24 @@ function modifikator(status: ProektFilterStatus): string {
 }
 
 /* Цветные точки состояний; счётчик остаётся muted. */
-.status-chip--build_pending .status-chip__dot,
 .status-chip--remove_pending .status-chip__dot {
   background: var(--fgColor-accent);
-}
-
-.status-chip--build_success .status-chip__dot {
-  background: var(--fgColor-success);
 }
 
 .status-chip--new .status-chip__dot {
   background: var(--fgColor-muted);
 }
 
-.status-chip--build_error .status-chip__dot,
 .status-chip--remove_error .status-chip__dot {
   background: var(--fgColor-danger);
 }
 
 /* Активный чип: цветная точка + цветной текст + тонкий бордер. */
 .status-chip--all.status-chip--active,
-.status-chip--build_pending.status-chip--active,
 .status-chip--remove_pending.status-chip--active {
   border-color: var(--borderColor-accent-muted);
   background: var(--bgColor-accent-muted);
   color: var(--fgColor-accent);
-}
-
-.status-chip--build_success.status-chip--active {
-  border-color: var(--borderColor-success-muted);
-  background: var(--bgColor-success-muted);
-  color: var(--fgColor-success);
 }
 
 .status-chip--new.status-chip--active {
@@ -182,7 +166,6 @@ function modifikator(status: ProektFilterStatus): string {
   color: var(--fgColor-default);
 }
 
-.status-chip--build_error.status-chip--active,
 .status-chip--remove_error.status-chip--active {
   border-color: var(--borderColor-danger-muted);
   background: var(--bgColor-danger-muted);

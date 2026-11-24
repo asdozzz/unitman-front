@@ -592,6 +592,8 @@
       },
       "zashishennie_vetki": {
         "title": "Protected branches",
+        "placeholder": "release/*",
+        "vvod_podskazka": "No matches. Type a branch mask (for example, release/*) and press Enter to add it",
         "hint": "Branches matching the masks are protected from file editing in units.",
         "empty": "No protected branches added",
         "buttons": {
@@ -819,10 +821,14 @@
           "mainBranch": "Main Branch",
           "unitContainerMemory": "Unit container memory limit, MB",
           "zashishennieVetki": "Protected branches"
+        },
+        "placeholders": {
+          "zashishennieVetki": "release/*"
         }
       },
       "hints": {
-        "zashishennieVetki": "Branch masks protected from file editing in units (for example, release/*)"
+        "zashishennieVetki": "Branch masks protected from file editing in units (for example, release/*)",
+        "zashishennieVetkiVvod": "No matches. Type a branch mask (for example, release/*) and press Enter to add it"
       },
       "buttons": {
         "ok": "Ok",
@@ -884,7 +890,6 @@
         "deactivate": "deactivate",
         "edit": "edit",
         "hook_settings": "Repository hook settings",
-        "build": "build",
         "variables": "variables"
       },
       "card_fields": {
@@ -928,13 +933,9 @@
       "card": {
         "status": {
           "busy": "In progress",
-          "success": "Built",
           "new": "New",
           "error": "Error",
           "process_in_progress": "Process is running",
-          "build_pending": "Building",
-          "build_success": "Built",
-          "build_error": "Build error",
           "remove_pending": "Removing",
           "remove_error": "Remove error"
         },
@@ -945,7 +946,6 @@
           "more": "More",
           "jobs": "Completed jobs",
           "edit": "Edit",
-          "build": "Build",
           "activate": "Activate",
           "deactivate": "Deactivate",
           "delete": "Delete",

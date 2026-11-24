@@ -14,8 +14,6 @@ const props = withDefaults(defineProps<{
 /** Вариант и иконка по P5: цвет дублируется формой иконки. */
 const variant = computed<GhLabelVariant>(() => {
   switch (props.state.status) {
-    case "success":
-      return "success";
     case "error":
       return "danger";
     case "busy":
@@ -28,8 +26,6 @@ const variant = computed<GhLabelVariant>(() => {
 
 const ikonka = computed<OcticonName>(() => {
   switch (props.state.status) {
-    case "success":
-      return "check-circle";
     case "new":
       return "circle";
     case "error":

@@ -6,9 +6,6 @@
  */
 export type ProektFilterStatus =
     | "NEW"
-    | "BUILD_PENDING"
-    | "BUILD_SUCCESS"
-    | "BUILD_ERROR"
     | "REMOVE_PENDING"
     | "REMOVE_ERROR";
 
@@ -48,9 +45,6 @@ export type ProektFilterChip = {
 
 const DOPUSTIMIE_STATUSI: ProektFilterStatus[] = [
     "NEW",
-    "BUILD_PENDING",
-    "BUILD_SUCCESS",
-    "BUILD_ERROR",
     "REMOVE_PENDING",
     "REMOVE_ERROR",
 ];

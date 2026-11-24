@@ -111,8 +111,8 @@ async function otpravitFormu() {
 }
 
 function filterSpiskaVetok(val: string | null, update: (cb: () => void) => void): void {
-  vetki.value.query = val;
-  update(() => addFormStore.poluchitVetki());
+  vetki.value.query = val ?? "";
+  update(() => void addFormStore.poluchitVetki());
 }
 
 /**
@@ -196,7 +196,12 @@ function projectChanged(znachenie: string | number | null) {
   }
 
   if (projectId) {
+    // Поиск относится к прежнему проекту — сбрасываем запрос, но не сам
+    // список: очистка опций на лету возвращает цикл фильтрации QSelect.
+    vetki.value.query = "";
     void addFormStore.poluchitVetki();
+  } else {
+    addFormStore.sbrositVetki();
   }
 }
 

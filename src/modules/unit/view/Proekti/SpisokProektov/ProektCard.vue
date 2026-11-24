@@ -31,17 +31,16 @@ const router = useRouter();
 
 const state = computed(() => deriveProektUiStatus(props.item));
 
-/** Лоадер процесса: незавершённая сборка или ожидание результата раннера. */
+/** Лоадер процесса: ожидание результата раннера. */
 const prozesAktiven = computed<boolean>(() => {
-  return props.item.waitResultRunner || props.item.state === "BUILD_PENDING";
+  return props.item.waitResultRunner;
 });
 
-/** Левый красный акцент — неуспешная сборка или неудачное удаление. */
+/** Левый красный акцент — неудачное удаление. */
 const estOshibka = computed<boolean>(() => {
-  return props.item.state === "BUILD_ERROR" || props.item.state === "REMOVE_ERROR";
+  return props.item.state === "REMOVE_ERROR";
 });
 
-const neSobirali = computed<boolean>(() => proektiStore.proektNeSobirali(props.item.id));
 const sloman = computed<boolean>(() => proektiStore.proektSloman(props.item.id));
 
 const prompt = ref(false);
@@ -69,10 +68,6 @@ function otkritZadachi() {
 
 function otkritRedaktirovanie() {
   router.push({name: "project_edit", params: {id: props.item.id}});
-}
-
-async function sobrat() {
-  await proektiStore.sobrat(props.item.id);
 }
 
 async function aktivirovat() {
@@ -152,11 +147,9 @@ async function podtverditUdalenie() {
       <template #actions>
         <ProektCardMenu
             :item="item"
-            :ne-sobirali="neSobirali"
             :sloman="sloman"
             @jobs="otkritZadachi"
             @edit="otkritRedaktirovanie"
-            @build="sobrat"
             @activate="aktivirovat"
             @deactivate="deaktivirovat"
             @remove="pokazatPodtverzhdenieUdaleniya"

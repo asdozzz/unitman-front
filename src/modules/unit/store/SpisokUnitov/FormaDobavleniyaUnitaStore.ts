@@ -54,6 +54,29 @@ class Vetka {
     }
 }
 
+/**
+ * Одинаковы ли списки веток по значениям.
+ *
+ * Если сервер вернул тот же набор (например, на повторный `filter('')`),
+ * массив опций не заменяется. Это сохраняет ссылку на него и не даёт
+ * QSelect повторно реагировать на «изменение» опций новым циклом фильтрации.
+ */
+function spiskiVetokRavni(tekushiy: Vetka[], noviy: Vetka[]): boolean {
+    if (tekushiy.length !== noviy.length) {
+        return false;
+    }
+
+    return tekushiy.every((vetka, indeks) => vetka.value === noviy[indeks].value);
+}
+
+/**
+ * Номер последнего запроса списка веток.
+ *
+ * Поздний ответ на устаревший запрос (другой проект или другой поисковый
+ * запрос) не должен перезаписывать актуальный список.
+ */
+let nomerZaprosaVetok = 0;
+
 type FormaDobavleniyaUnitaState = {
     enable: boolean;
     form:FormaDobavleniyaUnita;
@@ -188,6 +211,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.initPeremenie = false;
             this.dubli.loader = false;
             this.dubli.spisok = [];
+            this.sbrositVetki();
             this.zakritDialogSozdaniyaVetki();
             // Токены нужны для подсказки о правах на создание ветки:
             // грузим их при открытии формы, не блокируя её.
@@ -231,6 +255,7 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
             this.initPeremenie = false;
             this.dubli.loader = true;
             this.dubli.spisok = [];
+            this.sbrositVetki();
             this.zakritDialogSozdaniyaVetki();
         },
         /**
@@ -304,22 +329,74 @@ export const useFormaDobavleniyaUnitaStore = defineStore('FormaDobavleniyaUnitaS
                 }
             });
         },
-        async poluchitVetki() {
-            this.vetki.loader = true;
+        /**
+         * Сбросить список веток и отменить учёт незавершённых запросов.
+         *
+         * Используется при открытии/закрытии формы и при снятии выбора
+         * проекта. Намеренно не вызывается из `poluchitVetki`: очистка
+         * опций во время запроса заставляет QSelect (`use-input` +
+         * `fill-input`) повторно вызывать `@filter`, что приводило к
+         * бесконечным запросам `branchesList` и пустому списку.
+         */
+        sbrositVetki() {
+            nomerZaprosaVetok += 1;
             this.vetki.spisok = [];
-
-            if (!this.form.projectId) {
-                throw new Error('proekt ne vibran');
-            }
-            const response = await ProektiService.poluchitVetkiProekta({ id: this.form.projectId, query: this.vetki.query });
-
             this.vetki.loader = false;
-            if (response.status === "success") {
-                this.vetki.spisok = response.data.map((item: Schema<"ProjectBranch">) => new Vetka(item.name, item.name));
-            } else if (response.status === "fail") {
-                this.oshibkaOtBackenda = response.data.message;
-            } else if (response.status === "error") {
-                this.oshibkaOtBackenda = response.message;
+            this.vetki.query = null;
+        },
+        /**
+         * Загрузить ветки выбранного проекта.
+         *
+         * Список опций не очищается перед запросом: QSelect не должен терять
+         * текущие опции/выбранное значение, иначе он повторно запускает
+         * фильтрацию (и запрос) — именно это вызывало зацикливание.
+         * Устаревшие ответы отбрасываются по номеру запроса.
+         */
+        async poluchitVetki() {
+            const projectId = this.form.projectId;
+
+            if (!projectId) {
+                this.sbrositVetki();
+                return;
+            }
+
+            const nomerZaprosa = ++nomerZaprosaVetok;
+            const query = (this.vetki.query ?? "").trim();
+            this.vetki.loader = true;
+
+            try {
+                const response = await ProektiService.poluchitVetkiProekta({
+                    id: projectId,
+                    query: query === "" ? null : query,
+                });
+
+                if (nomerZaprosa !== nomerZaprosaVetok) {
+                    return;
+                }
+
+                if (response.status === "success") {
+                    const noviySpisok = response.data.map(
+                        (item: Schema<"ProjectBranch">) => new Vetka(item.name, item.name),
+                    );
+
+                    if (!spiskiVetokRavni(this.vetki.spisok, noviySpisok)) {
+                        this.vetki.spisok = noviySpisok;
+                    }
+                } else if (response.status === "fail") {
+                    this.oshibkaOtBackenda = response.data.message;
+                } else if (response.status === "error") {
+                    this.oshibkaOtBackenda = response.message;
+                }
+            } catch (error) {
+                if (nomerZaprosa === nomerZaprosaVetok) {
+                    this.oshibkaOtBackenda = error instanceof Error
+                        ? error.message
+                        : String(error);
+                }
+            } finally {
+                if (nomerZaprosa === nomerZaprosaVetok) {
+                    this.vetki.loader = false;
+                }
             }
         },
         /** Открыть диалог создания новой ветки. */

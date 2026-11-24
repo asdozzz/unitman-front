@@ -51,7 +51,7 @@ function estAktivnieUsloviya(filter: ProektFiltri): boolean {
         || filter.onlyActive;
 }
 
-/** Приоритет состояния для сортировки `state_priority`: busy → error → new → success. */
+/** Приоритет состояния для сортировки `state_priority`: busy → error → new. */
 function prioritetSostoyaniya(proekt: Proekt): number {
     const status: ProektUiStatus = deriveProektUiStatus(proekt).status;
 
@@ -62,8 +62,6 @@ function prioritetSostoyaniya(proekt: Proekt): number {
             return 1;
         case "new":
             return 2;
-        case "success":
-            return 3;
     }
 }
 
@@ -180,13 +178,6 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
                 return proekt.state;
             }
         },
-        proektGdetResultatSborki() {
-            const store = this;
-            return (id: string): boolean => {
-                const state = store.poluchitStateProektaPoId(id);
-                return state === 'BUILD_PENDING';
-            }
-        },
         proektGdetResultatUdaleniya() {
             const store = this;
             return (id: string): boolean => {
@@ -194,24 +185,11 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
                 return state === 'REMOVE_PENDING';
             }
         },
-        proektGdetResultatiOtRunnera() {
-            const store = this;
-            return (id: string): boolean => {
-                return store.proektGdetResultatSborki(id) || store.proektGdetResultatUdaleniya(id);
-            }
-        },
         proektSloman() {
             const store = this;
             return (id: string): boolean => {
                 const state = store.poluchitStateProektaPoId(id);
                 return state === 'REMOVE_ERROR';
-            }
-        },
-        proektNeSobirali() {
-            const store = this;
-            return (id: string): boolean => {
-                const state = store.poluchitStateProektaPoId(id);
-                return state === 'NEW' || state === 'BUILD_ERROR';
             }
         },
         /** Отфильтрованный и отсортированный список для сетки карточек. */
@@ -243,9 +221,6 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
         statusiSoSchetchikami(): Record<ProektFilterStatus, number> {
             const schetchiki: Record<ProektFilterStatus, number> = {
                 NEW: 0,
-                BUILD_PENDING: 0,
-                BUILD_SUCCESS: 0,
-                BUILD_ERROR: 0,
                 REMOVE_PENDING: 0,
                 REMOVE_ERROR: 0,
             };
@@ -446,19 +421,6 @@ export const useSpisokProektovStore = defineStore('SpisokProektovStore', {
             this.stopProjectLoader(id);
 
             const response = await ProektiService.deaktivirovat({ id })
-            this.stopProjectLoader(id);
-            if (response.status === "fail"){
-                Notify.create(response.data.message);
-            }
-
-            this.poluchitSpisokProektov();
-
-            return response;
-        },
-        async sobrat(id: string) {
-            this.stopProjectLoader(id);
-
-            const response = await ProektiService.sobrat({ id })
             this.stopProjectLoader(id);
             if (response.status === "fail"){
                 Notify.create(response.data.message);

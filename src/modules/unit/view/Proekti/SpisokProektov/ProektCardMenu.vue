@@ -7,8 +7,6 @@ import type {Proekt} from "@/modules/unit/store/SpisokProektov/model/Proekt";
 
 const props = defineProps<{
   item: Proekt;
-  /** Состояние NEW/BUILD_ERROR — проект ещё ни разу не собирали. */
-  neSobirali: boolean;
   /** Состояние REMOVE_ERROR — обычное удаление недоступно. */
   sloman: boolean;
 }>();
@@ -16,7 +14,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   jobs: [];
   edit: [];
-  build: [];
   activate: [];
   deactivate: [];
   remove: [];
@@ -30,10 +27,6 @@ const punktyMenu = computed<GhActionMenuItem[]>(() => {
     {id: "jobs", label: t("unit.spisok_proektov.card.buttons.jobs"), icon: "tasklist"},
     {id: "edit", label: t("unit.spisok_proektov.card.buttons.edit"), icon: "pencil"},
   ];
-
-  if (props.neSobirali) {
-    punkty.push({id: "build", label: t("unit.spisok_proektov.card.buttons.build"), icon: "tools"});
-  }
 
   if (!props.item.isActive) {
     punkty.push({id: "activate", label: t("unit.spisok_proektov.card.buttons.activate"), icon: "check"});
@@ -69,9 +62,6 @@ function vybratDeistvie(item: GhActionMenuItem): void {
       return;
     case "edit":
       emit("edit");
-      return;
-    case "build":
-      emit("build");
       return;
     case "activate":
       emit("activate");

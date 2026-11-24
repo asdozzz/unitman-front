@@ -1388,7 +1388,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/project/build": {
+    "/project/branchesListByCode": {
         parameters: {
             query?: never;
             header?: never;
@@ -1397,8 +1397,11 @@ export type paths = {
         };
         get?: never;
         put?: never;
-        /** Поставить проект в очередь на сборку */
-        post: operations["post_app_unitman_infra_project_build"];
+        /**
+         * Список веток проекта в хранилище до создания проекта
+         * @description Ветки запрашиваются напрямую в хранилище по паре «репозиторий + код проекта». Нужно форме добавления проекта: проект в Unitman ещё не создан.
+         */
+        post: operations["post_app_unitman_infra_project_brancheslistbycode"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2051,6 +2054,30 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/runner/{runnerId}/projects/{projectId}/build-state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Состояние сборки проекта на раннере
+         * @description Проверяет, собран ли проект на конкретном раннере (multi-runner). Аутентификация — X-Runner-Id + X-Runner-Signature: hex(HMAC-SHA256(пустое_тело, secret)).
+         */
+        get: operations["get_runner_project_build_state"];
+        /**
+         * Записать состояние сборки проекта на раннере
+         * @description Идемпотентно фиксирует факт сборки проекта на раннере (upsert). Аутентификация — X-Runner-Id + X-Runner-Signature: hex(HMAC-SHA256(raw_body, secret)).
+         */
+        put: operations["put_runner_project_build_state"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/runner/{runnerId}/public-address": {
         parameters: {
             query?: never;
@@ -2086,7 +2113,7 @@ export type paths = {
         put?: never;
         /**
          * Проверить доступность публичного адреса раннера (администратор)
-         * @description Best-effort `GET <publicAddress>/__unitman/health` с коротким таймаутом. Проверка консультативная: недоступность не является ошибкой запроса и ничего не сохраняет.
+         * @description Best-effort `GET <publicAddress>/__unitman/health` с коротким таймаутом. Локальный дев-адрес (localhost/127.0.0.1:8087) проверяется по внутреннему имени uproxy:80. Проверка консультативная: недоступность не является ошибкой запроса и ничего не сохраняет.
          */
         post: operations["post_app_runner_infra_runnerpublicaddress_checkpublicaddress"];
         delete?: never;
@@ -2106,9 +2133,49 @@ export type paths = {
         put?: never;
         /**
          * Health-push раннера
-         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. Обновляет состояние раннера и статистику контейнеров. При настроенном RUNNER_CALLBACK_SECRET обязателен заголовок X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. Обновляет состояние раннера и статистику контейнеров. Обязательны X-Runner-Id и X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
          */
         post: operations["post_app_runner_infra_runner_health"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runner/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Список раннеров с состоянием ресурсов (администратор)
+         * @description Карточки всех раннеров, отсортированные от худшего уровня угрозы. Доступно только администратору.
+         */
+        get: operations["get_app_runner_infra_runner_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runner/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Регистрация Go-раннера (multi-runner, v2)
+         * @description Публичный эндпоинт без JWT и без bootstrap-подписи. Принимает `{hostname, version}`. Возвращает runnerId (UUID v4), taskQueue (строго равен runnerId), детерминированный secret (64 hex, отдаётся один раз и не хранится), registryHost и карту портов.
+         */
+        post: operations["post_app_runner_infra_runner_register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2126,7 +2193,7 @@ export type paths = {
         put?: never;
         /**
          * Сохранить шаги выполнения задачи
-         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. `responseId` содержит токен прогресса (workflowId/jobId), `stepsContent` — полный снапшот шагов. При настроенном RUNNER_CALLBACK_SECRET обязателен заголовок X-Runner-Signature: hex(HMAC-SHA256(responseId . stepsContent, secret)).
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. `responseId` содержит токен прогресса (workflowId/jobId), `stepsContent` — полный снапшот шагов. Обязательны X-Runner-Id и X-Runner-Signature: hex(HMAC-SHA256(responseId . stepsContent, secret)).
          */
         post: operations["post_app_runner_infra_runner_savesteps"];
         delete?: never;
@@ -2152,6 +2219,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/runner/threats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Сводка угроз по раннерам для шапки сайта
+         * @description Доступно всем авторизованным пользователям. Содержит только уровни и идентификаторы проблемных раннеров, без деталей ресурсов.
+         */
+        get: operations["get_app_runner_infra_runner_threats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/runner/unitStateNotifications": {
         parameters: {
             query?: never;
@@ -2163,7 +2250,7 @@ export type paths = {
         put?: never;
         /**
          * Уведомления раннера о состоянии контейнеров юнитов
-         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. При настроенном RUNNER_CALLBACK_SECRET обязателен заголовок X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. Обязательны X-Runner-Id и X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
          */
         post: operations["post_app_runner_infra_runner_unitstatenotifications"];
         delete?: never;
@@ -2828,8 +2915,6 @@ export type components = {
             memoryLimit?: number;
             projectCode: string;
             projectName: string;
-            /** @default  */
-            proxyHost?: string;
             repoId: string;
             /** @default [] */
             zashishennieVetki?: string[] | {
@@ -3326,7 +3411,8 @@ export type components = {
             avtoudalenie: boolean;
             id: string;
             obnovlenieBezSbrosaPodgotovki: boolean;
-            vebhukNastroen: boolean;
+            /** @default false */
+            vebhukNastroen?: boolean;
         };
         ObnovitToken: {
             /**
@@ -3427,7 +3513,7 @@ export type components = {
             externalSessionId?: string | null;
             /** Format: uuid */
             id: string;
-            /** @description Ссылка на редактор workspace; null для unit-сессий и если proxy host первого проекта пуст */
+            /** @description Ссылка на редактор workspace; null для unit-сессий и если публичный адрес workspace не задан */
             ideLink?: string | null;
             /**
              * @description Модель, выбранная при создании сессии; null — будет использована дефолтная модель реквизитов
@@ -3681,6 +3767,12 @@ export type components = {
             id: string;
             query?: string | null;
         };
+        PoluchitSpisokVetokHranilisha: {
+            projectCode: string;
+            /** @default null */
+            query?: string | null;
+            repoId: string;
+        };
         PoluchitSpisokVetokProekta: {
             id: string;
             /** @default null */
@@ -3726,7 +3818,7 @@ export type components = {
              */
             suffix?: string | null;
             /**
-             * @description Протокол ссылки: `http` (по умолчанию), `ws`, `wss` — через proxy host; остальные — напрямую на контейнер
+             * @description Протокол ссылки: `http` (по умолчанию), `ws`, `wss` — через публичный адрес раннера; остальные — напрямую на контейнер
              * @default http
              * @example http
              */
@@ -3740,9 +3832,6 @@ export type components = {
         };
         PometitKakSlomanii: {
             /** Format: uuid */
-            id: string;
-        };
-        PostavitVOcheredNaSborku: {
             id: string;
         };
         PostavitVOcheredNaUdalenie: {
@@ -3779,7 +3868,7 @@ export type components = {
             avtoudalenie: boolean;
             obnovlenieBezSbrosaPodgotovki: boolean;
             /**
-             * @description Git-вебхук проекта уже присылал валидное событие. Пока false, Unitman сам опрашивает ветки.
+             * @description Git-вебхук проекта уже присылал валидное событие. Пока false, Unitman сам опрашивает ветки репозитория.
              * @example false
              */
             vebhukNastroen: boolean;
@@ -3798,11 +3887,9 @@ export type components = {
             /** @example my-app */
             name: string;
             nastroikiHukaProekta: components["schemas"]["ProjectHookSettings"];
-            /** @example proxy.example */
-            proxyHost: string | null;
             repoId: string;
             /** @enum {string} */
-            state: "NEW" | "BUILD_PENDING" | "BUILD_SUCCESS" | "BUILD_ERROR" | "REMOVE_PENDING" | "REMOVE_ERROR";
+            state: "NEW" | "REMOVE_PENDING" | "REMOVE_ERROR";
             users: components["schemas"]["ProjectUser"][];
             variables: components["schemas"]["ProjectVariable"][];
             waitResultRunner: boolean;
@@ -4059,7 +4146,7 @@ export type components = {
             /** Format: uuid */
             runnerId: string;
         };
-        /** @description Результат best-effort проверки `GET <publicAddress>/__unitman/health`. Проверка не сохраняет адрес и не блокирует сохранение. */
+        /** @description Результат best-effort проверки `GET <publicAddress>`. Проверка не сохраняет адрес и не блокирует сохранение. */
         RunnerPublicAddressCheck: {
             /** @description Причина недоступности (HTTP-статус или транспортная ошибка). */
             error?: string;
@@ -4079,7 +4166,17 @@ export type components = {
             dockerStats: components["schemas"]["RunnerContainerStats"][];
             id: string;
             memoryInfo: components["schemas"]["RunnerMemoryInfo"];
-            /** @example unitman-runner-queue */
+            /**
+             * Format: uri
+             * @description Публичный адрес раннера, заданный администратором. `null` — не задан.
+             */
+            publicAddress?: string | null;
+            /** @description Unix-время регистрации (контракт v2; fallback на lastRegisteredAt). */
+            registeredAt?: number | null;
+            /**
+             * @description Всегда строго равен `id` зарегистрированного раннера.
+             * @example 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+             */
             taskQueue: string;
         };
         SaveStepsCommand: {
@@ -4537,7 +4634,7 @@ export type components = {
              */
             createdAt: number;
             /**
-             * @description ready — можно применять; held_autoobnovlenie — ждёт включения автообновления
+             * @description ready — можно применять; held_autoobnovlenie — ждёт включения автообновления проекта
              * @enum {string}
              */
             status: "ready" | "held_autoobnovlenie";
@@ -4553,7 +4650,7 @@ export type components = {
         };
         /** @description Ссылка на сервис запущенного юнита */
         UnitLink: {
-            /** @example http://8080.feature-123.my-app.proxy.example */
+            /** @example http://8080.feature-123.my-app.workspaces.example.com */
             path: string;
             /** @example 8080 */
             port: number;
@@ -4637,7 +4734,7 @@ export type components = {
             redaktirovanieVklucheno?: boolean;
             /**
              * @description Ссылка на read-only редактор файлов юнита. Появляется после успешной подготовки, очищается при сбросе подготовки или пересборке.
-             * @example https://47000.feature-123.my-app.proxy.example
+             * @example https://47000.feature-123.my-app.workspaces.example.com
              */
             redaktorLink?: string | null;
             /**
@@ -4794,7 +4891,6 @@ export type components = {
             id: string;
             memoryLimit: number;
             newProjectName: string;
-            newProxyHost: string;
         };
         UstanovitZashishennieVetkiProekta: {
             id: string;
@@ -4974,7 +5070,10 @@ export type components = {
             memInfo?: string | null;
             /** @example runner-1 */
             runnerId: string;
-            /** @example unitman-runner-queue */
+            /**
+             * @description Всегда строго равен `runnerId` зарегистрированного раннера.
+             * @example 1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed
+             */
             taskQueue: string;
             /** @description Момент отправки, unix timestamp (секунды) */
             unixtime?: number | null;
@@ -8106,7 +8205,7 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_project_build: {
+    post_app_unitman_infra_project_brancheslistbycode: {
         parameters: {
             query?: never;
             header?: never;
@@ -8115,19 +8214,19 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["PostavitVOcheredNaSborku"];
+                "application/json": components["schemas"]["PoluchitSpisokVetokHranilisha"];
             };
         };
         responses: {
-            /** @description Пустой ответ: проект поставлен в очередь на сборку */
+            /** @description Ветки проекта в хранилище */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description Пустой ответ: проект поставлен в очередь на сборку */
-                        data: null;
+                        /** @description Ветки проекта в хранилище */
+                        data: components["schemas"]["ProjectBranch"][];
                         /**
                          * @example success
                          * @enum {string}
@@ -9880,6 +9979,112 @@ export interface operations {
             };
         };
     };
+    get_runner_project_build_state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+                runnerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Состояние сборки (built=false, если записи нет) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный projectId */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Неверная подпись либо X-Runner-Id не совпадает с путём */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.inactive */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_runner_project_build_state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: string;
+                runnerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    branch?: string | null;
+                    builtAt?: number | null;
+                    commit?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Сохранённое состояние сборки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный projectId или payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Неверная подпись либо X-Runner-Id не совпадает с путём */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.inactive */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     put_app_runner_infra_runnerpublicaddress_putpublicaddress: {
         parameters: {
             query?: never;
@@ -10060,7 +10265,108 @@ export interface operations {
                 content?: never;
             };
             /** @description Некорректная подпись запроса */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_runner_infra_runner_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Карточки раннеров */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RannerKartaReadModel"][];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав (не администратор) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_runner_infra_runner_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    hostname?: string;
+                    version?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Раннер зарегистрирован */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ports: {
+                            api?: number;
+                            registry?: number;
+                            temporal?: number;
+                        };
+                        registryHost: string;
+                        /** Format: uuid */
+                        runnerId: string;
+                        /** @description 64 hex, не сохраняется */
+                        secret: string;
+                        taskQueue: string;
+                    };
+                };
+            };
+            /** @description runner.registration.invalid_payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.registration.failed */
+            500: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10099,7 +10405,14 @@ export interface operations {
                 content?: never;
             };
             /** @description Некорректная подпись запроса */
-            403: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -10123,6 +10436,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunnerState"];
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_runner_infra_runner_threats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сводка угроз */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UgrozyRannerovReadModel"];
                 };
             };
             /** @description Не авторизован */
@@ -10172,7 +10519,14 @@ export interface operations {
                 content?: never;
             };
             /** @description Некорректная подпись запроса */
-            403: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description runner.not_found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

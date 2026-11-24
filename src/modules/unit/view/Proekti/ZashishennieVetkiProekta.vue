@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {storeToRefs} from "pinia";
-import {onUnmounted, ref, watch} from "vue";
+import {computed, onUnmounted, ref, watch} from "vue";
 import i18n from "@/bootstrap/translator";
 import {useAuthStore} from "@/modules/account/store/auth";
 import {storePolucheniyaProekta} from "@/modules/unit/store/SpisokProektov/StorPolucheniyaProekta";
@@ -19,7 +19,7 @@ const storeProekta = storePolucheniyaProekta();
 const {proekt} = storeToRefs(storeProekta);
 
 const stor = useStorZashishennyhVetok();
-const {loader, oshibkaOtBackenda, spisok} = storeToRefs(stor);
+const {loader, oshibkaOtBackenda, spisok, vetki} = storeToRefs(stor);
 
 const lokalnayaOshibka = ref<string | null>(null);
 const uspeh = ref<boolean>(false);
@@ -32,6 +32,25 @@ type NewValueDone = (value?: string, mode?: 'add' | 'add-unique' | 'toggle') => 
 watch(
     () => proekt.value?.zashishennieVetki,
     (vetki) => stor.ustanovitSpisok(vetki ?? []),
+    {immediate: true},
+);
+
+/** Опции селекта — имена веток проекта в хранилище. */
+const opciiVetok = computed<string[]>(() => vetki.value.spisok);
+
+/** Серверный поиск веток: запрос уходит в хранилище с параметром `query`. */
+function filterSpiskaVetok(znachenie: string | null, update: (cb: () => void) => void): void {
+  vetki.value.query = znachenie ?? "";
+  update(() => void stor.poluchitVetki(proekt.value?.id ?? ""));
+}
+
+// При смене проекта сбрасываем поиск и загружаем его ветки для подсказок.
+watch(
+    () => proekt.value?.id,
+    (id) => {
+      vetki.value.query = "";
+      void stor.poluchitVetki(id ?? "");
+    },
     {immediate: true},
 );
 
@@ -106,18 +125,35 @@ onUnmounted(() => {
       {{ $t('common.notifications.success') }}
     </GhBanner>
 
+    <!--
+      Тег-инпут масок: чипы выбранных значений (use-chips), серверный поиск
+      (@filter), ручной ввод маски по Enter (@new-value). hide-selected
+      скрывает чипы (QSelect.getSelection возвращяет пустой массив), а
+      fill-input не совместим с multiple — поэтому их здесь нет.
+    -->
     <q-select
         v-model="spisok"
         class="protected-branches__select"
+        :options="opciiVetok"
+        :loading="vetki.loader"
+        :disable="!proekt?.id"
+        :placeholder="spisok.length === 0 ? $t('unit.proekt.zashishennie_vetki.placeholder') : ''"
         use-input
         use-chips
         multiple
-        hide-selected
-        fill-input
         outlined
         dense
         @new-value="dobavitMasku"
-    />
+        @filter="filterSpiskaVetok"
+    >
+      <template #no-option>
+        <q-item>
+          <q-item-section class="text-grey">
+            {{ $t('unit.proekt.zashishennie_vetki.vvod_podskazka') }}
+          </q-item-section>
+        </q-item>
+      </template>
+    </q-select>
 
     <p v-if="lokalnayaOshibka" class="protected-branches__error">{{ lokalnayaOshibka }}</p>
     <p v-if="spisok.length === 0" class="protected-branches__empty">
