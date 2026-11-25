@@ -376,7 +376,9 @@ async function main() {
         );
     }
 
-    if (args.snapshot && !args.file && /^https?:/.test(source.origin)) {
+    // В режиме --check не трогаем отслеживаемый снимок: проверка в CI не должна
+    // переписывать рабочее дерево (иначе статус «чисто» недостижим).
+    if (args.snapshot && !args.check && !args.file && /^https?:/.test(source.origin)) {
         await mkdir(path.dirname(SNAPSHOT_PATH), { recursive: true });
         // Если пришлось что-то починить, сохраняем починенный вариант, иначе —
         // исходный текст как есть, чтобы не менять форматирование файла.

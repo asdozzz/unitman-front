@@ -355,24 +355,7 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/initialization/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список параметров инициализации */
-        get: operations["get_app_initialization_infra_initialization_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/initialization/proxy_host": {
+    "/ai/chat": {
         parameters: {
             query?: never;
             header?: never;
@@ -380,9 +363,12 @@ export type paths = {
             cookie?: never;
         };
         get?: never;
-        /** Обновить defoltnый proxy host */
-        put: operations["put_app_initialization_infra_initialization_updateproxyhost"];
-        post?: never;
+        put?: never;
+        /**
+         * Один шаг AI-чата через OpenAI-совместимый API OpenCode
+         * @description Принимает историю сообщений и набор инструментов, расшифровывает API-ключ текущего пользователя и ретранслирует ответ upstream. Ключ не покидает бэкенд.
+         */
+        post: operations["post_app_aichat_infra_aichat__invoke"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1578,23 +1564,6 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/project/proverkaProxyHost": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Проверить доступность proxy host */
-        post: operations["post_app_unitman_infra_project_proverkaproxyhost"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/project/read/{id}": {
         parameters: {
             query?: never;
@@ -2196,23 +2165,6 @@ export type paths = {
          * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. `responseId` содержит токен прогресса (workflowId/jobId), `stepsContent` — полный снапшот шагов. Обязательны X-Runner-Id и X-Runner-Signature: hex(HMAC-SHA256(responseId . stepsContent, secret)).
          */
         post: operations["post_app_runner_infra_runner_savesteps"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/runner/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Диагностическое состояние раннера */
-        get: operations["get_app_runner_infra_runner_test"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3254,13 +3206,6 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
-        /** @description Параметр инициализации (InitializationRecord) */
-        InitializationRecord: {
-            id: string;
-            init: number | null;
-            prop: string;
-            value: string | null;
-        };
         /** @description Частичное изменение реквизитов OpenCode: непереданные поля не меняются */
         IzmenitRekvizityOpenCode: {
             /**
@@ -3393,13 +3338,6 @@ export type components = {
             branch: string;
             /** Format: uuid */
             projectId: string;
-        };
-        ObnovitDefoltnyiProxyHost: {
-            /** @example http://proxy.example */
-            value: string | null;
-        };
-        ObnovitDefoltnyiProxyHost2: {
-            value?: string | null;
         };
         ObnovitKodUnita: {
             /** Format: uuid */
@@ -3951,10 +3889,6 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
-        ProveritProxyHost: {
-            /** @default  */
-            proxyHost?: string;
-        };
         /** @description Элемент каталога провайдеров OpenCode (ProvayderOpenCodeReadModel); список моделей запрашивается отдельно */
         ProviderOpenCode: {
             /**
@@ -3984,10 +3918,6 @@ export type components = {
              * @example true
              */
             supportsModelList: boolean;
-        };
-        /** @description Результат проверки доступности proxy host */
-        ProxyHostCheckResult: {
-            result: boolean;
         };
         /** @description Карточка раннера для `GET /api/runner/list` (RannerKartaReadModel). */
         RannerKartaReadModel: {
@@ -6005,35 +5935,7 @@ export interface operations {
             };
         };
     };
-    get_app_initialization_infra_initialization_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Параметры инициализации. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Параметры инициализации */
-                        data: components["schemas"]["InitializationRecord"][];
-                        /**
-                         * @example success
-                         * @enum {string}
-                         */
-                        status: "success";
-                    };
-                };
-            };
-        };
-    };
-    put_app_initialization_infra_initialization_updateproxyhost: {
+    post_app_aichat_infra_aichat__invoke: {
         parameters: {
             query?: never;
             header?: never;
@@ -6042,24 +5944,32 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ObnovitDefoltnyiProxyHost"];
+                "application/json": {
+                    credentialId?: string | null;
+                    /** @description История сообщений в формате OpenAI chat completions */
+                    messages: {
+                        content?: string;
+                        /** @enum {string} */
+                        role: "system" | "user" | "assistant" | "tool";
+                        /** @description Вызовы инструментов ассистентом */
+                        tool_calls?: Record<string, never>[];
+                    }[];
+                    model?: string | null;
+                    /** @description Активные инструменты OpenAI tools */
+                    tools?: Record<string, never>[];
+                };
             };
         };
         responses: {
-            /** @description Пустой ответ: defoltnyi proxy host обновлён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
+            /** @description Ответ OpenAI-совместимого API (choices, usage и т.д.) */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description Пустой ответ: defoltnyi proxy host обновлён */
-                        data: null;
-                        /**
-                         * @example success
-                         * @enum {string}
-                         */
-                        status: "success";
+                        choices?: Record<string, never>[];
+                        usage?: Record<string, never>;
                     };
                 };
             };
@@ -6069,6 +5979,24 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Некорректный payload, нет реквизитов или upstream не настроен */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+            /** @description Ошибка upstream OpenCode */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
             };
         };
     };
@@ -8710,51 +8638,6 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_project_proverkaproxyhost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProveritProxyHost"];
-            };
-        };
-        responses: {
-            /** @description Результат проверки доступности proxy host. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["ProxyHostCheckResult"];
-                        /**
-                         * @example success
-                         * @enum {string}
-                         */
-                        status: "success";
-                    };
-                };
-            };
-            /** @description Не авторизован */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     post_app_unitman_infra_project_byid: {
         parameters: {
             query?: never;
@@ -10413,40 +10296,6 @@ export interface operations {
             };
             /** @description runner.not_found */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_app_runner_infra_runner_test: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Текущее состояние раннера по умолчанию */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunnerState"];
-                };
-            };
-            /** @description Не авторизован */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
-            500: {
                 headers: {
                     [name: string]: unknown;
                 };

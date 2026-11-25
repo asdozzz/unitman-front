@@ -1,4 +1,4 @@
-import axios, {AxiosError, AxiosInstance} from "axios";
+import axios, {AxiosError, AxiosInstance, AxiosResponse} from "axios";
 import {ApiResponse, ApiResponseFactory, FailApiResponse} from "@/bootstrap/apiClient/ApiResponse";
 import type {ApiPath, ApiQueryArgs, ApiRequestArgs, ApiResponseData} from "@/api/types";
 import {useAuthStore} from "@/modules/account/store/auth";
@@ -17,6 +17,27 @@ const REFRESH_EXCLUDED_URLS = ['/login', '/account/refreshToken'];
 const ANONYMOUS_URLS = ['/login', '/account/refreshToken'];
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete';
+
+/** Методы, доступные «сырому» вызову (включая `patch`, которого нет в типизированных методах). */
+type RawHttpMethod = HttpMethod | 'patch';
+
+/**
+ * Результат «сырого» HTTP-вызова: статус и тело ответа сохраняются как есть.
+ *
+ * В отличие от `ApiResponse`, ошибки `400/403/404/422` не сворачиваются в
+ * `FailApiResponse` и не выбрасываются — вызывающий код (исполнитель
+ * инструментов) должен сам решить, как их интерпретировать.
+ */
+export type RawHttpResult<T = unknown> = {
+    /** `true` только для успешных HTTP-статусов (`2xx`). */
+    ok: boolean;
+    /** Точный HTTP-статус; `0`, если запрос не дошёл до сервера. */
+    status: number;
+    /** Разобранное тело ответа без конверта `ApiResponse`. */
+    data: T | string | null;
+    /** Текст ошибки для неуспешного ответа либо `null` при успехе. */
+    error: string | null;
+};
 
 class ApiClient {
 
@@ -91,11 +112,16 @@ class ApiClient {
 
     /** Признак того, что сервер отклонил запрос из-за невалидного/просроченного токена. */
     private isUnauthorized(error: AxiosError): boolean {
-        if (error.response?.status === 401) {
+        return this.isUnauthorizedResponse(error.response?.status, error.response?.data);
+    }
+
+    /** Та же проверка, но по уже полученным статусу и телу (для `requestRaw`). */
+    private isUnauthorizedResponse(status: number | undefined, body: unknown): boolean {
+        if (status === 401) {
             return true;
         }
 
-        const data = error.response?.data as {code?: string | number} | undefined;
+        const data = body as {code?: string | number} | undefined;
 
         return data?.code === 401 || data?.code === "401";
     }
@@ -193,6 +219,85 @@ class ApiClient {
                 return this.handleError(retryError as AxiosError);
             }
         }
+    }
+
+    /**
+     * «Сырой» HTTP-вызов для инструментов, сгенерированных из OpenAPI.
+     *
+     * Поведение авторизации повторяет `request`: токен обновляется до отправки,
+     * а на `401` выполняется одна повторная попытка после обновления пары
+     * токенов. При этом HTTP-ошибки `400/403/404/422` (и любые другие) не
+     * выбрасываются: возвращается точный статус и исходное тело ответа.
+     *
+     * `validateStatus: () => true` обязателен: без него axios выбросит
+     * `AxiosError`, и статус можно будет получить только из исключения, что
+     * противоречит контракту результата инструмента.
+     */
+    async requestRaw<T = unknown>(
+        method: RawHttpMethod,
+        url: string,
+        data?: unknown,
+        params?: Record<string, unknown>,
+    ): Promise<RawHttpResult<T>> {
+        const canRefresh = !REFRESH_EXCLUDED_URLS.includes(url);
+        const authStore = this.authStoreOrNull();
+
+        if (canRefresh && authStore?.getToken) {
+            await authStore.obespechitAktualniyToken();
+        }
+
+        const send = () => ApiClient.CLIENT.request<T>({
+            method,
+            url,
+            data,
+            params,
+            baseURL: apiHost(),
+            headers: this.headersFor(url, data),
+            validateStatus: () => true,
+        });
+
+        try {
+            let response = await send();
+
+            if (
+                canRefresh
+                && authStore
+                && this.isUnauthorizedResponse(response.status, response.data)
+            ) {
+                const obnovleno = await authStore.obnovitToken();
+
+                if (obnovleno) {
+                    response = await send();
+                }
+            }
+
+            return this.toRawResult<T>(response);
+        } catch (error) {
+            const axiosError = error as AxiosError;
+
+            return {
+                ok: false,
+                status: axiosError.response?.status ?? 0,
+                data: (axiosError.response?.data as T | string | null) ?? null,
+                error: this.extractMessage(axiosError.response?.data)
+                    || axiosError.message
+                    || "Unknown error",
+            };
+        }
+    }
+
+    /** Преобразует ответ axios в `RawHttpResult`, сохраняя статус и тело. */
+    private toRawResult<T>(response: AxiosResponse<T>): RawHttpResult<T> {
+        const status = response.status;
+        const ok = status >= 200 && status < 300;
+        const data = (response.data as T | string | null) ?? null;
+
+        return {
+            ok,
+            status,
+            data,
+            error: ok ? null : (this.extractMessage(data) || `HTTP ${status}`),
+        };
     }
 
     /**

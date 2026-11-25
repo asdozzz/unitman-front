@@ -313,6 +313,10 @@
       "saved": "Changes saved",
       "error_title": "Error"
     },
+    "not_authenticated": "Authentication is required. Sign in and try again.",
+    "opencode_credential": {
+      "model_not_available": "The selected model is not available for these OpenCode credentials."
+    },
     "edit": {
       "title": "Edit account",
       "description": "Manage account access and data",
@@ -1935,6 +1939,95 @@
       "counter_page_title": "Projects",
       "counter_page_description": "The counter is aligned to the title center",
       "heights_note": "At the same size, GhInput, GhSelect and GhButton match in height: 28 / 32 / 40 px."
+    }
+  },
+  "ai": {
+    "chat": {
+      "invalid_payload": "The AI chat request is invalid. Check the message and try again.",
+      "credential_required": "OpenCode credentials are not configured for the AI chat. Add them in your account settings.",
+      "upstream_not_configured": "The AI provider connection is not configured on the server.",
+      "upstream_unavailable": "The AI provider is temporarily unavailable. Try again later.",
+      "upstream_invalid_response": "The AI provider returned an invalid response.",
+      "upstream_error": "The AI provider returned an error. See the provider message below.",
+      "unexpected_error": "Failed to complete the AI chat request."
+    }
+  },
+  "aiChat": {
+    "page": {
+      "title": "AI Assistant",
+      "subtitle": "Manage the site in chat: the agent finds the right API tools and performs actions after confirmation.",
+      "new_chat": "New chat"
+    },
+    "composer": {
+      "placeholder": "Describe what needs to be done…",
+      "send": "Send",
+      "stop": "Stop",
+      "hint_send": "to send",
+      "hint_newline": "for a new line",
+      "paused_hint": "The loop is paused: confirm or cancel the action below."
+    },
+    "empty": {
+      "title": "Start a conversation",
+      "description": "Describe what needs to be done. The agent will find suitable API tools and show an action plan."
+    },
+    "thinking": "The agent is thinking…",
+    "roles": {
+      "user": "You",
+      "assistant": "Assistant"
+    },
+    "notice": {
+      "title": "Notice",
+      "step_limit_reached": "The step limit has been reached. Refine the request or start a new chat.",
+      "stopped": "Execution stopped."
+    },
+    "errors": {
+      "title": "Error",
+      "status": "HTTP {status}"
+    },
+    "tools": {
+      "title": "Active tools",
+      "empty_title": "No tools yet",
+      "empty": "Tools appear here when the model finds them via search_api_endpoints.",
+      "confirm_required": "Requires confirmation",
+      "arguments": "Arguments",
+      "result": "Result",
+      "error": "Error",
+      "truncated": "The result was truncated for display.",
+      "expand": "Show details",
+      "collapse": "Hide details",
+      "status": {
+        "pending": "Pending",
+        "awaiting_confirmation": "Awaiting confirmation",
+        "running": "Running",
+        "success": "Success",
+        "error": "Error",
+        "cancelled": "Cancelled"
+      }
+    },
+    "confirmation": {
+      "title": "Confirm the action",
+      "paused": "The loop is paused and waiting for your decision.",
+      "description": "The agent wants to perform a change via the API. The HTTP request is sent only after confirmation.",
+      "tool": "Tool",
+      "action": "Action",
+      "summary": "Description",
+      "arguments": "Request arguments",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "steps": {
+      "label": "Step {current} of {max}"
+    },
+    "credentials": {
+      "label": "OpenCode credentials",
+      "placeholder": "Select credentials",
+      "model_label": "Model",
+      "model_placeholder": "Select a model",
+      "default_marker": "default",
+      "load_error_title": "Failed to load credentials",
+      "no_credentials_title": "OpenCode credentials are not configured",
+      "no_credentials_description": "Add an API key and a model in your account settings to start using the AI chat.",
+      "open_settings": "Open account settings"
     }
   }
 }

@@ -1,0 +1,187 @@
+{
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/project/add": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Добавить проект",
+        "operationId": "post_app_unitman_infra_project_add",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "repoId",
+                  "projectCode",
+                  "projectName"
+                ],
+                "properties": {
+                  "repoId": {
+                    "type": "string"
+                  },
+                  "projectCode": {
+                    "type": "string"
+                  },
+                  "projectName": {
+                    "type": "string"
+                  },
+                  "mainBranch": {
+                    "type": "string",
+                    "default": "master"
+                  },
+                  "memoryLimit": {
+                    "type": "integer",
+                    "default": 0
+                  },
+                  "zashishennieVetki": {
+                    "default": [],
+                    "oneOf": [
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ai-confirm": true,
+        "x-ai-deps": [
+          "post_app_unitman_infra_repo_list",
+          "post_app_unitman_infra_repo_typelist"
+        ],
+        "x-ai-enabled": true,
+        "x-ai-roles": []
+      }
+    },
+    "/api/project/list": {
+      "post": {
+        "tags": [
+          "Project"
+        ],
+        "summary": "Список проектов",
+        "operationId": "post_app_unitman_infra_project_list",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 100
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ai-confirm": false,
+        "x-ai-deps": [],
+        "x-ai-enabled": true,
+        "x-ai-roles": []
+      }
+    },
+    "/api/repo/list": {
+      "post": {
+        "tags": [
+          "Repo"
+        ],
+        "summary": "Список репозиториев",
+        "operationId": "post_app_unitman_infra_repo_list",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 10
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ai-confirm": false,
+        "x-ai-deps": [],
+        "x-ai-enabled": true,
+        "x-ai-roles": []
+      }
+    },
+    "/api/repo/type/list": {
+      "post": {
+        "tags": [
+          "Repo"
+        ],
+        "summary": "Список типов репозиториев",
+        "operationId": "post_app_unitman_infra_repo_typelist",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 100
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "x-ai-confirm": false,
+        "x-ai-deps": [],
+        "x-ai-enabled": true,
+        "x-ai-roles": []
+      }
+    },
+    "/api/runner/list": {
+      "get": {
+        "tags": [
+          "Runner"
+        ],
+        "summary": "Список раннеров с состоянием ресурсов (администратор)",
+        "description": "Карточки всех раннеров, отсортированные от худшего уровня угрозы. Доступно только администратору.",
+        "operationId": "get_app_runner_infra_runner_list",
+        "x-ai-confirm": false,
+        "x-ai-deps": [],
+        "x-ai-enabled": true,
+        "x-ai-roles": [
+          "ROLE_ADMIN"
+        ]
+      }
+    }
+  }
+}
