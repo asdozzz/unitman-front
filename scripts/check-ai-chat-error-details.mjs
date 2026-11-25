@@ -142,6 +142,48 @@ test('пустой текст не попадает в errorDetails', () => {
     assert.equal(result.errorDetails, null);
 });
 
+test('коды session-эндпоинтов берутся из data.code конверта', () => {
+    const archived = normalizovatOshibkuChat(409, {
+        status: 'fail',
+        data: {code: 'ai.chat.session_archived', message: 'Session is archived'},
+    });
+
+    assert.equal(archived.errorKey, 'ai.chat.session_archived');
+    assert.equal(archived.errorDetails, 'Session is archived');
+
+    const notFound = normalizovatOshibkuChat(404, {
+        status: 'fail',
+        data: {code: 'ai.chat.session_not_found', message: 'Session not found'},
+    });
+
+    assert.equal(notFound.errorKey, 'ai.chat.session_not_found');
+    assert.equal(notFound.errorDetails, 'Session not found');
+});
+
+test('остальные session-коды и сообщение доходят без потерь', () => {
+    const cases = [
+        [409, 'ai.chat.session_expired'],
+        [409, 'ai.chat.session_not_archived'],
+        [409, 'ai.chat.credential_deleted'],
+        [409, 'ai.chat.session_message_limit'],
+        [422, 'ai.chat.invalid_limit'],
+        [422, 'ai.chat.invalid_offset'],
+        [422, 'ai.chat.credential_required'],
+        [422, 'ai.chat.provider_not_supported'],
+        [422, 'ai.chat.provider_session_transport_unknown'],
+    ];
+
+    for (const [status, code] of cases) {
+        const result = normalizovatOshibkuChat(status, {
+            status: 'fail',
+            data: {code, message: `msg:${code}`},
+        });
+
+        assert.equal(result.errorKey, code);
+        assert.equal(result.errorDetails, `msg:${code}`);
+    }
+});
+
 let failed = 0;
 
 for (const {name, fn} of cases) {

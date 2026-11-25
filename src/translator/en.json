@@ -267,6 +267,7 @@
         "runners": "Runners",
         "settings": "Settings",
         "ai_assistant": "AI Assistant",
+        "ai_sessions": "AI chat sessions",
         "sessions": "Sessions",
         "workspaces": "Workspaces"
       },
@@ -2028,6 +2029,48 @@
       "no_credentials_title": "OpenCode credentials are not configured",
       "no_credentials_description": "Add an API key and a model in your account settings to start using the AI chat.",
       "open_settings": "Open account settings"
+    },
+    "chat": {
+      "sessions": "All sessions",
+      "archive": "Archive",
+      "read_only": {
+        "archived_title": "Session is archived",
+        "expired_title": "Session has expired",
+        "credential_deleted_title": "Session credentials were deleted",
+        "description": "Only the history is available for viewing. The conversation cannot be continued."
+      }
+    },
+    "sessions": {
+      "title": "AI chat sessions",
+      "subtitle": "All saved conversations. Each card shows a single preview of the first message.",
+      "new_session": "New session",
+      "search_placeholder": "Search by title and messages",
+      "include_archived": "Show archived",
+      "loading": "Loading sessions…",
+      "empty_title": "No sessions yet",
+      "empty_description": "Start a new conversation — it will appear here after the first message.",
+      "load_error_title": "Failed to load sessions",
+      "untitled": "Untitled",
+      "preview_fallback": "No messages yet",
+      "archived_badge": "Archived",
+      "expired_badge": "Expired",
+      "credential_deleted_badge": "Credentials deleted",
+      "archive_reason": {
+        "manual": "Archived",
+        "expired": "Expired",
+        "credential_deleted": "Credentials deleted"
+      },
+      "updated_at": "Updated {date}",
+      "messages_count": "Messages: {count}",
+      "open": "Open",
+      "archive": "Archive",
+      "delete": "Delete",
+      "range": "{from}–{to} of {total}",
+      "previous": "Previous",
+      "next": "Next",
+      "delete_confirm_title": "Delete session?",
+      "delete_confirm_description": "The session “{title}” and its entire history will be permanently deleted.",
+      "delete_confirm_warning": "Deletion is available only for archived sessions."
     }
   }
 }

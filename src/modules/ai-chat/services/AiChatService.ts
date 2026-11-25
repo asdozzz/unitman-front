@@ -18,7 +18,15 @@ import type {
     AiChatAssistantMessage,
     AiChatRequestPayload,
     AiChatResult,
+    AiChatServiceResult,
+    AiChatSession,
+    AiChatSessionCreateRequest,
+    AiChatSessionDetail,
+    AiChatSessionList,
+    AiChatSessionListQuery,
     AiChatToolCall,
+    AiChatTurnRequest,
+    AiChatTurnResult,
 } from '@/modules/ai-chat/model/types';
 
 /**
@@ -27,6 +35,9 @@ import type {
  * приводится к `/ai/chat`.
  */
 export const AI_CHAT_URL = '/ai/chat';
+
+/** Базовый путь session-эндпоинтов без префикса `/api`. */
+export const AI_CHAT_SESSIONS_URL = `${AI_CHAT_URL}/sessions`;
 
 /** Безопасная сериализация: не выбрасывает исключение на циклических данных. */
 function safeJsonStringify(value: unknown): string {
@@ -166,6 +177,149 @@ export class AiChatService {
         }
 
         return this.normalizeError(raw.status, raw.data);
+    }
+
+    /* --------------------------- Сессии AI-чата --------------------------- */
+
+    /**
+     * Страница списка сессий текущего пользователя.
+     *
+     * `limit`/`offset` передаются всегда, `includeArchived` — булевым,
+     * `search` — только непустой строкой. Пустые сессии бэкенд исключает сам.
+     */
+    async listSessions(
+        query: AiChatSessionListQuery = {},
+    ): Promise<AiChatServiceResult<AiChatSessionList>> {
+        const params: Record<string, unknown> = {
+            includeArchived: query.includeArchived === true,
+            limit: query.limit ?? 50,
+            offset: query.offset ?? 0,
+        };
+
+        if (typeof query.search === 'string' && query.search.trim() !== '') {
+            params.search = query.search.trim();
+        }
+
+        return this.requestSession<AiChatSessionList>(
+            'get',
+            AI_CHAT_SESSIONS_URL,
+            undefined,
+            params,
+        );
+    }
+
+    /** Сессия вместе с полной историей сообщений. */
+    async getSession(id: string): Promise<AiChatServiceResult<AiChatSessionDetail>> {
+        return this.requestSession<AiChatSessionDetail>(
+            'get',
+            `${AI_CHAT_SESSIONS_URL}/${encodeURIComponent(id)}`,
+        );
+    }
+
+    /** Создаёт сессию; пустые `credentialId`/`model`/`title` не отправляются. */
+    async createSession(
+        payload: AiChatSessionCreateRequest = {},
+    ): Promise<AiChatServiceResult<AiChatSession>> {
+        const body: Record<string, unknown> = {};
+
+        if (typeof payload.credentialId === 'string' && payload.credentialId !== '') {
+            body.credentialId = payload.credentialId;
+        }
+
+        if (typeof payload.model === 'string' && payload.model !== '') {
+            body.model = payload.model;
+        }
+
+        if (typeof payload.title === 'string' && payload.title.trim() !== '') {
+            body.title = payload.title.trim();
+        }
+
+        return this.requestSession<AiChatSession>('post', AI_CHAT_SESSIONS_URL, body);
+    }
+
+    /** Архивирует сессию; повторный вызов идемпотентен. */
+    async archiveSession(id: string): Promise<AiChatServiceResult<AiChatSession>> {
+        return this.requestSession<AiChatSession>(
+            'post',
+            `${AI_CHAT_SESSIONS_URL}/${encodeURIComponent(id)}/archive`,
+        );
+    }
+
+    /** Удаляет сессию. Бэкенд разрешает только для архивной. */
+    async deleteSession(id: string): Promise<AiChatServiceResult<null>> {
+        return this.requestSession<null>(
+            'delete',
+            `${AI_CHAT_SESSIONS_URL}/${encodeURIComponent(id)}`,
+        );
+    }
+
+    /**
+     * Один шаг диалога. Тело содержит ровно одно из `message`/`toolResults`
+     * (это гарантирует тип {@link AiChatTurnRequest}).
+     */
+    async startTurn(
+        id: string,
+        payload: AiChatTurnRequest,
+    ): Promise<AiChatServiceResult<AiChatTurnResult>> {
+        const body: Record<string, unknown> = {};
+
+        if ('message' in payload && payload.message !== undefined) {
+            body.message = payload.message;
+        }
+
+        if ('toolResults' in payload && Array.isArray(payload.toolResults)) {
+            body.toolResults = payload.toolResults;
+        }
+
+        if (Array.isArray(payload.tools)) {
+            body.tools = payload.tools;
+        }
+
+        if (typeof payload.model === 'string' && payload.model !== '') {
+            body.model = payload.model;
+        }
+
+        return this.requestSession<AiChatTurnResult>(
+            'post',
+            `${AI_CHAT_SESSIONS_URL}/${encodeURIComponent(id)}/turns`,
+            body,
+        );
+    }
+
+    /**
+     * «Сырой» вызов session-эндпоинта: сохраняет статус и тело конверта,
+     * поэтому `data.code` ошибки доходит до {@link normalizovatOshibkuChat}.
+     */
+    private async requestSession<T>(
+        method: 'get' | 'post' | 'delete',
+        url: string,
+        data?: unknown,
+        params?: Record<string, unknown>,
+    ): Promise<AiChatServiceResult<T>> {
+        const raw = await apiClient.requestRaw(method, url, data, params);
+
+        if (raw.ok) {
+            const body = raw.data;
+            const payload = isPlainObject(body) && 'data' in body ? body.data : body;
+
+            return {
+                ok: true,
+                status: raw.status,
+                data: (payload as T | null) ?? null,
+                errorKey: null,
+                errorDetails: null,
+            };
+        }
+
+        const {errorKey, errorDetails} = normalizovatOshibkuChat(raw.status, raw.data);
+
+        return {
+            ok: false,
+            status: raw.status,
+            data: null,
+            errorKey,
+            errorDetails,
+        };
     }
 
     /** Нормализует успешный ответ; некорректная структура — типизированная ошибка. */

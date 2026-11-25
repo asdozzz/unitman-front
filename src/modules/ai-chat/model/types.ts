@@ -188,6 +188,17 @@ export type AiChatErrorKey =
     | 'ai.chat.upstream_unavailable'
     | 'ai.chat.upstream_invalid_response'
     | 'ai.chat.upstream_error'
+    | 'ai.chat.session_not_found'
+    | 'ai.chat.session_archived'
+    | 'ai.chat.session_expired'
+    | 'ai.chat.session_not_archived'
+    | 'ai.chat.credential_deleted'
+    | 'ai.chat.session_message_limit'
+    | 'ai.chat.session_required'
+    | 'ai.chat.invalid_limit'
+    | 'ai.chat.invalid_offset'
+    | 'ai.chat.provider_not_supported'
+    | 'ai.chat.provider_session_transport_unknown'
     | (string & {});
 
 /** Нормализованное сообщение ассистента из ответа провайдера. */
@@ -222,5 +233,145 @@ export interface AiChatResult {
      * переводится: это диагностическое сообщение провайдера. `null`, если
      * тело ошибки не содержит пригодной строки.
      */
+    errorDetails: string | null;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Сессии AI-чата (persistent sessions)                                       */
+/* -------------------------------------------------------------------------- */
+
+/** Причина архивации сессии (`AiChatSession.archiveReason`). */
+export type AiChatArchiveReason = 'manual' | 'expired' | 'credential_deleted';
+
+/**
+ * Вызов инструмента в истории сессии.
+ *
+ * Это плоская форма `{id, name, arguments}` из `AiChatSessionMessage`, а не
+ * OpenAI-форма `{id, type, function}` — истории сессии и upstream-запросу
+ * нужны разные представления.
+ */
+export interface AiChatSessionToolCall {
+    id: string;
+    name: string;
+    arguments: string;
+}
+
+/** Карточка сессии AI-чата (`AiChatSession`). */
+export interface AiChatSession {
+    id: string;
+    title: string;
+    provider: string;
+    model: string;
+    archived: boolean;
+    archiveReason: AiChatArchiveReason | null;
+    /** Реквизиты сессии удалены: доступно только чтение. */
+    credentialDeleted: boolean;
+    /** Ровно одно первое сообщение сессии, обрезанное бэкендом. */
+    preview: string;
+    /** Unix timestamp в секундах. */
+    createdAt: number;
+    /** Unix timestamp последней активности в секундах. */
+    updatedAt: number;
+    /** Unix timestamp автоматической архивации в секундах. */
+    expiresAt: number;
+    messageCount: number;
+}
+
+/** Сообщение истории сессии (`AiChatSessionMessage`). */
+export interface AiChatSessionMessage {
+    id: string;
+    seq: number;
+    role: AiChatRole;
+    content: string | null;
+    toolCalls: AiChatSessionToolCall[];
+    toolCallId: string | null;
+    name: string | null;
+    createdAt: number;
+}
+
+/** Страница списка сессий (`AiChatSessionList`). */
+export interface AiChatSessionList {
+    items: AiChatSession[];
+    limit: number;
+    offset: number;
+    total: number;
+    hasMore: boolean;
+}
+
+/** Сессия вместе с полной историей сообщений (`AiChatSessionDetail`). */
+export interface AiChatSessionDetail {
+    session: AiChatSession;
+    messages: AiChatSessionMessage[];
+}
+
+/** Query-параметры `GET /api/ai/chat/sessions`. */
+export interface AiChatSessionListQuery {
+    includeArchived?: boolean;
+    search?: string | null;
+    /** 1..100, по умолчанию 50. */
+    limit?: number;
+    /** Начиная с 0. */
+    offset?: number;
+}
+
+/** Тело `POST /api/ai/chat/sessions` (`AiChatSessionCreateRequest`). */
+export interface AiChatSessionCreateRequest {
+    credentialId?: string | null;
+    model?: string | null;
+    title?: string | null;
+}
+
+/** Результат одного tool-вызова для продолжения хода (`AiChatToolResult`). */
+export interface AiChatToolResult {
+    toolCallId: string;
+    content?: string | null;
+    name?: string | null;
+}
+
+interface AiChatTurnRequestBase {
+    tools?: LlmToolDefinition[];
+    model?: string | null;
+}
+
+/**
+ * Тело `POST /api/ai/chat/sessions/{id}/turns`.
+ *
+ * Ровно одно из `message` / `toolResults` — это правило бэкенда выражено
+ * объединением, а не опциональными полями.
+ */
+export type AiChatTurnRequest =
+    | (AiChatTurnRequestBase & { message: string; toolResults?: never })
+    | (AiChatTurnRequestBase & { toolResults: AiChatToolResult[]; message?: never });
+
+/** Ответ ассистента в рамках одного хода (`AiChatTurnResult.assistant`). */
+export interface AiChatTurnAssistant {
+    content: string | null;
+    toolCalls: AiChatSessionToolCall[];
+}
+
+/** Краткие метаданные сессии в ответе на ход (`AiChatTurnResult.session`). */
+export interface AiChatTurnSessionSummary {
+    id: string;
+    providerSessionExpiresAt: number | null;
+    archived: boolean;
+    updatedAt: number;
+    title: string;
+}
+
+/** Результат одного хода (`AiChatTurnResult`). */
+export interface AiChatTurnResult {
+    assistant: AiChatTurnAssistant;
+    session: AiChatTurnSessionSummary;
+}
+
+/**
+ * Результат вызова session-эндпоинта: успех с `data` либо нормализованная
+ * ошибка с ключом из `data.code` конверта бэкенда.
+ */
+export interface AiChatServiceResult<T> {
+    ok: boolean;
+    status: number;
+    data: T | null;
+    errorKey: AiChatErrorKey | null;
     errorDetails: string | null;
 }

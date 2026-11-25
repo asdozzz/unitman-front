@@ -7,6 +7,8 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "test:ai-chat": "node scripts/check-ai-chat-error-details.mjs",
     "test:ai-chat-session": "node scripts/check-ai-chat-session-id.mjs",
+    "test:ai-chat-agent": "node scripts/check-ai-chat-agent-loop.mjs",
+    "test:ai-chat:all": "yarn test:ai-chat && yarn test:ai-chat-session && yarn test:ai-chat-agent",
     "dev": "vite",
     "gen:ai-tools": "node scripts/gen-ai-tools.mjs",
     "gen:ai-tools:check": "node scripts/gen-ai-tools.mjs --check",

@@ -375,6 +375,94 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/ai/chat/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Список сессий AI-чата текущего пользователя
+         * @description Пагинация (`limit`, `offset`), поиск (`search`) по заголовку и первому сообщению, фильтр архивных (`includeArchived`). Возвращаются только сессии с хотя бы одним сообщением; в каждой карточке ровно одно превью первого сообщения.
+         */
+        get: operations["get_app_aichat_infra_sessiiaichata_list"];
+        put?: never;
+        /**
+         * Создать сессию AI-чата
+         * @description Без `credentialId` берётся первый реквизит аккаунта, без `model` — модель по умолчанию. Провайдер обязан поддерживать AI-чат.
+         */
+        post: operations["post_app_aichat_infra_sessiiaichata_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/chat/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Сессия AI-чата с полной историей
+         * @description Архивная или истёкшая сессия доступна только для чтения. Чужая сессия — 404.
+         */
+        get: operations["get_app_aichat_infra_sessiiaichata_show"];
+        put?: never;
+        post?: never;
+        /**
+         * Удалить архивную сессию AI-чата
+         * @description Разрешено только для архивной сессии; активную сначала нужно архивировать. Чужая сессия — 404.
+         */
+        delete: operations["delete_app_aichat_infra_sessiiaichata_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/chat/sessions/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Архивировать сессию AI-чата
+         * @description Идемпотентно: повторная архивация не меняет причину и время. Чужая сессия — 404.
+         */
+        post: operations["post_app_aichat_infra_sessiiaichata_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/chat/sessions/{id}/turns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Один шаг диалога AI-чата
+         * @description Ровно одно из `message` или `toolResults`. Архивная/истёкшая сессия — 409; неизвестный провайдер — 422. Чужая сессия — 404.
+         */
+        post: operations["post_app_aichat_infra_sessiiaichata_turn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lichniyToken/dobavit": {
         parameters: {
             query?: never;
@@ -2904,6 +2992,121 @@ export type components = {
             fileId: string;
             /** Format: uuid */
             projectId: string;
+        };
+        /** @description Карточка сессии AI-чата (SessiyaAiChataReadModel). `preview` — ровно одно первое сообщение сессии */
+        AiChatSession: {
+            /** @example false */
+            archived: boolean;
+            /**
+             * @example null
+             * @enum {string|null}
+             */
+            archiveReason: "manual" | "expired" | "credential_deleted" | null;
+            /**
+             * @description Момент создания, unix timestamp (секунды)
+             * @example 1764000000
+             */
+            createdAt: number;
+            /**
+             * @description Реквизиты сессии больше не существуют: сессия доступна только для чтения
+             * @example false
+             */
+            credentialDeleted: boolean;
+            /**
+             * @description Когда сессия автоматически архивируется, unix timestamp (секунды)
+             * @example 1764086400
+             */
+            expiresAt: number;
+            /** @example 6f9619ff-8b86-d011-b42d-00cf4fc964ff */
+            id: string;
+            /** @example 2 */
+            messageCount: number;
+            /** @example gpt-4o-mini */
+            model: string;
+            /**
+             * @description Превью первого сообщения, обрезанное до 200 символов
+             * @example Создай проект...
+             */
+            preview: string;
+            /** @example openai */
+            provider: string;
+            /** @example Создай проект */
+            title: string;
+            /**
+             * @description Момент последней активности, unix timestamp (секунды)
+             * @example 1764000300
+             */
+            updatedAt: number;
+        };
+        /** @description Создание сессии AI-чата. Все поля необязательны: без credentialId берётся первый реквизит аккаунта */
+        AiChatSessionCreateRequest: {
+            credentialId?: string | null;
+            model?: string | null;
+            title?: string | null;
+        };
+        /** @description Сессия вместе с полной историей сообщений (SessiyaAiChataSPolnoiIstorieiReadModel) */
+        AiChatSessionDetail: {
+            messages: components["schemas"]["AiChatSessionMessage"][];
+            session: components["schemas"]["AiChatSession"];
+        };
+        /** @description Страница списка сессий (SpisokSessiyAiChataReadModel). Пустые сессии в список не попадают */
+        AiChatSessionList: {
+            hasMore: boolean;
+            items: components["schemas"]["AiChatSession"][];
+            limit: number;
+            offset: number;
+            total: number;
+        };
+        /** @description Сообщение истории AI-чата (SoobshenieAiChataReadModel). `toolCalls` — плоский список `{id, name, arguments}` */
+        AiChatSessionMessage: {
+            content: string | null;
+            createdAt: number;
+            id: string;
+            name: string | null;
+            /** @enum {string} */
+            role: "system" | "user" | "assistant" | "tool";
+            seq: number;
+            toolCallId: string | null;
+            toolCalls: {
+                arguments: string;
+                id: string;
+                name: string;
+            }[];
+        };
+        /** @description Результат выполнения одного tool-вызова */
+        AiChatToolResult: {
+            content?: string | null;
+            name?: string | null;
+            /** @description Идентификатор tool_call из предыдущего ответа ассистента */
+            toolCallId: string;
+        };
+        /** @description Один шаг диалога: ровно одно из `message` или `toolResults` */
+        AiChatTurnRequest: {
+            /** @description Новое сообщение пользователя */
+            message?: string | null;
+            model?: string | null;
+            /** @description Результаты инструментов для продолжения диалога */
+            toolResults?: components["schemas"]["AiChatToolResult"][] | null;
+            /** @description Актуальный набор OpenAI tools */
+            tools?: Record<string, never>[];
+        } & (unknown | unknown);
+        /** @description Результат одного хода (RezultatHodaAiChataReadModel) */
+        AiChatTurnResult: {
+            assistant: {
+                content: string | null;
+                toolCalls: {
+                    arguments: string;
+                    id: string;
+                    name: string;
+                }[];
+            };
+            session: {
+                archived: boolean;
+                id: string;
+                providerSessionExpiresAt: number | null;
+                title: string;
+                updatedAt: number;
+            };
         };
         /** @description Архивация сессии: ходы и история сохраняются, сессия остаётся в списке с флагом `archived`, новые ходы запрещены */
         ArhivirovatSessiyu: {
@@ -5955,6 +6158,8 @@ export interface operations {
                         tool_calls?: Record<string, never>[];
                     }[];
                     model?: string | null;
+                    /** @description Идентификатор provider-сессии; передаётся так, как требует политика провайдера (header/body/query/none) */
+                    sessionId?: string | null;
                     /** @description Активные инструменты OpenAI tools */
                     tools?: Record<string, never>[];
                 };
@@ -5990,6 +6195,321 @@ export interface operations {
                 };
             };
             /** @description Ошибка upstream OpenCode */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+        };
+    };
+    get_app_aichat_infra_sessiiaichata_list: {
+        parameters: {
+            query?: {
+                includeArchived?: boolean;
+                limit?: number;
+                offset?: number;
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Страница сессий */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AiChatSessionList"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректная пагинация или параметры запроса */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+        };
+    };
+    post_app_aichat_infra_sessiiaichata_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AiChatSessionCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Сессия создана */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AiChatSession"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нет реквизитов, некорректный payload или провайдер не поддерживает AI-чат */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+        };
+    };
+    get_app_aichat_infra_sessiiaichata_show: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сессия и история сообщений */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AiChatSessionDetail"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Сессия не найдена или принадлежит другому аккаунту */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+        };
+    };
+    delete_app_aichat_infra_sessiiaichata_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сессия удалена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Сессия не найдена или принадлежит другому аккаунту */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+            /** @description Сессия не архивирована */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+        };
+    };
+    post_app_aichat_infra_sessiiaichata_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сессия архивирована */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AiChatSession"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Сессия не найдена или принадлежит другому аккаунту */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+        };
+    };
+    post_app_aichat_infra_sessiiaichata_turn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiChatTurnRequest"];
+            };
+        };
+        responses: {
+            /** @description Ответ ассистента и метаданные сессии */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AiChatTurnResult"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Сессия не найдена или принадлежит другому аккаунту */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+            /** @description Сессия архивна, истекла или реквизиты удалены */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+            /** @description Некорректный payload, нет реквизитов или провайдер не поддерживается */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FailEnvelope"];
+                };
+            };
+            /** @description Ошибка upstream-провайдера */
             502: {
                 headers: {
                     [name: string]: unknown;

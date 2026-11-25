@@ -17,8 +17,8 @@
  * 7. Преобразует любые ошибки в записи с `errorKey`/`status` (без переводов).
  */
 
-import { reactive, ref, shallowRef } from 'vue';
-import type { Ref, ShallowRef } from 'vue';
+import { computed, reactive, ref, shallowRef } from 'vue';
+import type { ComputedRef, Ref, ShallowRef } from 'vue';
 import { openApiToolRegistry } from '@/modules/ai-chat/services/OpenApiToolRegistry';
 import { isPlainObject } from '@/modules/ai-chat/services/OpenApiToolRegistry';
 import {
@@ -26,10 +26,16 @@ import {
     toolExecutor,
 } from '@/modules/ai-chat/services/ToolExecutor';
 import { aiChatService } from '@/modules/ai-chat/services/AiChatService';
+import { useStorSessiyAiChata } from '@/modules/ai-chat/store/StorSessiyAiChata';
+import type { DopolnenieHoda } from '@/modules/ai-chat/store/StorSessiyAiChata';
 import type {
     AiChatErrorKey,
     AiChatMessage,
+    AiChatSessionMessage,
+    AiChatSessionToolCall,
     AiChatToolCall,
+    AiChatToolResult,
+    AiChatTurnRequest,
     HttpMethod,
     OpenApiToolMeta,
     ToolExecutionFailure,
@@ -200,7 +206,7 @@ export interface UseAiAgentChatOptions {
 export interface UseAiAgentChatReturn {
     /** Записи ленты для отображения в UI. */
     messages: Ref<AiChatEntry[]>;
-    /** История в формате OpenAI chat-completions, отправляемая на бэкенд. */
+    /** История в формате OpenAI chat-completions (для совместимости и экспорта). */
     llmMessages: Ref<AiChatMessage[]>;
     /** `true`, пока выполняется ход агента. */
     isRunning: Ref<boolean>;
@@ -214,6 +220,10 @@ export interface UseAiAgentChatReturn {
     credentialId: Ref<string | null>;
     /** Желаемая модель провайдера (необязательная). */
     model: Ref<string | null>;
+    /** Идентификатор серверной сессии; `null` до её создания. */
+    sessionId: ComputedRef<string | null>;
+    /** Сессия архивна, истекла или потеряла реквизиты — только чтение. */
+    isReadOnly: ComputedRef<boolean>;
     /** Текущее действие, ожидающее подтверждения, либо `null`. */
     pendingConfirmation: ShallowRef<PendingConfirmationState | null>;
     /** Последний ключ ошибки шага; `null`, если ошибок не было. */
@@ -222,8 +232,12 @@ export interface UseAiAgentChatReturn {
     send: (text: string) => Promise<void>;
     /** Просит цикл завершиться после текущей операции. */
     stop: () => void;
-    /** Сбрасывает историю, подтверждение, счётчик шагов и сессию реестра. */
+    /** Сбрасывает историю и открытую сессию; следующая отправка создаст новую. */
     reset: () => void;
+    /** Заполняет ленту и LLM-историю сохранёнными сообщениями сессии. */
+    loadSession: (sessionMessages: readonly AiChatSessionMessage[]) => void;
+    /** Загружает сессию и её историю с бэкенда. */
+    loadSessionById: (id: string) => Promise<boolean>;
     /** Подтверждает ожидающее действие. */
     confirmToolCall: () => void;
     /** Отменяет ожидающее действие. */
@@ -249,24 +263,16 @@ function normalizeOptionalString(value: string | null | undefined): string | nul
     return trimmed === '' ? null : trimmed;
 }
 
-/**
- * Генерирует идентификатор сессии диалога для `x-opencode-session`.
- *
- * `crypto.randomUUID()` доступен не во всех окружениях (например, в
- * не-secure контексте), поэтому предусмотрен fallback только из символов,
- * допустимых бэкендом (`^[A-Za-z0-9._:-]{1,128}$`).
- */
-function generateSessionId(): string {
-    const cryptoApi = typeof globalThis.crypto === 'undefined' ? null : globalThis.crypto;
-
-    if (cryptoApi !== null && typeof cryptoApi.randomUUID === 'function') {
-        return cryptoApi.randomUUID();
-    }
-
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).slice(2, 10);
-
-    return `ai-${timestamp}-${random}`.slice(0, 128);
+/** Преобразует плоский tool-call из истории сессии в OpenAI-формат. */
+function flatToolCallToOpenAi(call: AiChatSessionToolCall): AiChatToolCall {
+    return {
+        id: call.id,
+        type: 'function',
+        function: {
+            name: call.name,
+            arguments: call.arguments,
+        },
+    };
 }
 
 /** Значение для необязательного поля запроса. */
@@ -379,11 +385,27 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
     const pendingConfirmation = shallowRef<PendingConfirmationState | null>(null);
     const errorKey = ref<AiChatErrorKey | null>(null);
 
+    /** Серверные сессии — единственный источник истины для id и истории. */
+    const store = useStorSessiyAiChata();
+
+    /** Идентификатор открытой серверной сессии; `null` до создания. */
+    const sessionId = computed<string | null>(() => store.session?.id ?? null);
+
     /**
-     * Идентификатор сессии диалога. Живёт до `reset()`, чтобы все сообщения
-     * одного диалога уходили в `opencode-go` с одним `x-opencode-session`.
+     * Read-only: архивная сессия, истёкшая пользовательская сессия или
+     * удалённые реквизиты. Точное решение всё равно принимает бэкенд.
      */
-    const sessionId = ref<string>(generateSessionId());
+    const isReadOnly = computed<boolean>(() => {
+        const session = store.session;
+
+        if (session === null) {
+            return false;
+        }
+
+        return session.archived
+            || session.credentialDeleted
+            || session.expiresAt * 1000 <= Date.now();
+    });
 
     /**
      * Номер текущего запуска. `reset()` увеличивает его, чтобы «осиротевший»
@@ -422,21 +444,21 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
 
     /* ------------------------- Записи ленты (UI) --------------------------- */
 
-    function pushUserEntry(text: string): void {
+    function pushUserEntry(text: string, createdAt: number = Date.now()): void {
         messages.value.push({
             id: nextEntryId('user'),
             kind: 'user',
             text,
-            createdAt: Date.now(),
+            createdAt,
         });
     }
 
-    function pushAssistantEntry(text: string): void {
+    function pushAssistantEntry(text: string, createdAt: number = Date.now()): void {
         messages.value.push({
             id: nextEntryId('assistant'),
             kind: 'assistant',
             text,
-            createdAt: Date.now(),
+            createdAt,
         });
     }
 
@@ -515,6 +537,163 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
         }
     }
 
+    /** Разбирает сохранённый tool-результат, чтобы восстановить статус ошибки. */
+    function prochitatOshibkuRezultata(content: string): string | null {
+        try {
+            const parsed: unknown = JSON.parse(content);
+
+            if (isPlainObject(parsed) && parsed.ok === false) {
+                return typeof parsed.error === 'string' && parsed.error !== ''
+                    ? parsed.error
+                    : 'tool_error';
+            }
+        } catch {
+            // Не JSON — это обычный текст результата инструмента.
+        }
+
+        return null;
+    }
+
+    /** Применяет сохранённый tool-результат к записи ленты. */
+    function primenitRezultatInstrumenta(
+        entry: AiChatToolInvocationEntry,
+        content: string,
+    ): void {
+        const error = prochitatOshibkuRezultata(content);
+
+        entry.status = error === null ? 'success' : 'error';
+        entry.resultSummary = truncateForUi(content);
+        entry.resultError = error;
+        entry.truncated = content.length > MAX_UI_TOOL_RESULT_CHARS;
+    }
+
+    /**
+     * Заполняет ленту и LLM-историю сохранёнными сообщениями сессии.
+     *
+     * Используется при открытии существующей сессии: UI получает те же
+     * записи, что и живой цикл, а `llmMessages` остаётся совместимым
+     * представлением истории для экспорта/отладки.
+     */
+    function loadSession(sessionMessages: readonly AiChatSessionMessage[]): void {
+        messages.value = [];
+        llmMessages.value = [];
+
+        const zapisiInstrumentov = new Map<string, AiChatToolInvocationEntry>();
+
+        for (const message of sessionMessages) {
+            if (message.role === 'system') {
+                llmMessages.value.push({
+                    role: 'system',
+                    content: message.content,
+                });
+                continue;
+            }
+
+            if (message.role === 'user') {
+                pushUserEntry(message.content ?? '', message.createdAt);
+
+                llmMessages.value.push({
+                    role: 'user',
+                    content: message.content,
+                });
+                continue;
+            }
+
+            if (message.role === 'assistant') {
+                const toolCalls = message.toolCalls.map(flatToolCallToOpenAi);
+
+                if (typeof message.content === 'string' && message.content.trim() !== '') {
+                    pushAssistantEntry(message.content, message.createdAt);
+                }
+
+                llmMessages.value.push({
+                    role: 'assistant',
+                    content: message.content,
+                    tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+                });
+
+                for (const call of toolCalls) {
+                    const meta = call.function.name === SEARCH_TOOL_NAME
+                        ? null
+                        : openApiToolRegistry.resolveTool(call.function.name);
+                    const parsed = parseToolArguments(call.function.arguments);
+                    const entry = createToolEntry(
+                        call,
+                        meta,
+                        parsed.args,
+                        call.function.arguments,
+                    );
+
+                    entry.createdAt = message.createdAt;
+                    messages.value.push(entry);
+                    zapisiInstrumentov.set(call.id, entry);
+                }
+
+                continue;
+            }
+
+            // role === 'tool'
+            const content = message.content ?? '';
+
+            llmMessages.value.push({
+                role: 'tool',
+                tool_call_id: message.toolCallId ?? undefined,
+                content,
+                name: message.name ?? undefined,
+            });
+
+            let entry = message.toolCallId === null
+                ? undefined
+                : zapisiInstrumentov.get(message.toolCallId);
+
+            if (entry === undefined) {
+                const call: AiChatToolCall = {
+                    id: message.toolCallId ?? `loaded-${message.id}`,
+                    type: 'function',
+                    function: {
+                        name: message.name ?? '',
+                        arguments: '',
+                    },
+                };
+
+                entry = createToolEntry(call, null, {}, '');
+                entry.createdAt = message.createdAt;
+                messages.value.push(entry);
+
+                if (message.toolCallId !== null) {
+                    zapisiInstrumentov.set(message.toolCallId, entry);
+                }
+            }
+
+            primenitRezultatInstrumenta(entry, content);
+        }
+    }
+
+    /**
+     * Загружает сессию и историю с бэкенда, заполняя ленту и LLM-историю.
+     *
+     * Возвращает `true` при успехе. Ошибка также попадает в ленту как запись
+     * `error`, чтобы экран мог показать её без отдельного состояния.
+     */
+    async function loadSessionById(id: string): Promise<boolean> {
+        const response = await store.otkrytSessiyu(id);
+
+        if (!response.ok || response.data === null) {
+            pushErrorEntry(
+                response.errorKey ?? UNEXPECTED_ERROR_KEY,
+                response.status,
+                response.errorDetails,
+            );
+
+            return false;
+        }
+
+        model.value = normalizeOptionalString(response.data.session.model);
+        loadSession(response.data.messages);
+
+        return true;
+    }
+
     /* ---------------------- Подтверждение пользователя --------------------- */
 
     /**
@@ -585,6 +764,19 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
             return;
         }
 
+        if (isReadOnly.value) {
+            const session = store.session;
+            const readOnlyKey: AiChatErrorKey = session !== null && session.archived
+                ? 'ai.chat.session_archived'
+                : (session !== null && session.credentialDeleted
+                    ? 'ai.chat.credential_deleted'
+                    : 'ai.chat.session_expired');
+
+            pushErrorEntry(readOnlyKey, 409, null);
+
+            return;
+        }
+
         const runId = runSequence + 1;
         runSequence = runId;
         stopRequested = false;
@@ -606,8 +798,49 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
             openApiToolRegistry.refreshRoles();
             refreshActiveTools();
 
+            // Сессия создаётся на сервере при первом сообщении. До этого
+            // клиент не генерирует никаких идентификаторов.
+            let activeSessionId = store.session?.id ?? null;
+
+            if (activeSessionId === null) {
+                const created = await store.sozdatSessiyu({
+                    credentialId: credentialId.value,
+                    model: model.value,
+                });
+
+                if (!isCurrentRun()) {
+                    return;
+                }
+
+                if (!created.ok || created.data === null) {
+                    pushErrorEntry(
+                        created.errorKey ?? UNEXPECTED_ERROR_KEY,
+                        created.status,
+                        created.errorDetails,
+                    );
+
+                    return;
+                }
+
+                activeSessionId = created.data.id;
+            }
+
             pushUserEntry(trimmed);
             llmMessages.value.push({ role: 'user', content: trimmed });
+
+            let turnRequest: AiChatTurnRequest = {
+                message: trimmed,
+                tools: openApiToolRegistry.getTools(),
+                model: optionalArgument(model.value),
+            };
+            let dopolnenie: DopolnenieHoda = { userMessage: trimmed };
+
+            /**
+             * Если пользователь остановил цикл во время выполнения
+             * инструментов, нужно всё равно отправить tool-результаты, чтобы
+             * серверная история не осталась с «висящими» tool_call.
+             */
+            let zavershitToolHod = false;
 
             // Основной цикл: проверка лимита стоит до вызова модели, поэтому
             // 11-й запрос не будет отправлен ни при каких условиях.
@@ -616,7 +849,7 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                     return;
                 }
 
-                if (stopRequested) {
+                if (stopRequested && !zavershitToolHod) {
                     pushNoticeEntry('stopped');
                     break;
                 }
@@ -629,19 +862,15 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
 
                 stepCount.value += 1;
 
-                const response = await aiChatService.chat({
-                    messages: llmMessages.value,
-                    tools: openApiToolRegistry.getTools(),
-                    model: optionalArgument(model.value),
-                    credentialId: optionalArgument(credentialId.value),
-                    sessionId: sessionId.value,
-                });
+                const response = await aiChatService.startTurn(activeSessionId, turnRequest);
+
+                zavershitToolHod = false;
 
                 if (!isCurrentRun()) {
                     return;
                 }
 
-                if (!response.ok || response.message === null) {
+                if (!response.ok || response.data === null) {
                     pushErrorEntry(
                         response.errorKey ?? UNEXPECTED_ERROR_KEY,
                         response.status,
@@ -650,24 +879,54 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                     break;
                 }
 
-                const assistant = response.message;
+                const result = response.data;
+
+                // Стор обновляет сводку сессии и зеркалит историю для A6.
+                store.applyTurnResult(result, dopolnenie);
+
+                const toolCalls = result.assistant.toolCalls.map(flatToolCallToOpenAi);
+                const assistantContent = result.assistant.content;
 
                 llmMessages.value.push({
                     role: 'assistant',
-                    content: assistant.content,
-                    tool_calls: assistant.toolCalls.length > 0 ? assistant.toolCalls : undefined,
+                    content: assistantContent,
+                    tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
                 });
 
-                if (typeof assistant.content === 'string' && assistant.content.trim() !== '') {
-                    pushAssistantEntry(assistant.content);
+                if (assistantContent !== null && assistantContent.trim() !== '') {
+                    pushAssistantEntry(assistantContent);
                 }
 
-                if (assistant.toolCalls.length === 0) {
+                if (toolCalls.length === 0) {
+                    if (stopRequested) {
+                        pushNoticeEntry('stopped');
+                    }
                     break;
                 }
 
+                // Остановка уже запрошена: не выполняем инструменты, но
+                // закрываем историю синтетическими результатами.
+                if (stopRequested) {
+                    const cancelledResults: AiChatToolResult[] = toolCalls.map((call) => ({
+                        toolCallId: call.id,
+                        content: STOPPED_TOOL_CONTENT,
+                        name: call.function.name,
+                    }));
+
+                    skipToolCalls(toolCalls, STOPPED_TOOL_CONTENT);
+
+                    turnRequest = {
+                        toolResults: cancelledResults,
+                        tools: openApiToolRegistry.getTools(),
+                        model: optionalArgument(model.value),
+                    };
+                    dopolnenie = { toolResults: cancelledResults };
+                    zavershitToolHod = true;
+                    continue;
+                }
+
                 // Вызовы одного сообщения выполняются строго по порядку.
-                const toolCalls = assistant.toolCalls;
+                const toolResults: AiChatToolResult[] = [];
 
                 for (let index = 0; index < toolCalls.length; index += 1) {
                     if (!isCurrentRun()) {
@@ -675,7 +934,18 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                     }
 
                     if (stopRequested) {
-                        skipToolCalls(toolCalls.slice(index), STOPPED_TOOL_CONTENT);
+                        const remaining = toolCalls.slice(index);
+
+                        skipToolCalls(remaining, STOPPED_TOOL_CONTENT);
+
+                        for (const call of remaining) {
+                            toolResults.push({
+                                toolCallId: call.id,
+                                content: STOPPED_TOOL_CONTENT,
+                                name: call.function.name,
+                            });
+                        }
+
                         break;
                     }
 
@@ -695,6 +965,11 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                             role: 'tool',
                             tool_call_id: call.id,
                             content: invalidArgumentsContent(parsed.error),
+                        });
+                        toolResults.push({
+                            toolCallId: call.id,
+                            content: invalidArgumentsContent(parsed.error),
+                            name: call.function.name,
                         });
                         continue;
                     }
@@ -725,6 +1000,11 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                                 role: 'tool',
                                 tool_call_id: call.id,
                                 content: USER_DECLINED_TOOL_CONTENT,
+                            });
+                            toolResults.push({
+                                toolCallId: call.id,
+                                content: USER_DECLINED_TOOL_CONTENT,
+                                name: call.function.name,
                             });
                             continue;
                         }
@@ -760,13 +1040,32 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                         content: result.content,
                     });
 
+                    toolResults.push({
+                        toolCallId: call.id,
+                        content: result.content,
+                        name: call.function.name,
+                    });
+
                     // `search_api_endpoints` активирует новые инструменты сессии.
                     if (call.function.name === SEARCH_TOOL_NAME) {
                         refreshActiveTools();
                     }
 
                     if (stopRequested) {
-                        skipToolCalls(toolCalls.slice(index + 1), STOPPED_TOOL_CONTENT);
+                        const remaining = toolCalls.slice(index + 1);
+
+                        if (remaining.length > 0) {
+                            skipToolCalls(remaining, STOPPED_TOOL_CONTENT);
+
+                            for (const call of remaining) {
+                                toolResults.push({
+                                    toolCallId: call.id,
+                                    content: STOPPED_TOOL_CONTENT,
+                                    name: call.function.name,
+                                });
+                            }
+                        }
+
                         break;
                     }
                 }
@@ -775,10 +1074,17 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
                     return;
                 }
 
-                if (stopRequested) {
-                    pushNoticeEntry('stopped');
+                if (toolResults.length === 0) {
                     break;
                 }
+
+                turnRequest = {
+                    toolResults,
+                    tools: openApiToolRegistry.getTools(),
+                    model: optionalArgument(model.value),
+                };
+                dopolnenie = { toolResults };
+                zavershitToolHod = stopRequested;
             }
         } catch (error) {
             if (isCurrentRun()) {
@@ -831,7 +1137,7 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
         isRunning.value = false;
         messages.value = [];
         llmMessages.value = [];
-        sessionId.value = generateSessionId();
+        store.sbrosit();
         stepCount.value = 0;
         stepLimitReached.value = false;
         errorKey.value = null;
@@ -849,11 +1155,15 @@ export function useAiAgentChat(options: UseAiAgentChatOptions = {}): UseAiAgentC
         activeTools,
         credentialId,
         model,
+        sessionId,
+        isReadOnly,
         pendingConfirmation,
         errorKey,
         send,
         stop,
         reset,
+        loadSession,
+        loadSessionById,
         confirmToolCall,
         cancelToolCall,
         setCredentials,

@@ -267,6 +267,7 @@
         "runners": "Раннеры",
         "settings": "Настройки",
         "ai_assistant": "ИИ-помощник",
+        "ai_sessions": "Сессии AI-чата",
         "sessions": "Сессии",
         "workspaces": "Workspaces"
       },
@@ -2009,6 +2010,48 @@
       "no_credentials_title": "Реквизиты OpenCode не настроены",
       "no_credentials_description": "Добавьте API-ключ и модель в настройках аккаунта, чтобы начать пользоваться AI-чатом.",
       "open_settings": "Открыть настройки аккаунта"
+    },
+    "chat": {
+      "sessions": "Все сессии",
+      "archive": "Архивировать",
+      "read_only": {
+        "archived_title": "Сессия в архиве",
+        "expired_title": "Сессия истекла",
+        "credential_deleted_title": "Реквизиты сессии удалены",
+        "description": "Доступен только просмотр истории. Продолжить диалог нельзя."
+      }
+    },
+    "sessions": {
+      "title": "Сессии AI-чата",
+      "subtitle": "Все сохранённые диалоги. В карточке показывается одно превью первого сообщения.",
+      "new_session": "Новая сессия",
+      "search_placeholder": "Поиск по заголовку и сообщениям",
+      "include_archived": "Показывать архивные",
+      "loading": "Загрузка сессий…",
+      "empty_title": "Сессий пока нет",
+      "empty_description": "Начните новый диалог — он появится здесь после первого сообщения.",
+      "load_error_title": "Не удалось загрузить сессии",
+      "untitled": "Без названия",
+      "preview_fallback": "Сообщений пока нет",
+      "archived_badge": "Архив",
+      "expired_badge": "Истекла",
+      "credential_deleted_badge": "Реквизиты удалены",
+      "archive_reason": {
+        "manual": "Архив",
+        "expired": "Истекла",
+        "credential_deleted": "Реквизиты удалены"
+      },
+      "updated_at": "Обновлена {date}",
+      "messages_count": "Сообщений: {count}",
+      "open": "Открыть",
+      "archive": "Архивировать",
+      "delete": "Удалить",
+      "range": "{from}–{to} из {total}",
+      "previous": "Назад",
+      "next": "Вперёд",
+      "delete_confirm_title": "Удалить сессию?",
+      "delete_confirm_description": "Сессия «{title}» и вся её история будут удалены без возможности восстановления.",
+      "delete_confirm_warning": "Удаление доступно только для архивной сессии."
     }
   }
 }

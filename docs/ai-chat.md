@@ -9,6 +9,67 @@
 эндпоинтов.
 
 План и обоснование решений — [`plans/ai-chat-openapi-tools.md`](../../plans/ai-chat-openapi-tools.md).
+Сессии диалога — [`plans/ai-chat-sessions.md`](../../plans/ai-chat-sessions.md).
+
+## 0. Сессии диалога
+
+История AI-чата теперь хранится на бэкенде. Фронтенд — не источник истины:
+он загружает историю при открытии сессии и отправляет только новый шаг.
+
+### 0.1 Две разные сессии
+
+- **Сессия чата** — запись в БД `ai_chat_session` + сообщения
+  `ai_chat_message`. Принадлежит аккаунту, содержит провайдера, модель и
+  историю.
+- **Provider-сессия** — транспортный идентификатор для провайдера
+  (`x-opencode-session` у `opencode`/`opencode-go`). История всегда передаётся
+  сообщениями; provider-сессия лишь помогает маршрутизации и кешу.
+
+TTL provider-сессии — **300 секунд**, после чего идентификатор ротируется.
+История чата при этом сохраняется. TTL пользовательской сессии — **24 часа от
+создания** (`AI_CHAT_SESSION_TTL`); по истечении сессия автоматически
+архивируется, история остаётся доступной для чтения.
+
+### 0.2 API
+
+| Метод | Путь | Назначение |
+|---|---|---|
+| `GET` | `/api/ai/chat/sessions` | Список сессий: `includeArchived`, `search`, `limit`, `offset`; пустые сессии скрыты, у каждой ровно одно `preview` |
+| `POST` | `/api/ai/chat/sessions` | Создать сессию (`credentialId?`, `model?`, `title?`) |
+| `GET` | `/api/ai/chat/sessions/{id}` | Сессия и полная история сообщений |
+| `POST` | `/api/ai/chat/sessions/{id}/archive` | Архивировать (идемпотентно) |
+| `DELETE` | `/api/ai/chat/sessions/{id}` | Удалить вместе с историей; только архивную |
+| `POST` | `/api/ai/chat/sessions/{id}/turns` | Один шаг: `message` **или** `toolResults` |
+
+Ошибки: `401 account.not_authenticated`, `404 ai.chat.session_not_found`,
+`409 ai.chat.session_archived` / `ai.chat.session_expired` /
+`ai.chat.session_not_archived` / `ai.chat.credential_deleted`,
+`422 ai.chat.invalid_payload` / `ai.chat.provider_not_supported` и другие.
+Чужая сессия неотличима от несуществующей (404).
+
+### 0.3 Provider policy
+
+| Провайдер | Транспорт | Ключ | TTL |
+|---|---|---|---|
+| `opencode`, `opencode-go` | `header` | `x-opencode-session` | 300 |
+| `openai`, `anthropic`, `google`, `openrouter`, `deepseek`, `mistral`, `groq`, `xai`, `together`, `ollama`, `custom` | `none` | — | 300 (у `google` 3600) |
+| неизвестный провайдер | `unknown` | — | блокирует AI-чат |
+
+Политика задаётся в `ProvayderOpenCode`, а применяется через
+`SessionTransportApplier`; в `OpenCodeChatProxy` нет provider-specific
+`if`-веток.
+
+### 0.4 Frontend
+
+- [`StorSessiyAiChata`](../src/modules/ai-chat/store/StorSessiyAiChata.ts:1) —
+  список, пагинация, поиск, открытая сессия, archive/delete.
+- [`useAiAgentChat`](../src/modules/ai-chat/composables/useAiAgentChat.ts:1) —
+  серверные ходы: `message`, затем `toolResults`; история загружается через
+  `loadSession`/`loadSessionById`.
+- Маршруты: `/ai/chat` (новый диалог), `/ai/chat/:id` (существующая сессия),
+  `/ai/chat/sessions` (список сессий).
+- Архивная, истёкшая сессия или сессия с удалёнными реквизитами — read-only:
+  композер и смена модели заблокированы.
 
 ## 1. Архитектура и поток данных
 
@@ -23,7 +84,7 @@ flowchart LR
     AG --> EXE[ToolExecutor]
     EXE --> API[API Unitman с JWT]
     AG --> PROXY[AiChatService]
-    PROXY --> CTRL[POST /api/ai/chat]
+    PROXY --> CTRL[POST /api/ai/chat/sessions/{id}/turns]
     CTRL --> ACC[AccountApi: расшифровка ключа]
     CTRL --> OCP[OpenCodeChatProxy]
     OCP --> LLM[OpenCode: OpenAI-compatible API]
@@ -43,14 +104,17 @@ flowchart LR
    ведёт ReAct-цикл. На каждом шаге модели отправляется `search_api_endpoints`
    плюс уже активированные инструменты сессии.
 3. [`AiChatService`](../src/modules/ai-chat/services/AiChatService.ts:1)
-   отправляет историю и инструменты в `POST /api/ai/chat`.
-4. Бэкенд [`AiChatController`](../../unitman/src/AiChat/Infra/Controller/AiChatController.php:1)
-   расшифровывает ключ пользователя через
+   отправляет только новый шаг: `startTurn(sessionId, { message })`, затем
+   `startTurn(sessionId, { toolResults })`. Полная история хранится на бэкенде
+   и не передаётся клиентом.
+4. Бэкенд [`SessiiAiChataController`](../../unitman/src/AiChat/Infra/Controller/SessiiAiChataController.php:1)
+   проверяет владельца и расшифровывает ключ пользователя через
    [`AccountApi::poluchitRekvizityOpenCodeDlyaTekuschegoPolzovatelya()`](../../unitman/src/Account/Api/AccountApi.php:114)
    и ретранслирует запрос в [`OpenCodeChatProxy`](../../unitman/src/AiChat/Infra/Service/OpenCodeChatProxy.php:1).
 5. Если модель вернула `tool_calls`, [`ToolExecutor`](../src/modules/ai-chat/services/ToolExecutor.ts:1)
    выполняет их через обычный `apiClient.requestRaw()` — с JWT пользователя и
-   против настоящего API. Результат возвращается модели как `role: "tool"`.
+   против настоящего API. Результаты отправляются следующим turn-запросом в
+   `toolResults`, а бэкенд сохраняет их как сообщения `role: "tool"`.
 
 Активация инструментов двухступенчатая: сначала модель вызывает
 `search_api_endpoints`, реестр находит операции и активирует их вместе с

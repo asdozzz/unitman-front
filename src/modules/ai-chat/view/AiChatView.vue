@@ -10,7 +10,7 @@
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   GhBanner,
   GhButton,
@@ -22,6 +22,7 @@ import {
   MAX_STEPS,
   useAiAgentChat,
 } from "@/modules/ai-chat/composables/useAiAgentChat";
+import { useStorSessiyAiChata } from "@/modules/ai-chat/store/StorSessiyAiChata";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import SoobshenieChata from "@/modules/ai-chat/view/components/SoobshenieChata.vue";
 import StrokaInstrumenta from "@/modules/ai-chat/view/components/StrokaInstrumenta.vue";
@@ -32,6 +33,7 @@ import VyborRekvizitov from "@/modules/ai-chat/view/components/VyborRekvizitov.v
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute();
 
 const chat = useAiAgentChat();
 const {
@@ -40,7 +42,11 @@ const {
   stepCount,
   activeTools,
   pendingConfirmation,
+  isReadOnly,
 } = chat;
+
+const storeSessiy = useStorSessiyAiChata();
+const { session } = storeToRefs(storeSessiy);
 
 const storSpiska = useStorSpiskaRekvizitovOpenCode();
 const { spisok, loaderSpiska, oshibkaZagruzki } = storeToRefs(storSpiska);
@@ -48,6 +54,7 @@ const { spisok, loaderSpiska, oshibkaZagruzki } = storeToRefs(storSpiska);
 const vybranniyId = ref<string | null>(null);
 const vybrannayaModel = ref<string | null>(null);
 const spisokZagruzhen = ref<boolean>(false);
+const oshibkaDeystviya = ref<string | null>(null);
 
 const lenta = ref<HTMLElement | null>(null);
 const derzhatsyaNiza = ref<boolean>(true);
@@ -59,6 +66,11 @@ const derzhatsyaNiza = ref<boolean>(true);
  * композаблу. Вызывается при загрузке списка и любом изменении выбора.
  */
 function sinhronizirovatVybor(): void {
+  // У открытой сессии провайдер/модель уже зафиксированы на бэкенде.
+  if (messages.value.length > 0 || isReadOnly.value) {
+    return;
+  }
+
   const rekvizity = spisok.value;
 
   if (rekvizity.length === 0) {
@@ -151,6 +163,61 @@ onMounted(async () => {
   prokrutitVNiz(true);
 });
 
+/* --------------------------- Маршрут сессии ---------------------------- */
+
+const idIzMarshruta = computed<string | null>(() => {
+  const id = route.params.id;
+
+  return typeof id === "string" && id !== "" ? id : null;
+});
+
+watch(
+  idIzMarshruta,
+  async (id) => {
+    if (id === null) {
+      if (chat.sessionId.value !== null) {
+        chat.reset();
+      }
+
+      return;
+    }
+
+    if (id === chat.sessionId.value) {
+      return;
+    }
+
+    oshibkaDeystviya.value = null;
+    const uspeh = await chat.loadSessionById(id);
+
+    if (uspeh) {
+      derzhatsyaNiza.value = true;
+      await nextTick();
+      prokrutitVNiz(true);
+    }
+  },
+  { immediate: true },
+);
+
+// После первого сообщения серверная сессия получает id: фиксируем его в URL,
+// чтобы перезагрузка страницы открывала тот же диалог.
+watch(
+  () => chat.sessionId.value,
+  (id) => {
+    if (id === null) {
+      return;
+    }
+
+    if (route.name === "ai_chat_session" && route.params.id === id) {
+      return;
+    }
+
+    void router.replace({
+      name: "ai_chat_session",
+      params: { id },
+    });
+  },
+);
+
 /* ------------------------------ Состояние ------------------------------- */
 
 const pustayaLenta = computed<boolean>(() => messages.value.length === 0);
@@ -170,7 +237,29 @@ const mozhnoOtpravit = computed<boolean>(
   () =>
     !isRunning.value &&
     !ozhidaetPodtverzhdeniya.value &&
+    !isReadOnly.value &&
     spisok.value.length > 0,
+);
+
+/** Реквизиты/модель можно менять только до первого сообщения активной сессии. */
+const vyborZablokirovan = computed<boolean>(
+  () => isRunning.value || isReadOnly.value || messages.value.length > 0,
+);
+
+const readOnlyTitle = computed<string>(() => {
+  if (session.value?.archived === true) {
+    return t("aiChat.chat.read_only.archived_title");
+  }
+
+  if (session.value?.credentialDeleted === true) {
+    return t("aiChat.chat.read_only.credential_deleted_title");
+  }
+
+  return t("aiChat.chat.read_only.expired_title");
+});
+
+const readOnlyDescription = computed<string>(() =>
+  t("aiChat.chat.read_only.description"),
 );
 
 /* ------------------------------- Действия ------------------------------- */
@@ -190,8 +279,37 @@ function ostanovit(): void {
 
 function noviyChat(): void {
   chat.reset();
+  oshibkaDeystviya.value = null;
   derzhatsyaNiza.value = true;
+  void router.push({ name: "ai_chat" });
   void nextTick(() => prokrutitVNiz(true));
+}
+
+function otkrytSpisok(): void {
+  void router.push({ name: "ai_chat_sessions" });
+}
+
+function tekstOshibki(errorKey: string | null, errorDetails: string | null): string {
+  if (errorDetails !== null && errorDetails !== "") {
+    return errorDetails;
+  }
+
+  return errorKey === null ? t("aiChat.errors.title") : t(errorKey);
+}
+
+async function arhivirovat(): Promise<void> {
+  const current = session.value;
+
+  if (current === null || current.archived) {
+    return;
+  }
+
+  oshibkaDeystviya.value = null;
+  const result = await storeSessiy.arhivirovatSessiyu(current.id);
+
+  if (!result.ok) {
+    oshibkaDeystviya.value = tekstOshibki(result.errorKey, result.errorDetails);
+  }
 }
 
 function podtverdit(): void {
@@ -214,13 +332,28 @@ function otkrytNastroyki(): void {
       :description="t('aiChat.page.subtitle')"
     >
       <template #actions>
+        <GhButton
+          variant="default"
+          icon="list-unordered"
+          :label="t('aiChat.chat.sessions')"
+          @click="otkrytSpisok"
+        />
+        <GhButton
+          v-if="session !== null && !session.archived"
+          variant="default"
+          icon="archive"
+          :label="t('aiChat.chat.archive')"
+          :disabled="isRunning || isReadOnly"
+          :loading="storeSessiy.arhiviruemiId === session.id"
+          @click="arhivirovat"
+        />
         <VyborRekvizitov
           v-if="spisok.length > 0"
           :credentials="spisok"
           :selected-id="vybranniyId"
           :selected-model="vybrannayaModel"
           :loading="loaderSpiska"
-          :disabled="isRunning"
+          :disabled="vyborZablokirovan"
           @update:selected-id="izmenitRekvizity"
           @update:selected-model="izmenitModel"
         />
@@ -233,6 +366,13 @@ function otkrytNastroyki(): void {
         />
       </template>
     </GhPageHeader>
+
+    <p v-if="session !== null" class="ai-chat__session-meta">
+      <GhIcon name="comment-discussion" :size="14" />
+      <span>{{ session.provider }}</span>
+      <span class="ai-chat__session-separator">/</span>
+      <span>{{ session.model }}</span>
+    </p>
 
     <GhBanner
       v-if="oshibkaZagruzki"
@@ -258,6 +398,24 @@ function otkrytNastroyki(): void {
           @click="otkrytNastroyki"
         />
       </template>
+    </GhBanner>
+
+    <GhBanner
+      v-if="isReadOnly"
+      variant="attention"
+      :title="readOnlyTitle"
+      class="ai-chat__banner"
+    >
+      {{ readOnlyDescription }}
+    </GhBanner>
+
+    <GhBanner
+      v-if="oshibkaDeystviya"
+      variant="danger"
+      :title="t('aiChat.errors.title')"
+      class="ai-chat__banner"
+    >
+      {{ oshibkaDeystviya }}
     </GhBanner>
 
     <div class="ai-chat__layout">
@@ -328,6 +486,20 @@ function otkrytNastroyki(): void {
 .ai-chat__banner {
   flex-shrink: 0;
   margin-bottom: 12px;
+}
+
+.ai-chat__session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin: -4px 0 8px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+}
+
+.ai-chat__session-separator {
+  color: var(--fgColor-muted);
 }
 
 .ai-chat__layout {

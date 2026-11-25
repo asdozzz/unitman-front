@@ -48,6 +48,12 @@ const osnovniePunkty = computed<GhSideNavItem[]>(() => [
         to: "/ai/chat",
     },
     {
+        id: "ai-sessions",
+        label: t("app.sidebar.items.ai_sessions"),
+        icon: "history",
+        to: "/ai/chat/sessions",
+    },
+    {
         id: "sessions",
         label: t("app.sidebar.items.sessions"),
         icon: "cpu",
