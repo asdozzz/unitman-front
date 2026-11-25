@@ -217,7 +217,8 @@
       "unit_jobs": "Unit jobs",
       "unauthorized": "Access denied",
       "not_found": "Page not found",
-      "runners": "Runners"
+      "runners": "Runners",
+      "notifications": "Notifications"
     },
     "header": {
       "profile": "Profile",
@@ -1234,6 +1235,7 @@
       "security": "Security",
       "tokens": "Tokens",
       "opencode": "OpenCode",
+      "notifications": "Notifications",
       "appearance": "Appearance"
     },
     "appearance": {
@@ -1297,6 +1299,80 @@
     "load_error": "Failed to load settings",
     "retry": "Retry",
     "save_error": "Failed to save changes"
+  },
+  "notifications": {
+    "page": {
+      "title": "Notifications",
+      "description": "Events that need your attention",
+      "refresh": "Refresh",
+      "mark_all_read": "Mark all as read",
+      "only_actionable": "Actionable only",
+      "only_actionable_description": "Hide informational notifications",
+      "empty_title": "No notifications yet",
+      "empty_description": "Events about your units and runners will appear here.",
+      "unread": "Unread notification"
+    },
+    "dialog": {
+      "title": "Notification"
+    },
+    "severity": {
+      "info": "Info",
+      "attention": "Needs attention",
+      "critical": "Critical"
+    },
+    "types": {
+      "runner_threat": {
+        "title": "Runner threats",
+        "description": "Critical runner resource events. System notifications cannot be disabled."
+      },
+      "unit_started": {
+        "title": "Unit started",
+        "description": "Messages about successful starts of your units."
+      }
+    },
+    "runner_threat": {
+      "short": "Runner {hostname}: {level}, memory {memory}%",
+      "full": {
+        "runner": "Runner: {hostname}",
+        "level": "Threat level: {level}",
+        "memory": "Memory: {memory}%",
+        "disk": "Disk {path}: {percent}%",
+        "block_reason": "Block reason: {reason}",
+        "collected_at": "Resource snapshot: {date}"
+      }
+    },
+    "unit_started": {
+      "short": "Unit {unitName} started",
+      "full": {
+        "unit": "Unit: {unitName}",
+        "project": "Project: {projectId}",
+        "branch": "Branch: {branch}",
+        "job": "Start job: {jobId}",
+        "started_at": "Started: {date}"
+      }
+    },
+    "push": {
+      "section_title": "Browser notifications",
+      "switch_label": "Push notifications",
+      "switch_description": "Receive notifications in your browser even when the site is closed.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "unsupported": "The browser does not support push notifications",
+      "permission_denied": "Notification permission is blocked in the browser",
+      "registration_failed": "Failed to register the service worker",
+      "key_unavailable": "The server has no VAPID key configured",
+      "subscribe_failed": "Failed to enable push notifications",
+      "unsubscribe_failed": "Failed to disable push notifications",
+      "reset_hint": "Reset the permission in your browser settings",
+      "https_hint": "Push notifications work only over HTTPS or on localhost."
+    },
+    "preferences": {
+      "section_title": "Notification types",
+      "system_locked": "System notifications cannot be disabled"
+    },
+    "errors": {
+      "invalid_response": "Invalid notifications server response"
+    }
   },
   "dashboard": {
     "all_projects": "All projects",

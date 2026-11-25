@@ -5,6 +5,7 @@ import unit from '@/modules/unit/routes';
 import opencode from '@/modules/opencode/routes';
 import runner from '@/modules/runner/routes';
 import aiChat from '@/modules/ai-chat/routes';
+import notification from '@/modules/notification/routes';
 import app from  '@/modules/app/routes';
 import i18n from "@/bootstrap/translator";
 
@@ -17,6 +18,7 @@ const router = createRouter({
         ...opencode,
         ...runner,
         ...aiChat,
+        ...notification,
         ...app,
     ]
 })

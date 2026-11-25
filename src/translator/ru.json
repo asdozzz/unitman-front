@@ -217,7 +217,8 @@
       "unit_jobs": "Задачи юнита",
       "unauthorized": "Доступ запрещён",
       "not_found": "Страница не найдена",
-      "runners": "Раннеры"
+      "runners": "Раннеры",
+      "notifications": "Уведомления"
     },
     "header": {
       "profile": "Профиль",
@@ -1215,6 +1216,7 @@
       "security": "Безопасность",
       "tokens": "Токены",
       "opencode": "OpenCode",
+      "notifications": "Уведомления",
       "appearance": "Внешний вид"
     },
     "appearance": {
@@ -1278,6 +1280,80 @@
     "load_error": "Не удалось загрузить настройки",
     "retry": "Повторить",
     "save_error": "Не удалось сохранить изменения"
+  },
+  "notifications": {
+    "page": {
+      "title": "Уведомления",
+      "description": "События, требующие вашего внимания",
+      "refresh": "Обновить",
+      "mark_all_read": "Отметить все прочитанными",
+      "only_actionable": "Только важные",
+      "only_actionable_description": "Скрыть информационные уведомления",
+      "empty_title": "Уведомлений пока нет",
+      "empty_description": "Здесь появятся события по вашим юнитам и раннерам.",
+      "unread": "Непрочитанное уведомление"
+    },
+    "dialog": {
+      "title": "Уведомление"
+    },
+    "severity": {
+      "info": "Инфо",
+      "attention": "Требует внимания",
+      "critical": "Критично"
+    },
+    "types": {
+      "runner_threat": {
+        "title": "Угрозы раннеров",
+        "description": "Критические события ресурсов раннеров. Системные уведомления нельзя отключить."
+      },
+      "unit_started": {
+        "title": "Запуск юнита",
+        "description": "Сообщения об успешном запуске ваших юнитов."
+      }
+    },
+    "runner_threat": {
+      "short": "Раннер {hostname}: {level}, память {memory}%",
+      "full": {
+        "runner": "Раннер: {hostname}",
+        "level": "Уровень угрозы: {level}",
+        "memory": "Память: {memory}%",
+        "disk": "Диск {path}: {percent}%",
+        "block_reason": "Причина блокировки: {reason}",
+        "collected_at": "Снимок ресурсов: {date}"
+      }
+    },
+    "unit_started": {
+      "short": "Юнит {unitName} запущен",
+      "full": {
+        "unit": "Юнит: {unitName}",
+        "project": "Проект: {projectId}",
+        "branch": "Ветка: {branch}",
+        "job": "Задача запуска: {jobId}",
+        "started_at": "Запущен: {date}"
+      }
+    },
+    "push": {
+      "section_title": "Браузерные уведомления",
+      "switch_label": "Push-уведомления",
+      "switch_description": "Получать уведомления в браузере, даже когда сайт закрыт.",
+      "enabled": "Включены",
+      "disabled": "Выключены",
+      "unsupported": "Браузер не поддерживает push-уведомления",
+      "permission_denied": "Разрешение на уведомления запрещено в браузере",
+      "registration_failed": "Не удалось зарегистрировать service worker",
+      "key_unavailable": "Сервер не настроил VAPID-ключ",
+      "subscribe_failed": "Не удалось включить push-уведомления",
+      "unsubscribe_failed": "Не удалось выключить push-уведомления",
+      "reset_hint": "Сбросьте разрешение в настройках браузера",
+      "https_hint": "Push-уведомления работают только по HTTPS или на localhost."
+    },
+    "preferences": {
+      "section_title": "Типы уведомлений",
+      "system_locked": "Системные уведомления отключить нельзя"
+    },
+    "errors": {
+      "invalid_response": "Некорректный ответ сервера уведомлений"
+    }
   },
   "dashboard": {
     "all_projects": "Все проекты",

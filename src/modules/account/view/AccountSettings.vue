@@ -20,9 +20,17 @@ import TabBezopasnost from "@/modules/account/view/AccountSettings/TabBezopasnos
 import TabVneshniyVid from "@/modules/account/view/AccountSettings/TabVneshniyVid.vue";
 import SpisokLichnihTokenov from "@/modules/account/view/AccountSettings/SpisokLichnihTokenov.vue";
 import SpisokRekvizitovOpenCode from "@/modules/account/view/AccountSettings/SpisokRekvizitovOpenCode.vue";
+import TabUvedomleniya from "@/modules/account/view/AccountSettings/TabUvedomleniya.vue";
 
 /** Допустимые значения query-параметра `?tab=`. */
-const TABI = ["profile", "security", "tokens", "opencode", "appearance"] as const;
+const TABI = [
+  "profile",
+  "security",
+  "tokens",
+  "opencode",
+  "notifications",
+  "appearance",
+] as const;
 
 type TabId = (typeof TABI)[number];
 
@@ -55,6 +63,11 @@ const taby = computed<GhNavItem[]>(() => [
   { name: "security", label: t("settings.tabs.security"), icon: "shield" },
   { name: "tokens", label: t("settings.tabs.tokens"), icon: "key" },
   { name: "opencode", label: t("settings.tabs.opencode"), icon: "cpu" },
+  {
+    name: "notifications",
+    label: t("settings.tabs.notifications"),
+    icon: "bell",
+  },
   { name: "appearance", label: t("settings.tabs.appearance"), icon: "paintbrush" },
 ]);
 
@@ -280,6 +293,7 @@ onUnmounted(() => {
       <TabBezopasnost v-else-if="aktivniyTab === 'security'" />
       <SpisokLichnihTokenov v-else-if="aktivniyTab === 'tokens'" />
       <SpisokRekvizitovOpenCode v-else-if="aktivniyTab === 'opencode'" />
+      <TabUvedomleniya v-else-if="aktivniyTab === 'notifications'" />
       <TabVneshniyVid v-else-if="aktivniyTab === 'appearance'" />
     </template>
 
