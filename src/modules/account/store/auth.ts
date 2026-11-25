@@ -112,24 +112,29 @@ export const useAuthStore = defineStore('auth', {
 
             return state.tokenData.user.locale as "en" | "ru";
         },
+        /**
+         * Проверка одной роли.
+         *
+         * Геттер возвращает функцию для обратной совместимости с шаблонами,
+         * где роль проверяется как `checkRole(role)`.
+         */
         checkRole() {
-            const _this = this;
-            return (role: string): boolean => _this.getRoles.includes(role);
+            return (role: string): boolean => this.getRoles.includes(role);
         },
+        /**
+         * Проверка, что у пользователя есть все перечисленные роли.
+         *
+         * Возвращает функцию (геттер вызывается как `checkRoles(roles)`),
+         * поэтому результат должен вычисляться через `every`, а не `forEach`:
+         * `return` из колбэка `forEach` не влияет на результат.
+         */
         checkRoles() {
-            const _this = this;
-            return (roles: string[]): boolean => {
-                roles.forEach((role: string) => {
-                    if (!_this.checkRole(role)) {
-                        return false;
-                    }
-                })
-
-                return true;
-            }
+            return (roles: string[]): boolean =>
+                roles.every((role: string) => this.getRoles.includes(role));
         },
+        /** Является ли текущий пользователь администратором. */
         isAdmin(): boolean {
-            return this.checkRole(Roles.Admin);
+            return this.getRoles.includes(Roles.Admin);
         },
     },
     actions: {

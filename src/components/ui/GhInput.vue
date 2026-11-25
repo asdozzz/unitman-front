@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import GhIcon from "./GhIcon.vue";
 import type { GhControlSize, OcticonName } from "./types";
 
@@ -70,6 +70,41 @@ const emit = defineEmits<{
 
 const estTextarea = computed<boolean>(() => props.type === "textarea");
 
+/** Корень компонента: нужен, чтобы проставить id нативному полю. */
+const koren = ref<HTMLElement | null>(null);
+
+/**
+ * Переносит `id` на нативный `input`/`textarea`.
+ *
+ * Quasar `QInput` не принимает внешний `id`: он генерирует собственный
+ * `targetUid` и вешает его на поле. Из-за этого `<label for="...">` из
+ * `GhFormField` не связывался с контролом, а `getByLabel`/`#id` в тестах
+ * не находили поле. После монтирования (и при смене `id`) проставляем
+ * переданное значение нативно.
+ */
+function primenitIdNaPole(): void {
+  if (props.id === undefined || koren.value === null) {
+    return;
+  }
+
+  const pole = koren.value.querySelector<
+    HTMLInputElement | HTMLTextAreaElement
+  >("input, textarea");
+
+  if (pole !== null && pole.id !== props.id) {
+    pole.id = props.id;
+  }
+}
+
+onMounted(primenitIdNaPole);
+
+watch(
+  () => props.id,
+  () => {
+    void nextTick(primenitIdNaPole);
+  },
+);
+
 function obnovitZnachenie(value: string | number | null): void {
   emit("update:modelValue", value);
 }
@@ -77,6 +112,7 @@ function obnovitZnachenie(value: string | number | null): void {
 
 <template>
   <div
+    ref="koren"
     class="gh-input primer"
     :class="[
       `gh-input--${size}`,
@@ -100,7 +136,6 @@ function obnovitZnachenie(value: string | number | null): void {
       :readonly="readonly"
       :clearable="clearable"
       :autocomplete="autocomplete"
-      :id="id"
       :aria-label="label || undefined"
       :aria-describedby="ariaDescribedby"
       :aria-invalid="ariaInvalid || error ? true : undefined"

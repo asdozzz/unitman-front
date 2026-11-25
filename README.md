@@ -269,3 +269,19 @@ await apiClient.post("/unit/create", params);
 Так как сгенерированный файл и снимок лежат в репозитории, сборка в Docker и CI не требуют доступа к
 бэкенду. Для CI можно добавить шаг `yarn gen:api --file openapi/unitman.json --check`, чтобы поймать
 рассинхронизацию снимка и сгенерированных типов.
+
+## E2E-тесты интерфейса
+
+Сквозные UI-тесты живут в [`e2e/`](e2e) и запускаются Playwright против Vite dev server.
+Бэкенд заменён моками HTTP API, поэтому для прогона не нужны PostgreSQL, Temporal,
+RoadRunner и Centrifugo.
+
+- Тест-кейсы и матрица покрытия: [`docs/e2e-test-cases.md`](docs/e2e-test-cases.md)
+- Запуск: `yarn test:e2e`
+- Интерактивный UI-режим: `yarn test:e2e:ui`
+- HTML-отчёт: `yarn test:e2e:report`
+- Запуск в официальном образе Playwright (если на хосте нет системных библиотек Chromium):
+  `yarn test:e2e:docker`
+
+Конфигурация — [`playwright.config.cjs`](playwright.config.cjs), моки и фабрики данных —
+[`e2e/support/`](e2e/support), сами сценарии — [`e2e/tests/`](e2e/tests).

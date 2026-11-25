@@ -17,7 +17,11 @@ export default defineConfig({
     quasar(),
   ],
   define: {
-    VITE_API_HOST: process.env.VITE_API_HOST,
+    // `define` подставляет значение в код как выражение, поэтому сырой URL
+    // без кавычек ломает сборку (`{ "VITE_API_HOST": /api }`). Значение
+    // сериализуется в валидную JS-строку; если переменная не задана —
+    // подставляется пустая строка.
+    VITE_API_HOST: JSON.stringify(process.env.VITE_API_HOST ?? ""),
   },
   resolve: {
     alias: {

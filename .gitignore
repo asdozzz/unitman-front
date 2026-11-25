@@ -28,3 +28,10 @@ dist-ssr
 /.env
 graphify-out
 plans
+
+# Playwright
+/e2e/.artifacts/
+/e2e/report/
+/playwright-report/
+/test-results/
+/blob-report/

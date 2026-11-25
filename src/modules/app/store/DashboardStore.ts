@@ -33,6 +33,9 @@ export const storeDashborda = defineStore('storeDashborda', {
 
             if (response.status === "success") {
                 this.statistikaPoProektam = response.data;
+                // Успешный повтор должен снимать прошлую ошибку, иначе баннер
+                // остаётся, а таблица продолжает быть скрытой.
+                this.oshibkaStatistikiPoProektam = null;
             } else if (response.status === "fail") {
                 this.statistikaPoProektam = [];
                 this.oshibkaStatistikiPoProektam = response.data.message;
