@@ -355,40 +355,6 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/initialization/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Список параметров инициализации */
-        get: operations["get_app_initialization_infra_initialization_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/initialization/proxy_host": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Обновить defoltnый proxy host */
-        put: operations["put_app_initialization_infra_initialization_updateproxyhost"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/lichniyToken/dobavit": {
         parameters: {
             query?: never;
@@ -655,6 +621,159 @@ export type paths = {
          * @description Принимает multipart/form-data. Допускаются только zip-архивы размером не более MEDIATEKA_MAX_FILE_SIZE (по умолчанию 200 МБ). Владелец файла ровно один: unitId — файл юнита, projectId — архив каталога типов томов проекта (общий, к юниту не привязывается). Без обоих полей файл сохраняется как черновик (unitId = null, projectId = null) и привязывается к юниту отдельным запросом /api/mediateka/prikrepit либо при создании юнита. Одновременная передача unitId и projectId — ошибка. Поле name необязательно: при отсутствии берётся имя загруженного файла. Имя всегда нормализуется: латиница в нижнем регистре, только символы a-z, 0-9, _, ., -, так как оно используется как имя docker-тома; кириллица транслитерируется, недопустимые символы заменяются на дефис, расширение .zip добавляется при отсутствии.
          */
         post: operations["post_app_mediateka_infra_mediateka_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Уведомления текущего пользователя */
+        get: operations["get_app_notification_infra_notification_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отметить уведомление прочитанным */
+        post: operations["post_app_notification_infra_notification_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Настройки типов уведомлений текущего пользователя */
+        get: operations["get_app_notification_infra_notification_preferences"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/preferences/{type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Изменить настройку типа уведомлений */
+        put: operations["put_app_notification_infra_notification_updatepreference"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/push/public-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** VAPID public key для подписки на Web Push */
+        get: operations["get_app_notification_infra_notification_pushpublickey"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/push/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Сохранить подписку браузера на Web Push */
+        post: operations["post_app_notification_infra_notification_subscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/push/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить подписку браузера на Web Push */
+        post: operations["post_app_notification_infra_notification_unsubscribe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Отметить все уведомления прочитанными */
+        post: operations["post_app_notification_infra_notification_readall"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Число непрочитанных уведомлений текущего пользователя */
+        get: operations["get_app_notification_infra_notification_unreadcount"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1578,23 +1697,6 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/project/proverkaProxyHost": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Проверить доступность proxy host */
-        post: operations["post_app_unitman_infra_project_proverkaproxyhost"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/project/read/{id}": {
         parameters: {
             query?: never;
@@ -2196,23 +2298,6 @@ export type paths = {
          * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. `responseId` содержит токен прогресса (workflowId/jobId), `stepsContent` — полный снапшот шагов. Обязательны X-Runner-Id и X-Runner-Signature: hex(HMAC-SHA256(responseId . stepsContent, secret)).
          */
         post: operations["post_app_runner_infra_runner_savesteps"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/runner/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Диагностическое состояние раннера */
-        get: operations["get_app_runner_infra_runner_test"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3254,13 +3339,6 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
-        /** @description Параметр инициализации (InitializationRecord) */
-        InitializationRecord: {
-            id: string;
-            init: number | null;
-            prop: string;
-            value: string | null;
-        };
         /** @description Частичное изменение реквизитов OpenCode: непереданные поля не меняются */
         IzmenitRekvizityOpenCode: {
             /**
@@ -3393,13 +3471,6 @@ export type components = {
             branch: string;
             /** Format: uuid */
             projectId: string;
-        };
-        ObnovitDefoltnyiProxyHost: {
-            /** @example http://proxy.example */
-            value: string | null;
-        };
-        ObnovitDefoltnyiProxyHost2: {
-            value?: string | null;
         };
         ObnovitKodUnita: {
             /** Format: uuid */
@@ -3951,10 +4022,6 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
-        ProveritProxyHost: {
-            /** @default  */
-            proxyHost?: string;
-        };
         /** @description Элемент каталога провайдеров OpenCode (ProvayderOpenCodeReadModel); список моделей запрашивается отдельно */
         ProviderOpenCode: {
             /**
@@ -3984,10 +4051,6 @@ export type components = {
              * @example true
              */
             supportsModelList: boolean;
-        };
-        /** @description Результат проверки доступности proxy host */
-        ProxyHostCheckResult: {
-            result: boolean;
         };
         /** @description Карточка раннера для `GET /api/runner/list` (RannerKartaReadModel). */
         RannerKartaReadModel: {
@@ -6005,73 +6068,6 @@ export interface operations {
             };
         };
     };
-    get_app_initialization_infra_initialization_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Параметры инициализации. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Параметры инициализации */
-                        data: components["schemas"]["InitializationRecord"][];
-                        /**
-                         * @example success
-                         * @enum {string}
-                         */
-                        status: "success";
-                    };
-                };
-            };
-        };
-    };
-    put_app_initialization_infra_initialization_updateproxyhost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ObnovitDefoltnyiProxyHost"];
-            };
-        };
-        responses: {
-            /** @description Пустой ответ: defoltnyi proxy host обновлён. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Пустой ответ: defoltnyi proxy host обновлён */
-                        data: null;
-                        /**
-                         * @example success
-                         * @enum {string}
-                         */
-                        status: "success";
-                    };
-                };
-            };
-            /** @description Не авторизован */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     post_app_unitman_infra_lichniytoken_dobavit: {
         parameters: {
             query?: never;
@@ -6581,6 +6577,273 @@ export interface operations {
                         status: "success";
                     } | components["schemas"]["ErrorEnvelope"];
                 };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_notification_infra_notification_list: {
+        parameters: {
+            query?: {
+                limit?: number;
+                onlyActionable?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список уведомлений и число непрочитанных */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_notification_infra_notification_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Уведомление прочитано */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Уведомление не найдено */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_notification_infra_notification_preferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список типов и переключателей */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    put_app_notification_infra_notification_updatepreference: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Настройка сохранена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректное тело или системный тип */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Неизвестный тип */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_notification_infra_notification_pushpublickey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Публичный VAPID-ключ */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_notification_infra_notification_subscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Подписка сохранена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный endpoint или ключи */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_notification_infra_notification_unsubscribe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Подписка удалена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный endpoint */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_notification_infra_notification_readall: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Количество обновлённых уведомлений */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_notification_infra_notification_unreadcount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Счётчик непрочитанных */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Не авторизован */
             401: {
@@ -8710,51 +8973,6 @@ export interface operations {
             };
         };
     };
-    post_app_unitman_infra_project_proverkaproxyhost: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProveritProxyHost"];
-            };
-        };
-        responses: {
-            /** @description Результат проверки доступности proxy host. При перехваченной ошибке PHP тело всё равно приходит с HTTP 200 в виде ErrorEnvelope */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        data: components["schemas"]["ProxyHostCheckResult"];
-                        /**
-                         * @example success
-                         * @enum {string}
-                         */
-                        status: "success";
-                    };
-                };
-            };
-            /** @description Не авторизован */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     post_app_unitman_infra_project_byid: {
         parameters: {
             query?: never;
@@ -10413,40 +10631,6 @@ export interface operations {
             };
             /** @description runner.not_found */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    get_app_runner_infra_runner_test: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Текущее состояние раннера по умолчанию */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunnerState"];
-                };
-            };
-            /** @description Не авторизован */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
-            500: {
                 headers: {
                     [name: string]: unknown;
                 };

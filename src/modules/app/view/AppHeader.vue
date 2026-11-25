@@ -10,14 +10,11 @@ import {
     GhCounter,
     GhIcon,
     GhKbd,
-    GhLabel,
     GhSegmentedControl,
 } from "@/components/ui";
 import type { GhSegmentedOption } from "@/components/ui";
 import { useAuthStore } from "@/modules/account/store/auth";
-import { storeUgrozRannerov } from "@/modules/runner/store/StoreUgrozRannerov";
-import type { UrovenResursov } from "@/modules/runner/model/ResursiServera";
-import { VARIANT_UROVNYA } from "@/modules/runner/utils/urovniResursov";
+import { useStorUvedomleniy } from "@/modules/notification/store/StorUvedomleniy";
 import { saveAppSettings } from "@/utils/appSettings";
 
 const emit = defineEmits<{
@@ -33,57 +30,32 @@ const authStore = useAuthStore();
 const { email, getLocale, isAdmin, loaderIzmemeniyaYazika } =
     storeToRefs(authStore);
 
-const ugrozyStore = storeUgrozRannerov();
-const {
-    svodka: ugrozy,
-    init: ugrozyInit,
-    netZaregistrirovannyhRannerov: netRannerov,
-} = storeToRefs(ugrozyStore);
+const storUvedomleniy = useStorUvedomleniy();
+const { neprochitannie } = storeToRefs(storUvedomleniy);
 
-const estUgrozy = computed<boolean>(() => ugrozyStore.estUgrozy);
-
-const klassUgroz = computed<string>(() =>
-    netRannerov.value ? "warning" : urovenKak(ugrozy.value.worstLevel),
+const podpisUvedomleniy = computed<string>(() =>
+    neprochitannie.value > 0
+        ? t("app.header.notifications_unread", {
+              count: neprochitannie.value,
+          })
+        : t("app.header.notifications"),
 );
 
-const podpisUgroz = computed<string>(() =>
-    netRannerov.value
-        ? t("app.header.runner_none")
-        : t("app.header.runner_threats", { count: ugrozy.value.count }),
+const znachenieBeydja = computed<string>(() =>
+    neprochitannie.value > 99 ? "99+" : String(neprochitannie.value),
 );
 
-const ariaUgroz = computed<string>(() =>
-    netRannerov.value
-        ? t("app.header.runner_none_aria")
-        : t("app.header.runner_threats_aria", { count: ugrozy.value.count }),
-);
-
-/** Приводит строковый уровень из API к литеральному типу. */
-function urovenKak(level: string): UrovenResursov {
-    return level === "warning" || level === "critical" || level === "blocker"
-        ? level
-        : "ok";
-}
-
-function podpisUrovnya(level: string): string {
-    return t(`runner.levels.${urovenKak(level)}`);
-}
-
-/** Переход в раздел «Раннеры» (доступен только администратору). */
-function pereytiVRazdelRannerov(): void {
-    void router.push("/runner/list");
+/** Переход в раздел уведомлений. */
+function otkrytUvedomleniya(): void {
+    void router.push("/notifications");
 }
 
 onMounted(() => {
-    if (!ugrozyInit.value) {
-        ugrozyStore.zapustitOprosUgrozy();
-    } else {
-        ugrozyStore.vostanovitOprosUgrozy();
-    }
+    storUvedomleniy.zapustitOpros();
 });
 
 onBeforeUnmount(() => {
-    ugrozyStore.ostanovitOprosUgrozy();
+    storUvedomleniy.ostanovitOpros();
 });
 
 /** Идентификатор поля поиска; на него переводит фокус глобальный хоткей `/`. */
@@ -115,15 +87,6 @@ const rolPodpis = computed<string>(() =>
 );
 
 const imyaPolzovatelya = computed<string>(() => email.value ?? "");
-
-/** Количество непрочитанных уведомлений (счётчик появится на этапе 2). */
-const neprochitannie = ref<number>(0);
-
-const podpisUvedomleniy = computed<string>(() =>
-    neprochitannie.value > 0
-        ? t("app.header.notifications_unread")
-        : t("app.header.notifications"),
-);
 
 /** Переход на список юнитов с поисковым запросом из хедера. */
 function otpravitPoisk(): void {
@@ -206,80 +169,6 @@ function vyiti(): void {
         </label>
 
         <div class="app-header__actions">
-            <div
-                v-if="estUgrozy"
-                class="app-header__action app-header__threats"
-                :class="`app-header__threats--${klassUgroz}`"
-            >
-                <GhButton
-                    variant="invisible"
-                    icon="alert"
-                    :label="podpisUgroz"
-                    :aria-label="ariaUgroz"
-                />
-
-                <q-menu
-                    auto-close
-                    class="primer gh-popover"
-                    anchor="bottom middle"
-                    self="top middle"
-                    :offset="[0, 6]"
-                >
-                    <template v-if="netRannerov">
-                        <div class="app-header__threats-empty">
-                            <p class="app-header__threats-title">
-                                {{ t("app.header.runner_none") }}
-                            </p>
-                            <p class="app-header__threats-text">
-                                {{ t("app.header.runner_none_description") }}
-                            </p>
-                        </div>
-
-                        <div class="gh-popover__actions">
-                            <GhButton
-                                v-if="isAdmin"
-                                size="sm"
-                                variant="primary"
-                                icon="server"
-                                :label="t('app.header.runner_none_open')"
-                                @click="pereytiVRazdelRannerov"
-                            />
-                            <span v-else class="gh-popover__hint">
-                                {{ t("app.header.runner_none_non_admin") }}
-                            </span>
-                        </div>
-                    </template>
-
-                    <template v-else>
-                        <div class="gh-popover__list">
-                            <div
-                                v-for="ranner in ugrozy.runners"
-                                :key="ranner.id"
-                                class="gh-popover__row"
-                            >
-                                <span class="gh-popover__id gh-mono">{{ ranner.id }}</span>
-                                <GhLabel
-                                    :variant="VARIANT_UROVNYA[urovenKak(ranner.level)]"
-                                    :label="podpisUrovnya(ranner.level)"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="gh-popover__actions">
-                            <GhButton
-                                v-if="isAdmin"
-                                size="sm"
-                                variant="primary"
-                                :label="t('app.header.runner_threats_open')"
-                                @click="pereytiVRazdelRannerov"
-                            />
-                            <span v-else class="gh-popover__hint">
-                                {{ t("app.header.runner_threats_non_admin") }}
-                            </span>
-                        </div>
-                    </template>
-                </q-menu>
-            </div>
 
             <div class="app-header__action">
                 <GhButton
@@ -310,12 +199,13 @@ function vyiti(): void {
                     variant="invisible"
                     icon="bell"
                     :aria-label="podpisUvedomleniy"
+                    @click="otkrytUvedomleniya"
                 />
                 <GhCounter
                     v-if="neprochitannie > 0"
                     class="app-header__notification-counter"
-                    variant="primary"
-                    :value="neprochitannie"
+                    variant="accent"
+                    :value="znachenieBeydja"
                     :label="podpisUvedomleniy"
                 />
             </div>
@@ -534,36 +424,6 @@ function vyiti(): void {
     background-color: var(--bgColor-neutral-muted);
 }
 
-.app-header__threats-empty {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    max-width: 320px;
-    padding: 8px 12px;
-}
-
-.app-header__threats-title {
-    margin: 0;
-    font-size: var(--fontSize-body);
-    font-weight: var(--fontWeight-semibold);
-}
-
-.app-header__threats-text {
-    margin: 0;
-    color: var(--fgColor-muted);
-    font-size: var(--fontSize-caption);
-    line-height: var(--lineHeight-normal);
-}
-
-.app-header__threats--warning :deep(.gh-button) {
-    color: var(--fgColor-attention);
-}
-
-.app-header__threats--critical :deep(.gh-button),
-.app-header__threats--blocker :deep(.gh-button) {
-    color: var(--fgColor-danger);
-}
-
 
 @media (max-width: 767px) {
     .app-header__inner {
@@ -585,13 +445,7 @@ function vyiti(): void {
         display: none;
     }
 
-    .app-header__language,
-    .app-header__notifications {
-        display: none;
-    }
-
-    /* На узких экранах оставляем только иконку угрозы: тултип сохраняется. */
-    .app-header__threats :deep(.gh-button__label) {
+    .app-header__language {
         display: none;
     }
 }
