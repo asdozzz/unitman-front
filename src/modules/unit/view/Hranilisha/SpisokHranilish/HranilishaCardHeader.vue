@@ -9,11 +9,12 @@ const props = defineProps<{
 }>();
 
 /**
- * URL репозитория показываем только для GitLab: у остальных типов он
- * служебный и в карточке не нужен (совпадает с прежним поведением страницы).
+ * Показываем URL, если адаптер его сохранил. Для GitHub/Bitbucket/Codeberg
+ * это базовый адрес хостинга, для GitLab/Gitea/Forgejo/GitFlic/GitVerse —
+ * адрес конкретной установки.
  */
 const pokazatUrl = computed<boolean>(() => {
-  return props.item.type.toUpperCase() === "GITLAB" && props.item.repoUrl !== "";
+  return props.item.repoUrl !== "";
 });
 </script>
 
