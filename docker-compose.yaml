@@ -12,5 +12,7 @@ services:
       VITE_API_HOST: ${VITE_API_HOST:-http://localhost:8082/api}
       VITE_CENTRIFUGE_HOST: ${VITE_CENTRIFUGE_HOST:-ws://localhost:8000/connection/websocket}
       VITE_DEBUG_PROGRESS: ${VITE_DEBUG_PROGRESS:-true}
+      # Пусто = entry.sh выведет CSP connect-src из VITE_* выше.
+      CSP_CONNECT_SRC: ${CSP_CONNECT_SRC:-}
     ports:
       - 8033:80

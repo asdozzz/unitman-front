@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "yarn gen:ai-tools:check && vue-tsc --noEmit && vite build",
+    "test": "vitest run",
     "check:i18n": "node scripts/check-i18n.mjs",
     "test:ai-chat": "node scripts/check-ai-chat-error-details.mjs",
     "test:ai-chat-session": "node scripts/check-ai-chat-session-id.mjs",
@@ -42,9 +43,11 @@
     "@apidevtools/swagger-parser": "^13.1.0",
     "@playwright/test": "1.48.2",
     "@vitejs/plugin-vue": "^4.1.0",
+    "jsdom": "^26",
     "openapi-typescript": "7",
     "typescript": "5.6.3",
     "vite": "^6.3.4",
+    "vitest": "^3",
     "vue-cli-plugin-quasar": "~5.0.2",
     "vue-tsc": "2.1.2"
   },

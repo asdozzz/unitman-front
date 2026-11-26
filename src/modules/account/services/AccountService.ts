@@ -10,10 +10,12 @@ export type AccountActivationStatus = {
     roles: string[];
 };
 
-/** Ответ OAuth-exchange: пара токенов и данные пользователя. */
+/**
+ * Ответ OAuth-exchange: access-токен и данные пользователя.
+ * Refresh-токен приходит только в HttpOnly cookie.
+ */
 export type OAuthTokenData = {
     token: string;
-    refreshToken: string;
     user: {
         id: string;
         email: string;
@@ -46,14 +48,22 @@ class AccountService {
     }
 
     /**
-     * Обновление пары токенов по refresh-токену.
+     * Обновление access-токена по HttpOnly refresh-cookie.
      *
-     * Публичный эндпоинт: заголовок Authorization не требуется.
-     * Refresh-токен одноразовый — после успешного обновления старый отзывается,
-     * поэтому в хранилище нужно сохранять и новый `refreshToken`.
+     * Публичный эндпоинт: Authorization не требуется, refresh-токен читается
+     * сервером из cookie. В теле возвращается только новый access-токен.
      */
-    obnovitToken(refreshToken: string) {
-        return apiClient.post('/account/refreshToken', {refreshToken});
+    obnovitToken(): Promise<ApiResponse<{ token: string }>> {
+        const url: string = '/account/refreshToken';
+
+        return apiClient.post<{ token: string }>(url);
+    }
+
+    /** Завершение сессии: сервер отзывает refresh-токен и очищает cookie. */
+    logout(): Promise<ApiResponse<null>> {
+        const url: string = '/account/logout';
+
+        return apiClient.post<null>(url);
     }
 
     /** Контракт объявляет эндпоинт как GET. */

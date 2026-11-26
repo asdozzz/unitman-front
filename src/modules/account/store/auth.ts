@@ -32,19 +32,46 @@ export type LoginUser = {
     emailVerified?: boolean;
 }
 
-/** Ответ `/login` из схемы плюс добавленный бэкендом `user`. */
-export type TokenData = ApiResponseData<"/login", "post"> & {
+/**
+ * Ответ `/login` из схемы плюс добавленный бэкендом `user`.
+ *
+ * `refreshToken` намеренно исключён: он доставляется только HttpOnly cookie
+ * и не должен попадать в состояние или localStorage.
+ */
+export type TokenData = Omit<ApiResponseData<"/login", "post">, "refreshToken"> & {
     expired?: string | null;
     user: LoginUser;
 }
 
+/** Ответ `/account/refreshToken`: только access-токен. */
+type RefreshResult = {
+    token: string;
+}
+
 /**
- * Пара токенов, которую возвращает `/account/refreshToken`.
+ * Сохраняет в localStorage только безопасную часть сессии.
  *
- * `user` в ответе на обновление не приходит, поэтому данные пользователя
- * переносятся из текущего `tokenData`.
+ * Даже если бэкенд/старый ответ всё ещё содержит `refreshToken`, поле
+ * вырезается здесь — это единственная точка записи.
  */
-type RefreshTokenData = ApiResponseData<"/account/refreshToken", "post">;
+function persistTokenData(tokenData: TokenData | null): void {
+    if (!tokenData) {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+        return;
+    }
+
+    const safe = { ...tokenData } as TokenData & {refreshToken?: string};
+    delete safe.refreshToken;
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(safe));
+}
+
+/** Fallback-навигация, если обновление сессии не удалось. */
+function redirectToLogin(): void {
+    if (typeof globalThis.location?.assign === 'function') {
+        globalThis.location.assign('/login');
+    }
+}
 
 /**
  * Единственное обновление токена в полёте.
@@ -71,9 +98,16 @@ enum Roles {
 export const useAuthStore = defineStore('auth', {
     state: (): State => {
         const json: string | null = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const storedTokenData = json ? JSON.parse(json) : null;
+
+        // Старые сессии могли сохранить refresh-токен: вычищаем при загрузке.
+        if (storedTokenData) {
+            delete storedTokenData.refreshToken;
+        }
+
         return {
             // initialize state from local storage to enable user to stay logged in
-            tokenData: json ? JSON.parse(json) : null,
+            tokenData: storedTokenData,
             defaultRoute : '/unit/list',
             returnUrl: null,
             loginView: new LoginView(),
@@ -93,9 +127,6 @@ export const useAuthStore = defineStore('auth', {
         },
         getToken(state: State): string | null {
             return state.tokenData && state.tokenData.token || null;
-        },
-        getRefreshToken(state: State): string | null {
-            return state.tokenData?.refreshToken || null;
         },
         /**
          * Истёк (или вот-вот истечёт) ли access-токен.
@@ -160,7 +191,7 @@ export const useAuthStore = defineStore('auth', {
                 this.tokenData.user.locale = locale;
             }
             i18n.global.locale.value = locale;
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
+            persistTokenData(this.tokenData);
             dayjs.locale(locale)
         },
         /**
@@ -170,7 +201,7 @@ export const useAuthStore = defineStore('auth', {
          */
         prinyatTokenData(tokenData: TokenData) {
             this.tokenData = tokenData;
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokenData));
+            persistTokenData(tokenData);
             const locale = (tokenData.user?.locale || "ru") as "en" | "ru";
             this.updateLocale(locale);
         },
@@ -194,30 +225,36 @@ export const useAuthStore = defineStore('auth', {
          * @returns `true`, если токены обновлены.
          */
         async obnovitToken(): Promise<boolean> {
-            const refreshToken = this.getRefreshToken;
-
-            if (!refreshToken) {
-                // Обновить нечем (refresh-токена нет) — сессия невосстановима.
-                this.logout();
+            if (!this.tokenData) {
+                // Сессии нет — обновлять нечего.
                 return false;
             }
 
-            // Один и тот же одноразовый токен нельзя обменять дважды.
+            // Один и тот же refresh-cookie нельзя обменять параллельно.
             if (obnovlenieTokenaPromise) {
                 return obnovlenieTokenaPromise;
             }
 
             const promise = (async (): Promise<boolean> => {
-                const response = await AccountService.obnovitToken(refreshToken);
+                try {
+                    const response = await AccountService.obnovitToken();
 
-                if (response.status !== "success") {
+                    if (response.status !== "success") {
+                        this.logout();
+                        redirectToLogin();
+
+                        return false;
+                    }
+
+                    this.ustanovitToken((response.data as RefreshResult).token);
+
+                    return true;
+                } catch {
                     this.logout();
+                    redirectToLogin();
+
                     return false;
                 }
-
-                const data = response.data as RefreshTokenData;
-                this.ustanovitToken(data.token, data.refreshToken);
-                return true;
             })();
 
             obnovlenieTokenaPromise = promise;
@@ -248,10 +285,10 @@ export const useAuthStore = defineStore('auth', {
             return this.obnovitToken();
         },
         /**
-         * Сохраняет новую пару токенов, сохраняя данные пользователя
+         * Сохраняет новый access-токен, сохраняя данные пользователя
          * (их в ответе на обновление нет).
          */
-        ustanovitToken(token: string, refreshToken: string) {
+        ustanovitToken(token: string) {
             if (!this.tokenData) {
                 return;
             }
@@ -259,14 +296,17 @@ export const useAuthStore = defineStore('auth', {
             this.tokenData = {
                 ...this.tokenData,
                 token,
-                refreshToken,
             };
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
+            persistTokenData(this.tokenData);
         },
         logout() {
             this.tokenData = null;
             obnovlenieTokenaPromise = null;
             localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+            // Сервер отзывает refresh-токен и очищает HttpOnly cookie.
+            // Best-effort: локальная сессия уже завершена.
+            void AccountService.logout().catch(() => undefined);
         },
         /**
          * Проверяет активацию аккаунта на сервере и обновляет локальные роли.
@@ -283,7 +323,7 @@ export const useAuthStore = defineStore('auth', {
             this.tokenData.user.activationPending = response.data.activationPending;
             this.tokenData.user.emailVerified = response.data.emailVerified;
             this.tokenData.user.roles = response.data.roles;
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
+            persistTokenData(this.tokenData);
 
             return !response.data.activationPending;
         },

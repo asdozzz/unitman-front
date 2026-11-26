@@ -12,6 +12,7 @@ import {apiHost} from "@/utils/runtimeEnv";
 const REFRESH_EXCLUDED_URLS = [
     '/login',
     '/account/refreshToken',
+    '/account/logout',
     '/account/verifyEmail',
     '/account/resendEmailVerification',
     '/oauth/providers',
@@ -24,6 +25,7 @@ const REFRESH_EXCLUDED_URLS = [
 const ANONYMOUS_URLS = [
     '/login',
     '/account/refreshToken',
+    '/account/logout',
     '/account/verifyEmail',
     '/account/resendEmailVerification',
     '/oauth/providers',
@@ -67,9 +69,15 @@ class ApiClient {
      * в `headersFor` — только для не-`FormData` тел.
      */
     private static readonly CLIENT: AxiosInstance = axios.create({
+        // Refresh-токен живёт в HttpOnly cookie: браузер должен отправлять и
+        // принимать cookie на cross-origin API. Никакого refresh-токена в JS.
+        withCredentials: true,
         headers: {
             "Accept": "application/json",
             "Pragma": "no-cache",
+            // Cookie-эндпоинты требуют этот заголовок (CSRF, cross-site форма
+            // не может его выставить). Безвреден для остальных запросов.
+            "X-Requested-With": "XMLHttpRequest",
         },
     });
 

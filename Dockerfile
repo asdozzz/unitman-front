@@ -37,7 +37,9 @@ ENV VITE_API_HOST=${ARG_API_HOST:-http://localhost:8082/api} \
     VITE_DEBUG_PROGRESS=true
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html
-COPY ./.docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Шаблон рендерится entry.sh через envsubst: CSP connect-src зависит от
+# runtime-хостов API/Centrifugo и не может быть запечён при сборке.
+COPY ./.docker/nginx/nginx.conf /etc/nginx/templates/default.conf.template
 COPY ./entry.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
