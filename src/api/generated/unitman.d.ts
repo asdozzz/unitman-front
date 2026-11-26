@@ -3841,7 +3841,6 @@ export type components = {
             id: string;
             isBlocked: boolean;
             nickname: string | null;
-            password: string;
             pendingActivation: boolean;
             roles: string;
         };
