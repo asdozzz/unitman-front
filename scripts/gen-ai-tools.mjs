@@ -75,6 +75,16 @@ const RELATIVE_SOURCE_PATH = path.relative(FRONTEND_DIR, SOURCE_PATH);
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 
 /**
+ * Внутренние эндпоинты бэкенда (`/api/internal/**`) никогда не должны попадать
+ * в манифест AI-инструментов: они предназначены для раннера/служебных
+ * компонентов и обходят публичную авторизацию. Даже если на такой операции
+ * случайно окажется `x-ai-enabled: true`, путь исключается безусловно.
+ */
+function isInternalPath(pathKey) {
+    return pathKey === '/api/internal' || pathKey.startsWith('/api/internal/');
+}
+
+/**
  * Ключи операции, которые нужны браузерному реестру и описанию инструмента.
  * Всё остальное (`responses`, `security`, `deprecated` и т.п.) отбрасывается,
  * чтобы манифест оставался компактным. Расширения `x-ai-*` копируются
@@ -166,11 +176,19 @@ function filterPaths(document, stats) {
             continue;
         }
 
+        // Внутренние/служебные операции не экспортируются как инструменты ни
+        // при каких расширениях. Это защита в глубину к `x-ai-enabled: false`.
+        if (isInternalPath(pathKey)) {
+            continue;
+        }
+
         const filteredPathItem = {};
 
         for (const method of HTTP_METHODS) {
             const operation = pathItem[method];
 
+            // Явно включаем только `x-ai-enabled: true`: отсутствие флага или
+            // `false` исключает операцию из манифеста.
             if (!isPlainObject(operation) || operation['x-ai-enabled'] !== true) {
                 continue;
             }

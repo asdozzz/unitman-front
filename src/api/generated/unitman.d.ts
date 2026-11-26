@@ -165,6 +165,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/account/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Завершить сессию: отозвать refresh-токен и очистить cookie
+         * @description Публичный эндпоинт. Требует Origin allowlist + X-Requested-With. Всегда очищает cookie.
+         */
+        post: operations["post_app_account_infra_account_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/myStatus": {
         parameters: {
             query?: never;
@@ -348,8 +368,8 @@ export type paths = {
         get?: never;
         put?: never;
         /**
-         * Обновить пару токенов по refresh-токену
-         * @description Публичный эндпоинт. Refresh-токен одноразовый: после успешного обновления старый отзывается.
+         * Обновить access-токен по HttpOnly refresh-cookie
+         * @description Публичный эндпоинт. Refresh-токен читается из HttpOnly cookie, ротируется и возвращается только обновлённой cookie. Requires Origin allowlist + X-Requested-With.
          */
         post: operations["post_app_account_infra_account_refreshtoken"];
         delete?: never;
@@ -548,6 +568,26 @@ export type paths = {
          * @description Ровно одно из `message` или `toolResults`. Архивная/истёкшая сессия — 409; неизвестный провайдер — 422. Чужая сессия — 404.
          */
         post: operations["post_app_aichat_infra_sessiiaichata_turn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/internal/repo/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Короткоживущий грант git-доступа для раннера (internal)
+         * @description Внутренний runner-facing endpoint. Аутентификация — X-Runner-Id + X-Runner-Signature: hex(HMAC-SHA256(raw_body, secret)). Возвращает чистый repoUrl, username, token и expiresAt (TTL ≤ 5 минут). Не принимает пользовательскую сессию и не публикуется в AI-инструментах.
+         */
+        post: operations["issue_runner_repo_credentials"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3464,7 +3504,8 @@ export type components = {
             repoId: string;
             /** @default null */
             repoUrl?: string | null;
-            token: string;
+            /** @default null */
+            token?: string | null;
         };
         ChangeEmailByAdmin: {
             /** Format: uuid */
@@ -4536,7 +4577,7 @@ export type components = {
             id: string;
             userId: string;
         };
-        /** @description Репозиторий (RepoList) */
+        /** @description Репозиторий (RepoListItem) — публичное представление без учётных данных */
         Repo: {
             confirmed: boolean;
             /** Format: uuid */
@@ -4544,7 +4585,8 @@ export type components = {
             name: string;
             /** Format: uri */
             repoUrl: string;
-            token: string;
+            /** @description Последние 4 символа токена; пустая строка, если токен короче 8 символов. Необратим. */
+            tokenHint: string;
             /** @example gitlab */
             type: string;
         };
@@ -6004,6 +6046,31 @@ export interface operations {
             };
         };
     };
+    post_app_account_infra_account_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Сессия завершена */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CSRF-проверка Origin/X-Requested-With не пройдена */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_app_account_infra_account_mystatus: {
         parameters: {
             query?: never;
@@ -6454,13 +6521,9 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ObnovitToken"];
-            };
-        };
+        requestBody?: never;
         responses: {
-            /** @description Новая пара токенов */
+            /** @description Новый access-токен в теле; новый refresh-токен — в HttpOnly cookie */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -6468,8 +6531,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         data: {
-                            /** @example a1b2c3... */
-                            refreshToken: string;
                             /** @example eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9... */
                             token: string;
                         };
@@ -6481,8 +6542,15 @@ export interface operations {
                     };
                 };
             };
-            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
-            500: {
+            /** @description Cookie отсутствует, просрочена или отозвана */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CSRF-проверка Origin/X-Requested-With не пройдена */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7056,6 +7124,84 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["FailEnvelope"];
                 };
+            };
+        };
+    };
+    issue_runner_repo_credentials: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    projectId: string;
+                    repoId: string;
+                    unitId?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Грант выдан */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        expiresAt: number;
+                        projectId: string;
+                        repoId: string;
+                        /** @description URL без userinfo */
+                        repoUrl: string;
+                        token: string;
+                        username: string;
+                    };
+                };
+            };
+            /** @description Некорректный запрос */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Неверная подпись раннера */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Раннер не имеет доступа к repo/project/unit */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Раннер не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Раннер неактивен */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Токен репозитория недоступен (fail closed) */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -10949,6 +11095,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Доступ только для администратора */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {
                 headers: {
@@ -11174,6 +11327,13 @@ export interface operations {
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Доступ только для администратора */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
