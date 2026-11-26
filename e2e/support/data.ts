@@ -58,14 +58,14 @@ export function project(overrides: Overrides = {}) {
   };
 }
 
-/** Репозиторий (`Repo`). */
+/** Репозиторий (`Repo`). Публичное представление без секрета. */
 export function repo(overrides: Overrides = {}) {
   return {
     confirmed: true,
     id: "33333333-3333-4333-8333-333333333333",
     name: "e2e-repo",
     repoUrl: "https://gitlab.example.com/group/e2e-repo.git",
-    token: "***",
+    tokenHint: "TEST",
     type: "gitlab",
     ...overrides,
   };

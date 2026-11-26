@@ -778,7 +778,8 @@
           "no": "No",
           "input_label": "Type the repository name to confirm",
           "input_hint": "This action cannot be undone: type “{name}”."
-        }
+        },
+        "token_hint": "Token: ••••{hint}"
       },
       "list": {
         "empty_result": "There are no repositories yet",
@@ -977,6 +978,12 @@
       "fields": {
         "labels": {
           "token": "Token"
+        },
+        "hints": {
+          "token": "leave empty to keep the current token"
+        },
+        "placeholders": {
+          "token": "New token"
         }
       },
       "buttons": {

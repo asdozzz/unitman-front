@@ -43,10 +43,9 @@ const value: Schema<"ZnacheniePeremenoi"> = { id: "1", type: "string", value: "v
 type NoQuery = ApiQuery<"/unit/list", "post">;
 const noQuery: NoQuery = undefined;
 
-// 7. Обновление токена: тело `ObnovitToken` и развёрнутый ответ из схемы.
-const refreshBody: ApiRequestBody<"/account/refreshToken", "post"> = { refreshToken: "a1b2c3" };
-// @ts-expect-error — обязательное поле refreshToken отсутствует
-const badRefresh: ApiRequestBody<"/account/refreshToken", "post"> = {};
+// 7. Обновление токена: refresh-токен живёт в HttpOnly cookie, тело не передаётся.
+type RefreshBody = ApiRequestBody<"/account/refreshToken", "post">;
+const noRefreshBody: RefreshBody = undefined;
 type RefreshResponse = ApiResponseData<"/account/refreshToken", "post">;
 const refreshResponseToken: RefreshResponse["token"] = "eyJ0eXAi...";
 
@@ -101,7 +100,7 @@ const archiveResponse: ArchiveResponse = null;
 
 export const typecheck = {
     postPath, badPost, listBody, badCreate, createBody, hookParams, value, noQuery,
-    listResponseItem, refreshBody, badRefresh, refreshResponseToken, helperBody, helperSuffix,
+    listResponseItem, noRefreshBody, refreshResponseToken, helperBody, helperSuffix,
     uploadBody, badUpload, uploadResponse, deleteUrl, deleteResponse, volume, badVolume, createWithFiles,
     badCreateVolume, fillVolumes, sessionListQuery, badSessionListQuery, archiveBody, badArchiveBody,
     archiveResponse,

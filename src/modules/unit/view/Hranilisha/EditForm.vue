@@ -27,8 +27,16 @@ async function otpravitFormu() {
 
 <template>
   <form class="edit-repo" @submit.prevent="otpravitFormu">
-    <GhFormField :label="$t('unit.form_edit_rep.fields.labels.token')">
-      <GhInput v-model="form.token" type="password" autocomplete="new-password" />
+    <GhFormField
+        :label="$t('unit.form_edit_rep.fields.labels.token')"
+        :caption="$t('unit.form_edit_rep.fields.hints.token')"
+    >
+      <GhInput
+          v-model="form.token"
+          type="password"
+          autocomplete="new-password"
+          :placeholder="$t('unit.form_edit_rep.fields.placeholders.token')"
+      />
     </GhFormField>
 
     <GhBanner v-if="oshibkaOtBackenda" variant="danger" class="edit-repo__error">

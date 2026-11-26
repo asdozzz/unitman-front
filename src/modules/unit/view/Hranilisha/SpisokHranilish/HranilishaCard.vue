@@ -116,6 +116,13 @@ async function podtverditUdalenie() {
             :title="item.repoUrl"
         >{{ item.repoUrl }}</a>
       </div>
+
+      <div v-if="item.tokenHint" class="hranilisha-card__field">
+        <GhIcon name="key" :size="14" />
+        <span class="hranilisha-card__field-value">
+          {{ $t('unit.spisok_rep.card.token_hint', {hint: item.tokenHint}) }}
+        </span>
+      </div>
     </div>
   </GhBox>
 </template>

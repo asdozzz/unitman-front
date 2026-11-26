@@ -3,11 +3,15 @@ import HranilishaService from "@/modules/unit/services/HranilishaService";
 
 export class EditForm {
     repoId: string;
+    /**
+     * Только НОВОЕ значение токена. Никогда не заполняется из API: бэкенд
+     * отдаёт лишь `tokenHint`, а пустое поле означает «не менять токен».
+     */
     token: string;
 
-    constructor(repoId: string = "", token: string = "") {
+    constructor(repoId: string = "") {
         this.repoId = repoId;
-        this.token = token;
+        this.token = "";
     }
 }
 
@@ -39,7 +43,17 @@ export const useEditFormStore = defineStore('EditFormStore', {
         },
         async otpravitFormu() {
             this.loader = true;
-            const response = await HranilishaService.changeCredentials(this.form);
+
+            // Контракт WS-2: `token` необязателен. Пустая строка означает
+            // «оставить существующий токен», поэтому поле не отправляется.
+            const payload: {repoId: string; token?: string} = {repoId: this.form.repoId};
+            const newToken = this.form.token.trim();
+
+            if (newToken !== "") {
+                payload.token = newToken;
+            }
+
+            const response = await HranilishaService.changeCredentials(payload);
 
             this.loader = false;
             if (response.status === "success") {

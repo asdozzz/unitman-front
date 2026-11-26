@@ -18,9 +18,14 @@ const emit = defineEmits<{
 const editFormStore = useEditFormStore();
 const {t} = useI18n();
 
-/** «Редактировать» открывает общий диалог формы редактирования. */
+/**
+ * «Редактировать» открывает общий диалог формы редактирования.
+ *
+ * В форму передаётся только id: API больше не возвращает сам токен, а поле
+ * ввода предназначено исключительно для НОВОГО значения.
+ */
 function otkritRedaktirovanie() {
-  editFormStore.otkritFormu(new EditForm(props.item.id, props.item.token));
+  editFormStore.otkritFormu(new EditForm(props.item.id));
 }
 
 const punktyMenu = computed<GhActionMenuItem[]>(() => {

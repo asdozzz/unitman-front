@@ -736,7 +736,14 @@
     },
     "form_add_unit": {
       "caption": "Добавить юнит",
-      "fields": { "labels": { "project": "Проект", "branch": "Ветка", "unitName": "Имя юнита", "unitContainerMemory": "Лимит памяти на контейнер юнита, MB" } },
+      "fields": {
+        "labels": {
+          "project": "Проект",
+          "branch": "Ветка",
+          "unitName": "Имя юнита",
+          "unitContainerMemory": "Лимит памяти на контейнер юнита, MB"
+        }
+      },
       "messages": {
         "duplicates": "Найденные юниты с такой же веткой:",
         "no_variables": "В конфиге отсутствуют переменные",
@@ -749,10 +756,22 @@
       },
       "dialog": {
         "title": "Создание ветки",
-        "fields": { "labels": { "base_branch": "Базовая ветка *", "new_branch_name": "Название новой ветки *" } },
-        "validation": { "required": "Обязательное поле", "no_whitespace": "Название не должно содержать пробелов" },
-        "buttons": { "create": "Создать" },
-        "errors": { "create_failed": "Не удалось создать ветку" }
+        "fields": {
+          "labels": {
+            "base_branch": "Базовая ветка *",
+            "new_branch_name": "Название новой ветки *"
+          }
+        },
+        "validation": {
+          "required": "Обязательное поле",
+          "no_whitespace": "Название не должно содержать пробелов"
+        },
+        "buttons": {
+          "create": "Создать"
+        },
+        "errors": {
+          "create_failed": "Не удалось создать ветку"
+        }
       }
     },
     "form_fill_variables": {
@@ -925,7 +944,8 @@
           "no": "Нет",
           "input_label": "Введите имя репозитория для подтверждения",
           "input_hint": "Действие необратимо: введите «{name}»."
-        }
+        },
+        "token_hint": "Токен: ••••{hint}"
       },
       "list": {
         "empty_result": "Репозиториев пока нет",
@@ -958,6 +978,12 @@
       "fields": {
         "labels": {
           "token": "Токен"
+        },
+        "hints": {
+          "token": "оставьте пустым, чтобы не менять токен"
+        },
+        "placeholders": {
+          "token": "Новый токен"
         }
       },
       "buttons": {

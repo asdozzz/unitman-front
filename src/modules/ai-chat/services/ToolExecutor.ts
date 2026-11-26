@@ -58,6 +58,114 @@ const TRUNCATION_NOTICE =
 const TRUNCATION_ENVELOPE_RESERVE = 512;
 
 /* -------------------------------------------------------------------------- */
+/* Редакция учётных данных                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Единый маркер для всех вырезанных секретов. */
+export const REDACTED_MARKER = '***REDACTED***';
+
+/** Общий текст ошибки, если тело ответа не удалось безопасно обработать. */
+const SANITIZATION_ERROR =
+    'The tool response could not be safely sanitized and was discarded.';
+
+/** Предел рекурсии при санитизации, защита от патологически глубоких тел. */
+const MAX_SANITIZATION_DEPTH = 64;
+
+/**
+ * Ключи (после нормализации), значения которых никогда не попадают в
+ * tool-сообщение. Сравнение регистро- и разделитель-независимое:
+ * `refresh_token`, `Refresh-Token` и `refreshToken` эквивалентны.
+ *
+ * `tokenHint` намеренно отсутствует: бэкенд отдаёт только последние символы,
+ * это безопасная и полезная подсказка.
+ */
+const SENSITIVE_KEY_SET = new Set([
+    'token',
+    'refreshtoken',
+    'accesstoken',
+    'password',
+    'secret',
+    'apikey',
+    'authorization',
+    'cookie',
+    'setcookie',
+    'privatekey',
+    'credentials',
+    'tokencipher',
+]);
+
+function normalizeKey(key: string): string {
+    return key.toLowerCase().replace(/[\s_-]+/g, '');
+}
+
+/** `true`, если значение по этому ключу нужно заменить маркером. */
+export function isSensitiveKey(key: string): boolean {
+    return SENSITIVE_KEY_SET.has(normalizeKey(key));
+}
+
+/** Вырезает userinfo (`user:pass@`, `oauth2:...@`) из произвольной строки. */
+export function sanitizeToolText(text: string): string {
+    return text
+        .replace(/(:\/\/)([^/\s@]+)@/g, `$1${REDACTED_MARKER}@`)
+        .replace(/(\boauth2:)[^@\s/]+@/gi, `$1${REDACTED_MARKER}@`);
+}
+
+/**
+ * Рекурсивно заменяет значения чувствительных ключей и чистит userinfo в
+ * строках. Структура и не-секретные поля сохраняются без изменений.
+ */
+export function sanitizeForToolMessage(value: unknown, depth = 0): unknown {
+    if (depth > MAX_SANITIZATION_DEPTH) {
+        return REDACTED_MARKER;
+    }
+
+    if (typeof value === 'string') {
+        return sanitizeToolText(value);
+    }
+
+    if (Array.isArray(value)) {
+        return value.map((item) => sanitizeForToolMessage(item, depth + 1));
+    }
+
+    if (isPlainObject(value)) {
+        const result: Record<string, unknown> = {};
+
+        for (const [key, item] of Object.entries(value)) {
+            result[key] = isSensitiveKey(key)
+                ? REDACTED_MARKER
+                : sanitizeForToolMessage(item, depth + 1);
+        }
+
+        return result;
+    }
+
+    return value;
+}
+
+type SanitizedData =
+    | {ok: true; value: unknown}
+    | {ok: false};
+
+/**
+ * Санитизирует тело и проверяет, что оно сериализуемо в JSON.
+ *
+ * При любой проблеме (исключение, циклическая структура, `BigInt` и т.п.)
+ * возвращает `{ok: false}`: вызывающий код обязан отбросить тело, а не
+ * отправлять его в LLM сырым.
+ */
+function sanitizeToolData(data: unknown): SanitizedData {
+    try {
+        const value = sanitizeForToolMessage(data);
+
+        JSON.stringify(value);
+
+        return {ok: true, value};
+    } catch {
+        return {ok: false};
+    }
+}
+
+/* -------------------------------------------------------------------------- */
 /* Обрезка и сериализация                                                     */
 /* -------------------------------------------------------------------------- */
 
@@ -177,8 +285,31 @@ function boundPayload(value: unknown): BoundedPayload {
 /* Сборка результата                                                          */
 /* -------------------------------------------------------------------------- */
 
+function makeSanitizationFailure(status: number): ToolExecutionResult {
+    return {
+        ok: false,
+        status,
+        data: null,
+        truncated: false,
+        content: safeJsonStringify({
+            ok: false,
+            status,
+            errorKind: 'http_error',
+            error: SANITIZATION_ERROR,
+        }),
+        error: SANITIZATION_ERROR,
+        errorKind: 'http_error',
+    };
+}
+
 function makeSuccess(status: number, data: unknown): ToolExecutionResult {
-    const bounded = boundPayload(data);
+    const sanitized = sanitizeToolData(data);
+
+    if (!sanitized.ok) {
+        return makeSanitizationFailure(status);
+    }
+
+    const bounded = boundPayload(sanitized.value);
 
     return {
         ok: true,
@@ -197,12 +328,16 @@ function makeFailure(
     error: string,
     data: unknown = null,
 ): ToolExecutionResult {
-    const bounded = boundPayload(data);
+    // Текст ошибки тоже может содержать URL с учётными данными или эхо
+    // запроса — чистим его до попадания в tool-сообщение.
+    const safeError = sanitizeToolText(String(error));
+    const sanitizedData = sanitizeToolData(data);
+    const bounded = boundPayload(sanitizedData.ok ? sanitizedData.value : null);
     const envelope = {
         ok: false,
         status,
         errorKind,
-        error,
+        error: safeError,
         data: bounded.value,
     };
 
@@ -212,7 +347,7 @@ function makeFailure(
         data: bounded.value,
         truncated: bounded.truncated,
         content: boundPayload(envelope).content,
-        error,
+        error: safeError,
         errorKind,
     };
 }
