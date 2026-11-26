@@ -21,6 +21,7 @@ export { default as GhSkeleton } from "./GhSkeleton.vue";
 export { default as GhSwitch } from "./GhSwitch.vue";
 export { default as GhTable } from "./GhTable.vue";
 export { default as GhUnderlineNav } from "./GhUnderlineNav.vue";
+export { default as UnitmanLogo } from "./UnitmanLogo.vue";
 
 export type {
   GhActionMenuItem,

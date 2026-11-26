@@ -11,6 +11,7 @@ import {
     GhIcon,
     GhKbd,
     GhSegmentedControl,
+    UnitmanLogo,
 } from "@/components/ui";
 import type { GhSegmentedOption } from "@/components/ui";
 import { useAuthStore } from "@/modules/account/store/auth";
@@ -148,7 +149,7 @@ function vyiti(): void {
                 class="app-header__brand"
                 :aria-label="t('app.header.logo_aria')"
             >
-                <GhIcon name="beaker" :size="16" />
+                <UnitmanLogo :size="16" />
                 <span class="app-header__brand-text">Unitman</span>
             </router-link>
         </div>

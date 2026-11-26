@@ -1,0 +1,31 @@
+{
+  "name": "Unitman",
+  "short_name": "Unitman",
+  "description": "Панель управления проектами, юнитами и сессиями OpenCode",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#11151a",
+  "theme_color": "#2f6fb0",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

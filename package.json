@@ -17,6 +17,7 @@
     "dev": "vite",
     "gen:ai-tools": "node scripts/gen-ai-tools.mjs",
     "gen:ai-tools:check": "node scripts/gen-ai-tools.mjs --check",
+    "gen:icons": "node scripts/gen-icons.mjs",
     "gen:api": "node scripts/gen-api-types.mjs",
     "gen:api:check": "node scripts/gen-api-types.mjs --check",
     "preview": "vite preview"
