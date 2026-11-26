@@ -1,4 +1,8 @@
 import Login from "@/modules/account/view/Login.vue";
+import RegisterAccount from "@/modules/account/view/RegisterAccount.vue";
+import EmailVerification from "@/modules/account/view/EmailVerification.vue";
+import OAuthCallback from "@/modules/account/view/OAuthCallback.vue";
+import PendingActivation from "@/modules/account/view/PendingActivation.vue";
 import MainLayout from "@/modules/account/view/MainLayout.vue";
 import AccountSettings from "@/modules/account/view/AccountSettings.vue";
 import SpisokPolzovateleiDlyAdministrirovaniya
@@ -12,6 +16,34 @@ export default [
         component: Login,
         meta: {
             titleKey: 'app.titles.login'
+        }
+    },
+    {
+        path: '/register',
+        component: RegisterAccount,
+        meta: {
+            titleKey: 'app.titles.register'
+        }
+    },
+    {
+        path: '/verify-email',
+        component: EmailVerification,
+        meta: {
+            titleKey: 'app.titles.verify_email'
+        }
+    },
+    {
+        path: '/oauth/callback',
+        component: OAuthCallback,
+        meta: {
+            titleKey: 'app.titles.oauth_callback'
+        }
+    },
+    {
+        path: '/pending',
+        component: PendingActivation,
+        meta: {
+            titleKey: 'app.titles.pending_activation'
         }
     },
     {

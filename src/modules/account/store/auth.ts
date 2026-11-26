@@ -21,15 +21,19 @@ const TOKEN_EXPIRY_LEEWAY_MS = 30_000;
  * (`AuthenticationSuccessListener`). В спецификации объявлен только `token`,
  * поэтому `user` описывается здесь как дополнение к сгенерированному типу.
  */
-type LoginUser = {
+export type LoginUser = {
     id: string;
     email: string;
     roles: string[];
     locale: string;
+    /** Аккаунт создан, но ещё не активирован администратором. */
+    activationPending?: boolean;
+    /** Email подтверждён кодом или OAuth-провайдером. */
+    emailVerified?: boolean;
 }
 
 /** Ответ `/login` из схемы плюс добавленный бэкендом `user`. */
-type TokenData = ApiResponseData<"/login", "post"> & {
+export type TokenData = ApiResponseData<"/login", "post"> & {
     expired?: string | null;
     user: LoginUser;
 }
@@ -136,6 +140,19 @@ export const useAuthStore = defineStore('auth', {
         isAdmin(): boolean {
             return this.getRoles.includes(Roles.Admin);
         },
+        /** Ожидает ли текущий аккаунт активации администратором. */
+        isPendingActivation(state: State): boolean {
+            return state.tokenData?.user?.activationPending === true;
+        },
+        /**
+         * Подтверждён ли email.
+         *
+         * Для старых сессий без поля считаем email подтверждённым, иначе
+         * пользователь после обновления фронтенда попал бы на форму кода.
+         */
+        isEmailVerified(state: State): boolean {
+            return state.tokenData?.user?.emailVerified !== false;
+        },
     },
     actions: {
         updateLocale(locale: "en" | "ru") {
@@ -146,16 +163,23 @@ export const useAuthStore = defineStore('auth', {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
             dayjs.locale(locale)
         },
+        /**
+         * Сохраняет готовую пару токенов и данные пользователя.
+         *
+         * Используется обычным входом и OAuth-exchange.
+         */
+        prinyatTokenData(tokenData: TokenData) {
+            this.tokenData = tokenData;
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokenData));
+            const locale = (tokenData.user?.locale || "ru") as "en" | "ru";
+            this.updateLocale(locale);
+        },
         async login() {
             const response = await AccountService.login(this.loginView.form.login, this.loginView.form.pass);
 
             if (response.status === "success") {
                 // Бэкенд дополняет ответ /login полем user (см. LoginUser).
-                const tokenData = response.data as TokenData;
-                this.tokenData = tokenData;
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tokenData));
-                const locale = (tokenData.user?.locale || "ru") as "en" | "ru";
-                this.updateLocale(locale);
+                this.prinyatTokenData(response.data as TokenData);
             }
 
             return response;
@@ -243,6 +267,25 @@ export const useAuthStore = defineStore('auth', {
             this.tokenData = null;
             obnovlenieTokenaPromise = null;
             localStorage.removeItem(LOCAL_STORAGE_KEY);
+        },
+        /**
+         * Проверяет активацию аккаунта на сервере и обновляет локальные роли.
+         *
+         * @returns `true`, если аккаунт уже активирован.
+         */
+        async obnovitStatusAktivacii(): Promise<boolean> {
+            const response = await AccountService.moiStatus();
+
+            if (response.status !== 'success' || !this.tokenData?.user) {
+                return false;
+            }
+
+            this.tokenData.user.activationPending = response.data.activationPending;
+            this.tokenData.user.emailVerified = response.data.emailVerified;
+            this.tokenData.user.roles = response.data.roles;
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this.tokenData));
+
+            return !response.data.activationPending;
         },
         async izmeniyYazik(locale: string) {
             this.loaderIzmemeniyaYazika = true;

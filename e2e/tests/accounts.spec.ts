@@ -85,6 +85,11 @@ test.describe("Аккаунты", () => {
     await expect(
       dialog.getByText("Добавить учетную запись", { exact: true }),
     ).toBeVisible();
-    await expect(dialog.getByText("Пароль", { exact: true })).toBeVisible();
+    await expect(
+      dialog.getByText(
+        "Система сгенерирует временный пароль и отправит его на email пользователя.",
+        { exact: true },
+      ),
+    ).toBeVisible();
   });
 });

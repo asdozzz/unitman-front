@@ -2,7 +2,7 @@
 import { computed, nextTick, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   GhBanner,
   GhBox,
@@ -11,9 +11,11 @@ import {
   GhInput,
 } from "@/components/ui";
 import { useAuthStore } from "@/modules/account/store/auth";
+import SocialAuthButtons from "@/modules/account/view/components/SocialAuthButtons.vue";
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute();
 
 const authStore = useAuthStore();
 const { loginView, tokenData, defaultRoute, returnUrl } = storeToRefs(authStore);
@@ -23,6 +25,30 @@ const otpravka = ref<boolean>(false);
 
 /** Текст ошибки входа; показывается inline-баннером вместо Notify. */
 const oshibka = ref<string | null>(null);
+
+function perevodOauthOshibki(message: string): string {
+  switch (message) {
+    case "oauth.email.not_verified":
+      return t("account.oauth.errors.email_not_verified");
+    case "oauth.account.blocked":
+      return t("account.oauth.errors.blocked");
+    case "oauth.account.system":
+      return t("account.oauth.errors.system");
+    case "oauth.provider.not_configured":
+      return t("account.oauth.errors.not_configured");
+    case "oauth.state.invalid":
+    case "oauth.state.expired":
+      return t("account.oauth.errors.state");
+    default:
+      return t("account.oauth.errors.exchange");
+  }
+}
+
+const oauthOshibka = ref<string | null>(
+  typeof route.query.oauthError === "string"
+    ? perevodOauthOshibki(route.query.oauthError)
+    : null,
+);
 
 const estAvtorizovan = computed<boolean>(() => tokenData.value !== null);
 
@@ -50,6 +76,20 @@ async function onSubmit(): Promise<void> {
 
   if (response.status === "success") {
     await nextTick();
+
+    if (!authStore.isEmailVerified) {
+      await router.push({
+        path: "/verify-email",
+        query: { email: authStore.email ?? "" },
+      });
+      return;
+    }
+
+    if (authStore.isPendingActivation) {
+      await router.push("/pending");
+      return;
+    }
+
     await router.push(returnUrl.value || defaultRoute.value);
     return;
   }
@@ -71,6 +111,16 @@ function onLogout(): void {
     <GhBox v-if="!estAvtorizovan" class="login__card">
       <form class="login__form" @submit.prevent="onSubmit">
         <h1 class="login__title">{{ t("account.login_form.caption") }}</h1>
+
+        <GhBanner
+          v-if="oauthOshibka !== null"
+          variant="danger"
+          :title="t('account.oauth.callback_error_title')"
+        >
+          {{ oauthOshibka }}
+        </GhBanner>
+
+        <SocialAuthButtons />
 
         <GhBanner
           v-if="oshibka !== null"
@@ -121,6 +171,13 @@ function onLogout(): void {
           :disabled="otpravka"
           :label="t('account.login_form.button_login')"
         />
+
+        <p class="login__register">
+          {{ t("account.login_form.no_account") }}
+          <RouterLink class="login__link" to="/register">
+            {{ t("account.login_form.register_link") }}
+          </RouterLink>
+        </p>
       </form>
     </GhBox>
 
@@ -169,5 +226,21 @@ function onLogout(): void {
   font-weight: var(--fontWeight-semibold);
   line-height: var(--lineHeight-tight);
   text-align: center;
+}
+
+.login__register {
+  margin: 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-small);
+  text-align: center;
+}
+
+.login__link {
+  color: var(--fgColor-accent);
+  text-decoration: none;
+}
+
+.login__link:hover {
+  text-decoration: underline;
 }
 </style>

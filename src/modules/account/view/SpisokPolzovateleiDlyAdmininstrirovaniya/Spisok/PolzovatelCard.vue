@@ -24,6 +24,10 @@ async function blokirovat(): Promise<void> {
 async function razblokirovat(): Promise<void> {
   await spisokStore.razblokirovatPolzovatelya(props.item.id);
 }
+
+async function aktivirovat(): Promise<void> {
+  await spisokStore.aktivirovatPolzovatelya(props.item.id);
+}
 </script>
 
 <template>
@@ -33,6 +37,7 @@ async function razblokirovat(): Promise<void> {
         <template #actions>
           <PolzovatelCardMenu
             :item="item"
+            @activate="aktivirovat"
             @block="blokirovat"
             @unblock="razblokirovat"
           />

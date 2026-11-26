@@ -55,6 +55,7 @@ export function installDefaultMocks(api: ApiMock): void {
   api.post("/account/changeMyLocale", ok(null));
   api.get("/account/opencode/spisokRekvizitov", ok([]));
   api.get("/account/opencode/providers", ok([]));
+  api.get("/oauth/providers", ok({ providers: [] }));
 
   /* AI-чат и OpenCode. */
   api.get("/ai/chat/sessions", ok(emptySessionPage()));

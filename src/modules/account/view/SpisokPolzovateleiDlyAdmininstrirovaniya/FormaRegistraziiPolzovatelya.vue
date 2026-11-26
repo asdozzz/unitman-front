@@ -39,10 +39,6 @@ function izmenitEmail(value: string | number | null): void {
   form.value.email = value === null ? "" : String(value);
 }
 
-function izmenitParol(value: string | number | null): void {
-  form.value.password = value === null ? "" : String(value);
-}
-
 function izmenitRol(value: string | number | null): void {
   form.value.roles = value === null ? "" : String(value);
 }
@@ -99,21 +95,9 @@ function toggle(proektId: string): void {
         </template>
       </GhFormField>
 
-      <GhFormField
-        :label="t('account.form_add.fields.labels.password')"
-        control-id="account-add-password"
-      >
-        <template #default="{ controlId, ariaInvalid }">
-          <GhInput
-            :id="controlId"
-            :model-value="form.password"
-            type="password"
-            autocomplete="new-password"
-            :aria-invalid="ariaInvalid"
-            @update:model-value="izmenitParol"
-          />
-        </template>
-      </GhFormField>
+      <p class="account-add__hint">
+        {{ t('account.form_add.fields.hints.password_sent_to_email') }}
+      </p>
 
       <GhFormField
         :label="t('account.form_add.fields.labels.role')"
@@ -242,6 +226,13 @@ function toggle(proektId: string): void {
   outline: 2px solid var(--focus-outlineColor);
   outline-offset: 2px;
   border-radius: var(--borderRadius-full);
+}
+
+.account-add__hint {
+  margin: 0;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-small);
+  line-height: var(--lineHeight-normal);
 }
 
 /* Действия диалога: отступ 16px сверху, тот же горизонтальный инсет, что у полей. */

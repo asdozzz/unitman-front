@@ -9,9 +9,17 @@ const props = defineProps<{
   item: PolzovatelDlyAdmininstrirovaniya;
 }>();
 
-/** Статус блокировки для бейджа шапки. */
+/** Статус аккаунта для бейджа шапки. */
 const status = computed<PolzovatelFilterStatus>(() => {
-  return props.item.isBlocked ? "blocked" : "active";
+  if (props.item.isBlocked) {
+    return "blocked";
+  }
+
+  if (props.item.emailVerified === false) {
+    return "unverified";
+  }
+
+  return props.item.pendingActivation ? "pending" : "active";
 });
 
 /** Роли для мета-строки: строка `ROLE_USER,ROLE_ADMIN` → `ROLE_USER, ROLE_ADMIN`. */

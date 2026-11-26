@@ -62,7 +62,15 @@ function razobratRoli(roles: string): string[] {
 
 /** Статус аккаунта в терминах фильтра. */
 function statusPolzovatelya(item: PolzovatelDlyAdmininstrirovaniya): PolzovatelFilterStatus {
-    return item.isBlocked ? 'blocked' : 'active';
+    if (item.isBlocked) {
+        return 'blocked';
+    }
+
+    if (item.emailVerified === false) {
+        return 'unverified';
+    }
+
+    return item.pendingActivation ? 'pending' : 'active';
 }
 
 /** Сравнивает строки для стабильной клиентской сортировки. */
@@ -210,6 +218,23 @@ export const useSpisokPolzovateleiDlyAdmininstrirovaniyaStore = defineStore('Spi
 
             return response;
         },
+        async aktivirovatPolzovatelya(accountId: string) {
+            this.loaderObnovleniya = true;
+
+            const response = await AccountService.aktivirovatPolzovatelya({ accountId });
+
+            this.loaderObnovleniya = false;
+
+            if (response.status === "fail"){
+                Notify.create(response.data.message);
+            } else if (response.status === "error") {
+                Notify.create(response.message);
+            }
+
+            this.poluchitPolzovateleiDlyAdmininstrirovaniya();
+
+            return response;
+        },
     },
     getters: {
         /**
@@ -267,6 +292,8 @@ export const useSpisokPolzovateleiDlyAdmininstrirovaniyaStore = defineStore('Spi
             const schetchiki: Record<PolzovatelFilterStatus, number> = {
                 active: 0,
                 blocked: 0,
+                pending: 0,
+                unverified: 0,
             };
 
             this.spisok.forEach((item: PolzovatelDlyAdmininstrirovaniya) => {

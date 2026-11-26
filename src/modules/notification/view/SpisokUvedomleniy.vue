@@ -43,6 +43,13 @@ const ikonkaPoUrovnyu: Record<UrovenVazhnosti, OcticonName> = {
 };
 
 function kratkoeOpisanie(uvedomlenie: Uvedomlenie): string {
+  if (uvedomlenie.type === "account_activation_request") {
+    return t("notifications.account_activation_request.short", {
+      email: uvedomlenie.payload.email || "",
+      nickname: uvedomlenie.payload.nickname || "",
+    });
+  }
+
   if (uvedomlenie.type === "runner_threat") {
     return t("notifications.runner_threat.short", {
       hostname: uvedomlenie.payload.hostname || uvedomlenie.payload.runnerId || "",
@@ -59,6 +66,32 @@ function kratkoeOpisanie(uvedomlenie: Uvedomlenie): string {
 
 function polnoeOpisanie(uvedomlenie: Uvedomlenie): string[] {
   const payload = uvedomlenie.payload;
+
+  if (uvedomlenie.type === "account_activation_request") {
+    const stroki = [
+      t("notifications.account_activation_request.full.email", {
+        email: payload.email || "",
+      }),
+    ];
+
+    if (payload.nickname) {
+      stroki.push(
+        t("notifications.account_activation_request.full.nickname", {
+          nickname: payload.nickname,
+        }),
+      );
+    }
+
+    if (payload.accountId) {
+      stroki.push(
+        t("notifications.account_activation_request.full.account", {
+          accountId: payload.accountId,
+        }),
+      );
+    }
+
+    return stroki;
+  }
 
   if (uvedomlenie.type === "runner_threat") {
     const stroki = [

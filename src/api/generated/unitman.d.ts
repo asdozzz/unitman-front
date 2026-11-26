@@ -12,6 +12,23 @@
  */
 
 export type paths = {
+    "/account/activateByAdmin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Активировать аккаунт (администратор) */
+        post: operations["post_app_account_infra_account_activatebyadmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/blockByAdmin": {
         parameters: {
             query?: never;
@@ -142,6 +159,26 @@ export type paths = {
         put?: never;
         /** Изменить роль аккаунта (администратор) */
         post: operations["post_app_account_infra_account_changerolebyadmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/myStatus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Статус активации текущего пользователя
+         * @description Доступен неактивированному пользователю: по нему фронтенд понимает, что аккаунт уже активирован.
+         */
+        get: operations["get_app_account_infra_account_mystatus"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -338,6 +375,67 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/account/requestRegistration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Публичная заявка на регистрацию
+         * @description Создаёт неактивированный аккаунт. Доступ к остальным разделам откроется после активации администратором.
+         */
+        post: operations["post_app_account_infra_account_requestregistration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/resendEmailVerification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Повторно отправить код подтверждения email */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Код отправлен */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Ошибка обработки */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/account/unblockByAdmin": {
         parameters: {
             query?: never;
@@ -349,6 +447,47 @@ export type paths = {
         put?: never;
         /** Разблокировать аккаунт (администратор) */
         post: operations["post_app_account_infra_account_unblock"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/account/verifyEmail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Подтвердить email кодом из письма */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Email подтверждён */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Ошибка обработки */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -880,6 +1019,149 @@ export type paths = {
         };
         /** Число непрочитанных уведомлений текущего пользователя */
         get: operations["get_app_notification_infra_notification_unreadcount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/{provider}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Callback OAuth-провайдера */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Редирект на фронтенд с одноразовым кодом или ошибкой */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/{provider}/redirect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Начать OAuth-вход */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Редирект на страницу провайдера */
+                302: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Обменять одноразовый OAuth-код на токены */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Пара токенов и данные пользователя */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Ошибка обработки */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Список настроенных OAuth-провайдеров */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Список провайдеров */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         put?: never;
         post?: never;
         delete?: never;
@@ -3074,10 +3356,24 @@ export type paths = {
 export type webhooks = Record<string, never>;
 export type components = {
     schemas: {
+        AccountActivationStatus: {
+            activationPending: boolean;
+            emailVerified: boolean;
+            /**
+             * @example [
+             *       "ROLE_PENDING"
+             *     ]
+             */
+            roles: string[];
+        };
         /** @description Данные аутентифицированного пользователя в ответе /api/login */
         AccountLoginUser: {
+            /** @description Аккаунт ещё не активирован администратором */
+            activationPending?: boolean;
             /** Format: email */
             email?: string;
+            /** @description Email подтверждён кодом или OAuth-провайдером */
+            emailVerified?: boolean;
             /** Format: uuid */
             id?: string;
             /** @example ru */
@@ -3097,9 +3393,15 @@ export type components = {
         AccountUser: {
             /** Format: email */
             email: string;
+            emailVerified: boolean;
             id: string;
             isBlocked: boolean;
             nickname: string | null;
+            pendingActivation: boolean;
+        };
+        ActivateAccountByAdmin: {
+            /** Format: uuid */
+            accountId: string;
         };
         AddProject: {
             /** @default master */
@@ -3617,10 +3919,12 @@ export type components = {
         ManagedAccount: {
             /** Format: email */
             email: string;
+            emailVerified: boolean;
             id: string;
             isBlocked: boolean;
             nickname: string | null;
             password: string;
+            pendingActivation: boolean;
             roles: string;
         };
         /** @description Метаданные файла юнита (FaylUnita::toArray) */
@@ -3694,6 +3998,12 @@ export type components = {
             branch: string;
             /** Format: uuid */
             projectId: string;
+        };
+        OAuthExchange: {
+            code: string;
+        };
+        OAuthProviderList: {
+            providers: ("google" | "github")[];
         };
         ObnovitKodUnita: {
             /** Format: uuid */
@@ -4310,6 +4620,7 @@ export type components = {
             imya: string;
             userId: string;
         };
+        /** @description Пароль не передаётся: система генерирует его и отправляет на email */
         RegisterAccount: {
             /**
              * Format: email
@@ -4321,15 +4632,27 @@ export type components = {
             /** @example nickname */
             nickname?: string | null;
             /**
-             * Format: password
-             * @example secret
-             */
-            password: string;
-            /**
              * @description В коде объявлено строкой, а не массивом
              * @example ROLE_USER
              */
             roles: string;
+        };
+        /** @description Публичная заявка на регистрацию; роль всегда ROLE_PENDING */
+        RegisterPendingAccount: {
+            /**
+             * Format: email
+             * @example user@example.com
+             */
+            email: string;
+            /** @example ru */
+            locale?: string;
+            /** @example nickname */
+            nickname?: string | null;
+            /**
+             * Format: password
+             * @example secret
+             */
+            password: string;
         };
         RemoveUserFromProject: {
             id: string;
@@ -4358,6 +4681,10 @@ export type components = {
             code: string;
             /** @example GitLab */
             name: string;
+        };
+        ResendEmailVerification: {
+            /** Format: email */
+            email: string;
         };
         RezultatArhivaciiWorkspace: {
             dirtyProjects: {
@@ -5205,6 +5532,11 @@ export type components = {
             unitId: string;
             unitName: string;
         };
+        VerifyEmail: {
+            code: string;
+            /** Format: email */
+            email: string;
+        };
         VipolnitDeistviye: {
             actionId: string;
             /** Format: uuid */
@@ -5387,6 +5719,52 @@ export type components = {
 };
 export type $defs = Record<string, never>;
 export interface operations {
+    post_app_account_infra_account_activatebyadmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ActivateAccountByAdmin"];
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: аккаунт активирован */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Пустой ответ: аккаунт активирован */
+                        data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_account_infra_account_block: {
         parameters: {
             query?: never;
@@ -5731,6 +6109,47 @@ export interface operations {
                     "application/json": {
                         /** @description Пустой ответ: роль изменена */
                         data: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_account_infra_account_mystatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Статус активации и роли */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AccountActivationStatus"];
                         /**
                          * @example success
                          * @enum {string}
@@ -6235,6 +6654,44 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_account_requestregistration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterPendingAccount"];
+            };
+        };
+        responses: {
+            /** @description Идентификатор созданного аккаунта */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["IdHolder"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {

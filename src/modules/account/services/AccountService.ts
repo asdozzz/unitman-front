@@ -1,6 +1,29 @@
 import apiClient from "@/bootstrap/apiClient";
+import type { ApiResponse } from "@/bootstrap/apiClient/ApiResponse";
 import { buildPath } from "@/api/paths";
 import type { Schema } from "@/api/types";
+
+/** Статус активации текущего пользователя. */
+export type AccountActivationStatus = {
+    activationPending: boolean;
+    emailVerified: boolean;
+    roles: string[];
+};
+
+/** Ответ OAuth-exchange: пара токенов и данные пользователя. */
+export type OAuthTokenData = {
+    token: string;
+    refreshToken: string;
+    user: {
+        id: string;
+        email: string;
+        roles: string[];
+        locale: string;
+        nickname: string | null;
+        activationPending: boolean;
+        emailVerified: boolean;
+    };
+};
 
 /**
  * Сервис аккаунтов.
@@ -53,6 +76,36 @@ class AccountService {
 
     registraziyaPolzovatelya(params: Schema<"RegisterAccount">) {
         return apiClient.post('/account/register', params);
+    }
+
+    /** Публичная заявка на регистрацию: аккаунт ждёт активации. */
+    registraziyaZayavki(params: {
+        email: string;
+        password: string;
+        locale?: string;
+        nickname?: string | null;
+    }): Promise<ApiResponse<{ id: string }>> {
+        return apiClient.post<{ id: string }>('/account/requestRegistration', params);
+    }
+
+    /** Статус активации текущего пользователя. */
+    moiStatus(): Promise<ApiResponse<AccountActivationStatus>> {
+        return apiClient.get<AccountActivationStatus>('/account/myStatus');
+    }
+
+    /** Подтвердить email кодом из письма. */
+    podtverditEmail(params: { email: string; code: string }) {
+        return apiClient.post('/account/verifyEmail', params);
+    }
+
+    /** Повторно отправить код подтверждения email. */
+    otpravitKodPovtorno(params: { email: string }) {
+        return apiClient.post('/account/resendEmailVerification', params);
+    }
+
+    /** Активация самостоятельно зарегистрированного аккаунта. */
+    aktivirovatPolzovatelya(params: { accountId: string }) {
+        return apiClient.post('/account/activateByAdmin', params);
     }
 
     blockirovkaPolzovatelya(params: Schema<"BlockByAdmin">) {

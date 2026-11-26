@@ -213,6 +213,10 @@
     },
     "titles": {
       "login": "Sign in",
+      "register": "Sign up",
+      "verify_email": "Email verification",
+      "oauth_callback": "Provider sign-in",
+      "pending_activation": "Pending activation",
       "account_settings": "Account settings",
       "unit_jobs": "Unit jobs",
       "unauthorized": "Access denied",
@@ -346,9 +350,105 @@
       "button_login": "Sign in",
       "error": "Could not sign in",
       "error_title": "Sign-in error",
+      "no_account": "No account yet?",
+      "register_link": "Sign up",
       "already_signin": {
         "text": "Already signed",
         "button_text": "Logout"
+      }
+    },
+    "register_form": {
+      "caption": "Create account",
+      "description": "Create an account. We will send an email verification code, then an administrator activates it.",
+      "email_label": "Email",
+      "password_label": "Password",
+      "password_repeat_label": "Repeat password",
+      "nickname_label": "Nickname",
+      "locale_label": "Language",
+      "button_register": "Sign up",
+      "passwords_mismatch": "Passwords do not match",
+      "success_title": "Code sent",
+      "success_text": "Enter the code from the email on the verification page.",
+      "go_to_login": "Go to sign in",
+      "have_account": "Already have an account?",
+      "error": "Failed to submit the request",
+      "error_title": "Registration error"
+    },
+    "verify_email": {
+      "title": "Email verification",
+      "description": "We sent a 6-digit code to your email. Enter it to verify your address.",
+      "email_label": "Email",
+      "code_label": "Code from the email",
+      "submit": "Verify",
+      "resend": "Resend code",
+      "resend_in": "Retry in {seconds}s",
+      "resent": "The code has been sent again.",
+      "success_title": "Email verified",
+      "success_text": "The account is waiting for administrator activation. You can sign in after activation.",
+      "go_to_login": "Go to sign in",
+      "have_account": "Already verified?",
+      "error_title": "Verification error",
+      "errors": {
+        "invalid": "Invalid code. Check the email and try again.",
+        "expired": "The code has expired. Request a new one.",
+        "too_many_attempts": "Too many attempts. Request a new code.",
+        "resend_too_often": "The code was already sent. Wait a bit before resending.",
+        "too_many_resends": "Too many code requests. Try again later."
+      }
+    },
+    "oauth": {
+      "or": "or",
+      "google": "Continue with Google",
+      "github": "Continue with GitHub",
+      "callback_loading": "Completing sign-in…",
+      "callback_error_title": "Sign-in failed",
+      "go_to_login": "Back to sign in",
+      "errors": {
+        "email_not_verified": "The provider did not verify the email. Use another sign-in method.",
+        "blocked": "The account is blocked.",
+        "system": "Signing in to the system account is not allowed.",
+        "not_configured": "Sign-in with this provider is not configured.",
+        "state": "The sign-in session has expired. Try again.",
+        "exchange": "Failed to complete provider sign-in. Try again."
+      }
+    },
+    "pending_activation": {
+      "banner_title": "Account pending activation",
+      "banner_text": "Email verified. An administrator will activate the account; only this page is available until then.",
+      "title": "Welcome to Unitman",
+      "description": "Unitman automatically creates test environments: tracks branches, builds and runs units, and helps test related services.",
+      "account": "Account",
+      "check_status": "Check status",
+      "logout": "Sign out",
+      "still_pending": "The account is not activated yet. Try again later.",
+      "check_error": "Failed to check the activation status",
+      "activated": "The account is activated",
+      "features_title": "What opens after activation",
+      "features": {
+        "units": {
+          "title": "Units",
+          "description": "Ready-to-use test environments for validating changes without manual setup."
+        },
+        "projects": {
+          "title": "Projects",
+          "description": "Repositories and branches Unitman builds environments from."
+        },
+        "runners": {
+          "title": "Runners",
+          "description": "Workers that build and run containers on your servers."
+        },
+        "ai": {
+          "title": "AI assistant",
+          "description": "A chat with tools for navigating projects and units."
+        },
+        "notifications": {
+          "title": "Notifications",
+          "description": "Unit and runner events, including browser push notifications."
+        },
+        "access": {
+          "title": "Secure access",
+          "description": "Roles, personal tokens, and OpenCode credentials kept protected."
+        }
       }
     },
     "spisok": {
@@ -407,11 +507,14 @@
         },
         "status": {
           "active": "Active",
-          "blocked": "Blocked"
+          "blocked": "Blocked",
+          "pending": "Pending activation",
+          "unverified": "Email not verified"
         },
         "buttons": {
           "more": "More",
           "edit": "Edit",
+          "activate": "Activate",
           "block": "Block",
           "unblock": "Unblock"
         }
@@ -454,10 +557,12 @@
       "fields": {
         "labels": {
           "email": "Email",
-          "password": "Password",
           "role": "Role",
           "locale": "Language",
           "nickname": "Nickname"
+        },
+        "hints": {
+          "password_sent_to_email": "The system will generate a temporary password and email it to the user."
         }
       },
       "buttons": {
@@ -1328,6 +1433,18 @@
       "unit_started": {
         "title": "Unit started",
         "description": "Messages about successful starts of your units."
+      },
+      "account_activation_request": {
+        "title": "Activation requests",
+        "description": "New accounts waiting for administrator activation. System notifications cannot be disabled."
+      }
+    },
+    "account_activation_request": {
+      "short": "New account {email} is waiting for activation",
+      "full": {
+        "email": "Email: {email}",
+        "nickname": "Nickname: {nickname}",
+        "account": "Account ID: {accountId}"
       }
     },
     "runner_threat": {

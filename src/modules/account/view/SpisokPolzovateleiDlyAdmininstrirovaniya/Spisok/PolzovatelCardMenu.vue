@@ -11,6 +11,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  activate: [];
   block: [];
   unblock: [];
 }>();
@@ -18,7 +19,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const router = useRouter();
 
-/** Действия карточки: редактирование и обратимая блокировка. */
+/** Действия карточки: редактирование, активация и обратимая блокировка. */
 const items = computed<GhActionMenuItem[]>(() => {
   const spisok: GhActionMenuItem[] = [
     {
@@ -27,6 +28,15 @@ const items = computed<GhActionMenuItem[]>(() => {
       icon: "pencil",
     },
   ];
+
+  if (props.item.pendingActivation && props.item.emailVerified !== false && !props.item.isBlocked) {
+    spisok.push({
+      id: "activate",
+      label: t("account.spisok.card.buttons.activate"),
+      icon: "check",
+      separatorBefore: true,
+    });
+  }
 
   if (props.item.isBlocked) {
     spisok.push({
@@ -56,6 +66,11 @@ function redaktirovat(): void {
 function vybrat(item: GhActionMenuItem): void {
   if (item.id === "edit") {
     redaktirovat();
+    return;
+  }
+
+  if (item.id === "activate") {
+    emit("activate");
     return;
   }
 

@@ -2,7 +2,10 @@
 export type UrovenVazhnosti = "info" | "attention" | "critical";
 
 /** Тип уведомления. */
-export type TipUvedomleniya = "runner_threat" | "unit_started";
+export type TipUvedomleniya =
+  | "runner_threat"
+  | "unit_started"
+  | "account_activation_request";
 
 /** Данные уведомления об угрозе раннера. */
 export type PayloadUgrozыRannera = {
@@ -30,8 +33,16 @@ export type PayloadZapuskaUnita = {
   startedAt?: number;
 };
 
+/** Данные заявки на активацию аккаунта. */
+export type PayloadZaprosaAktivacii = {
+  accountId?: string;
+  email?: string;
+  nickname?: string | null;
+};
+
 export type PayloadUvedomleniya = PayloadUgrozыRannera &
   PayloadZapuskaUnita &
+  PayloadZaprosaAktivacii &
   Record<string, unknown>;
 
 /** Уведомление текущего пользователя. */
@@ -62,7 +73,11 @@ export type NastroikaUvedomleniya = {
 };
 
 const UROVNI: readonly string[] = ["info", "attention", "critical"];
-const TIPI: readonly string[] = ["runner_threat", "unit_started"];
+const TIPI: readonly string[] = [
+  "runner_threat",
+  "unit_started",
+  "account_activation_request",
+];
 
 /** Проверка формы уведомления из ответа API. */
 export function pohozheNaUvedomlenie(value: unknown): value is Uvedomlenie {

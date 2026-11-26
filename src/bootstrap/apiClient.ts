@@ -9,12 +9,26 @@ import {apiHost} from "@/utils/runtimeEnv";
  * `/login` — сессии ещё нет, `/account/refreshToken` — обновление уже идёт
  * (иначе рекурсия и повторное использование одноразового refresh-токена).
  */
-const REFRESH_EXCLUDED_URLS = ['/login', '/account/refreshToken'];
+const REFRESH_EXCLUDED_URLS = [
+    '/login',
+    '/account/refreshToken',
+    '/account/verifyEmail',
+    '/account/resendEmailVerification',
+    '/oauth/providers',
+    '/oauth/exchange',
+];
 
 /**
  * Публичные эндпоинты, которые не должны получать заголовок Authorization.
  */
-const ANONYMOUS_URLS = ['/login', '/account/refreshToken'];
+const ANONYMOUS_URLS = [
+    '/login',
+    '/account/refreshToken',
+    '/account/verifyEmail',
+    '/account/resendEmailVerification',
+    '/oauth/providers',
+    '/oauth/exchange',
+];
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete';
 

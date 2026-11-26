@@ -27,17 +27,23 @@ module.exports = defineConfig({
   // прерывает загрузку модулей Vite с `ERR_NETWORK_CHANGED`. Детерминированные
   // ошибки повтором не маскируются — они падают все три раза.
   retries: 2,
-  workers: process.env.CI ? 2 : undefined,
+  // Ограничиваем параллелизм: при большом числе воркеров Vite dev server
+  // не успевает прогреться, и часть тестов падает по таймауту на первом
+  // проходе. Значение можно переопределить через E2E_WORKERS.
+  workers: process.env.E2E_WORKERS
+    ? Number(process.env.E2E_WORKERS)
+    : 2,
   reporter: [
     ["list"],
     ["html", { outputFolder: "e2e/report", open: "never" }],
   ],
   // Первый прогрев Vite может занимать больше 5 секунд: зависимости
-  // предсобираются, а сеть контейнера иногда отдаёт ERR_NETWORK_CHANGED.
-  // Даём приложению время догрузиться, не превращая это в flaky-тест.
-  expect: { timeout: 15_000 },
+  // предсобираются, а маршруты компилируются лениво при первом обращении.
+  // При параллельном запуске это легко превышает 15 секунд, поэтому даём
+  // приложению время догрузиться, не превращая это в flaky-тест.
+  expect: { timeout: 30_000 },
   use: {
-    actionTimeout: 15_000,
+    actionTimeout: 30_000,
     navigationTimeout: 30_000,
     baseURL: BASE_URL,
     locale: "ru-RU",

@@ -17,6 +17,8 @@ export type SessionOverrides = {
   locale?: "ru" | "en";
   roles?: string[];
   tokenExpiresInSeconds?: number;
+  activationPending?: boolean;
+  emailVerified?: boolean;
 };
 
 export type SessionUser = {
@@ -24,6 +26,8 @@ export type SessionUser = {
   email: string;
   roles: string[];
   locale: "ru" | "en";
+  activationPending?: boolean;
+  emailVerified?: boolean;
 };
 
 export type TokenData = {
@@ -78,6 +82,8 @@ export function tokenDataFor(
     roles:
       overrides.roles ?? (isAdmin ? ["ROLE_ADMIN", "ROLE_USER"] : ["ROLE_USER"]),
     locale: overrides.locale ?? "ru",
+    activationPending: overrides.activationPending,
+    emailVerified: overrides.emailVerified,
   };
 
   const exp =

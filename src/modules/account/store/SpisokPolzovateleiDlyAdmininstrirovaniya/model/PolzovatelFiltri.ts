@@ -5,8 +5,8 @@
  * сортировка применяются клиентски поверх полученного списка.
  */
 
-/** Статус аккаунта в терминах UI: активен либо заблокирован. */
-export type PolzovatelFilterStatus = "active" | "blocked";
+/** Статус аккаунта в терминах UI: активен, заблокирован, ждёт активации или email не подтверждён. */
+export type PolzovatelFilterStatus = "active" | "blocked" | "pending" | "unverified";
 
 /** Допустимые сортировки списка. */
 export type PolzovatelSort = "email_asc" | "nickname_asc";
@@ -43,7 +43,7 @@ export type PolzovatelFilterChip = {
     label?: string;
 };
 
-const DOPUSTIMIE_STATUSI: PolzovatelFilterStatus[] = ["active", "blocked"];
+const DOPUSTIMIE_STATUSI: PolzovatelFilterStatus[] = ["active", "blocked", "pending", "unverified"];
 
 const DOPUSTIMIE_SORTIROVKI: PolzovatelSort[] = ["email_asc", "nickname_asc"];
 

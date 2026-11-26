@@ -14,6 +14,8 @@ const { t } = useI18n();
 
 const STATUSI: OpisanieStatusa[] = [
   { status: "active", icon: "check-circle" },
+  { status: "pending", icon: "clock" },
+  { status: "unverified", icon: "mail" },
   { status: "blocked", icon: "x-circle" },
 ];
 
@@ -51,7 +53,15 @@ function variant(status: PolzovatelFilterStatus, aktiven: boolean): GhLabelVaria
     return "neutral";
   }
 
-  return status === "active" ? "success" : "danger";
+  if (status === "active") {
+    return "success";
+  }
+
+  if (status === "pending") {
+    return "attention";
+  }
+
+  return "danger";
 }
 
 /** Счётчик может прийти неполным — отсутствующее значение показывает 0. */

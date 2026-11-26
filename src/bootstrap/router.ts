@@ -26,7 +26,7 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
 
     // redirect to login page if not logged in and trying to access a restricted page
-    const publicPages = ['/login'];
+    const publicPages = ['/login', '/register', '/verify-email', '/oauth/callback'];
     const authRequired = !publicPages.includes(to.path);
     const authStore = useAuthStore();
 
@@ -42,6 +42,38 @@ router.beforeEach(async (to, _from, next) => {
             authStore.returnUrl = to.fullPath;
             return next('/login');
         }
+    }
+
+    // Неподтверждённый email: доступна только страница ввода кода.
+    if (authStore.isAuth && !authStore.isEmailVerified) {
+        if (to.path !== '/verify-email' && to.path !== '/login') {
+            return next({
+                path: '/verify-email',
+                query: { email: authStore.email ?? '' },
+            });
+        }
+    }
+
+    // Неактивированный пользователь видит только информационную страницу.
+    // Проверка идёт до requiredRoles, иначе роль ROLE_PENDING увела бы его
+    // на /unauthorized вместо страницы ожидания.
+    if (
+        authStore.isAuth
+        && authStore.isEmailVerified
+        && authStore.isPendingActivation
+    ) {
+        if (to.path !== '/pending') {
+            return next('/pending');
+        }
+    }
+
+    if (
+        authStore.isAuth
+        && authStore.isEmailVerified
+        && !authStore.isPendingActivation
+        && (to.path === '/pending' || to.path === '/verify-email')
+    ) {
+        return next(authStore.defaultRoute);
     }
 
     if (to.meta && to.meta.requiredRoles) {
