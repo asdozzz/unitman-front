@@ -386,7 +386,7 @@ export type paths = {
         put?: never;
         /**
          * Публичная заявка на регистрацию
-         * @description Создаёт неактивированный аккаунт. Доступ к остальным разделам откроется после активации администратором.
+         * @description Создаёт неподтверждённый аккаунт и отправляет код на email. Доступ откроется после подтверждения email и активации администратором.
          */
         post: operations["post_app_account_infra_account_requestregistration"];
         delete?: never;
@@ -405,31 +405,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Повторно отправить код подтверждения email */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Код отправлен */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Ошибка обработки */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        post: operations["post_app_account_infra_account_resendemailverification"];
         delete?: never;
         options?: never;
         head?: never;
@@ -463,31 +439,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Подтвердить email кодом из письма */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Email подтверждён */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Ошибка обработки */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        post: operations["post_app_account_infra_account_verifyemail"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1035,24 +987,7 @@ export type paths = {
             cookie?: never;
         };
         /** Callback OAuth-провайдера */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Редирект на фронтенд с одноразовым кодом или ошибкой */
-                302: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["get_app_account_infra_oauth_callback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1069,24 +1004,7 @@ export type paths = {
             cookie?: never;
         };
         /** Начать OAuth-вход */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Редирект на страницу провайдера */
-                302: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["get_app_account_infra_oauth_redirecttoprovider"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1105,31 +1023,7 @@ export type paths = {
         get?: never;
         put?: never;
         /** Обменять одноразовый OAuth-код на токены */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Пара токенов и данные пользователя */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Ошибка обработки */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        post: operations["post_app_account_infra_oauth_exchange"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1144,24 +1038,7 @@ export type paths = {
             cookie?: never;
         };
         /** Список настроенных OAuth-провайдеров */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Список провайдеров */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-            };
-        };
+        get: operations["get_app_account_infra_oauth_providers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4000,6 +3877,7 @@ export type components = {
             projectId: string;
         };
         OAuthExchange: {
+            /** @description Одноразовый код из callback-редиректа */
             code: string;
         };
         OAuthProviderList: {
@@ -4683,7 +4561,10 @@ export type components = {
             name: string;
         };
         ResendEmailVerification: {
-            /** Format: email */
+            /**
+             * Format: email
+             * @example user@example.com
+             */
             email: string;
         };
         RezultatArhivaciiWorkspace: {
@@ -5189,7 +5070,6 @@ export type components = {
         /** @description Конфигурация юнита; пустой массив, если конфигурация ещё не задана */
         UnitConfig: {
             actions: components["schemas"]["UnitAction"][];
-            build: components["schemas"]["UnitConfigBuild"];
             down: string[];
             prepare: string[];
             reset_prepare: string[];
@@ -5199,24 +5079,11 @@ export type components = {
             up: string[];
             variables: components["schemas"]["UnitConfigVariable"][];
         };
-        /** @description Стадия сборки юнита (KonfigStadiiSborki::toArray) */
-        UnitConfigBuild: {
-            commands: string[];
-            /** @example asdozzz/unitman-unit:latest */
-            image: string;
-        };
         /** @description Сервис юнита (KonfigServisa::toArray) */
         UnitConfigService: {
-            /** @description Пустой массив, если кеш не настроен */
-            cache: components["schemas"]["UnitConfigServiceCache"] | Record<string, never>[];
             /** @example backend */
             name: string | null;
             ports: components["schemas"]["UnitConfigServicePort"][];
-        };
-        /** @description Настройки кеширования сервиса (CacheServisa::toArray) */
-        UnitConfigServiceCache: {
-            files: string[];
-            paths: string[];
         };
         /** @description Порт сервиса (PortServisa::toArray) */
         UnitConfigServicePort: {
@@ -5533,8 +5400,12 @@ export type components = {
             unitName: string;
         };
         VerifyEmail: {
+            /** @example 123456 */
             code: string;
-            /** Format: email */
+            /**
+             * Format: email
+             * @example user@example.com
+             */
             email: string;
         };
         VipolnitDeistviye: {
@@ -6702,6 +6573,35 @@ export interface operations {
             };
         };
     };
+    post_app_account_infra_account_resendemailverification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResendEmailVerification"];
+            };
+        };
+        responses: {
+            /** @description Код отправлен, если аккаунт существует и не подтверждён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     post_app_account_infra_account_unblock: {
         parameters: {
             query?: never;
@@ -6734,6 +6634,35 @@ export interface operations {
             };
             /** @description Не авторизован */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_account_verifyemail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmail"];
+            };
+        };
+        responses: {
+            /** @description Email подтверждён */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7913,6 +7842,98 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    get_app_account_infra_oauth_callback: {
+        parameters: {
+            query: {
+                code: string;
+                state: string;
+            };
+            header?: never;
+            path: {
+                provider: "google" | "github";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Редирект на фронтенд с одноразовым кодом или ошибкой */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_account_infra_oauth_redirecttoprovider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: "google" | "github";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Редирект на страницу провайдера */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_account_infra_oauth_exchange: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OAuthExchange"];
+            };
+        };
+        responses: {
+            /** @description Пара токенов и данные пользователя */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_app_account_infra_oauth_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Список провайдеров */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OAuthProviderList"];
+                };
             };
         };
     };
