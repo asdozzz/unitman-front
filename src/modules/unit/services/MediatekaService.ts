@@ -46,6 +46,17 @@ class MediatekaService {
         return apiClient.post<ChernovikFayla>("/mediateka/upload", body);
     }
 
+    /** Загрузить файл workspace как черновик (изображение или текст). */
+    zagruzitChernovikWorkspace(file: File, name?: string): Promise<ApiResponse<ChernovikFayla>> {
+        const body = new FormData();
+        body.append("file", file);
+        if (name) {
+            body.append("name", name);
+        }
+
+        return apiClient.post<ChernovikFayla>("/mediateka/workspace/upload", body);
+    }
+
     /**
      * Собрать тело multipart-запроса.
      *

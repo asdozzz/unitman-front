@@ -204,6 +204,21 @@ class OpenCodeService {
         return apiClient.post<'/opencode/workspace/arhivirovat'>('/opencode/workspace/arhivirovat', params);
     }
 
+    dobavitProektVWorkspace(params: {
+        workspaceId: string;
+        projects: Array<{ projectId: string; branch: string }>;
+    }) {
+        return apiClient.post<{ updating: boolean }>('/opencode/workspace/dobavitProekt', params);
+    }
+
+    prikrepitFaylyKWorkspace(params: { workspaceId: string; fileIds: string[] }) {
+        return apiClient.post<{ updating: boolean }>('/opencode/workspace/fayly/prikrepit', params);
+    }
+
+    udalitFaylWorkspace(params: { workspaceId: string; fileId: string }) {
+        return apiClient.post<{ updating: boolean }>('/opencode/workspace/fayly/udalit', params);
+    }
+
     /** Восстановление архивного workspace: контейнер поднимается без повторного деплоя. */
     vosstanovitWorkspace(params: Schema<"VosstanovitWorkspace">) {
         return apiClient.post<'/opencode/workspace/vosstanovit'>('/opencode/workspace/vosstanovit', params);

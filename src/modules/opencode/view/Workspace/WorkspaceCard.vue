@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import i18n from "@/bootstrap/translator";
 import {
     GhActionMenu,
@@ -12,6 +12,9 @@ import {
 import type { GhActionMenuItem } from "@/components/ui";
 import WorkspaceStatusBadge from "@/modules/opencode/view/Workspace/WorkspaceStatusBadge.vue";
 import OknoSsylkiWorkspace from "@/modules/opencode/view/Workspace/OknoSsylkiWorkspace.vue";
+import OknoDobavleniyaProekta from "@/modules/opencode/view/Workspace/OknoDobavleniyaProekta.vue";
+import OknoFaylovWorkspace from "@/modules/opencode/view/Workspace/OknoFaylovWorkspace.vue";
+import OpenCodeService from "@/modules/opencode/services/OpenCodeService";
 import { useStorPomoschnikaSsylkiWorkspace } from "@/modules/opencode/store/StorPomoschnikaSsylkiWorkspace";
 import { convertDate } from "@/utils/dates";
 import {
@@ -31,6 +34,14 @@ import {
  * решает, как провести действие (например, архив с подтверждением dirty-файлов).
  */
 type DejstvieWorkspace = "archive" | "restore" | "delete" | "create_units";
+
+type WorkspaceFileItem = {
+    fileId: string;
+    name: string;
+    size: number;
+    applied: boolean;
+    createdAt: number;
+};
 
 const props = defineProps<{
     workspace: Workspace;
@@ -66,11 +77,24 @@ const emit = defineEmits<{
     delete: [];
     "create-units": [];
     "open-units": [unitIds: string[]];
+    refresh: [];
 }>();
 
 const tranzitniy = computed(() => statusTranzitniy(props.workspace.status));
 const readOnly = computed(() => estReadOnly(props.workspace));
 const unitiWorkspace = computed(() => props.workspace.units ?? []);
+const fayly = computed<WorkspaceFileItem[]>(() => {
+    const value = (props.workspace as Workspace & { files?: WorkspaceFileItem[] }).files;
+
+    return value ?? [];
+});
+const obnovlyaetsya = computed(() => {
+    return (props.workspace as Workspace & { updating?: boolean }).updating === true;
+});
+const mozhnoObnovit = computed(() => props.workspace.status === "RUNNING" && !obnovlyaetsya.value);
+
+const oknoDobavleniya = ref(false);
+const oknoFaylov = ref(false);
 
 /**
  * Действие доступно только у работающего workspace без созданных юнитов.
@@ -88,6 +112,22 @@ const dejstvieIdet = computed(() => props.dejstvie !== null && props.dejstvie !=
 /** Пункты меню действий по текущему статусу workspace. */
 const punktyMenu = computed<GhActionMenuItem[]>(() => {
     const punkty: GhActionMenuItem[] = [];
+
+    if (mozhnoObnovit.value) {
+        punkty.push({
+            id: "add_project",
+            label: i18n.global.t("opencode.workspace.actions.add_project"),
+            icon: "plus",
+            disabled: dejstvieIdet.value,
+        });
+
+        punkty.push({
+            id: "attach_files",
+            label: i18n.global.t("opencode.workspace.actions.attach_files"),
+            icon: "paperclip",
+            disabled: dejstvieIdet.value,
+        });
+    }
 
     if (mozhnoSozdatUniti.value) {
         punkty.push({
@@ -132,6 +172,16 @@ const punktyMenu = computed<GhActionMenuItem[]>(() => {
 
 /** Маршрутизация выбранного пункта меню к событию карточки. */
 function vybratDejstvie(item: GhActionMenuItem): void {
+    if (item.id === "add_project") {
+        oknoDobavleniya.value = true;
+        return;
+    }
+
+    if (item.id === "attach_files") {
+        oknoFaylov.value = true;
+        return;
+    }
+
     if (item.id === "create_units") {
         emit("create-units");
         return;
@@ -150,6 +200,15 @@ function vybratDejstvie(item: GhActionMenuItem): void {
     if (item.id === "delete") {
         emit("delete");
     }
+}
+
+/** Удалить файл: бэкенд удаляет его из контейнера и реестра. */
+async function udalitFayl(fileId: string): Promise<void> {
+    await OpenCodeService.udalitFaylWorkspace({
+        workspaceId: props.workspace.id,
+        fileId,
+    });
+    emit("refresh");
 }
 
 /** Переход на страницу юнитов с фильтром по созданным юнитам. */
@@ -276,6 +335,28 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
       </GhLabel>
     </div>
 
+    <div v-if="fayly.length > 0" class="workspace-card__projects">
+      <span class="workspace-card__units-title">{{ $t('opencode.workspace.files.title') }}</span>
+      <GhLabel
+          v-for="file in fayly"
+          :key="'ws_file_' + file.fileId"
+          variant="neutral"
+          icon="file"
+          :title="file.name"
+      >
+        {{ file.name }}
+        <GhIcon v-if="!file.applied" name="sync" :size="12" />
+        <GhButton
+            variant="invisible"
+            size="sm"
+            icon="x"
+            :aria-label="$t('common.buttons.delete')"
+            :disabled="!mozhnoObnovit"
+            @click="udalitFayl(file.fileId)"
+        />
+      </GhLabel>
+    </div>
+
     <GhBanner
         v-if="workspace.status === 'ERROR'"
         variant="danger"
@@ -302,6 +383,18 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
 
     <!-- Один экземпляр диалога на список: только у карточки-источника. -->
     <OknoSsylkiWorkspace v-if="workspace.id === storPomoschnika.workspaceId" />
+
+    <OknoDobavleniyaProekta
+        v-model="oknoDobavleniya"
+        :workspace="workspace"
+        @done="emit('refresh')"
+    />
+
+    <OknoFaylovWorkspace
+        v-model="oknoFaylov"
+        :workspace="workspace"
+        @done="emit('refresh')"
+    />
   </GhBox>
 </template>
 

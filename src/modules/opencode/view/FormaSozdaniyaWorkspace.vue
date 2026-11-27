@@ -43,6 +43,9 @@ const {
     modelPoUmolchaniyu,
     projectIds,
     prompt,
+    files,
+    zagruzkaFaylov,
+    oshibkaFaylov,
     proekti,
     loaderProektov,
     oshibkaZagruzkiProektov,
@@ -115,6 +118,17 @@ async function sozdat() {
 
     if (id !== null) {
         emit("sozdan", id);
+    }
+}
+
+/** Загрузка выбранных файлов workspace. */
+async function faylyVibrani(vybrannye: File[] | null): Promise<void> {
+    if (!vybrannye || vybrannye.length === 0) {
+        return;
+    }
+
+    for (const file of vybrannye) {
+        await formaStore.zagruzitFayl(file);
     }
 }
 
@@ -343,6 +357,41 @@ onBeforeUnmount(() => {
       >
         <!-- Промпт бывает многострочным: GhInput в режиме textarea (F2). -->
         <GhInput v-model="prompt" type="textarea" autogrow />
+      </GhFormField>
+
+      <GhFormField
+          :label="$t('opencode.workspace.form.fields.files')"
+          :caption="$t('opencode.workspace.form.hint_files')"
+      >
+        <q-file
+            :model-value="null"
+            multiple
+            :loading="zagruzkaFaylov"
+            accept=".png,.jpg,.jpeg,.gif,.webp,.txt,.md,.csv,.tsv,.json,.yaml,.yml,.xml,.log"
+            :label="$t('opencode.workspace.form.fields.files')"
+            @update:model-value="(value) => faylyVibrani(value as File[] | null)"
+        >
+          <template #prepend>
+            <q-icon name="paperclip" />
+          </template>
+        </q-file>
+
+        <ul v-if="files.length > 0" class="opencode-form__files">
+          <li v-for="file in files" :key="file.id" class="opencode-form__file-row">
+            <q-icon name="file" size="14px" />
+            <span class="opencode-form__file-name">{{ file.name }}</span>
+            <q-btn
+                flat
+                dense
+                round
+                icon="x"
+                :aria-label="$t('common.buttons.delete')"
+                @click="formaStore.udalitFayl(file.id)"
+            />
+          </li>
+        </ul>
+
+        <p v-if="oshibkaFaylov" class="opencode-form__row-error">{{ oshibkaFaylov }}</p>
       </GhFormField>
 
       <GhBanner v-if="proektiBezPushTokena.length > 0" variant="danger">

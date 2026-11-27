@@ -5,6 +5,7 @@ import {
     modeliRekvizitov,
     normalizovatModel,
 } from "@/modules/opencode/model/ModeliOpenCode";
+import { normalizovatHodWorkspace } from "@/modules/opencode/model/WorkspaceSession";
 import type {
     WorkspaceAnswer,
     WorkspaceQuestion,
@@ -159,7 +160,7 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             const response = await WorkspaceService.istoriya({ workspaceId: this.workspaceId });
 
             if (response.status === "success") {
-                this.hody = response.data;
+                this.hody = response.data.map(normalizovatHodWorkspace);
             } else {
                 this.oshibka = response.status === "fail" ? response.data.message : response.message;
             }

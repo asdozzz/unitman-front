@@ -1,6 +1,8 @@
 import apiClient from "@/bootstrap/apiClient";
 import type { ApiResponse } from "@/bootstrap/apiClient/ApiResponse";
 import type {
+    FajlHodaSsilka,
+    FajlHodaTekst,
     WorkspaceAnswer,
     WorkspaceLaunch,
     WorkspaceSession,
@@ -140,6 +142,22 @@ class WorkspaceService {
 
     poluchitProgressHoda(params: { turnId: string }): Promise<ApiResponse<ProgressHoda | null>> {
         return apiClient.post<ProgressHoda | null>("/opencode/poluchitProgressHoda", params);
+    }
+
+    /** Подписанная ссылка на скачивание артефакта хода. */
+    poluchitSsylkuFajla(params: {
+        turnId: string;
+        fileId: string;
+    }): Promise<ApiResponse<FajlHodaSsilka>> {
+        return apiClient.post<FajlHodaSsilka>("/opencode/fajl/ssylka", params);
+    }
+
+    /** Текст артефакта хода для предпросмотра (лимит 512 КБ). */
+    poluchitTekstFajla(params: {
+        turnId: string;
+        fileId: string;
+    }): Promise<ApiResponse<FajlHodaTekst>> {
+        return apiClient.post<FajlHodaTekst>("/opencode/fajl/tekst", params);
     }
 }
 

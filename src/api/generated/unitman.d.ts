@@ -866,6 +866,43 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/mediateka/workspace/presign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Подготовить прямую загрузку файла workspace в MinIO */
+        post: operations["post_app_mediateka_infra_mediateka_workspacepresign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mediateka/workspace/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Загрузить файл workspace (черновик)
+         * @description Принимает multipart/form-data с одним файлом. Разрешены только изображения и текстовые файлы по allowlist MEDIATEKA_WORKSPACE_ALLOWED_EXT. Исполняемые и активные типы запрещены всегда. Файл сохраняется как черновик и привязывается к workspace через OpenCode.
+         */
+        post: operations["post_app_mediateka_infra_mediateka_workspaceupload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications": {
         parameters: {
             query?: never;
@@ -1098,6 +1135,40 @@ export type paths = {
         put?: never;
         /** Архивировать сессию: остаётся в списке, новые ходы запрещены */
         post: operations["post_app_opencode_infra_opencode_arhivirovatsessiyu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/fajl/ssylka": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Получить подписанную ссылку на файл-артефакт хода */
+        post: operations["post_app_opencode_infra_opencodefile_ssylka"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/fajl/tekst": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Получить текст файла-артефакта хода для preview */
+        post: operations["post_app_opencode_infra_opencodefile_tekst"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1598,6 +1669,57 @@ export type paths = {
         put?: never;
         /** Архивировать workspace (при незакоммиченных изменениях требует force) */
         post: operations["post_app_opencode_infra_workspace_arhivirovat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/dobavitProekt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Добавить проект в работающий workspace */
+        post: operations["post_app_opencode_infra_workspace_dobavitproekt"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/fayly/prikrepit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Прикрепить файлы к работающему workspace */
+        post: operations["post_app_opencode_infra_workspace_prikrepitfayly"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/fayly/udalit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить файл workspace */
+        post: operations["post_app_opencode_infra_workspace_udalitfayl"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2565,6 +2687,26 @@ export type paths = {
         get: operations["get_app_runner_infra_runner_list"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runner/opencode/artifact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Загрузить файл-артефакт хода OpenCode
+         * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. Аутентификация — `X-Runner-Id` и `X-Runner-Signature`: hex(HMAC-SHA256(workflowId + "\n" + name + "\n" + rawBody, secret)). Тело — сырые байты файла.
+         */
+        post: operations["post_app_opencode_infra_runnerartifact_artifact"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3612,6 +3754,17 @@ export type components = {
             tip: string;
             value: string;
         };
+        /** @description Добавление проектов в работающий workspace; локальные ветки создаются клиентом до запроса */
+        DobavitProektyVWorkspace: {
+            projects: {
+                /** @example feature/added */
+                branch: string;
+                /** Format: uuid */
+                projectId: string;
+            }[];
+            /** Format: uuid */
+            workspaceId: string;
+        };
         DobavitTipVoluma: {
             /** @default  */
             code?: string;
@@ -3650,6 +3803,47 @@ export type components = {
              * @enum {string}
              */
             status: "fail";
+        };
+        /** @description Метаданные файла-артефакта хода */
+        FajlHoda: {
+            /** @example text/markdown */
+            contentType: string;
+            /** @example 1762000000 */
+            createdAt: number;
+            /** Format: uuid */
+            fileId: string;
+            /** @example feature-plan.md */
+            name: string;
+            /** @example 4096 */
+            size: number;
+            /** Format: uuid */
+            turnId: string;
+            /** Format: uuid */
+            workspaceId: string;
+        };
+        /** @description Подписанная ссылка на файл-артефакт хода */
+        FajlHodaSsilka: {
+            /** @example text/markdown */
+            contentType: string;
+            /** Format: uuid */
+            fileId: string;
+            /** @example feature-plan.md */
+            name: string;
+            /** @example 4096 */
+            size: number;
+            /** Format: uri */
+            url: string;
+        };
+        /** @description Текст файла-артефакта хода для preview */
+        FajlHodaTekst: {
+            /** @example # План фичи... */
+            content: string;
+            /** @example text/markdown */
+            contentType: string;
+            /** Format: uuid */
+            fileId: string;
+            /** @example feature-plan.md */
+            name: string;
         };
         ForceRemoveProject: {
             id: string;
@@ -4161,6 +4355,8 @@ export type components = {
         OpenCodeTurnResult: {
             /** @description Финальный ответ ассистента при Kind=ANSWER */
             Answer?: string | null;
+            /** @description Метаданные файлов-артефактов, созданных ходом; у легаси-ходов поля может не быть */
+            Attachments?: components["schemas"]["VlozhenieHoda"][];
             /** @description Ключ перевода ошибки при Kind=ERROR */
             ErrorKey?: string | null;
             /** @description Фактический текст ошибки раннера/OpenCode; не переводится */
@@ -4366,6 +4562,12 @@ export type components = {
             fileId?: string;
             /** @default  */
             projectId?: string;
+        };
+        /** @description Прикрепление загруженных черновиков файлов к работающему workspace */
+        PrikrepitFaylyKWorkspace: {
+            fileIds: string[];
+            /** Format: uuid */
+            workspaceId: string;
         };
         PrikrepitRedaktoraKUnitu: {
             unitId: string;
@@ -4942,6 +5144,8 @@ export type components = {
             branch: string;
             /** Format: uuid */
             credentialId: string;
+            /** @description Черновики файлов workspace, загруженные текущим пользователем; привязываются до запуска контейнера */
+            fileIds?: string[];
             /**
              * @description Модель из набора реквизитов; пустое значение — дефолтная модель реквизитов
              * @example gpt-4o
@@ -5030,6 +5234,13 @@ export type components = {
             targetUnitId: string;
             /** @description Идентификатор переменной конфига юнита */
             variableId: string;
+        };
+        /** @description Удаление файла из работающего workspace */
+        UdalitFaylWorkspace: {
+            /** Format: uuid */
+            fileId: string;
+            /** Format: uuid */
+            workspaceId: string;
         };
         UdalitLichniyToken: {
             id: string;
@@ -5458,6 +5669,22 @@ export type components = {
         };
         VklyuchitRedaktirovanieUnita: {
             unitId: string;
+        };
+        /** @description Метаданные файла-артефакта в результате хода (RezultatHodaOpenCode::$Attachments) */
+        VlozhenieHoda: {
+            /** @example text/markdown */
+            ContentType: string;
+            /** Format: uuid */
+            FileId: string;
+            /** @example feature-plan.md */
+            Name: string;
+            /** @description Вычисляется бэкендом по расширению (md/txt/json/yaml/yml/csv/log) */
+            Previewable: boolean;
+            /**
+             * @description Размер файла в байтах
+             * @example 4096
+             */
+            Size: number;
         };
         /** @description Тип тома проекта с привязанными архивами (VolumeTypeList::toArray) */
         VolumeTypeList: {
@@ -7723,6 +7950,73 @@ export interface operations {
             };
         };
     };
+    post_app_mediateka_infra_mediateka_workspacepresign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    contentType?: string | null;
+                    name: string;
+                    /** Format: int64 */
+                    size: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Параметры загрузки либо ErrorEnvelope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_mediateka_infra_mediateka_workspaceupload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    name?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Файл загружен либо ErrorEnvelope */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_app_notification_infra_notification_list: {
         parameters: {
             query?: {
@@ -8120,6 +8414,127 @@ export interface operations {
                 content?: never;
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencodefile_ssylka: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    fileId: string;
+                    /** Format: uuid */
+                    turnId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Ссылка на скачивание файла */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FajlHodaSsilka"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ход, сессия или файл не найдены либо чужие */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_opencodefile_tekst: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uuid */
+                    fileId: string;
+                    /** Format: uuid */
+                    turnId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Текст файла */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FajlHodaTekst"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ход, сессия или файл не найдены либо чужие */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Тип не previewable, файл слишком большой или не UTF-8 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки (ErrorEnvelope) */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -9131,6 +9546,114 @@ export interface operations {
                 content?: never;
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_dobavitproekt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DobavitProektyVWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Обновление запущено */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_prikrepitfayly: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrikrepitFaylyKWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Обновление запущено */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspace_udalitfayl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UdalitFaylWorkspace"];
+            };
+        };
+        responses: {
+            /** @description Обновление запущено */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка обработки */
             500: {
                 headers: {
                     [name: string]: unknown;
@@ -11774,6 +12297,86 @@ export interface operations {
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_runnerartifact_artifact: {
+        parameters: {
+            query: {
+                /** @description MIME-тип файла */
+                contentType?: string;
+                /** @description Исходное имя файла; нормализуется после проверки подписи */
+                name: string;
+                /** @description Идентификатор workflow хода */
+                workflowId: string;
+                /** @description Идентификатор workspace-сессии хода */
+                workspaceId: string;
+            };
+            header: {
+                /** @description Идентификатор зарегистрированного раннера */
+                "X-Runner-Id": string;
+                /** @description hex(HMAC-SHA256(workflowId + "\n" + name + "\n" + body, secret)) */
+                "X-Runner-Signature": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/octet-stream": string;
+            };
+        };
+        responses: {
+            /** @description Файл зарегистрирован (повторная загрузка идемпотентна) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FajlHoda"];
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+            /** @description Неверная подпись раннера (runner.invalid_signature) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Неизвестный раннер (runner.not_found) либо ход не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ход уже не выполняется (opencode.artifact.turn_not_running) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Тело больше лимита (opencode.artifact.file_is_too_large) */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нарушены имя, тип, кодировка, владелец или лимиты */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import i18n from "@/bootstrap/translator";
@@ -14,7 +14,14 @@ import {
 } from "@/components/ui";
 import type { GhSelectOption } from "@/components/ui";
 import { useStorChataWorkspace } from "@/modules/opencode/store/StorChataWorkspace";
-import type { WorkspaceAnswer } from "@/modules/opencode/model/WorkspaceSession";
+import WorkspaceService from "@/modules/opencode/services/WorkspaceService";
+import OknoProsmotraFajla from "@/modules/opencode/view/Workspace/OknoProsmotraFajla.vue";
+import { formatSize } from "@/modules/opencode/utils/formatSize";
+import type {
+    WorkspaceAnswer,
+    WorkspaceAttachment,
+    WorkspaceTurn,
+} from "@/modules/opencode/model/WorkspaceSession";
 
 const props = defineProps<{ id: string }>();
 
@@ -59,6 +66,59 @@ const tekstOshibki = computed<string>(() => {
 
     return i18n.global.te(klyuch) ? i18n.global.t(klyuch) : klyuch;
 });
+
+const vibraniyHodId = ref<string | null>(null);
+const vibranoeVlozhenie = ref<WorkspaceAttachment | null>(null);
+const oshibkaSkachivaniya = ref(false);
+
+const oknoProsmotraOtkrito = computed<boolean>(() => vibranoeVlozhenie.value !== null);
+
+/** Вложения конкретного хода; у легаси-ходов список пуст. */
+function vlozheniyaHoda(hod: WorkspaceTurn): WorkspaceAttachment[] {
+    return hod.result?.Attachments ?? [];
+}
+
+function otkritProsmotr(hodId: string, attachment: WorkspaceAttachment): void {
+    vibraniyHodId.value = hodId;
+    vibranoeVlozhenie.value = attachment;
+}
+
+function zakritProsmotr(value: boolean): void {
+    if (value) {
+        return;
+    }
+
+    vibranoeVlozhenie.value = null;
+    vibraniyHodId.value = null;
+}
+
+async function skachatFajl(hodId: string, attachment: WorkspaceAttachment): Promise<void> {
+    oshibkaSkachivaniya.value = false;
+
+    const response = await WorkspaceService.poluchitSsylkuFajla({
+        turnId: hodId,
+        fileId: attachment.FileId,
+    });
+
+    if (response.status === "success") {
+        window.open(response.data.url, "_blank", "noopener,noreferrer");
+
+        return;
+    }
+
+    oshibkaSkachivaniya.value = true;
+}
+
+/** Клик по имени: preview для текстовых форматов, иначе — скачивание. */
+function nazhatieNaImya(hodId: string, attachment: WorkspaceAttachment): void {
+    if (attachment.Previewable) {
+        otkritProsmotr(hodId, attachment);
+
+        return;
+    }
+
+    void skachatFajl(hodId, attachment);
+}
 
 function otvetit(hodId: string, questionId: string, optionId: string | null) {
     const answers: WorkspaceAnswer[] = [{
@@ -207,6 +267,50 @@ onUnmounted(() => {
             <GhIcon name="sync" class="workspace-chat__spin" />
             <span>{{ $t('opencode.chat.status.RUNNING') }}</span>
           </div>
+
+          <div
+              v-if="vlozheniyaHoda(hod).length > 0"
+              class="workspace-chat__attachments"
+          >
+            <GhLabel variant="neutral">{{ $t('opencode.workspace.chat.attachments') }}</GhLabel>
+            <ul class="workspace-chat__attachment-list">
+              <li
+                  v-for="attachment in vlozheniyaHoda(hod)"
+                  :key="attachment.FileId"
+                  class="workspace-chat__attachment"
+              >
+                <GhIcon name="file" class="workspace-chat__attachment-icon" />
+                <button
+                    type="button"
+                    class="workspace-chat__attachment-name"
+                    :title="attachment.Previewable
+                      ? $t('opencode.workspace.chat.preview')
+                      : $t('opencode.workspace.chat.download')"
+                    @click="nazhatieNaImya(hod.id, attachment)"
+                >
+                  {{ attachment.Name }}
+                </button>
+                <span class="workspace-chat__attachment-size">{{ formatSize(attachment.Size) }}</span>
+                <GhButton
+                    v-if="attachment.Previewable"
+                    variant="invisible"
+                    size="sm"
+                    icon="eye"
+                    :aria-label="$t('opencode.workspace.chat.preview')"
+                    :title="$t('opencode.workspace.chat.preview')"
+                    @click="otkritProsmotr(hod.id, attachment)"
+                />
+                <GhButton
+                    variant="invisible"
+                    size="sm"
+                    icon="download"
+                    :aria-label="$t('opencode.workspace.chat.download')"
+                    :title="$t('opencode.workspace.chat.download')"
+                    @click="skachatFajl(hod.id, attachment)"
+                />
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div v-if="hody.length === 0" class="workspace-chat__muted">
@@ -214,6 +318,15 @@ onUnmounted(() => {
         </div>
       </template>
     </div>
+
+    <GhBanner
+        v-if="oshibkaSkachivaniya"
+        variant="danger"
+        dismissible
+        @dismiss="oshibkaSkachivaniya = false"
+    >
+      {{ $t('opencode.workspace.chat.download_error') }}
+    </GhBanner>
 
     <footer class="workspace-chat__footer">
       <GhInput
@@ -233,6 +346,13 @@ onUnmounted(() => {
           @click="stor.otpravit()"
       />
     </footer>
+
+    <OknoProsmotraFajla
+        :model-value="oknoProsmotraOtkrito"
+        :turn-id="vibraniyHodId ?? ''"
+        :attachment="vibranoeVlozhenie"
+        @update:model-value="zakritProsmotr"
+    />
   </div>
 </template>
 
@@ -325,6 +445,59 @@ onUnmounted(() => {
 .workspace-chat__error {
   border: 1px solid var(--borderColor-danger-muted);
   color: var(--fgColor-danger);
+}
+
+.workspace-chat__attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--borderColor-default);
+  border-radius: var(--borderRadius-medium);
+}
+
+.workspace-chat__attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workspace-chat__attachment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workspace-chat__attachment-icon {
+  flex: 0 0 auto;
+  color: var(--fgColor-muted);
+}
+
+.workspace-chat__attachment-name {
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fgColor-accent);
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.workspace-chat__attachment-name:hover {
+  text-decoration: underline;
+}
+
+.workspace-chat__attachment-size {
+  flex: 0 0 auto;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
 }
 
 .workspace-chat__questions {

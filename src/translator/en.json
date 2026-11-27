@@ -1616,6 +1616,13 @@
         "create_units": "Create units",
         "actions": "Workspace actions"
       },
+      "actions": {
+        "add_project": "Add project",
+        "attach_files": "Attach files"
+      },
+      "files": {
+        "title": "Files"
+      },
       "fields": {
         "branch": "Branch",
         "projects_count": "Projects: {count}"
@@ -1641,7 +1648,8 @@
           "projects": "Projects",
           "prompt": "Initial prompt",
           "base_branch": "Base branch",
-          "local_branch": "Local branch"
+          "local_branch": "Local branch",
+          "files": "Workspace files"
         },
         "columns": {
           "project": "Project",
@@ -1654,6 +1662,7 @@
         "no_project_branches": "No branches found",
         "error_project_branches": "Failed to load project branches",
         "hint_prompt": "Runs automatically once the container is up",
+        "hint_files": "Images and text files only. Available to the agent in /workspace/unitman_files as read-only",
         "errors": {
           "token_required": "Branch creation is unavailable: no personal token with push access for projects: {projects}. Add a token in account settings",
           "vetka_zashishena": "The branch is protected: choose another name"
@@ -1688,7 +1697,16 @@
         "empty": "Send the first prompt",
         "error": "OpenCode error",
         "placeholder": "Describe the task for OpenCode",
-        "send": "Send"
+        "send": "Send",
+        "attachments": "Attachments",
+        "preview": "Preview",
+        "download": "Download",
+        "preview_loading": "Loading file…",
+        "preview_error": "Failed to open file",
+        "preview_unsupported": "Preview unavailable",
+        "preview_too_large": "File is too large for preview",
+        "download_error": "Failed to download file",
+        "preview_binary": "The file is not plain text"
       },
       "errors": {
         "not_found": "Workspace not found",

@@ -423,6 +423,7 @@ onUnmounted(() => {
             @delete="udalit(workspace)"
             @create-units="sozdatUniti(workspace)"
             @open-units="otkritUniti"
+            @refresh="stor.poluchitSpisok()"
         />
       </div>
     </div>

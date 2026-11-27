@@ -3,6 +3,7 @@
  *
  * Workspace — самостоятельный агрегат. У него нет юнитов и нет поля `type`.
  */
+import type { Schema } from "@/api/types";
 
 export type WorkspaceStatus =
     | "CREATING"
@@ -43,10 +44,27 @@ export type WorkspaceTurnResult = {
     Kind: "ANSWER" | "QUESTION" | "ERROR";
     Answer?: string | null;
     Questions?: WorkspaceQuestion[];
+    /** Файлы-артефакты хода; у легаси-ходов поля нет. */
+    Attachments?: WorkspaceAttachment[];
     ErrorKey?: string | null;
     ErrorMessage?: string | null;
     ExternalSessionId?: string | null;
 };
+
+/**
+ * Артефакт, созданный ходом ассистента.
+ *
+ * Форма полностью совпадает с компонентом `VlozhenieHoda` из OpenAPI
+ * (метаданные `RezultatHodaOpenCode::$Attachments`), поэтому тип берётся из
+ * сгенерированной схемы, а не пишется руками.
+ */
+export type WorkspaceAttachment = Schema<"VlozhenieHoda">;
+
+/** Ответ `POST /opencode/fajl/ssylka` (схема `FajlHodaSsilka`). */
+export type FajlHodaSsilka = Schema<"FajlHodaSsilka">;
+
+/** Ответ `POST /opencode/fajl/tekst` (схема `FajlHodaTekst`). */
+export type FajlHodaTekst = Schema<"FajlHodaTekst">;
 
 export type WorkspaceQuestion = {
     Id: string;
@@ -104,6 +122,34 @@ export type WorkspaceLaunch = {
     status: WorkspaceTurn["status"];
     progressChannel: string;
 };
+
+/**
+ * Привести результат хода к полной форме.
+ *
+ * У легаси-ходов поля `Attachments` нет — на экране это должно быть пустым
+ * списком, а не `undefined`, иначе проверки длины требуют дополнительных
+ * охранных условий в шаблонах.
+ */
+export function normalizovatRezultatHoda(
+    result: WorkspaceTurnResult | null | undefined,
+): WorkspaceTurnResult | null {
+    if (result === null || result === undefined) {
+        return null;
+    }
+
+    return {
+        ...result,
+        Attachments: result.Attachments ?? [],
+    };
+}
+
+/** Нормализовать ход истории workspace. */
+export function normalizovatHodWorkspace(hod: WorkspaceTurn): WorkspaceTurn {
+    return {
+        ...hod,
+        result: normalizovatRezultatHoda(hod.result),
+    };
+}
 
 export const TRANZITNIE_STATUSY: readonly WorkspaceStatus[] = [
     "CREATING",

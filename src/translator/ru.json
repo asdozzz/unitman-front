@@ -1616,6 +1616,13 @@
         "create_units": "Создать юниты",
         "actions": "Действия с workspace"
       },
+      "actions": {
+        "add_project": "Добавить проект",
+        "attach_files": "Прикрепить файлы"
+      },
+      "files": {
+        "title": "Файлы"
+      },
       "fields": {
         "branch": "Ветка",
         "projects_count": "Проектов: {count}"
@@ -1641,7 +1648,8 @@
           "projects": "Проекты",
           "prompt": "Первый промпт",
           "base_branch": "Базовая ветка",
-          "local_branch": "Локальная ветка"
+          "local_branch": "Локальная ветка",
+          "files": "Файлы workspace"
         },
         "columns": {
           "project": "Проект",
@@ -1654,6 +1662,7 @@
         "no_project_branches": "Ветки не найдены",
         "error_project_branches": "Не удалось загрузить ветки проекта",
         "hint_prompt": "Запустится автоматически после старта контейнера",
+        "hint_files": "Только изображения и текстовые файлы. Будут доступны агенту в /workspace/unitman_files только для чтения",
         "errors": {
           "token_required": "Создание веток недоступно: нет личного токена с правом push для проектов: {projects}. Добавьте токен в настройках аккаунта",
           "vetka_zashishena": "Ветка защищена: выберите другое имя"
@@ -1688,7 +1697,16 @@
         "empty": "Отправьте первый промпт",
         "error": "Ошибка OpenCode",
         "placeholder": "Опишите задачу для OpenCode",
-        "send": "Отправить"
+        "send": "Отправить",
+        "attachments": "Вложения",
+        "preview": "Предпросмотр",
+        "download": "Скачать",
+        "preview_loading": "Загрузка файла…",
+        "preview_error": "Не удалось открыть файл",
+        "preview_unsupported": "Предпросмотр недоступен",
+        "preview_too_large": "Файл слишком большой для предпросмотра",
+        "download_error": "Не удалось скачать файл",
+        "preview_binary": "Файл не является текстом"
       },
       "errors": {
         "not_found": "Workspace не найден",

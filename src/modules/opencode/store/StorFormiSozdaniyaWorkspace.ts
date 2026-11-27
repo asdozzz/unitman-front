@@ -3,6 +3,7 @@ import OpenCodeService from "@/modules/opencode/services/OpenCodeService";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import { useStorSpiskaWorkspace } from "@/modules/opencode/store/StorSpiskaWorkspace";
 import ProektiService from "@/modules/unit/services/ProektiService";
+import MediatekaService, { type ChernovikFayla } from "@/modules/unit/services/MediatekaService";
 import LichniyTokenService from "@/modules/account/services/LichniyTokenService";
 import type { Proekt } from "@/modules/unit/store/SpisokProektov/model/Proekt";
 import type { Schema } from "@/api/types";
@@ -41,6 +42,10 @@ type StorFormiSozdaniyaWorkspaceState = {
     model: string;
     /** Проекты в выбранном порядке: он же порядок папок в workspace. */
     projectIds: string[];
+    /** Загруженные файлы workspace (изображения и текстовые). */
+    files: ChernovikFayla[];
+    zagruzkaFaylov: boolean;
+    oshibkaFaylov: string | null;
     /** Первый промпт: запускается после успешного старта контейнера. */
     prompt: string;
     proekti: Proekt[];
@@ -89,6 +94,9 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
             credentialId: "",
             model: "",
             projectIds: [],
+            files: [],
+            zagruzkaFaylov: false,
+            oshibkaFaylov: null,
             prompt: "",
             proekti: [],
             loaderProektov: false,
@@ -192,6 +200,9 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
             this.credentialId = pervaya?.id ?? "";
             this.model = modelPoUmolchaniyu(pervaya);
             this.projectIds = [];
+            this.files = [];
+            this.zagruzkaFaylov = false;
+            this.oshibkaFaylov = null;
             this.prompt = "";
             this.oshibkaOtBackenda = null;
             this.loader = false;
@@ -339,6 +350,36 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
                 this.oshibkiVetokProektov[projectId] = response.data.message;
             } else {
                 this.oshibkiVetokProektov[projectId] = response.message;
+            }
+        },
+
+        /** Загрузить файл workspace как черновик. */
+        async zagruzitFayl(file: File): Promise<void> {
+            this.zagruzkaFaylov = true;
+            this.oshibkaFaylov = null;
+
+            try {
+                const response = await MediatekaService.zagruzitChernovikWorkspace(file);
+
+                if (response.status === "success") {
+                    this.files = [...this.files, response.data];
+                    return;
+                }
+
+                this.oshibkaFaylov = response.status === "fail"
+                    ? response.data.message
+                    : response.message;
+            } finally {
+                this.zagruzkaFaylov = false;
+            }
+        },
+
+        /** Удалить ранее загруженный черновик файла workspace. */
+        async udalitFayl(fileId: string): Promise<void> {
+            const response = await MediatekaService.udalitFayl(fileId);
+
+            if (response.status === "success") {
+                this.files = this.files.filter((file) => file.id !== fileId);
             }
         },
 
@@ -496,10 +537,14 @@ export const useStorFormiSozdaniyaWorkspace = defineStore("StorFormiSozdaniyaWor
                 // Фаза 2: создание workspace с готовыми ветками.
                 this.etapSozdaniya = "workspace";
 
-                const payload: Schema<"SozdatWorkspace"> & { model?: string | null } = {
+                const payload: Schema<"SozdatWorkspace"> & {
+                    model?: string | null;
+                    fileIds?: string[];
+                } = {
                     name: this.name.trim(),
                     credentialId: this.credentialId,
                     projectIds: [...this.projectIds],
+                    fileIds: this.files.map((file) => file.id),
                     prompt: this.prompt.trim(),
                     // Пустую модель не отправляем: бэкенд возьмёт дефолт реквизитов.
                     model: normalizovatModel(this.model) ?? undefined,
