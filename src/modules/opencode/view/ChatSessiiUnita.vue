@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import {
     GhBanner,
     GhButton,
+    GhCounter,
     GhIcon,
     GhInput,
     GhLabel,
-    GhSelect,
     GhSkeleton,
 } from "@/components/ui";
-import type { GhSelectOption } from "@/components/ui";
 import { useStorChataSessiiUnita } from "@/modules/opencode/store/StorChataSessiiUnita";
 import type { UnitSessionAnswer } from "@/modules/opencode/model/UnitSession";
+import PanelRezhimaAgenta from "@/modules/agent-mode/view/PanelRezhimaAgenta.vue";
+import OknoNavykov from "@/modules/skill/view/OknoNavykov.vue";
+import { useNavykiSessii } from "@/modules/skill/composables/useNavykiSessii";
 
 const props = defineProps<{ id: string }>();
 
@@ -24,8 +26,11 @@ const {
     sostoyanie,
     hody,
     prompt,
+    agentModeId,
+    credentialId,
     model,
-    dostupnieModeli,
+    dostupnieRezhimy,
+    dostupnieRekvizity,
     loader,
     otpravka,
     oshibka,
@@ -34,10 +39,31 @@ const {
     prichinaReadOnly,
 } = storeToRefs(stor);
 
-/** Опции моделей реквизитов сессии. */
-const optsModelei = computed<GhSelectOption[]>(() =>
-    dostupnieModeli.value.map((nazvanie) => ({ value: nazvanie, label: nazvanie })),
-);
+const oknoNavykovOtkrito = ref(false);
+
+/**
+ * Идентификатор сессии: маршрут уже содержит id сессии, но после загрузки
+ * берём подтверждённый сервером, чтобы не запрашивать навыки по чужому id.
+ */
+const idSessii = computed<string>(() => session.value?.id ?? props.id);
+
+const {
+    navyki,
+    loading: navykiLoader,
+    error: navykiOshibka,
+    truncated: navykiObrezani,
+    zagruzit: zagruzitNavyki,
+} = useNavykiSessii(idSessii);
+
+/** Смена мода действует только на последующие ходы. */
+function izmenitRezhim(value: string | number | null): void {
+    stor.ustanovitRezhim(value === null ? null : String(value));
+}
+
+/** Смена реквизитов действует только на последующие ходы. */
+function izmenitRekvizity(value: string | number | null): void {
+    stor.ustanovitRekvizity(value === null ? null : String(value));
+}
 
 /** Смена модели действует только на последующие ходы. */
 function izmenitModel(value: string | number | null): void {
@@ -104,18 +130,20 @@ onUnmounted(() => {
       <GhLabel v-if="readOnly" variant="neutral">
         {{ $t('opencode.unit_sessions.badges.read_only') }}
       </GhLabel>
-      <div class="unit-session-chat__model-select">
-        <GhSelect
-            :model-value="model"
-            :options="optsModelei"
-            size="sm"
-            use-input
-            hide-selected
-            fill-input
-            :placeholder="$t('opencode.rekvizity.fields.default_model')"
-            @update:model-value="izmenitModel"
-        />
-      </div>
+      <GhButton
+          variant="invisible"
+          size="sm"
+          icon="book"
+          :label="$t('skill.chat.button')"
+          :aria-label="$t('skill.chat.button_tooltip')"
+          :title="$t('skill.chat.button_tooltip')"
+          @click="oknoNavykovOtkrito = true"
+      />
+      <GhCounter
+          v-if="!navykiLoader && !navykiOshibka"
+          :value="navyki.length"
+          :label="$t('skill.chat.count_label', { count: navyki.length })"
+      />
       <GhButton
           v-if="session && !session.archived"
           variant="invisible"
@@ -211,14 +239,27 @@ onUnmounted(() => {
     </div>
 
     <footer class="unit-session-chat__footer">
-      <GhInput
-          v-model="prompt"
-          type="textarea"
-          autogrow
-          :placeholder="$t('opencode.unit_sessions.chat.placeholder')"
-          :disabled="!mozhnoOtpravlyat || otpravka"
-          @keydown.enter.exact.prevent="stor.otpravit()"
-      />
+      <div class="unit-session-chat__composer">
+        <GhInput
+            v-model="prompt"
+            type="textarea"
+            autogrow
+            :placeholder="$t('opencode.unit_sessions.chat.placeholder')"
+            :disabled="!mozhnoOtpravlyat || otpravka"
+            @keydown.enter.exact.prevent="stor.otpravit()"
+        />
+        <PanelRezhimaAgenta
+            :modes="dostupnieRezhimy"
+            :mode-id="agentModeId"
+            :credentials="dostupnieRekvizity"
+            :credential-id="credentialId"
+            :model="model"
+            :disabled="!mozhnoOtpravlyat || otpravka"
+            @update:mode-id="izmenitRezhim"
+            @update:credential-id="izmenitRekvizity"
+            @update:model="izmenitModel"
+        />
+      </div>
       <GhButton
           variant="primary"
           icon="paper-airplane"
@@ -228,6 +269,15 @@ onUnmounted(() => {
           @click="stor.otpravit()"
       />
     </footer>
+
+    <OknoNavykov
+        v-model="oknoNavykovOtkrito"
+        :navyki="navyki"
+        :loading="navykiLoader"
+        :error="navykiOshibka"
+        :truncated="navykiObrezani"
+        @retry="zagruzitNavyki"
+    />
   </div>
 </template>
 
@@ -370,6 +420,13 @@ onUnmounted(() => {
 .unit-session-chat__footer {
   display: flex;
   align-items: flex-end;
+  gap: 8px;
+}
+
+.unit-session-chat__composer {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   gap: 8px;
 }
 </style>

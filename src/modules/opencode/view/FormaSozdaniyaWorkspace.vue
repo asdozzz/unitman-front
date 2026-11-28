@@ -20,6 +20,8 @@ import {
 } from "@/modules/opencode/store/StorFormiSozdaniyaWorkspace";
 import { proveritNazvanieVetki } from "@/modules/unit/utils/vetki";
 import { soderzhitZashishennuyuVetku } from "@/modules/unit/utils/zashishennieVetki";
+import { useEffektivnieNavyki } from "@/modules/skill/composables/useEffektivnieNavyki";
+import BlokNavykovSozdaniya from "@/modules/skill/view/BlokNavykovSozdaniya.vue";
 
 /**
  * Диалог создания workspace.
@@ -60,6 +62,24 @@ const {
     vetkiProektov,
     oshibkiVetokProektov,
 } = storeToRefs(formaStore);
+
+/** Навыки для выбранных проектов и имена проектов для их группировки. */
+const {
+    navyki,
+    loading: navykiLoader,
+    error: navykiOshibka,
+    zagruzit: zagruzitNavyki,
+} = useEffektivnieNavyki(projectIds, { enabled: otkrita, debounceMs: 300 });
+
+const imenaProektov = computed<Record<string, string>>(() => {
+    const rezultat: Record<string, string> = {};
+
+    for (const proekt of proekti.value) {
+        rezultat[proekt.id] = proekt.name;
+    }
+
+    return rezultat;
+});
 
 /** Опции реквизитов для GhSelect. */
 const optsRekvizitov = computed<GhSelectOption[]>(() =>
@@ -350,6 +370,14 @@ onBeforeUnmount(() => {
           </template>
         </div>
       </GhFormField>
+
+      <BlokNavykovSozdaniya
+          :navyki="navyki"
+          :loading="navykiLoader"
+          :error="navykiOshibka"
+          :project-names="imenaProektov"
+          @retry="zagruzitNavyki"
+      />
 
       <GhFormField
           :label="$t('opencode.workspace.form.fields.prompt')"

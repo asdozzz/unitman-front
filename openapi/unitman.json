@@ -4056,6 +4056,69 @@
                 "security": []
             }
         },
+        "/api/opencode/navyki": {
+            "post": {
+                "tags": [
+                    "OpenCode"
+                ],
+                "summary": "\u042d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043d\u0430\u0432\u044b\u043a\u0438 \u0434\u043b\u044f \u0441\u0435\u0441\u0441\u0438\u0438 OpenCode",
+                "description": "\u041f\u0440\u043e\u0435\u043a\u0442\u044b \u0440\u0430\u0437\u0440\u0435\u0448\u0430\u044e\u0442\u0441\u044f \u0438\u0437 \u0441\u0435\u0441\u0441\u0438\u0438 \u043d\u0430 \u0441\u0435\u0440\u0432\u0435\u0440\u0435; \u043a\u043b\u0438\u0435\u043d\u0442 \u043d\u0435 \u043c\u043e\u0436\u0435\u0442 \u0437\u0430\u043f\u0440\u043e\u0441\u0438\u0442\u044c \u043d\u0430\u0432\u044b\u043a\u0438 \u0447\u0443\u0436\u043e\u0433\u043e \u043f\u0440\u043e\u0435\u043a\u0442\u0430.",
+                "operationId": "opencode_session_skills",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sessionId"
+                                ],
+                                "properties": {
+                                    "sessionId": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u042d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043d\u0430\u0432\u044b\u043a\u0438 \u0441 \u043c\u0430\u043d\u0438\u0444\u0435\u0441\u0442\u043e\u043c",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430 \u043a \u0441\u0435\u0441\u0441\u0438\u0438"
+                    },
+                    "404": {
+                        "description": "\u0421\u0435\u0441\u0441\u0438\u044f \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u0430"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/opencode/unit-session/spisok": {
             "get": {
                 "tags": [
@@ -4959,6 +5022,316 @@
                 }
             }
         },
+        "/api/opencode/workspace/uchastniki/spisok": {
+            "post": {
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "\u0421\u043f\u0438\u0441\u043e\u043a \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432 workspace",
+                "operationId": "post_app_opencode_infra_workspaceparticipant_spisok",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "workspaceId"
+                                ],
+                                "properties": {
+                                    "workspaceId": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0438",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "required": [
+                                                "items"
+                                            ],
+                                            "properties": {
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/UchastnikSessii"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/opencode/workspace/uchastniki/dobavit": {
+            "post": {
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "\u041f\u0440\u0438\u0433\u043b\u0430\u0441\u0438\u0442\u044c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u0432 workspace",
+                "operationId": "post_app_opencode_infra_workspaceparticipant_dobavit",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "workspaceId",
+                                    "accountId",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "workspaceId": {
+                                        "type": "string"
+                                    },
+                                    "accountId": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "writer",
+                                            "viewer"
+                                        ]
+                                    },
+                                    "credentialId": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "model": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u0434\u043e\u0431\u0430\u0432\u043b\u0435\u043d",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "required": [
+                                                "added"
+                                            ],
+                                            "properties": {
+                                                "added": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/opencode/workspace/uchastniki/izmenit": {
+            "post": {
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u0440\u043e\u043b\u044c \u0438\u043b\u0438 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430",
+                "operationId": "post_app_opencode_infra_workspaceparticipant_izmenit",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "workspaceId",
+                                    "accountId",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "workspaceId": {
+                                        "type": "string"
+                                    },
+                                    "accountId": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "writer",
+                                            "viewer"
+                                        ]
+                                    },
+                                    "credentialId": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "model": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u0438\u0437\u043c\u0435\u043d\u0451\u043d",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "required": [
+                                                "updated"
+                                            ],
+                                            "properties": {
+                                                "updated": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/opencode/workspace/uchastniki/udalit": {
+            "post": {
+                "tags": [
+                    "Workspace"
+                ],
+                "summary": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u0438\u0437 workspace",
+                "operationId": "post_app_opencode_infra_workspaceparticipant_udalit",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "workspaceId",
+                                    "accountId"
+                                ],
+                                "properties": {
+                                    "workspaceId": {
+                                        "type": "string"
+                                    },
+                                    "accountId": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u0443\u0434\u0430\u043b\u0451\u043d",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "status",
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "required": [
+                                                "removed"
+                                            ],
+                                            "properties": {
+                                                "removed": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/opencode/workspace-session/prompt": {
             "post": {
                 "tags": [
@@ -5796,6 +6169,719 @@
                     },
                     "404": {
                         "description": "runner.not_found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/internal/opencode/skills/resolve": {
+            "post": {
+                "tags": [
+                    "Runner"
+                ],
+                "summary": "\u042d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043d\u0430\u0432\u044b\u043a\u0438 \u0434\u043b\u044f \u0440\u0430\u043d\u043d\u0435\u0440\u0430 (internal)",
+                "description": "\u0412\u043d\u0443\u0442\u0440\u0435\u043d\u043d\u0438\u0439 runner-facing endpoint. \u0410\u0443\u0442\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u044f \u2014 X-Runner-Id + X-Runner-Signature: hex(HMAC-SHA256(raw_body, secret)). \u0412\u043e\u0437\u0432\u0440\u0430\u0449\u0430\u0435\u0442 \u044d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043d\u0430\u0432\u044b\u043a\u0438, manifestHash, \u0441\u0443\u043c\u043c\u0430\u0440\u043d\u044b\u0439 \u0440\u0430\u0437\u043c\u0435\u0440 \u0438 \u043f\u0440\u0438\u0437\u043d\u0430\u043a \u0443\u0441\u0435\u0447\u0435\u043d\u0438\u044f. \u0421\u0435\u043a\u0440\u0435\u0442\u043e\u0432 \u0432 \u043e\u0442\u0432\u0435\u0442\u0435 \u043d\u0435\u0442.",
+                "operationId": "resolve_runner_skills",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "projectIds",
+                                    "formatVersion",
+                                    "maxTotalBytes"
+                                ],
+                                "properties": {
+                                    "projectIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "formatVersion": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "maxTotalBytes": {
+                                        "type": "integer",
+                                        "example": 524288
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u042d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043d\u0430\u0432\u044b\u043a\u0438",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "\u041d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u0437\u0430\u043f\u0440\u043e\u0441"
+                    },
+                    "401": {
+                        "description": "\u041d\u0435\u0432\u0435\u0440\u043d\u0430\u044f \u043f\u043e\u0434\u043f\u0438\u0441\u044c \u0440\u0430\u043d\u043d\u0435\u0440\u0430"
+                    },
+                    "404": {
+                        "description": "\u0420\u0430\u043d\u043d\u0435\u0440 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    }
+                },
+                "security": [],
+                "x-ai-enabled": false,
+                "x-internal": true
+            }
+        },
+        "/api/skill/spisok": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u0421\u043f\u0438\u0441\u043e\u043a \u043d\u0430\u0432\u044b\u043a\u043e\u0432 (\u0433\u043b\u043e\u0431\u0430\u043b\u044c\u043d\u044b\u0445 \u0438\u043b\u0438 \u043f\u0440\u043e\u0435\u043a\u0442\u043d\u044b\u0445)",
+                "operationId": "skill_list",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "scope": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "global",
+                                            "project"
+                                        ]
+                                    },
+                                    "projectId": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "includeArchived": {
+                                        "type": "boolean",
+                                        "default": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u041a\u0440\u0430\u0442\u043a\u0438\u0435 \u043a\u0430\u0440\u0442\u043e\u0447\u043a\u0438 \u043d\u0430\u0432\u044b\u043a\u043e\u0432",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430 \u043a \u043f\u0440\u043e\u0435\u043a\u0442\u0443"
+                    },
+                    "422": {
+                        "description": "\u041d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u0437\u0430\u043f\u0440\u043e\u0441"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/read": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u041f\u043e\u043b\u043d\u0430\u044f \u043a\u0430\u0440\u0442\u043e\u0447\u043a\u0430 \u043d\u0430\u0432\u044b\u043a\u0430",
+                "operationId": "skill_read",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u041a\u0430\u0440\u0442\u043e\u0447\u043a\u0430 \u043d\u0430\u0432\u044b\u043a\u0430 \u0441 \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u043c\u044b\u043c",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430"
+                    },
+                    "404": {
+                        "description": "\u041d\u0430\u0432\u044b\u043a \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/sozdat": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043d\u0430\u0432\u044b\u043a",
+                "operationId": "skill_create",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "scope"
+                                ],
+                                "properties": {
+                                    "slug": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "scope": {
+                                        "type": "string",
+                                        "enum": [
+                                            "global",
+                                            "project"
+                                        ]
+                                    },
+                                    "projectIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0418\u0434\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u043e\u0440 \u0438 slug \u0441\u043e\u0437\u0434\u0430\u043d\u043d\u043e\u0433\u043e \u043d\u0430\u0432\u044b\u043a\u0430",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432"
+                    },
+                    "422": {
+                        "description": "\u041e\u0448\u0438\u0431\u043a\u0430 \u0432\u0430\u043b\u0438\u0434\u0430\u0446\u0438\u0438 \u0438\u043b\u0438 \u0437\u0430\u043d\u044f\u0442\u044b\u0439 slug"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/izmenit": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u043d\u0430\u0432\u044b\u043a",
+                "operationId": "skill_update",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "description": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "content": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0418\u0434\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u043e\u0440 \u0438 \u0432\u0435\u0440\u0441\u0438\u044f \u043d\u0430\u0432\u044b\u043a\u0430",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432"
+                    },
+                    "404": {
+                        "description": "\u041d\u0430\u0432\u044b\u043a \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    },
+                    "422": {
+                        "description": "\u041e\u0448\u0438\u0431\u043a\u0430 \u0432\u0430\u043b\u0438\u0434\u0430\u0446\u0438\u0438"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/udalit": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u0410\u0440\u0445\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043d\u0430\u0432\u044b\u043a",
+                "operationId": "skill_archive",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u041f\u0443\u0441\u0442\u043e\u0439 \u043e\u0442\u0432\u0435\u0442: \u043d\u0430\u0432\u044b\u043a \u0430\u0440\u0445\u0438\u0432\u0438\u0440\u043e\u0432\u0430\u043d",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        },
+                                        "data": {
+                                            "type": "null"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432"
+                    },
+                    "404": {
+                        "description": "\u041d\u0430\u0432\u044b\u043a \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/prikrepit": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u041f\u0440\u0438\u043a\u0440\u0435\u043f\u0438\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442\u043d\u044b\u0439 \u043d\u0430\u0432\u044b\u043a \u043a \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c",
+                "operationId": "skill_attach_projects",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "projectIds"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "projectIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0410\u043a\u0442\u0443\u0430\u043b\u044c\u043d\u044b\u0439 \u0441\u043f\u0438\u0441\u043e\u043a \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432 \u043d\u0430\u0432\u044b\u043a\u0430",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432"
+                    },
+                    "404": {
+                        "description": "\u041d\u0430\u0432\u044b\u043a \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    },
+                    "422": {
+                        "description": "\u041d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u0437\u0430\u043f\u0440\u043e\u0441"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/otkrepit": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u041e\u0442\u043a\u0440\u0435\u043f\u0438\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442\u043d\u044b\u0439 \u043d\u0430\u0432\u044b\u043a \u043e\u0442 \u043f\u0440\u043e\u0435\u043a\u0442\u0430",
+                "operationId": "skill_detach_project",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "projectId"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "projectId": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0410\u043a\u0442\u0443\u0430\u043b\u044c\u043d\u044b\u0439 \u0441\u043f\u0438\u0441\u043e\u043a \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432 \u043d\u0430\u0432\u044b\u043a\u0430",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432"
+                    },
+                    "404": {
+                        "description": "\u041d\u0430\u0432\u044b\u043a \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    },
+                    "422": {
+                        "description": "\u041d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u0437\u0430\u043f\u0440\u043e\u0441"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/versii": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u0418\u0441\u0442\u043e\u0440\u0438\u044f \u0432\u0435\u0440\u0441\u0438\u0439 \u043d\u0430\u0432\u044b\u043a\u0430",
+                "operationId": "skill_versions",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u0412\u0435\u0440\u0441\u0438\u0438 \u043d\u0430\u0432\u044b\u043a\u0430 \u043e\u0442 \u043d\u043e\u0432\u043e\u0439 \u043a \u0441\u0442\u0430\u0440\u043e\u0439",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430"
+                    },
+                    "404": {
+                        "description": "\u041d\u0430\u0432\u044b\u043a \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/skill/effektivnie": {
+            "post": {
+                "tags": [
+                    "Skill"
+                ],
+                "summary": "\u042d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0439 \u043d\u0430\u0431\u043e\u0440 \u043d\u0430\u0432\u044b\u043a\u043e\u0432 \u0434\u043b\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432 (\u0434\u0438\u0430\u0433\u043d\u043e\u0441\u0442\u0438\u043a\u0430)",
+                "operationId": "skill_effective",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "projectIds"
+                                ],
+                                "properties": {
+                                    "projectIds": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "\u042d\u0444\u0444\u0435\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u043d\u0430\u0432\u044b\u043a\u0438 \u0441 \u043c\u0430\u043d\u0438\u0444\u0435\u0441\u0442\u043e\u043c",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "success"
+                                            ],
+                                            "example": "success"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "\u041d\u0435 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u043e\u0432\u0430\u043d"
+                    },
+                    "403": {
+                        "description": "\u041d\u0435\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430 \u043a \u043f\u0440\u043e\u0435\u043a\u0442\u0430\u043c"
                     }
                 },
                 "security": [
@@ -10390,6 +11476,25 @@
                 },
                 "type": "object"
             },
+            "OpenCodeErrorCode": {
+                "description": "\u041a\u043e\u0434\u044b \u043e\u0448\u0438\u0431\u043e\u043a OpenCode, \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b\u0435 \u0444\u0440\u043e\u043d\u0442\u0435\u043d\u0434\u0443. \u0414\u043e\u043c\u0435\u043d\u043d\u044b\u0435 \u043e\u0448\u0438\u0431\u043a\u0438 \u043f\u0440\u0438\u0445\u043e\u0434\u044f\u0442 \u0432 FailEnvelope.data.message \u0431\u0435\u0437 \u043f\u0440\u0435\u0444\u0438\u043a\u0441\u0430 \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0430",
+                "type": "string",
+                "enum": [
+                    "opencode.session.busy",
+                    "opencode.session.forbidden",
+                    "opencode.session.credential_required",
+                    "opencode.workspace.project_access_revoked",
+                    "opencode.participant.already_owner",
+                    "opencode.participant.already_exists",
+                    "opencode.participant.limit_exceeded",
+                    "opencode.participant.project_access_denied",
+                    "opencode.participant.not_found",
+                    "opencode.participant.owner_role_immutable",
+                    "opencode.participant.owner_cannot_be_removed",
+                    "opencode.participant.invalid_role"
+                ],
+                "example": "opencode.participant.not_found"
+            },
             "RegisterAccount": {
                 "description": "\u041f\u0430\u0440\u043e\u043b\u044c \u043d\u0435 \u043f\u0435\u0440\u0435\u0434\u0430\u0451\u0442\u0441\u044f: \u0441\u0438\u0441\u0442\u0435\u043c\u0430 \u0433\u0435\u043d\u0435\u0440\u0438\u0440\u0443\u0435\u0442 \u0435\u0433\u043e \u0438 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u044f\u0435\u0442 \u043d\u0430 email",
                 "required": [
@@ -11042,6 +12147,14 @@
                         ],
                         "maxLength": 128,
                         "example": "gpt-4o-mini"
+                    },
+                    "credentialId": {
+                        "description": "\u0420\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b OpenCode \u0434\u043b\u044f \u0445\u043e\u0434\u0430; \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u0431\u0435\u0440\u0443\u0442\u0441\u044f \u043b\u0438\u0447\u043d\u044b\u0435 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 (\u0438\u043d\u0430\u0447\u0435 \u2014 `opencode.session.credential_required`)",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "7d4b1c2a-3f5e-4a6b-8c9d-0e1f2a3b4c5d"
                     }
                 },
                 "type": "object"
@@ -11074,6 +12187,14 @@
                         ],
                         "maxLength": 128,
                         "example": "gpt-4o-mini"
+                    },
+                    "credentialId": {
+                        "description": "\u0420\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b OpenCode \u0434\u043b\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u0445\u043e\u0434\u0430; \u043f\u0440\u0438 \u043e\u0442\u0441\u0443\u0442\u0441\u0442\u0432\u0438\u0438 \u0431\u0435\u0440\u0443\u0442\u0441\u044f \u043b\u0438\u0447\u043d\u044b\u0435 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 (\u0438\u043d\u0430\u0447\u0435 \u2014 `opencode.session.credential_required`)",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "7d4b1c2a-3f5e-4a6b-8c9d-0e1f2a3b4c5d"
                     }
                 },
                 "type": "object"
@@ -11788,6 +12909,29 @@
                     "updatedAt": {
                         "type": "integer",
                         "example": 1762000000
+                    },
+                    "myRole": {
+                        "description": "\u0420\u043e\u043b\u044c \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f \u0432 workspace",
+                        "type": "string",
+                        "enum": [
+                            "owner",
+                            "writer",
+                            "viewer"
+                        ],
+                        "example": "writer"
+                    },
+                    "ownerAccountId": {
+                        "description": "\u0418\u0434\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u043e\u0440 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430 \u0432\u043b\u0430\u0434\u0435\u043b\u044c\u0446\u0430 workspace",
+                        "type": "string"
+                    },
+                    "participantsCount": {
+                        "description": "\u041a\u043e\u043b\u0438\u0447\u0435\u0441\u0442\u0432\u043e \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u0432 workspace, \u0432\u043a\u043b\u044e\u0447\u0430\u044f \u0432\u043b\u0430\u0434\u0435\u043b\u044c\u0446\u0430",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "shared": {
+                        "description": "true \u2014 workspace \u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d \u0431\u043e\u043b\u0435\u0435 \u0447\u0435\u043c \u043e\u0434\u043d\u043e\u043c\u0443 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0443",
+                        "type": "boolean"
                     }
                 },
                 "type": "object"
@@ -11865,7 +13009,7 @@
                         ]
                     },
                     "canAcceptMessages": {
-                        "description": "status = RUNNING \u0418 \u0441\u0435\u0441\u0441\u0438\u044f \u043d\u0435 \u0432 \u0430\u0440\u0445\u0438\u0432\u0435 \u0418 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u0445\u043e\u0434 \u043d\u0435 RUNNING",
+                        "description": "status = RUNNING \u0418 \u0441\u0435\u0441\u0441\u0438\u044f \u043d\u0435 \u0432 \u0430\u0440\u0445\u0438\u0432\u0435 \u0418 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u0445\u043e\u0434 \u043d\u0435 RUNNING \u0418 \u0440\u043e\u043b\u044c \u043f\u043e\u0437\u0432\u043e\u043b\u044f\u0435\u0442 \u043f\u0438\u0441\u0430\u0442\u044c (owner \u0438\u043b\u0438 writer)",
                         "type": "boolean"
                     },
                     "lastTurnId": {
@@ -11885,6 +13029,96 @@
                             "ANSWERED",
                             "FAILED"
                         ]
+                    },
+                    "myRole": {
+                        "description": "\u0420\u043e\u043b\u044c \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f \u0432 workspace",
+                        "type": "string",
+                        "enum": [
+                            "owner",
+                            "writer",
+                            "viewer"
+                        ],
+                        "example": "writer"
+                    },
+                    "canManage": {
+                        "description": "true \u2014 \u0442\u0435\u043a\u0443\u0449\u0438\u0439 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u043c\u043e\u0436\u0435\u0442 \u0443\u043f\u0440\u0430\u0432\u043b\u044f\u0442\u044c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430\u043c\u0438 (\u0432\u043b\u0430\u0434\u0435\u043b\u0435\u0446)",
+                        "type": "boolean"
+                    },
+                    "participants": {
+                        "description": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0438 workspace \u0441 \u0440\u043e\u043b\u044f\u043c\u0438 \u0438 \u043b\u0438\u0447\u043d\u044b\u043c\u0438 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u0430\u043c\u0438",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UchastnikSessii"
+                        }
+                    },
+                    "myDefaultCredentialId": {
+                        "description": "\u041b\u0438\u0447\u043d\u044b\u0435 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e; null \u2014 \u043d\u0435 \u0437\u0430\u0434\u0430\u043d\u044b",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "myDefaultModel": {
+                        "description": "\u041c\u043e\u0434\u0435\u043b\u044c \u0442\u0435\u043a\u0443\u0449\u0435\u0433\u043e \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e; null \u2014 \u043d\u0435 \u0437\u0430\u0434\u0430\u043d\u0430",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "gpt-4o-mini"
+                    }
+                },
+                "type": "object"
+            },
+            "UchastnikSessii": {
+                "description": "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a workspace (UchastnikSessiiReadModel): \u0440\u043e\u043b\u044c \u0438 \u043b\u0438\u0447\u043d\u044b\u0435 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b \u0445\u043e\u0434\u043e\u0432; \u0441\u0435\u043a\u0440\u0435\u0442 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u043e\u0432 \u043d\u0435 \u043e\u0442\u0434\u0430\u0451\u0442\u0441\u044f",
+                "required": [
+                    "accountId",
+                    "role",
+                    "owner",
+                    "createdAt",
+                    "updatedAt"
+                ],
+                "properties": {
+                    "accountId": {
+                        "description": "\u0418\u0434\u0435\u043d\u0442\u0438\u0444\u0438\u043a\u0430\u0442\u043e\u0440 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430",
+                        "type": "string"
+                    },
+                    "role": {
+                        "description": "\u0420\u043e\u043b\u044c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430; owner \u2014 \u0435\u0434\u0438\u043d\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0438 \u043d\u0435\u0438\u0437\u043c\u0435\u043d\u044f\u0435\u043c\u044b\u0439",
+                        "type": "string",
+                        "enum": [
+                            "owner",
+                            "writer",
+                            "viewer"
+                        ],
+                        "example": "writer"
+                    },
+                    "owner": {
+                        "description": "true \u2014 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u044f\u0432\u043b\u044f\u0435\u0442\u0441\u044f \u0432\u043b\u0430\u0434\u0435\u043b\u044c\u0446\u0435\u043c workspace",
+                        "type": "boolean"
+                    },
+                    "defaultCredentialId": {
+                        "description": "\u041b\u0438\u0447\u043d\u044b\u0435 \u0440\u0435\u043a\u0432\u0438\u0437\u0438\u0442\u044b \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e; null \u2014 \u043d\u0435 \u0437\u0430\u0434\u0430\u043d\u044b",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "defaultModel": {
+                        "description": "\u041c\u043e\u0434\u0435\u043b\u044c \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0430 \u043f\u043e \u0443\u043c\u043e\u043b\u0447\u0430\u043d\u0438\u044e; null \u2014 \u043d\u0435 \u0437\u0430\u0434\u0430\u043d\u0430",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "gpt-4o-mini"
+                    },
+                    "createdAt": {
+                        "type": "integer",
+                        "example": 1762000000
+                    },
+                    "updatedAt": {
+                        "type": "integer",
+                        "example": 1762000000
                     }
                 },
                 "type": "object"
@@ -12159,6 +13393,21 @@
                         "description": "\u0418\u043c\u044f Centrifugo-\u043a\u0430\u043d\u0430\u043b\u0430 \u043f\u0440\u043e\u0433\u0440\u0435\u0441\u0441\u0430 \u044d\u0442\u043e\u0433\u043e \u0445\u043e\u0434\u0430. \u0414\u043b\u044f \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d\u043d\u044b\u0445 \u0445\u043e\u0434\u043e\u0432 \u043e\u0441\u0442\u0430\u0451\u0442\u0441\u044f \u043f\u0440\u0435\u0436\u043d\u0438\u043c \u0438 \u043c\u043e\u0436\u0435\u0442 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c\u0441\u044f \u0434\u043b\u044f \u0434\u043e\u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u0441\u043d\u0430\u043f\u0448\u043e\u0442\u0430 \u0447\u0435\u0440\u0435\u0437 /poluchitProgressHoda.",
                         "type": "string",
                         "example": "unit_progress#6f1c5e0a-7d1f-4d59-9a54-0c2f8a2e6f11"
+                    },
+                    "authorAccountId": {
+                        "description": "\u0410\u043a\u043a\u0430\u0443\u043d\u0442 \u0430\u0432\u0442\u043e\u0440\u0430 \u0445\u043e\u0434\u0430; null \u0443 \u043b\u0435\u0433\u0430\u0441\u0438-\u0445\u043e\u0434\u043e\u0432 \u0431\u0435\u0437 \u0430\u0432\u0442\u043e\u0440\u0430",
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "authorDisplayName": {
+                        "description": "\u041e\u0442\u043e\u0431\u0440\u0430\u0436\u0430\u0435\u043c\u043e\u0435 \u0438\u043c\u044f \u0430\u0432\u0442\u043e\u0440\u0430 \u0445\u043e\u0434\u0430; null \u0443 \u043b\u0435\u0433\u0430\u0441\u0438-\u0445\u043e\u0434\u043e\u0432 \u0431\u0435\u0437 \u0430\u0432\u0442\u043e\u0440\u0430",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "example": "\u0418\u0432\u0430\u043d \u041f\u0435\u0442\u0440\u043e\u0432"
                     }
                 },
                 "type": "object"
@@ -16043,6 +17292,181 @@
                 },
                 "type": "object"
             },
+            "PoluchitNavykiSessii": {
+                "properties": {
+                    "sessionId": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "type": "object"
+            },
+            "PoluchitSpisokNavykov": {
+                "properties": {
+                    "scope": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null
+                    },
+                    "projectId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null
+                    },
+                    "includeArchived": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "type": "object"
+            },
+            "PoluchitNavyk": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "type": "object"
+            },
+            "SozdatNavyk": {
+                "properties": {
+                    "slug": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null,
+                        "maxLength": 64
+                    },
+                    "name": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 128
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 512
+                    },
+                    "content": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "scope": {
+                        "type": "string",
+                        "default": "global",
+                        "enum": [
+                            "global",
+                            "project"
+                        ]
+                    },
+                    "projectIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": []
+                    }
+                },
+                "type": "object"
+            },
+            "IzmenitNavyk": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "name": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null,
+                        "maxLength": 128
+                    },
+                    "description": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null,
+                        "maxLength": 512
+                    },
+                    "content": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null
+                    }
+                },
+                "type": "object"
+            },
+            "UdalitNavyk": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "type": "object"
+            },
+            "PrikrepitNavykKProektam": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "projectIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": [],
+                        "minItems": 1
+                    }
+                },
+                "type": "object"
+            },
+            "OtkrepitNavykOtProekta": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "projectId": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "type": "object"
+            },
+            "PoluchitVersiiNavyka": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "type": "object"
+            },
+            "PoluchitEffektivnieNavyki": {
+                "properties": {
+                    "projectIds": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "default": []
+                    }
+                },
+                "type": "object"
+            },
             "DobavitLichniyToken": {
                 "required": [
                     "repoId",
@@ -16925,6 +18349,10 @@
         {
             "name": "Workspace",
             "description": "Workspace"
+        },
+        {
+            "name": "Skill",
+            "description": "Skill"
         },
         {
             "name": "LichniyToken",

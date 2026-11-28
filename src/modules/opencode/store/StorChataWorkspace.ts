@@ -1,18 +1,23 @@
 import { defineStore } from "pinia";
 import WorkspaceService from "@/modules/opencode/services/WorkspaceService";
+import { useStorRezhimovAgenta } from "@/modules/agent-mode/store/StorRezhimovAgenta";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import {
     modeliRekvizitov,
+    modelPoUmolchaniyu,
     normalizovatModel,
 } from "@/modules/opencode/model/ModeliOpenCode";
-import { normalizovatHodWorkspace } from "@/modules/opencode/model/WorkspaceSession";
-import type {
-    WorkspaceAnswer,
-    WorkspaceQuestion,
-    WorkspaceSession,
-    WorkspaceState,
-    WorkspaceTurn,
+import {
+    normalizovatHodWorkspace,
+    statusTranzitniy,
+    type RolUchastnikaWorkspace,
+    type WorkspaceAnswer,
+    type WorkspaceQuestion,
+    type WorkspaceSession,
+    type WorkspaceState,
+    type WorkspaceTurn,
 } from "@/modules/opencode/model/WorkspaceSession";
+import type { RekvizityOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
 
 type StorChataWorkspaceState = {
     workspaceId: string;
@@ -20,6 +25,10 @@ type StorChataWorkspaceState = {
     sostoyanie: WorkspaceState | null;
     hody: WorkspaceTurn[];
     prompt: string;
+    /** Выбранные личные реквизиты текущего участника для следующих ходов. */
+    credentialId: string;
+    /** Выбранный мод агента для следующих ходов. */
+    agentModeId: string;
     /** Выбранная модель для следующих ходов. */
     model: string;
     /** Последняя использованная модель (сохраняется между сессиями). */
@@ -33,6 +42,10 @@ let oprosTimer: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Состояние чата workspace. Не знает о unit-сессиях.
+ *
+ * Workspace может быть общим: каждый участник ходит под своими личными
+ * реквизитами. Стор хранит выбранные реквизиты текущего пользователя и
+ * отправляет их в `prompt`/`otvetit`, чтобы ход не зависел от чужих ключей.
  */
 export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
     state: (): StorChataWorkspaceState => {
@@ -42,6 +55,8 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             sostoyanie: null,
             hody: [],
             prompt: "",
+            credentialId: "",
+            agentModeId: "",
             model: "",
             poslednyayaModel: "",
             loader: false,
@@ -55,31 +70,112 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             return state.hody.length === 0 ? null : state.hody[state.hody.length - 1];
         },
 
-        /**
-         * Каталог моделей для выбора.
-         *
-         * Read-модель workspace не отдаёт `credentialId`, поэтому точно
-         * определить реквизиты нельзя. Показываем объединённый список моделей
-         * всех реквизитов: бэкенд всё равно проверит выбранную модель.
-         */
-        dostupnieModeli(): string[] {
-            const modeli = useStorSpiskaRekvizitovOpenCode().spisok
-                .flatMap((rekvizity) => modeliRekvizitov(rekvizity));
-
-            return [...new Set(modeli)];
+        /** Доступные моды агента. */
+        dostupnieRezhimy() {
+            return useStorRezhimovAgenta().dostupnye;
         },
 
-        /** Модель по умолчанию: модель workspace, затем последняя использованная. */
+        /** Мод, выбранный для следующих ходов. */
+        vybrannyyRezhim(state) {
+            return useStorRezhimovAgenta().poId(state.agentModeId);
+        },
+
+        /** Личные реквизиты текущего пользователя (список аккаунта, без чужих). */
+        dostupnieRekvizity(): RekvizityOpenCode[] {
+            return useStorSpiskaRekvizitovOpenCode().spisok;
+        },
+
+        /** Реквизиты, выбранные для следующих ходов. */
+        vibranieRekvizity(): RekvizityOpenCode | null {
+            if (this.credentialId === "") {
+                return null;
+            }
+
+            return useStorSpiskaRekvizitovOpenCode().rekvizityPoId(this.credentialId);
+        },
+
+        /**
+         * Каталог моделей выбранных реквизитов.
+         *
+         * Раньше здесь был объединённый список моделей всех реквизитов, но
+         * общий workspace требует, чтобы модель принадлежала именно тем
+         * реквизитам, под которыми идёт ход.
+         */
+        dostupnieModeli(): string[] {
+            return modeliRekvizitov(this.vibranieRekvizity);
+        },
+
+        /** Модель по умолчанию: модель workspace, участника, реквизитов, затем последняя. */
         modelPoUmolchaniyu(state): string {
-            return state.workspace?.model || state.poslednyayaModel || "";
+            return state.workspace?.model
+                || state.sostoyanie?.myDefaultModel
+                || modelPoUmolchaniyu(this.vibranieRekvizity)
+                || state.poslednyayaModel
+                || "";
+        },
+
+        /** Текущая роль пользователя в workspace. */
+        moyaRol(state): RolUchastnikaWorkspace | null {
+            return state.sostoyanie?.myRole ?? state.workspace?.myRole ?? null;
+        },
+
+        /** Может ли текущий пользователь управлять участниками. */
+        mozhnoUpravlyat(): boolean {
+            return this.sostoyanie?.canManage === true;
         },
 
         hodVipolnyaetsya(): boolean {
             return this.posledniyHod?.status === "RUNNING";
         },
 
+        /**
+         * Причина, по которой композер недоступен.
+         *
+         * Возвращает ключ перевода (или `null`, если писать можно). Стор не
+         * содержит русских подписей — их подставляет компонент.
+         */
+        prichinaNedostupnosti(state): string | null {
+            if (this.mozhnoOtpravlyat) {
+                return null;
+            }
+
+            if (this.moyaRol === "viewer") {
+                return "opencode.workspace.chat.states.viewer";
+            }
+
+            if (this.hodVipolnyaetsya) {
+                return "opencode.workspace.chat.states.turn_running";
+            }
+
+            if (state.sostoyanie === null) {
+                return null;
+            }
+
+            if (state.sostoyanie.archived) {
+                return "opencode.workspace.chat.states.archived";
+            }
+
+            if (statusTranzitniy(state.sostoyanie.status)) {
+                return "opencode.workspace.chat.states.transient";
+            }
+
+            if (state.sostoyanie.status === "ERROR") {
+                return "opencode.workspace.chat.states.error";
+            }
+
+            return "opencode.workspace.chat.waiting";
+        },
+
+        /**
+         * Можно ли отправлять сообщения.
+         *
+         * `canAcceptMessages` уже учитывает роль и занятость на бэкенде, но
+         * `viewer` запрещаем писать и на клиенте — так композер не мигает,
+         * если сервер прислал устаревшее состояние.
+         */
         mozhnoOtpravlyat(): boolean {
-            return !this.hodVipolnyaetsya
+            return this.moyaRol !== "viewer"
+                && !this.hodVipolnyaetsya
                 && this.sostoyanie?.canAcceptMessages === true;
         },
 
@@ -100,18 +196,69 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             this.workspaceId = workspaceId;
             this.loader = true;
             this.oshibka = null;
+            this.credentialId = "";
+            this.agentModeId = "";
             this.model = "";
+
+            const storRekvizitov = useStorSpiskaRekvizitovOpenCode();
 
             await Promise.all([
                 this.zagruzitWorkspace(),
                 this.zagruzitIstoriyu(),
                 this.zagruzitSostoyanie(),
+                storRekvizitov.spisok.length === 0
+                    ? storRekvizitov.poluchitSpisok()
+                    : Promise.resolve(null),
             ]);
 
+            await useStorRezhimovAgenta().zagruzit();
+            this.primenitRezhimPoUmolchaniyu();
+            this.primenitRekvizityPoUmolchaniyu();
             this.primenitModelPoUmolchaniyu();
 
             this.loader = false;
             this.zapustitOpros();
+        },
+
+        /** Переключить мод и подставить его реквизиты/модель. */
+        ustanovitRezhim(modeId: string | null) {
+            this.agentModeId = modeId ?? "";
+
+            if (this.agentModeId === "") {
+                return;
+            }
+
+            const nastroyki = useStorRezhimovAgenta().nastroykiModa(this.agentModeId);
+
+            if (nastroyki.credentialId !== "") {
+                this.credentialId = nastroyki.credentialId;
+            }
+
+            if (nastroyki.model !== "") {
+                this.model = nastroyki.model;
+            }
+        },
+
+        /** Подставить дефолтный мод для workspace-чата. */
+        primenitRezhimPoUmolchaniyu() {
+            if (this.agentModeId !== "") {
+                return;
+            }
+
+            const rezhim = useStorRezhimovAgenta().poUmolchaniyu("workspace");
+
+            if (rezhim !== null) {
+                this.ustanovitRezhim(rezhim.id);
+            }
+        },
+
+        /** Записать выбранные реквизиты и их модель по умолчанию. */
+        ustanovitRekvizity(credentialId: string | null) {
+            this.credentialId = credentialId ?? "";
+
+            if (this.model === "") {
+                this.model = modelPoUmolchaniyu(this.vibranieRekvizity);
+            }
         },
 
         /** Записать выбранную модель и запомнить её как последнюю. */
@@ -123,6 +270,30 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             if (normalizovannaya !== null) {
                 this.poslednyayaModel = normalizovannaya;
             }
+        },
+
+        /**
+         * Подставить реквизиты по умолчанию.
+         *
+         * Приоритет: личные реквизиты из состояния workspace, затем первые
+         * реквизиты аккаунта. Если у пользователя нет реквизитов, поле
+         * остаётся пустым — бэкенд ответит `opencode.session.credential_required`.
+         */
+        primenitRekvizityPoUmolchaniyu() {
+            if (this.credentialId !== "") {
+                return;
+            }
+
+            const dostupnie = this.dostupnieRekvizity;
+            const izSostoyaniya = this.sostoyanie?.myDefaultCredentialId ?? null;
+
+            if (izSostoyaniya !== null && dostupnie.some((rekvizity) => rekvizity.id === izSostoyaniya)) {
+                this.credentialId = izSostoyaniya;
+
+                return;
+            }
+
+            this.credentialId = dostupnie[0]?.id ?? "";
         },
 
         /** Подставить модель по умолчанию, если пользователь ещё не выбрал. */
@@ -143,6 +314,8 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             this.sostoyanie = null;
             this.hody = [];
             this.prompt = "";
+            this.credentialId = "";
+            this.agentModeId = "";
             this.loader = false;
             this.otpravka = false;
             this.oshibka = null;
@@ -187,7 +360,9 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             const response = await WorkspaceService.prompt({
                 workspaceId: this.workspaceId,
                 text: tekst,
+                credentialId: normalizovatModel(this.credentialId),
                 model: normalizovatModel(this.model) ?? undefined,
+                agentModeId: this.agentModeId || undefined,
             });
 
             this.otpravka = false;
@@ -216,7 +391,9 @@ export const useStorChataWorkspace = defineStore("StorChataWorkspace", {
             const response = await WorkspaceService.otvetit({
                 turnId: idHoda,
                 answers,
+                credentialId: normalizovatModel(this.credentialId),
                 model: normalizovatModel(this.model) ?? undefined,
+                agentModeId: this.agentModeId || undefined,
             });
 
             this.otpravka = false;

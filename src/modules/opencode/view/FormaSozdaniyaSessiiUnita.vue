@@ -12,6 +12,8 @@ import {
 } from "@/components/ui";
 import type { GhSelectOption } from "@/components/ui";
 import { useStorFormiSozdaniyaSessiiUnita } from "@/modules/opencode/store/StorFormiSozdaniyaSessiiUnita";
+import { useEffektivnieNavyki } from "@/modules/skill/composables/useEffektivnieNavyki";
+import BlokNavykovSozdaniya from "@/modules/skill/view/BlokNavykovSozdaniya.vue";
 
 /**
  * Диалог создания unit-сессии.
@@ -26,6 +28,7 @@ const { t } = useI18n();
 const formaStore = useStorFormiSozdaniyaSessiiUnita();
 const {
     otkrita,
+    unitProjectId,
     unitLabel,
     unitDescription,
     title,
@@ -38,6 +41,18 @@ const {
     rekvizity,
     mozhnoSohranit,
 } = storeToRefs(formaStore);
+
+/** Проект юнита известен заранее: показываем его навыки до старта сессии. */
+const projectIdsDlyaNavykov = computed<string[]>(() =>
+    unitProjectId.value === "" ? [] : [unitProjectId.value],
+);
+
+const {
+    navyki,
+    loading: navykiLoader,
+    error: navykiOshibka,
+    zagruzit: zagruzitNavyki,
+} = useEffektivnieNavyki(projectIdsDlyaNavykov, { enabled: otkrita });
 
 const optsRekvizitov = computed<GhSelectOption[]>(() =>
     rekvizity.value.map((rekvizit) => ({
@@ -118,6 +133,13 @@ async function sozdat() {
             @update:model-value="izmenitModel"
         />
       </GhFormField>
+
+      <BlokNavykovSozdaniya
+          :navyki="navyki"
+          :loading="navykiLoader"
+          :error="navykiOshibka"
+          @retry="zagruzitNavyki"
+      />
 
       <GhBanner v-if="oshibkaOtBackenda" variant="danger">
         {{ oshibkaOtBackenda }}

@@ -6,17 +6,22 @@ import i18n from "@/bootstrap/translator";
 import {
     GhBanner,
     GhButton,
+    GhCounter,
     GhIcon,
     GhInput,
     GhLabel,
-    GhSelect,
     GhSkeleton,
 } from "@/components/ui";
-import type { GhSelectOption } from "@/components/ui";
+import { useAuthStore } from "@/modules/account/store/auth";
 import { useStorChataWorkspace } from "@/modules/opencode/store/StorChataWorkspace";
 import WorkspaceService from "@/modules/opencode/services/WorkspaceService";
 import OknoProsmotraFajla from "@/modules/opencode/view/Workspace/OknoProsmotraFajla.vue";
+import OknoUchastnikovWorkspace from "@/modules/opencode/view/Workspace/OknoUchastnikovWorkspace.vue";
+import PanelRezhimaAgenta from "@/modules/agent-mode/view/PanelRezhimaAgenta.vue";
+import OknoNavykov from "@/modules/skill/view/OknoNavykov.vue";
+import { useNavykiSessii } from "@/modules/skill/composables/useNavykiSessii";
 import { formatSize } from "@/modules/opencode/utils/formatSize";
+import { avtorHoda } from "@/modules/opencode/model/WorkspaceSession";
 import type {
     WorkspaceAnswer,
     WorkspaceAttachment,
@@ -26,31 +31,111 @@ import type {
 const props = defineProps<{ id: string }>();
 
 const router = useRouter();
+const auth = useAuthStore();
 const stor = useStorChataWorkspace();
 const {
     workspace,
     sostoyanie,
     hody,
     prompt,
+    agentModeId,
+    credentialId,
     model,
-    dostupnieModeli,
+    dostupnieRezhimy,
+    dostupnieRekvizity,
     loader,
     otpravka,
     oshibka,
     mozhnoOtpravlyat,
+    prichinaNedostupnosti,
+    mozhnoUpravlyat,
+    moyaRol,
 } = storeToRefs(stor);
 
 const zagolovok = computed<string>(() => workspace.value?.name || props.id);
 const proekty = computed(() => sostoyanie.value?.projects ?? workspace.value?.projects ?? []);
 
-/** Каталог моделей всех реквизитов: workspace не отдаёт `credentialId`. */
-const optsModelei = computed<GhSelectOption[]>(() =>
-    dostupnieModeli.value.map((nazvanie) => ({ value: nazvanie, label: nazvanie })),
-);
+const oknoNavykovOtkrito = ref(false);
+
+/**
+ * Имена проектов workspace: по ним навыки группируются понятнее.
+ * Глобальные навыки `PanelNavykov` показывает отдельной группой.
+ */
+const imenaProektov = computed<Record<string, string>>(() => {
+    const rezultat: Record<string, string> = {};
+
+    for (const proekt of proekty.value) {
+        rezultat[proekt.projectId] = proekt.projectName;
+    }
+
+    return rezultat;
+});
+
+// Идентификатор workspace совпадает с идентификатором сессии OpenCode.
+const {
+    navyki,
+    loading: navykiLoader,
+    error: navykiOshibka,
+    truncated: navykiObrezani,
+    zagruzit: zagruzitNavyki,
+} = useNavykiSessii(() => props.id);
+
+/** Смена мода действует только на последующие ходы. */
+function izmenitRezhim(value: string | number | null): void {
+    stor.ustanovitRezhim(value === null ? null : String(value));
+}
+
+/** Смена реквизитов действует только на последующие ходы. */
+function izmenitRekvizity(value: string | number | null): void {
+    stor.ustanovitRekvizity(value === null ? null : String(value));
+}
 
 /** Смена модели действует только на последующие ходы. */
 function izmenitModel(value: string | number | null): void {
     stor.ustanovitModel(value === null ? null : String(value));
+}
+
+/** Причина, по которой писать нельзя; ключ переводим здесь. */
+const tekstPrichini = computed<string>(() => {
+    const klyuch = prichinaNedostupnosti.value;
+
+    if (klyuch === null) {
+        return "";
+    }
+
+    return i18n.global.te(klyuch) ? i18n.global.t(klyuch) : klyuch;
+});
+
+/** Подпись автора хода: имя, «Вы» или нейтральный fallback. */
+function podpisAvtora(hod: WorkspaceTurn): string {
+    const avtor = avtorHoda(hod, auth.userId);
+
+    if (avtor.bezAvtora) {
+        return i18n.global.t("opencode.workspace.chat.author_unknown");
+    }
+
+    if (avtor.etoTekushiy) {
+        return i18n.global.t("opencode.workspace.chat.author_you");
+    }
+
+    if (avtor.imya !== null) {
+        return avtor.imya;
+    }
+
+    return i18n.global.t("opencode.workspace.chat.author_account", {
+        id: (avtor.accountId ?? "").slice(0, 8),
+    });
+}
+
+const oknoUchastnikovOtkrito = ref(false);
+
+function otkritUchastnikov(): void {
+    oknoUchastnikovOtkrito.value = true;
+}
+
+/** После изменения участников перечитываем состояние workspace. */
+async function posleIzmeneniyaUchastnikov(): Promise<void> {
+    await stor.zagruzitSostoyanie();
 }
 
 /**
@@ -160,21 +245,33 @@ onUnmounted(() => {
         <span class="workspace-chat__title">{{ zagolovok }}</span>
         <span class="workspace-chat__subtitle">{{ sostoyanie?.status ?? workspace?.status ?? "" }}</span>
       </div>
+      <GhLabel v-if="moyaRol" variant="neutral">
+        {{ $t('opencode.workspace.participants.roles.' + moyaRol) }}
+      </GhLabel>
       <GhLabel v-if="sostoyanie?.readOnly ?? workspace?.readOnly" variant="neutral">
         {{ $t('opencode.workspace.badges.read_only') }}
       </GhLabel>
-      <div class="workspace-chat__model-select">
-        <GhSelect
-            :model-value="model"
-            :options="optsModelei"
-            size="sm"
-            use-input
-            hide-selected
-            fill-input
-            :placeholder="$t('opencode.rekvizity.fields.default_model')"
-            @update:model-value="izmenitModel"
-        />
-      </div>
+      <GhButton
+          variant="invisible"
+          size="sm"
+          icon="book"
+          :label="$t('skill.chat.button')"
+          :aria-label="$t('skill.chat.button_tooltip')"
+          :title="$t('skill.chat.button_tooltip')"
+          @click="oknoNavykovOtkrito = true"
+      />
+      <GhCounter
+          v-if="!navykiLoader && !navykiOshibka"
+          :value="navyki.length"
+          :label="$t('skill.chat.count_label', { count: navyki.length })"
+      />
+      <GhButton
+          variant="invisible"
+          size="sm"
+          icon="people"
+          :label="$t('opencode.workspace.participants.button')"
+          @click="otkritUchastnikov"
+      />
       <GhButton
           v-if="workspace && !workspace.archived"
           variant="invisible"
@@ -219,6 +316,7 @@ onUnmounted(() => {
             :key="hod.id"
             class="workspace-chat__turn"
         >
+          <div class="workspace-chat__author">{{ podpisAvtora(hod) }}</div>
           <div class="workspace-chat__user">{{ hod.requestText }}</div>
 
           <div
@@ -328,15 +426,36 @@ onUnmounted(() => {
       {{ $t('opencode.workspace.chat.download_error') }}
     </GhBanner>
 
+    <GhBanner
+        v-if="!mozhnoOtpravlyat && tekstPrichini !== ''"
+        variant="attention"
+        class="workspace-chat__state"
+    >
+      {{ tekstPrichini }}
+    </GhBanner>
+
     <footer class="workspace-chat__footer">
-      <GhInput
-          v-model="prompt"
-          type="textarea"
-          autogrow
-          :placeholder="$t('opencode.workspace.chat.placeholder')"
-          :disabled="!mozhnoOtpravlyat || otpravka"
-          @keydown.enter.exact.prevent="stor.otpravit()"
-      />
+      <div class="workspace-chat__composer">
+        <GhInput
+            v-model="prompt"
+            type="textarea"
+            autogrow
+            :placeholder="$t('opencode.workspace.chat.placeholder')"
+            :disabled="!mozhnoOtpravlyat || otpravka"
+            @keydown.enter.exact.prevent="stor.otpravit()"
+        />
+        <PanelRezhimaAgenta
+            :modes="dostupnieRezhimy"
+            :mode-id="agentModeId"
+            :credentials="dostupnieRekvizity"
+            :credential-id="credentialId"
+            :model="model"
+            :disabled="!mozhnoOtpravlyat || otpravka"
+            @update:mode-id="izmenitRezhim"
+            @update:credential-id="izmenitRekvizity"
+            @update:model="izmenitModel"
+        />
+      </div>
       <GhButton
           variant="primary"
           icon="paper-airplane"
@@ -352,6 +471,24 @@ onUnmounted(() => {
         :turn-id="vibraniyHodId ?? ''"
         :attachment="vibranoeVlozhenie"
         @update:model-value="zakritProsmotr"
+    />
+
+    <OknoUchastnikovWorkspace
+        :model-value="oknoUchastnikovOtkrito"
+        :workspace-id="props.id"
+        :can-manage="mozhnoUpravlyat"
+        @update:model-value="oknoUchastnikovOtkrito = $event"
+        @izmeneno="posleIzmeneniyaUchastnikov"
+    />
+
+    <OknoNavykov
+        v-model="oknoNavykovOtkrito"
+        :navyki="navyki"
+        :loading="navykiLoader"
+        :error="navykiOshibka"
+        :project-names="imenaProektov"
+        :truncated="navykiObrezani"
+        @retry="zagruzitNavyki"
     />
   </div>
 </template>
@@ -392,9 +529,11 @@ onUnmounted(() => {
   font-size: var(--fontSize-caption);
 }
 
-.workspace-chat__model-select {
-  flex: 0 0 200px;
-  min-width: 140px;
+.workspace-chat__composer {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .workspace-chat__model-caption {
@@ -420,6 +559,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.workspace-chat__author {
+  margin-bottom: -2px;
+  color: var(--fgColor-muted);
+  font-size: var(--fontSize-caption);
+  font-weight: var(--fontWeight-semibold);
 }
 
 .workspace-chat__user,

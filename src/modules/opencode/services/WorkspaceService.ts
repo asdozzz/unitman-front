@@ -3,8 +3,10 @@ import type { ApiResponse } from "@/bootstrap/apiClient/ApiResponse";
 import type {
     FajlHodaSsilka,
     FajlHodaTekst,
+    RolUchastnikaWorkspace,
     WorkspaceAnswer,
     WorkspaceLaunch,
+    WorkspaceParticipant,
     WorkspaceSession,
     WorkspaceState,
     WorkspaceTurn,
@@ -23,15 +25,14 @@ export type ZahvatUvedomleniyWorkspaceResponse = {
 /**
  * Сервис workspace OpenCode.
  *
- * ВАЖНО: независимый бэкенд-агрегат workspace (`/opencode/workspace-session/*`,
- * таблицы `opencode_workspace_session*`) пока не имеет пути записи — создание
- * и жизненный цикл workspace живут в старом агрегате сессий OpenCode
- * (`opencode_session` + `opencode_workspace`). Поэтому чат workspace работает
- * через маршруты старого агрегата: ид сессии workspace — это ид сессии
- * OpenCode (см. докблок `OpenCodeService`).
+ * Чат, состояние, история, результат и прогресс идут через независимый
+ * агрегат `/opencode/workspace-session/*` (таблицы
+ * `opencode_workspace_session*`). Жизненный цикл и участники остаются на
+ * прежних маршрутах `/opencode/workspace/*`: бэкенд внутри роутит их по
+ * флагам `OPENCODE_WORKSPACE_READ/WRITE`. Сигнатуры методов не меняются.
  *
- * Когда запись переехит в независимые таблицы, методы ниже переключаются на
- * `/opencode/workspace-session/*` без изменения сигнатур.
+ * Артефакты хода (`poluchitSsylkuFajla`, `poluchitTekstFajla`) остаются на
+ * `/opencode/fajl/*`: их обработчик ищет ход и в легаси, и в новом агрегате.
  */
 class WorkspaceService {
     spisok(params?: FiltrWorkspace): Promise<ApiResponse<WorkspaceSession[]>> {
@@ -55,7 +56,7 @@ class WorkspaceService {
     }
 
     sostoyanie(params: { workspaceId: string }): Promise<ApiResponse<WorkspaceState>> {
-        return apiClient.post<WorkspaceState>("/opencode/workspace/sostoyanie", params);
+        return apiClient.post<WorkspaceState>("/opencode/workspace-session/sostoyanie", params);
     }
 
     arhivirovat(params: {
@@ -88,37 +89,42 @@ class WorkspaceService {
     prompt(params: {
         workspaceId: string;
         text: string;
+        /** Реквизиты текущего участника; без них бэкенд берёт личные по умолчанию. */
+        credentialId?: string | null;
         model?: string | null;
+        agentModeId?: string | null;
     }): Promise<ApiResponse<WorkspaceLaunch>> {
-        return apiClient.post<WorkspaceLaunch>("/opencode/prompt", {
-            sessionId: params.workspaceId,
+        return apiClient.post<WorkspaceLaunch>("/opencode/workspace-session/prompt", {
+            workspaceId: params.workspaceId,
             text: params.text,
+            // Новый контроллер ключ игнорирует, но клиент продолжает передавать
+            // выбранные реквизиты: контракт запроса не сужается.
+            credentialId: params.credentialId ?? undefined,
             model: params.model ?? undefined,
+            agentModeId: params.agentModeId ?? undefined,
         });
     }
 
     /**
      * Ответ на вопросы предыдущего хода.
      *
-     * Чат workspace может обслуживаться двумя агрегатами:
-     * - легаси `/opencode/otvetit` — DTO `OtvetitNaVopros` с camelCase-ключами
-     *   (`questionId`/`optionId`/`text`);
-     * - новый `/opencode/workspace-session/otvetit` — читает PascalCase
-     *   (`QuestionId`/`OptionId`/`Text`).
-     *
-     * Чтобы ответ не зависел от того, какой агрегат стоит за маршрутом, шлём
-     * оба набора ключей. Лишние ключи каждый обработчик игнорирует, а без
-     * совпадения бэкенд отбрасывает ответ и возвращает
-     * `opencode.turn.answers_required`.
+     * Новый обработчик читает PascalCase (`QuestionId`/`OptionId`/`Text`).
+     * Дополнительно шлём camelCase-набор: лишние ключи игнорируются, а без
+     * совпадения бэкенд возвращает `opencode.turn.answers_required`.
      */
     otvetit(params: {
         turnId: string;
         answers: WorkspaceAnswer[];
+        /** Реквизиты текущего участника; без них бэкенд берёт личные по умолчанию. */
+        credentialId?: string | null;
         model?: string | null;
+        agentModeId?: string | null;
     }): Promise<ApiResponse<WorkspaceLaunch>> {
-        return apiClient.post<WorkspaceLaunch>("/opencode/otvetit", {
+        return apiClient.post<WorkspaceLaunch>("/opencode/workspace-session/otvetit", {
             turnId: params.turnId,
+            credentialId: params.credentialId ?? undefined,
             model: params.model ?? undefined,
+            agentModeId: params.agentModeId ?? undefined,
             answers: params.answers.map((answer) => ({
                 QuestionId: answer.QuestionId,
                 OptionId: answer.OptionId,
@@ -131,17 +137,75 @@ class WorkspaceService {
     }
 
     istoriya(params: { workspaceId: string }): Promise<ApiResponse<WorkspaceTurn[]>> {
-        return apiClient.post<WorkspaceTurn[]>("/opencode/istoriyaSessii", {
-            sessionId: params.workspaceId,
+        return apiClient.post<WorkspaceTurn[]>("/opencode/workspace-session/istoriya", {
+            workspaceId: params.workspaceId,
         });
     }
 
     poluchitResultatHoda(params: { turnId: string }): Promise<ApiResponse<WorkspaceTurn>> {
-        return apiClient.post<WorkspaceTurn>("/opencode/poluchitResultatHoda", params);
+        return apiClient.post<WorkspaceTurn>(
+            "/opencode/workspace-session/poluchitResultatHoda",
+            params,
+        );
     }
 
     poluchitProgressHoda(params: { turnId: string }): Promise<ApiResponse<ProgressHoda | null>> {
-        return apiClient.post<ProgressHoda | null>("/opencode/poluchitProgressHoda", params);
+        return apiClient.post<ProgressHoda | null>(
+            "/opencode/workspace-session/poluchitProgressHoda",
+            params,
+        );
+    }
+
+    /** Участники workspace с ролями и личными реквизитами. */
+    spisokUchastnikov(params: {
+        workspaceId: string;
+    }): Promise<ApiResponse<{ items: WorkspaceParticipant[] }>> {
+        return apiClient.post<{ items: WorkspaceParticipant[] }>(
+            "/opencode/workspace/uchastniki/spisok",
+            params,
+        );
+    }
+
+    /** Пригласить участника: роль `writer` или `viewer`. */
+    dobavitUchastnika(params: {
+        workspaceId: string;
+        accountId: string;
+        role: Exclude<RolUchastnikaWorkspace, "owner">;
+        credentialId?: string | null;
+        model?: string | null;
+    }): Promise<ApiResponse<{ added: boolean }>> {
+        return apiClient.post<{ added: boolean }>("/opencode/workspace/uchastniki/dobavit", {
+            workspaceId: params.workspaceId,
+            accountId: params.accountId,
+            role: params.role,
+            credentialId: params.credentialId ?? undefined,
+            model: params.model ?? undefined,
+        });
+    }
+
+    /** Изменить роль или личные реквизиты участника. */
+    izmenitUchastnika(params: {
+        workspaceId: string;
+        accountId: string;
+        role: Exclude<RolUchastnikaWorkspace, "owner">;
+        credentialId?: string | null;
+        model?: string | null;
+    }): Promise<ApiResponse<{ updated: boolean }>> {
+        return apiClient.post<{ updated: boolean }>("/opencode/workspace/uchastniki/izmenit", {
+            workspaceId: params.workspaceId,
+            accountId: params.accountId,
+            role: params.role,
+            credentialId: params.credentialId ?? undefined,
+            model: params.model ?? undefined,
+        });
+    }
+
+    /** Удалить участника; владельца удалить нельзя. */
+    udalitUchastnika(params: {
+        workspaceId: string;
+        accountId: string;
+    }): Promise<ApiResponse<{ removed: boolean }>> {
+        return apiClient.post<{ removed: boolean }>("/opencode/workspace/uchastniki/udalit", params);
     }
 
     /** Подписанная ссылка на скачивание артефакта хода. */

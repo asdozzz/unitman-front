@@ -274,7 +274,8 @@
         "ai_assistant": "AI Assistant",
         "ai_sessions": "AI chat sessions",
         "sessions": "Sessions",
-        "workspaces": "Workspaces"
+        "workspaces": "Workspaces",
+        "skills": "Skills"
       },
       "collapse": "Collapse sidebar",
       "expand": "Expand sidebar",
@@ -1347,6 +1348,7 @@
       "security": "Security",
       "tokens": "Tokens",
       "opencode": "OpenCode",
+      "agent_modes": "Agent modes",
       "notifications": "Notifications",
       "appearance": "Appearance"
     },
@@ -1558,6 +1560,38 @@
     }
   },
   "opencode": {
+    "agent_modes": {
+      "mode": "Agent mode",
+      "mode_placeholder": "Select a mode",
+      "credential": "Credentials",
+      "credential_placeholder": "Select credentials",
+      "model": "Model",
+      "model_placeholder": "Select a model",
+      "not_configured": "This mode has no credentials or model configured. Set them up in account settings.",
+      "title": "Agent modes",
+      "subtitle": "Choose the mode, credentials, and model for chats. Shared modes are read-only.",
+      "admin_title": "Shared agent modes",
+      "admin_subtitle": "System mode catalog available to every user.",
+      "create": "Create mode",
+      "edit": "Edit",
+      "archive": "Archive",
+      "global": "Shared",
+      "personal": "Personal",
+      "enabled": "Enabled",
+      "default_unit": "Default for unit chats",
+      "default_workspace": "Default for workspace chats",
+      "name": "Name",
+      "slug": "Slug",
+      "slug_hint": "Latin letters, digits, and hyphens. If empty, it is generated from the name.",
+      "description": "Description",
+      "access_mode": "Access mode",
+      "access_build": "Edits allowed",
+      "access_plan": "Read-only",
+      "prompt": "System prompt",
+      "save": "Save",
+      "cancel": "Cancel",
+      "empty": "No modes available yet. Create the first one."
+    },
     "providers": {
       "openai": "OpenAI",
       "anthropic": "Anthropic",
@@ -1604,7 +1638,9 @@
       "badges": {
         "read_only": "Read-only",
         "read_only_hint": "One of the projects has no push access — commits and pushes are blocked",
-        "no_push_project": "No push access"
+        "no_push_project": "No push access",
+        "shared": "Shared",
+        "shared_hint": "Workspace is available to participants: {count}"
       },
       "buttons": {
         "add": "New workspace",
@@ -1625,7 +1661,9 @@
       },
       "fields": {
         "branch": "Branch",
-        "projects_count": "Projects: {count}"
+        "projects_count": "Projects: {count}",
+        "participants_count": "Participants: {count}",
+        "owner": "Owner"
       },
       "units": {
         "title": "Units",
@@ -1706,7 +1744,19 @@
         "preview_unsupported": "Preview unavailable",
         "preview_too_large": "File is too large for preview",
         "download_error": "Failed to download file",
-        "preview_binary": "The file is not plain text"
+        "preview_binary": "The file is not plain text",
+        "credential": "Personal credentials",
+        "credential_placeholder": "Credentials for turns",
+        "author_you": "You",
+        "author_unknown": "No author",
+        "author_account": "Participant {id}",
+        "states": {
+          "viewer": "Viewer role: only the owner or a writer can send messages",
+          "turn_running": "A turn is running. Wait for the answer before sending another message",
+          "archived": "Workspace is archived: sending messages is unavailable",
+          "transient": "Workspace is performing an operation. Sending will be available once it finishes",
+          "error": "Workspace is in error state: sending messages is unavailable"
+        }
       },
       "errors": {
         "not_found": "Workspace not found",
@@ -1735,7 +1785,38 @@
           "request_failed": "Failed to generate the link"
         }
       },
-      "branch_protected": "The branch is protected in one of the projects and cannot be used for a workspace"
+      "branch_protected": "The branch is protected in one of the projects and cannot be used for a workspace",
+      "participants": {
+        "caption": "Workspace participants",
+        "button": "Participants",
+        "owner": "Owner",
+        "empty": "No participants yet",
+        "empty_hint": "Invite colleagues by their account ID",
+        "change_role": "Change role",
+        "remove": "Remove participant",
+        "invite_title": "Invite participant",
+        "readonly_hint": "Only the workspace owner can manage participants",
+        "roles": {
+          "owner": "Owner",
+          "writer": "Writer",
+          "viewer": "Viewer"
+        },
+        "fields": {
+          "account_id": "Account ID",
+          "account_id_hint": "UUID of the account to invite",
+          "account_id_placeholder": "e.g. 7d4b1c2a-…",
+          "role": "Role",
+          "credential": "Credentials",
+          "credential_hint": "Optional: personal credentials of the participant",
+          "credential_placeholder": "Default credentials",
+          "model": "Model",
+          "model_placeholder": "Default model"
+        },
+        "buttons": {
+          "invite": "Invite"
+        }
+      },
+      "project_access_revoked": "Access to one of the workspace projects was revoked. Check project permissions"
     },
     "rekvizity": {
       "caption": "Access credentials",
@@ -1990,6 +2071,21 @@
       "unknown_option": "No such answer option",
       "unexpected_kind": "The runner returned an unexpected result kind",
       "unit_directory_not_found": "The unit directory was not found on the runner"
+    },
+    "session": {
+      "busy": "Session is busy: wait for the current turn to finish",
+      "forbidden": "You do not have permission for this session action",
+      "credential_required": "No OpenCode credentials selected. Set personal credentials or choose them when sending"
+    },
+    "participant": {
+      "already_owner": "This participant is already the workspace owner",
+      "already_exists": "Participant is already in the workspace",
+      "limit_exceeded": "Workspace participant limit exceeded",
+      "project_access_denied": "The invitee has no access to the workspace projects",
+      "not_found": "Participant not found",
+      "owner_role_immutable": "The owner role cannot be changed",
+      "owner_cannot_be_removed": "The owner cannot be removed from the workspace",
+      "invalid_role": "Invalid participant role"
     }
   },
   "project": {
@@ -2289,6 +2385,173 @@
       "delete_confirm_title": "Delete session?",
       "delete_confirm_description": "The session “{title}” and its entire history will be permanently deleted.",
       "delete_confirm_warning": "Deletion is available only for archived sessions."
+    }
+  },
+  "skill": {
+    "admin": {
+      "title": "OpenCode skills",
+      "description": "Global skills are available to every project and used by the OpenCode agent."
+    },
+    "project": {
+      "title": "Project skills",
+      "tab": "Skills",
+      "description": "Skills attached to the project \"{project}\".",
+      "read_only_hint": "You are a project member: skills are read-only for you."
+    },
+    "scopes": {
+      "global": "Global",
+      "project": "Project"
+    },
+    "card": {
+      "no_description": "No description",
+      "archived": "Archived",
+      "version": "Version {version}",
+      "updated": "Updated {date}"
+    },
+    "actions": {
+      "create": "Create skill",
+      "save": "Save",
+      "attach": "Attach to projects",
+      "detach": "Detach from project",
+      "archive": "Archive",
+      "details": "Details"
+    },
+    "filters": {
+      "include_archived": "Show archived"
+    },
+    "form": {
+      "create_title": "New skill",
+      "edit_title": "Edit skill"
+    },
+    "fields": {
+      "name": "Name",
+      "slug": "Slug",
+      "description": "Description",
+      "content": "Content",
+      "scope": "Scope",
+      "projects": "Projects",
+      "projects_placeholder": "Select projects"
+    },
+    "hints": {
+      "slug": "Lowercase Latin letters, digits and hyphens; up to 64 characters. Generated from the name.",
+      "slug_locked": "The slug cannot be changed after creation.",
+      "description": "Briefly describe what the skill is for.",
+      "content": "Markdown instructions describing how the agent should use the skill.",
+      "scope_locked": "The scope cannot be changed after creation.",
+      "projects": "The skill will be available to the selected projects.",
+      "projects_locked": "Project attachments are managed in the skill details."
+    },
+    "validation": {
+      "name_required": "Enter a name",
+      "name_too_long": "Name must be at most 128 characters",
+      "slug_required": "Enter a slug",
+      "slug_invalid": "Slug: lowercase Latin letters, digits and hyphens, up to 64 characters",
+      "description_too_long": "Description must be at most 512 characters",
+      "content_too_long": "Content must be at most 32 KiB",
+      "projects_required": "Select at least one project"
+    },
+    "errors": {
+      "id": {
+        "empty": "Skill id is missing",
+        "too_long": "Skill id is too long"
+      },
+      "slug": {
+        "invalid": "Invalid slug",
+        "taken": "This slug is already taken"
+      },
+      "name": {
+        "empty": "Enter a name",
+        "invalid_utf8": "Name must be valid UTF-8",
+        "contains_nul": "Name contains invalid characters",
+        "too_long": "Name must be at most 128 characters"
+      },
+      "description": {
+        "invalid_utf8": "Description must be valid UTF-8",
+        "contains_nul": "Description contains invalid characters",
+        "too_long": "Description must be at most 512 characters"
+      },
+      "content": {
+        "invalid_utf8": "Content must be valid UTF-8",
+        "contains_nul": "Content contains invalid characters",
+        "too_long": "Content must be at most 32 KiB"
+      },
+      "project": {
+        "required": "A project skill needs at least one project",
+        "invalid": "Invalid project",
+        "too_long": "Project id is too long",
+        "not_attached": "The skill is not attached to this project"
+      },
+      "scope": {
+        "invalid": "Invalid skill scope",
+        "projects_forbidden": "A global skill cannot have projects",
+        "global_cannot_attach": "A global skill cannot be attached to a project",
+        "global_cannot_detach": "A global skill cannot be detached from a project"
+      },
+      "forbidden": "Insufficient permissions",
+      "not_found": "Skill not found",
+      "not_authenticated": "Authentication required"
+    },
+    "states": {
+      "empty": "No skills yet",
+      "empty_hint": "Create the first skill so the OpenCode agent knows what to do.",
+      "empty_project_hint": "No skills are attached to this project yet."
+    },
+    "archive": {
+      "title": "Archive skill?",
+      "message": "The skill \"{name}\" will be moved to the archive. Enable archived items to see it again.",
+      "confirm": "Archive"
+    },
+    "detail": {
+      "title": "Skill",
+      "read_only": "This skill is read-only: editing requires project administrator rights.",
+      "what_is_it": "What it is for",
+      "how_to_use": "How to use",
+      "content_empty": "No content",
+      "versions": "Version history",
+      "no_versions": "Version history is empty",
+      "version": "Version {version}",
+      "created_by": "By {author}",
+      "not_found": "Skill not found"
+    },
+    "attach": {
+      "title": "Attach to projects",
+      "select_label": "Projects",
+      "hint": "Select the projects that should have access to the skill.",
+      "confirm": "Attach"
+    },
+    "panel": {
+      "search_placeholder": "Search skills",
+      "empty": "No skills",
+      "empty_hint": "No skills were found for this session.",
+      "global_group": "Global skills",
+      "project_group": "Project skills",
+      "show_content": "Show content",
+      "hide_content": "Hide content"
+    },
+    "window": {
+      "title": "Agent skills",
+      "close": "Close"
+    },
+    "chat": {
+      "button": "Skills",
+      "button_tooltip": "Show the agent skills for this session",
+      "count_label": "Skills: {count}",
+      "dialog_title": "Agent skills",
+      "empty": "No skills connected",
+      "empty_hint": "The agent works without extra instructions.",
+      "error": "Failed to load skills",
+      "error_forbidden": "No access to this session's skills",
+      "error_invalid": "Invalid skills request",
+      "truncated": "Showing the first {count} skills"
+    },
+    "create": {
+      "title": "Agent skills",
+      "hint": "The agent will receive these skills after it starts.",
+      "empty": "No skills connected",
+      "empty_hint": "The agent works without extra instructions.",
+      "error": "Failed to load skills",
+      "expand": "Show skills",
+      "collapse": "Hide skills"
     }
   }
 }

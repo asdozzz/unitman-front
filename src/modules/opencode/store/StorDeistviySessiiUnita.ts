@@ -7,6 +7,8 @@ type ParametryOtkrytiya = {
     unitId: string;
     unitLabel: string;
     unitDescription: string;
+    /** Проект юнита — нужен для предпросмотра навыков агента. */
+    projectId?: string;
 };
 
 type StorDeistviySessiiUnitaState = {

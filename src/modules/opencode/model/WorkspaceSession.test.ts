@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  avtorHoda,
   normalizovatHodWorkspace,
   normalizovatRezultatHoda,
   type WorkspaceAttachment,
@@ -52,5 +53,50 @@ describe('WorkspaceSession: нормализация вложений', () => {
     const hod = normalizovatHodWorkspace(hodSRezultatom({ Kind: 'ANSWER' }));
 
     expect(hod.result?.Attachments).toEqual([]);
+  });
+});
+
+describe('WorkspaceSession: авторство хода', () => {
+  it('имя автора берётся из authorDisplayName', () => {
+    const avtor = avtorHoda(
+      { authorAccountId: 'acc-2', authorDisplayName: 'Иван Петров' },
+      'acc-1',
+    );
+
+    expect(avtor).toEqual({
+      imya: 'Иван Петров',
+      accountId: 'acc-2',
+      etoTekushiy: false,
+      bezAvtora: false,
+    });
+  });
+
+  it('автор-текущий пользователь помечается флагом', () => {
+    const avtor = avtorHoda(
+      { authorAccountId: 'acc-1', authorDisplayName: 'Я' },
+      'acc-1',
+    );
+
+    expect(avtor.etoTekushiy).toBe(true);
+    expect(avtor.bezAvtora).toBe(false);
+  });
+
+  it('легаси-ход без автора получает нейтральный fallback', () => {
+    const avtor = avtorHoda({ authorAccountId: null, authorDisplayName: null }, 'acc-1');
+
+    expect(avtor).toEqual({
+      imya: null,
+      accountId: null,
+      etoTekushiy: false,
+      bezAvtora: true,
+    });
+  });
+
+  it('аккаунт без имени остаётся пригодным для подписи по id', () => {
+    const avtor = avtorHoda({ authorAccountId: 'acc-9' }, 'acc-1');
+
+    expect(avtor.imya).toBeNull();
+    expect(avtor.accountId).toBe('acc-9');
+    expect(avtor.bezAvtora).toBe(false);
   });
 });

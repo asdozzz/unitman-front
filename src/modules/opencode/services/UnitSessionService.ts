@@ -52,6 +52,8 @@ class UnitSessionService {
         sessionId: string;
         text: string;
         model?: string | null;
+        credentialId?: string | null;
+        agentModeId?: string | null;
     }): Promise<ApiResponse<UnitSessionLaunch>> {
         return apiClient.post<UnitSessionLaunch>("/opencode/unit-session/prompt", params);
     }
@@ -67,10 +69,14 @@ class UnitSessionService {
         turnId: string;
         answers: UnitSessionAnswer[];
         model?: string | null;
+        credentialId?: string | null;
+        agentModeId?: string | null;
     }): Promise<ApiResponse<UnitSessionLaunch>> {
         return apiClient.post<UnitSessionLaunch>("/opencode/unit-session/otvetit", {
             turnId: params.turnId,
             model: params.model ?? undefined,
+            credentialId: params.credentialId ?? undefined,
+            agentModeId: params.agentModeId ?? undefined,
             answers: params.answers.map((answer) => ({
                 QuestionId: answer.QuestionId,
                 OptionId: answer.OptionId,

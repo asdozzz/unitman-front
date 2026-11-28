@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import UnitSessionService from "@/modules/opencode/services/UnitSessionService";
+import { useStorRezhimovAgenta } from "@/modules/agent-mode/store/StorRezhimovAgenta";
 import { useStorSpiskaRekvizitovOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/StorSpiskaRekvizitovOpenCode";
 import type { RekvizityOpenCode } from "@/modules/account/store/SpisokRekvizitovOpenCode/model/OpenCodeRekvizity";
 import {
@@ -21,6 +22,10 @@ type StorChataSessiiUnitaState = {
     sostoyanie: UnitSessionState | null;
     hody: UnitSessionTurn[];
     prompt: string;
+    /** Выбранный мод агента для следующих ходов. */
+    agentModeId: string;
+    /** Реквизиты, переопределённые для следующих ходов. */
+    credentialId: string;
     /** Выбранная модель для следующих ходов. */
     model: string;
     /** Последняя использованная модель (сохраняется между сессиями). */
@@ -43,6 +48,8 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             sostoyanie: null,
             hody: [],
             prompt: "",
+            agentModeId: "",
+            credentialId: "",
             model: "",
             poslednyayaModel: "",
             loader: false,
@@ -56,9 +63,26 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             return state.hody.length === 0 ? null : state.hody[state.hody.length - 1];
         },
 
-        /** Полные реквизиты сессии (с моделями провайдера). */
+        /** Доступные моды агента. */
+        dostupnieRezhimy() {
+            return useStorRezhimovAgenta().dostupnye;
+        },
+
+        /** Мод, выбранный для следующих ходов. */
+        vybrannyyRezhim(state) {
+            return useStorRezhimovAgenta().poId(state.agentModeId);
+        },
+
+        /** Личные реквизиты текущего пользователя. */
+        dostupnieRekvizity(): RekvizityOpenCode[] {
+            return useStorSpiskaRekvizitovOpenCode().spisok;
+        },
+
+        /** Полные реквизиты хода: выбранные или сохранённые в сессии. */
         vybrannieRekvizity(state): RekvizityOpenCode | null {
-            return useStorSpiskaRekvizitovOpenCode().rekvizityPoId(state.session?.credentialId ?? "");
+            const id = state.credentialId || state.session?.credentialId || "";
+
+            return useStorSpiskaRekvizitovOpenCode().rekvizityPoId(id);
         },
 
         /** Модели, доступные для сессии. */
@@ -111,6 +135,8 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             this.sessionId = sessionId;
             this.loader = true;
             this.oshibka = null;
+            this.agentModeId = "";
+            this.credentialId = "";
             this.model = "";
 
             await Promise.all([
@@ -119,10 +145,53 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
                 this.zagruzitSostoyanie(),
             ]);
 
+            await useStorRezhimovAgenta().zagruzit();
+            this.primenitRezhimPoUmolchaniyu();
             this.primenitModelPoUmolchaniyu();
 
             this.loader = false;
             this.zapustitOpros();
+        },
+
+        /** Переключить мод и подставить его реквизиты/модель. */
+        ustanovitRezhim(modeId: string | null) {
+            this.agentModeId = modeId ?? "";
+
+            if (this.agentModeId === "") {
+                return;
+            }
+
+            const nastroyki = useStorRezhimovAgenta().nastroykiModa(this.agentModeId);
+
+            if (nastroyki.credentialId !== "") {
+                this.credentialId = nastroyki.credentialId;
+            }
+
+            if (nastroyki.model !== "") {
+                this.model = nastroyki.model;
+            }
+        },
+
+        /** Подставить дефолтный мод для unit-чата. */
+        primenitRezhimPoUmolchaniyu() {
+            if (this.agentModeId !== "") {
+                return;
+            }
+
+            const rezhim = useStorRezhimovAgenta().poUmolchaniyu("unit");
+
+            if (rezhim !== null) {
+                this.ustanovitRezhim(rezhim.id);
+            }
+        },
+
+        /** Записать выбранные реквизиты и их модель по умолчанию. */
+        ustanovitRekvizity(credentialId: string | null) {
+            this.credentialId = credentialId ?? "";
+
+            if (this.model === "") {
+                this.model = modelPoUmolchaniyu(this.vybrannieRekvizity);
+            }
         },
 
         /** Записать выбранную модель и запомнить её как последнюю. */
@@ -154,6 +223,8 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
             this.sostoyanie = null;
             this.hody = [];
             this.prompt = "";
+            this.agentModeId = "";
+            this.credentialId = "";
             this.loader = false;
             this.otpravka = false;
             this.oshibka = null;
@@ -199,6 +270,8 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
                 sessionId: this.sessionId,
                 text: tekst,
                 model: normalizovatModel(this.model) ?? undefined,
+                credentialId: this.credentialId || undefined,
+                agentModeId: this.agentModeId || undefined,
             });
 
             this.otpravka = false;
@@ -228,6 +301,8 @@ export const useStorChataSessiiUnita = defineStore("StorChataSessiiUnita", {
                 turnId: idHoda,
                 answers,
                 model: normalizovatModel(this.model) ?? undefined,
+                credentialId: this.credentialId || undefined,
+                agentModeId: this.agentModeId || undefined,
             });
 
             this.otpravka = false;

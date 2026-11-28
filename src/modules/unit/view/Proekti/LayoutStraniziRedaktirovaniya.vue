@@ -13,7 +13,8 @@ type TabId =
   | "project_variables"
   | "project_repo_event_handler"
   | "project_webhooks"
-  | "project_volume_types";
+  | "project_volume_types"
+  | "project_skills";
 
 /**
  * Совместимый deep-link `?tab=<slug>`: короткий slug → имя дочернего маршрута.
@@ -27,6 +28,7 @@ const KARTA_SLUGOV: Record<string, TabId> = {
   repo_event_handler: "project_repo_event_handler",
   webhooks: "project_webhooks",
   volume_types: "project_volume_types",
+  skills: "project_skills",
   project_edit: "project_edit",
   project_jobs: "project_jobs",
   project_users: "project_users",
@@ -34,6 +36,7 @@ const KARTA_SLUGOV: Record<string, TabId> = {
   project_repo_event_handler: "project_repo_event_handler",
   project_webhooks: "project_webhooks",
   project_volume_types: "project_volume_types",
+  project_skills: "project_skills",
 };
 
 type OpisanieTaba = {
@@ -54,6 +57,7 @@ const TABI: OpisanieTaba[] = [
   {id: "project_repo_event_handler", labelKey: "unit.proekt.tabs.repo_event_handler", icon: "broadcast"},
   {id: "project_webhooks", labelKey: "unit.proekt.tabs.webhooks", icon: "broadcast"},
   {id: "project_volume_types", labelKey: "unit.proekt.tabs.volume_types", icon: "database"},
+  {id: "project_skills", labelKey: "skill.project.tab", icon: "book"},
 ];
 
 const route = useRoute();

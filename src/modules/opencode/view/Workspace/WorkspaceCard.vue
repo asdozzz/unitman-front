@@ -81,6 +81,19 @@ const emit = defineEmits<{
 }>();
 
 const tranzitniy = computed(() => statusTranzitniy(props.workspace.status));
+
+/** Подпись роли текущего пользователя в workspace. */
+const podpisRoli = computed<string | null>(() => {
+    const rol = props.workspace.myRole;
+
+    if (!rol) {
+        return null;
+    }
+
+    const klyuch = `opencode.workspace.participants.roles.${rol}`;
+
+    return i18n.global.te(klyuch) ? i18n.global.t(klyuch) : rol;
+});
 const readOnly = computed(() => estReadOnly(props.workspace));
 const unitiWorkspace = computed(() => props.workspace.units ?? []);
 const fayly = computed<WorkspaceFileItem[]>(() => {
@@ -239,6 +252,18 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
       </span>
 
       <GhLabel
+          v-if="workspace.shared"
+          variant="accent"
+          icon="people"
+          :label="$t('opencode.workspace.badges.shared')"
+          :title="$t('opencode.workspace.badges.shared_hint', { count: workspace.participantsCount ?? 0 })"
+      />
+
+      <GhLabel v-if="podpisRoli" variant="neutral">
+        {{ podpisRoli }}
+      </GhLabel>
+
+      <GhLabel
           v-if="readOnly"
           variant="attention"
           icon="lock"
@@ -300,6 +325,12 @@ const oshibka = computed(() => perevodKlyucha(props.workspace.errorKey));
     <div class="workspace-card__meta">
       <span>{{ $t('opencode.workspace.fields.branch') }}: <span class="gh-mono">{{ workspace.branch }}</span></span>
       <span>{{ $t('opencode.workspace.fields.projects_count', { count: workspace.projects.length }) }}</span>
+      <span v-if="workspace.participantsCount !== undefined">
+        {{ $t('opencode.workspace.fields.participants_count', { count: workspace.participantsCount }) }}
+      </span>
+      <span v-if="workspace.ownerAccountId">
+        {{ $t('opencode.workspace.fields.owner') }}: <span class="gh-mono">{{ workspace.ownerAccountId }}</span>
+      </span>
       <span>{{ $t('opencode.sessions.fields.updated_at') }}: <span class="gh-mono">{{ convertDate(workspace.updatedAt) }}</span></span>
       <span>{{ $t('opencode.sessions.fields.created_at') }}: <span class="gh-mono">{{ convertDate(workspace.createdAt) }}</span></span>
     </div>

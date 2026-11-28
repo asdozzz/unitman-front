@@ -23,6 +23,9 @@ export type WorkspaceProject = {
     branch: string;
 };
 
+/** Роль текущего пользователя (или участника) в workspace. */
+export type RolUchastnikaWorkspace = "owner" | "writer" | "viewer";
+
 export type WorkspaceSession = {
     id: string;
     name: string;
@@ -38,7 +41,23 @@ export type WorkspaceSession = {
     ideLink: string | null;
     createdAt: number;
     updatedAt: number;
+    /** Роль текущего пользователя; у старых ответов поля нет. */
+    myRole?: RolUchastnikaWorkspace;
+    /** Аккаунт владельца workspace. */
+    ownerAccountId?: string;
+    /** Количество участников, включая владельца. */
+    participantsCount?: number;
+    /** `true` — workspace доступен более чем одному участнику. */
+    shared?: boolean;
 };
+
+/**
+ * Участник workspace: роль и личные реквизиты ходов.
+ *
+ * Форма совпадает со схемой `UchastnikSessii`, поэтому тип берётся из
+ * сгенерированной OpenAPI-схемы.
+ */
+export type WorkspaceParticipant = Schema<"UchastnikSessii">;
 
 export type WorkspaceTurnResult = {
     Kind: "ANSWER" | "QUESTION" | "ERROR";
@@ -93,6 +112,10 @@ export type WorkspaceTurn = {
     createdAt: number;
     finishedAt: number | null;
     progressChannel: string;
+    /** Аккаунт автора хода; `null`/нет у легаси-ходов без автора. */
+    authorAccountId?: string | null;
+    /** Отображаемое имя автора хода; `null`/нет у легаси-ходов. */
+    authorDisplayName?: string | null;
 };
 
 export type WorkspaceAnswer = {
@@ -112,9 +135,20 @@ export type WorkspaceState = {
     errorKey: string | null;
     projects: WorkspaceProject[];
     ideLink: string | null;
+    /** Сервер уже учёл роль и занятость: можно ли отправить сообщение. */
     canAcceptMessages: boolean;
     lastTurnId: string | null;
     lastTurnStatus: WorkspaceTurn["status"] | null;
+    /** Роль текущего пользователя. */
+    myRole?: RolUchastnikaWorkspace;
+    /** `true` — текущий пользователь может управлять участниками. */
+    canManage?: boolean;
+    /** Участники workspace. */
+    participants?: WorkspaceParticipant[];
+    /** Личные реквизиты текущего участника по умолчанию. */
+    myDefaultCredentialId?: string | null;
+    /** Модель текущего участника по умолчанию. */
+    myDefaultModel?: string | null;
 };
 
 export type WorkspaceLaunch = {
@@ -148,6 +182,40 @@ export function normalizovatHodWorkspace(hod: WorkspaceTurn): WorkspaceTurn {
     return {
         ...hod,
         result: normalizovatRezultatHoda(hod.result),
+    };
+}
+
+/**
+ * Описание авторства хода для интерфейса.
+ *
+ * У легаси-ходов автора нет — для них `bezAvtora = true`, а `imya = null`.
+ * Если автор совпадает с текущим пользователем, интерфейс показывает «Вы»,
+ * не полагаясь на `authorDisplayName` (он может отсутствовать).
+ */
+export type AvtorHoda = {
+    /** Имя автора из read-модели; `null`, если сервер его не отдал. */
+    imya: string | null;
+    /** Аккаунт автора; `null` у легаси-ходов. */
+    accountId: string | null;
+    /** Автор — текущий пользователь. */
+    etoTekushiy: boolean;
+    /** Ход без автора (легаси). */
+    bezAvtora: boolean;
+};
+
+export function avtorHoda(
+    hod: Pick<WorkspaceTurn, "authorAccountId" | "authorDisplayName">,
+    tekushiyAccountId: string | null,
+): AvtorHoda {
+    const accountId = hod.authorAccountId ?? null;
+    const imya = (hod.authorDisplayName ?? "").trim();
+    const bezAvtora = accountId === null && imya === "";
+
+    return {
+        imya: imya === "" ? null : imya,
+        accountId,
+        etoTekushiy: accountId !== null && accountId === tekushiyAccountId,
+        bezAvtora,
     };
 }
 

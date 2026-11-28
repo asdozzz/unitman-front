@@ -1,4 +1,5 @@
 import SpisokProektov from "@/modules/unit/view/SpisokProektov.vue";
+import SpisokNavykovProekta from "@/modules/skill/view/SpisokNavykovProekta.vue";
 import OknoVipolnenihZadachRunnera from "@/modules/unit/view/Proekti/OknoVipolnenihZadachRunnera.vue";
 import EditProjectForm from "@/modules/unit/view/Proekti/EditProjectForm.vue";
 import LayoutStraniziRedaktirovaniya from "@/modules/unit/view/Proekti/LayoutStraniziRedaktirovaniya.vue";
@@ -77,6 +78,14 @@ export default [
                 name: 'project_volume_types',
                 meta: {
                     titleKey: 'unit.proekt.tabs.volume_types'
+                }
+            },
+            {
+                path: 'skills',
+                component: SpisokNavykovProekta,
+                name: 'project_skills',
+                meta: {
+                    titleKey: 'skill.project.tab'
                 }
             }
         ]

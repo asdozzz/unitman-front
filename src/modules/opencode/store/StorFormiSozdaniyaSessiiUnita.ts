@@ -13,6 +13,8 @@ import {
 type StorFormiSozdaniyaSessiiUnitaState = {
     otkrita: boolean;
     unitId: string;
+    /** Проект юнита: по нему до старта показываем будущие навыки агента. */
+    unitProjectId: string;
     unitLabel: string;
     unitDescription: string;
     title: string;
@@ -34,6 +36,7 @@ export const useStorFormiSozdaniyaSessiiUnita = defineStore("StorFormiSozdaniyaS
         return {
             otkrita: false,
             unitId: "",
+            unitProjectId: "",
             unitLabel: "",
             unitDescription: "",
             title: "",
@@ -79,12 +82,15 @@ export const useStorFormiSozdaniyaSessiiUnita = defineStore("StorFormiSozdaniyaS
             unitId: string;
             unitLabel: string;
             unitDescription: string;
+            /** Проект юнита; необязателен для старых вызовов. */
+            projectId?: string;
         }) {
             const rekvizity = useStorSpiskaRekvizitovOpenCode().spisok;
             const pervaya = rekvizity.length > 0 ? rekvizity[0] : null;
 
             this.otkrita = true;
             this.unitId = params.unitId;
+            this.unitProjectId = params.projectId ?? "";
             this.unitLabel = params.unitLabel;
             this.unitDescription = params.unitDescription;
             this.title = "";

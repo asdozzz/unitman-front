@@ -21,6 +21,8 @@ PostgreSQL, Temporal, RoadRunner и Centrifugo.
 ### Что не проверяем в этом контуре
 
 - реальные сборки юнитов, Docker, раннеры и Temporal;
+- ACL Unitman при доступе участника к проектам workspace — он живёт на бэкенде
+  и закрыт PHPUnit, e2e видит только ответы моков;
 - WebSocket-доставку (Centrifugo) — сокет маршрутизируется в no-op;
 - Web Push, Service Worker и реальные браузерные разрешения;
 - визуальную регрессию (скриншотные эталоны);
@@ -204,7 +206,17 @@ PostgreSQL, Temporal, RoadRunner и Centrifugo.
 | E2E-OC-02 | Пустой список workspace | P1 | backlog |
 | E2E-OC-03 | Чат сессии и уведомления | P2 | backlog |
 
-### 2.13 Артефакты workspace (E2E-WSA)
+### 2.13 Совместный чат workspace (E2E-WSC)
+
+| ID | Сценарий | Приоритет | Статус |
+| --- | --- | --- | --- |
+| E2E-WSC-01 | Владелец приглашает редактора и видит его в списке участников | P0 | auto |
+| E2E-WSC-02 | Редактор видит бейдж «Общий», авторство чужих ходов и шлёт промпт своими реквизитами | P0 | auto |
+| E2E-WSC-03 | Наблюдатель читает чат, композер и «Отправить» недоступны | P0 | auto |
+| E2E-WSC-04 | Смена роли участника уходит на бэкенд и отражается в строке | P1 | auto |
+| E2E-WSC-05 | Удалённый участник теряет доступ к workspace | P0 | auto |
+
+### 2.14 Артефакты workspace (E2E-WSA)
 
 | ID | Сценарий | Приоритет | Статус |
 | --- | --- | --- | --- |
@@ -542,6 +554,32 @@ E2E-WSA-07 требует раннера и контейнера workspace, по
   пока нет».
 - **Автотесты:** `notifications.spec.ts`.
 
+### E2E-WSC-01…05 — Совместный чат workspace
+
+- **Предусловия:** моки `/opencode/workspace/spisok`, `/sostoyanie`,
+  `/istoriyaSessii`, `/prompt`, `/account/opencode/spisokRekvizitov` и
+  `/opencode/workspace/uchastniki/*`; три аккаунта — Алиса (владелец), Борис
+  (редактор), Клара (наблюдатель). Состояние бэкенда хранится в замыкании
+  теста, смена пользователя — подмена `localStorage.tokenData` и перезагрузка.
+- **Шаги:**
+  1. Алиса открывает `/opencode/workspaces` — карточка показывает
+     «Участников: 1».
+  2. В чате открывает «Участники», вводит id Бориса и приглашает с ролью
+     «Редактор».
+  3. Борис заходит: карточка показывает «Общий», «Редактор»,
+     «Участников: 2»; в чате виден автор хода Алисы.
+  4. Борис выбирает свои реквизиты и отправляет промпт.
+  5. Алиса приглашает Клару и меняет её роль на «Наблюдатель».
+  6. Клара открывает чат: история видна, поле ввода и «Отправить» disabled,
+     показана причина.
+  7. Алиса удаляет Бориса; Борис больше не видит workspace, а прямой переход
+     даёт «Workspace не найден».
+- **Ожидаемый результат:** каждый шаг отражается в UI, `POST /opencode/prompt`
+  несёт `credentialId` реквизитов автора, смена роли уходит в
+  `/uchastniki/izmenit`.
+- **Автотест:** `workspace-shared-chat.spec.ts` → «приглашение, общий чат,
+  наблюдатель и потеря доступа».
+
 ### E2E-AI-01/02, E2E-OC-01
 
 - **Предусловия:** пустые списки реквизитов OpenCode, AI-сессий и unit-сессий.
@@ -616,7 +654,28 @@ yarn playwright show-trace e2e/.artifacts/<test>/trace.zip
 4. **Smoke против реального стека** — отдельный проект Playwright с
    `E2E_BASE_URL` и настоящими учётными данными, запускаемый по расписанию.
 
-## 7. Подтверждение email и OAuth
+## 7. Workspace-чат на новом агрегате
+
+После фазы 8 `WorkspaceService` обращается к маршрутам
+`/opencode/workspace-session/*`:
+
+| Действие | Маршрут |
+| --- | --- |
+| Состояние | `POST /opencode/workspace-session/sostoyanie` |
+| История | `POST /opencode/workspace-session/istoriya` |
+| Промпт | `POST /opencode/workspace-session/prompt` |
+| Ответ на вопросы | `POST /opencode/workspace-session/otvetit` |
+| Результат хода | `POST /opencode/workspace-session/poluchitResultatHoda` |
+| Прогресс хода | `POST /opencode/workspace-session/poluchitProgressHoda` |
+
+Жизненный цикл и участники остаются на `/opencode/workspace/*` (бэкенд
+роутит по флагам). Артефакты хода — на `/opencode/fajl/*`.
+
+E2E-моки [`workspace-shared-chat.spec.ts`](../e2e/tests/workspace-shared-chat.spec.ts:1)
+переведены на новые пути. Сценарий двух пользователей (владелец приглашает
+writer/viewer, общий чат виден всем ролям) остаётся зелёным.
+
+## 8. Подтверждение email и OAuth
 
 - Самостоятельная регистрация переводит на `/verify-email` с подставленным email.
 - Верный 6-значный код показывает успех и сообщение об ожидании активации.

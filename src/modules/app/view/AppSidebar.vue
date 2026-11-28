@@ -99,6 +99,12 @@ const administrativniePunkty = computed<GhSideNavItem[]>(() => [
         icon: "server",
         to: "/runner/list",
     },
+    {
+        id: "skills",
+        label: t("app.sidebar.items.skills"),
+        icon: "book",
+        to: "/admin/skills",
+    },
 ]);
 
 const gruppy = computed<GhSideNavGroup[]>(() => {

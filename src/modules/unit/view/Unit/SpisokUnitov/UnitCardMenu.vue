@@ -313,6 +313,7 @@ function sozdatSessiyuSUnitom() {
     unitId: props.item.id,
     unitLabel: props.item.name,
     unitDescription: `${props.item.projectName} · ${props.item.branch}`,
+    projectId: props.item.projectId,
   });
 }
 

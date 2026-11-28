@@ -574,6 +574,26 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/internal/opencode/skills/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Эффективные навыки для раннера (internal)
+         * @description Внутренний runner-facing endpoint. Аутентификация — X-Runner-Id + X-Runner-Signature: hex(HMAC-SHA256(raw_body, secret)). Возвращает эффективные навыки, manifestHash, суммарный размер и признак усечения. Секретов в ответе нет.
+         */
+        post: operations["resolve_runner_skills"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/internal/repo/credentials": {
         parameters: {
             query?: never;
@@ -1186,6 +1206,26 @@ export type paths = {
         put?: never;
         /** История ходов сессии */
         post: operations["post_app_opencode_infra_opencode_istoriyasessii"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/navyki": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Эффективные навыки для сессии OpenCode
+         * @description Проекты разрешаются из сессии на сервере; клиент не может запросить навыки чужого проекта.
+         */
+        post: operations["opencode_session_skills"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1808,6 +1848,74 @@ export type paths = {
         put?: never;
         /** Ссылка на произвольный порт workspace-контейнера */
         post: operations["post_app_opencode_infra_workspace_ssylkapoportu"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/uchastniki/dobavit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Пригласить участника в workspace */
+        post: operations["post_app_opencode_infra_workspaceparticipant_dobavit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/uchastniki/izmenit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Изменить роль или реквизиты участника */
+        post: operations["post_app_opencode_infra_workspaceparticipant_izmenit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/uchastniki/spisok": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Список участников workspace */
+        post: operations["post_app_opencode_infra_workspaceparticipant_spisok"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/opencode/workspace/uchastniki/udalit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Удалить участника из workspace */
+        post: operations["post_app_opencode_infra_workspaceparticipant_udalit"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2787,6 +2895,159 @@ export type paths = {
          * @description Вызывается Golang-раннером, публичный эндпоинт без JWT. Обязательны X-Runner-Id и X-Runner-Signature: hex(HMAC-SHA256(тело_запроса, secret)).
          */
         post: operations["post_app_runner_infra_runner_unitstatenotifications"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/effektivnie": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Эффективный набор навыков для проектов (диагностика) */
+        post: operations["skill_effective"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/izmenit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Изменить навык */
+        post: operations["skill_update"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/otkrepit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Открепить проектный навык от проекта */
+        post: operations["skill_detach_project"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/prikrepit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Прикрепить проектный навык к проектам */
+        post: operations["skill_attach_projects"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Полная карточка навыка */
+        post: operations["skill_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/sozdat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Создать навык */
+        post: operations["skill_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/spisok": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Список навыков (глобальных или проектных) */
+        post: operations["skill_list"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/udalit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Архивировать навык */
+        post: operations["skill_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/skill/versii": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** История версий навыка */
+        post: operations["skill_versions"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3976,6 +4237,16 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
+        IzmenitNavyk: {
+            /** @default null */
+            content?: string | null;
+            /** @default null */
+            description?: string | null;
+            /** @default  */
+            id?: string;
+            /** @default null */
+            name?: string | null;
+        };
         /** @description Частичное изменение реквизитов OpenCode: непереданные поля не меняются */
         IzmenitRekvizityOpenCode: {
             /**
@@ -4092,6 +4363,11 @@ export type components = {
         /** @description Промпт пользователя, запускающий новый ход */
         NachatPrompt: {
             /**
+             * @description Реквизиты OpenCode для хода; при отсутствии берутся личные реквизиты участника (иначе — `opencode.session.credential_required`)
+             * @example 7d4b1c2a-3f5e-4a6b-8c9d-0e1f2a3b4c5d
+             */
+            credentialId?: string | null;
+            /**
              * @description Переопределение модели перед ходом; приоритет: запрос → модель сессии → дефолт реквизитов
              * @example gpt-4o-mini
              */
@@ -4193,6 +4469,12 @@ export type components = {
             /** @example https://api.openai.com/v1 */
             url: string;
         };
+        /**
+         * @description Коды ошибок OpenCode, доступные фронтенду. Доменные ошибки приходят в FailEnvelope.data.message без префикса перевода
+         * @example opencode.participant.not_found
+         * @enum {string}
+         */
+        OpenCodeErrorCode: "opencode.session.busy" | "opencode.session.forbidden" | "opencode.session.credential_required" | "opencode.workspace.project_access_revoked" | "opencode.participant.already_owner" | "opencode.participant.already_exists" | "opencode.participant.limit_exceeded" | "opencode.participant.project_access_denied" | "opencode.participant.not_found" | "opencode.participant.owner_role_immutable" | "opencode.participant.owner_cannot_be_removed" | "opencode.participant.invalid_role";
         OpenCodeQuestion: {
             /** @description Разрешён ли свободный текстовый ответ вместо выбора варианта */
             AllowFreeText: boolean;
@@ -4277,6 +4559,13 @@ export type components = {
         OpenCodeTurn: {
             /** @description Нормализованные ответы, породившие этот ход (для первого хода и хода после промпта — пустой массив) */
             answers: components["schemas"]["OpenCodeAnswer"][];
+            /** @description Аккаунт автора хода; null у легаси-ходов без автора */
+            authorAccountId?: string | null;
+            /**
+             * @description Отображаемое имя автора хода; null у легаси-ходов без автора
+             * @example Иван Петров
+             */
+            authorDisplayName?: string | null;
             /**
              * @description Момент создания, unix timestamp (секунды)
              * @example 1762000000
@@ -4385,6 +4674,12 @@ export type components = {
             /** @default false */
             udalitFayl?: boolean;
         };
+        OtkrepitNavykOtProekta: {
+            /** @default  */
+            id?: string;
+            /** @default  */
+            projectId?: string;
+        };
         OtkrepitRedaktoraOtUnita: {
             unitId: string;
             userId: string;
@@ -4393,6 +4688,11 @@ export type components = {
         OtvetitNaVopros: {
             /** @description Ответы по каждому вопросу хода */
             answers: components["schemas"]["OpenCodeAnswer"][];
+            /**
+             * @description Реквизиты OpenCode для нового хода; при отсутствии берутся личные реквизиты участника (иначе — `opencode.session.credential_required`)
+             * @example 7d4b1c2a-3f5e-4a6b-8c9d-0e1f2a3b4c5d
+             */
+            credentialId?: string | null;
             /**
              * @description Переопределение модели для нового хода; приоритет: запрос → модель сессии → дефолт реквизитов
              * @example gpt-4o-mini
@@ -4415,6 +4715,10 @@ export type components = {
             /** Format: uuid */
             id: string;
         };
+        PoluchitEffektivnieNavyki: {
+            /** @default [] */
+            projectIds?: string[];
+        };
         PoluchitIstoriyuSessii: {
             /** Format: uuid */
             sessionId: string;
@@ -4434,6 +4738,14 @@ export type components = {
             limit?: number;
             /** @default 0 */
             offset?: number;
+        };
+        PoluchitNavyk: {
+            /** @default  */
+            id?: string;
+        };
+        PoluchitNavykiSessii: {
+            /** @default  */
+            sessionId?: string;
         };
         PoluchitPeremenieUnita: {
             /** Format: uuid */
@@ -4474,6 +4786,14 @@ export type components = {
         PoluchitSostoyanieWorkspace: {
             /** Format: uuid */
             workspaceId: string;
+        };
+        PoluchitSpisokNavykov: {
+            /** @default false */
+            includeArchived?: boolean;
+            /** @default null */
+            projectId?: string | null;
+            /** @default null */
+            scope?: string | null;
         };
         PoluchitSpisokPeremenihProekta: {
             id: string;
@@ -4548,6 +4868,10 @@ export type components = {
             /** @default  */
             projectId?: string;
         };
+        PoluchitVersiiNavyka: {
+            /** @default  */
+            id?: string;
+        };
         PometitKakSlomanii: {
             /** Format: uuid */
             id: string;
@@ -4568,6 +4892,12 @@ export type components = {
             fileIds: string[];
             /** Format: uuid */
             workspaceId: string;
+        };
+        PrikrepitNavykKProektam: {
+            /** @default  */
+            id?: string;
+            /** @default [] */
+            projectIds?: string[];
         };
         PrikrepitRedaktoraKUnitu: {
             unitId: string;
@@ -4990,8 +5320,10 @@ export type components = {
             archived: boolean;
             archiveReason?: string | null;
             branch: string;
-            /** @description status = RUNNING И сессия не в архиве И последний ход не RUNNING */
+            /** @description status = RUNNING И сессия не в архиве И последний ход не RUNNING И роль позволяет писать (owner или writer) */
             canAcceptMessages: boolean;
+            /** @description true — текущий пользователь может управлять участниками (владелец) */
+            canManage?: boolean;
             errorKey?: string | null;
             /** Format: uuid */
             id: string;
@@ -4999,12 +5331,44 @@ export type components = {
             lastTurnId?: string | null;
             /** @enum {string|null} */
             lastTurnStatus?: "RUNNING" | "AWAITING_INPUT" | "ANSWERED" | "FAILED" | null;
+            /** @description Личные реквизиты текущего участника по умолчанию; null — не заданы */
+            myDefaultCredentialId?: string | null;
+            /**
+             * @description Модель текущего участника по умолчанию; null — не задана
+             * @example gpt-4o-mini
+             */
+            myDefaultModel?: string | null;
+            /**
+             * @description Роль текущего пользователя в workspace
+             * @example writer
+             * @enum {string}
+             */
+            myRole?: "owner" | "writer" | "viewer";
             name: string;
+            /** @description Участники workspace с ролями и личными реквизитами */
+            participants?: components["schemas"]["UchastnikSessii"][];
             projects: components["schemas"]["WorkspaceProject"][];
             readOnly: boolean;
             /** @enum {string} */
             status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
             units: components["schemas"]["WorkspaceUnit"][];
+        };
+        SozdatNavyk: {
+            /** @default  */
+            content?: string;
+            /** @default  */
+            description?: string;
+            /** @default  */
+            name?: string;
+            /** @default [] */
+            projectIds?: string[];
+            /**
+             * @default global
+             * @enum {string}
+             */
+            scope?: "global" | "project";
+            /** @default null */
+            slug?: string | null;
         };
         /** @description Реквизиты подключения к OpenCode (API-ключ шифруется на бэкенде). Для известного провайдера `url` можно не передавать — подставляется `baseUrl` каталога; для `custom` он обязателен */
         SozdatRekvizityOpenCode: {
@@ -5235,6 +5599,30 @@ export type components = {
             /** @description Идентификатор переменной конфига юнита */
             variableId: string;
         };
+        /** @description Участник workspace (UchastnikSessiiReadModel): роль и личные реквизиты ходов; секрет реквизитов не отдаётся */
+        UchastnikSessii: {
+            /** @description Идентификатор аккаунта участника */
+            accountId: string;
+            /** @example 1762000000 */
+            createdAt: number;
+            /** @description Личные реквизиты участника по умолчанию; null — не заданы */
+            defaultCredentialId?: string | null;
+            /**
+             * @description Модель участника по умолчанию; null — не задана
+             * @example gpt-4o-mini
+             */
+            defaultModel?: string | null;
+            /** @description true — участник является владельцем workspace */
+            owner: boolean;
+            /**
+             * @description Роль участника; owner — единственный и неизменяемый
+             * @example writer
+             * @enum {string}
+             */
+            role: "owner" | "writer" | "viewer";
+            /** @example 1762000000 */
+            updatedAt: number;
+        };
         /** @description Удаление файла из работающего workspace */
         UdalitFaylWorkspace: {
             /** Format: uuid */
@@ -5244,6 +5632,10 @@ export type components = {
         };
         UdalitLichniyToken: {
             id: string;
+        };
+        UdalitNavyk: {
+            /** @default  */
+            id?: string;
         };
         UdalitPeremenuyuIzProekta: {
             code: string;
@@ -5750,9 +6142,24 @@ export type components = {
              * @example gpt-4o
              */
             model?: string | null;
+            /**
+             * @description Роль текущего пользователя в workspace
+             * @example writer
+             * @enum {string}
+             */
+            myRole?: "owner" | "writer" | "viewer";
             name: string;
+            /** @description Идентификатор аккаунта владельца workspace */
+            ownerAccountId?: string;
+            /**
+             * @description Количество участников workspace, включая владельца
+             * @example 3
+             */
+            participantsCount?: number;
             projects: components["schemas"]["WorkspaceProject"][];
             readOnly: boolean;
+            /** @description true — workspace доступен более чем одному участнику */
+            shared?: boolean;
             /** @enum {string} */
             status: "CREATING" | "STARTING" | "RUNNING" | "ARCHIVING" | "ARCHIVED" | "DELETING" | "ERROR";
             /** @description Юниты, созданные из workspace; после создания повторный запуск запрещён */
@@ -7353,6 +7760,63 @@ export interface operations {
             };
         };
     };
+    resolve_runner_skills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @example 1 */
+                    formatVersion: number;
+                    /** @example 524288 */
+                    maxTotalBytes: number;
+                    projectIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Эффективные навыки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Некорректный запрос */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Неверная подпись раннера */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Раннер не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     issue_runner_repo_credentials: {
         parameters: {
             query?: never;
@@ -8581,6 +9045,59 @@ export interface operations {
             };
             /** @description Ошибка обработки (FailEnvelope либо ErrorEnvelope) */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    opencode_session_skills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    sessionId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Эффективные навыки с манифестом */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нет доступа к сессии */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Сессия не найдена */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -9895,6 +10412,160 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    post_app_opencode_infra_workspaceparticipant_dobavit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    accountId: string;
+                    credentialId?: string | null;
+                    model?: string | null;
+                    /** @enum {string} */
+                    role: "writer" | "viewer";
+                    workspaceId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Участник добавлен */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @example true */
+                            added: boolean;
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+        };
+    };
+    post_app_opencode_infra_workspaceparticipant_izmenit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    accountId: string;
+                    credentialId?: string | null;
+                    model?: string | null;
+                    /** @enum {string} */
+                    role: "writer" | "viewer";
+                    workspaceId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Участник изменён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @example true */
+                            updated: boolean;
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+        };
+    };
+    post_app_opencode_infra_workspaceparticipant_spisok: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    workspaceId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Участники */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            items: components["schemas"]["UchastnikSessii"][];
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
+            };
+        };
+    };
+    post_app_opencode_infra_workspaceparticipant_udalit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    accountId: string;
+                    workspaceId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Участник удалён */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            /** @example true */
+                            removed: boolean;
+                        };
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status: "success";
+                    };
+                };
             };
         };
     };
@@ -12555,6 +13226,513 @@ export interface operations {
                 content?: never;
             };
             /** @description runner.not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_effective: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    projectIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Эффективные навыки с манифестом */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нет доступа к проектам */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    content?: string | null;
+                    description?: string | null;
+                    id: string;
+                    name?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Идентификатор и версия навыка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Навык не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка валидации */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_detach_project: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                    projectId: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Актуальный список проектов навыка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Навык не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный запрос */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_attach_projects: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                    projectIds: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Актуальный список проектов навыка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Навык не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный запрос */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_read: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Карточка навыка с содержимым */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нет доступа */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Навык не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    content?: string;
+                    description?: string;
+                    name: string;
+                    projectIds?: string[];
+                    /** @enum {string} */
+                    scope: "global" | "project";
+                    slug?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Идентификатор и slug созданного навыка */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Ошибка валидации или занятый slug */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @default false */
+                    includeArchived?: boolean;
+                    projectId?: string | null;
+                    /** @enum {string|null} */
+                    scope?: "global" | "project" | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Краткие карточки навыков */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нет доступа к проекту */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Некорректный запрос */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Пустой ответ: навык архивирован */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data?: null;
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Недостаточно прав */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Навык не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    skill_versions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    id: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Версии навыка от новой к старой */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @example success
+                         * @enum {string}
+                         */
+                        status?: "success";
+                    };
+                };
+            };
+            /** @description Не авторизован */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Нет доступа */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Навык не найден */
             404: {
                 headers: {
                     [name: string]: unknown;

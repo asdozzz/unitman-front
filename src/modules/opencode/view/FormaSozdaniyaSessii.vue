@@ -14,6 +14,8 @@ import {
 } from "@/components/ui";
 import type { GhSelectOption } from "@/components/ui";
 import { useStorFormiSozdaniyaSessii } from "@/modules/opencode/store/StorFormiSozdaniyaSessii";
+import { useEffektivnieNavyki } from "@/modules/skill/composables/useEffektivnieNavyki";
+import BlokNavykovSozdaniya from "@/modules/skill/view/BlokNavykovSozdaniya.vue";
 
 /**
  * Диалог создания сессии.
@@ -43,6 +45,36 @@ const {
     rekvizity,
     mozhnoSohranit,
 } = storeToRefs(formaStore);
+
+/**
+ * Проекты выбранных юнитов: их навыки получит агент. Дубликаты проектов
+ * схлопываем, чтобы `effektivnie` не считал один проект дважды.
+ */
+const projectIdsDlyaNavykov = computed<string[]>(() => {
+    const vybrannye = new Set(unitIds.value);
+    const ids = uniti.value
+        .filter((unit) => vybrannye.has(unit.id))
+        .map((unit) => unit.projectId);
+
+    return [...new Set(ids)];
+});
+
+const imenaProektov = computed<Record<string, string>>(() => {
+    const rezultat: Record<string, string> = {};
+
+    for (const unit of uniti.value) {
+        rezultat[unit.projectId] = unit.projectName;
+    }
+
+    return rezultat;
+});
+
+const {
+    navyki,
+    loading: navykiLoader,
+    error: navykiOshibka,
+    zagruzit: zagruzitNavyki,
+} = useEffektivnieNavyki(projectIdsDlyaNavykov, { enabled: otkrita });
 
 /** Опции реквизитов для GhSelect. */
 const optsRekvizitov = computed<GhSelectOption[]>(() =>
@@ -156,6 +188,14 @@ async function sozdat() {
           </p>
         </div>
       </GhFormField>
+
+      <BlokNavykovSozdaniya
+          :navyki="navyki"
+          :loading="navykiLoader"
+          :error="navykiOshibka"
+          :project-names="imenaProektov"
+          @retry="zagruzitNavyki"
+      />
 
       <GhBanner v-if="oshibkaZagruzkiUnitov" variant="danger">
         {{ oshibkaZagruzkiUnitov }}
